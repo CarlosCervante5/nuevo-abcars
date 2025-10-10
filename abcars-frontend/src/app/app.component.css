@@ -1,0 +1,59 @@
+mat-sidenav {      
+    width: 300px;
+}
+
+.toolbar-filler {
+    flex: 1 1 auto;
+}
+
+.router-background {
+    background-color: white;
+}
+
+.login-button {
+    background-color: #FFCB54;
+    border-color: #ffcc54be;    
+    color: white;
+}
+
+.login-button:hover {
+    background-color: #ffcc54be !important;
+    border-color: #ffcc54be !important;    
+    color: white;
+}
+
+.navbar-position {
+    float: right;
+}
+
+.navbar-assist-index {
+    top: 0px;
+    z-index: 98;
+}
+
+.navbar-navegation-index {
+    z-index: 99;
+    background: #F2F2F2;
+    border-bottom-left-radius: 50px;
+    border-bottom-right-radius: 50px;
+}
+/*Sidevar*/
+.menu_sidevar:hover{
+    background-color: #FFCB54;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.menu_sidenav{
+    background-color: #D9D9D9;
+}
+.menu_sidevar{
+    position: relative;
+}
+.menu_sidevar div {
+    padding-bottom: 0 !important;
+}
+.menu_icon_sidevar{
+    width: 30px;
+}

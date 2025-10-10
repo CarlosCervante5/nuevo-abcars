@@ -1,0 +1,340 @@
+<div class="container mg-top-30px">
+    <!-- Banner -->
+    <div class="row">
+        <div class="col-12 " > <!-- cursor-pointer [routerLink]="['/autos-en-oferta']" -->
+                <!-- <img src="assets/images/abcars-images/banner_prueba_7.jpg"    class="img-fluid mt-3" alt="Banner ABCars">   width="100%" -->
+                <img [src]="image_path" class="img-fluid mt-3" alt="Banner ABCars"> 
+        </div>
+    </div>
+
+    <!-- Input Search -->
+    <div class="row search-navbar-sticky">
+        <div class="col-12 mt-4">
+            <mat-form-field class="chip-list" appearance="outline">
+                <mat-label>Buscar por marca, modelo, año...</mat-label>
+                <input matInput [(ngModel)]="palabra_busqueda" (keyup)="searchKeyboard()">
+                <mat-icon class="searchIcon" matSuffix (click)="searchByKeyword()">search</mat-icon>
+            </mat-form-field>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-6">
+            <button mat-raised-button class="abcars-background-color px-4 py-1 rounded-pill text-dark mb-4" (click)="highEnd(1, highEndChange)" class="buttonHighEnd"> <!---->
+                <i class="far fa-gem"></i>
+                Ver Inventario Gama Alta
+            </button>
+        </div>
+        <div class="col-6 text-end">
+            <button mat-raised-button class="abcars-background-color px-4 py-1 rounded-pill text-dark mb-4" style="margin-left: 7px;" (click)="lowEnd()" class="buttonFiltro"> <!---->
+                <i class="fa fa-level-down"></i>
+                Ver todo el inventario
+            </button>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-6 text-start">
+            <button mat-raised-button class="abcars-background-color px-4 py-1 rounded-pill text-dark mb-4" (click)="openAccordion(status)" class="buttonFiltro">
+                <i *ngIf="status" class="fas fa-minus-circle"></i>
+                <i *ngIf="!status" class="fas fa-plus-circle"></i>
+                {{ status ? 'Ocultar Filtros' : 'Mostrar Filtros' }}
+            </button>
+        </div> 
+        <div class="col-6 text-end">
+            <button mat-raised-button class="btn abcars-background-color-secondary px-4 py-1 mb-4" [matMenuTriggerFor]="menu">
+                <i class="fas fa-sort-amount-down"></i> 
+            </button>
+            <mat-menu #menu="matMenu">
+                <a mat-menu-item (click)="cambiarOrden('precio_mas')">Mayor Precio</a>
+                <a mat-menu-item (click)="cambiarOrden('precio_menos')">Menor Precio</a>
+            </mat-menu>
+        </div> 
+    </div> 
+
+    <!-- Filters, Vehicles & Pagination -->
+    <div class="row">
+        <!-- Filters -->
+        <div [ngClass]="[status ? 'col-12 col-sm-12 col-md-4 col-xl-3' : 'd-none']">
+            <div class="row">
+                <mat-accordion class="example-headers-align" multi>
+                    <mat-expansion-panel [expanded]="status">
+                        <!-- Clean Filters -->
+                        <div class="row">
+                            <div class="col-12 mt-3 text-end">
+                                <button mat-button class="fw-bold text text-dark text-decoration-none cursor-pointer" (click)="clean()">Limpiar</button>
+                            </div>
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="row">
+                            <div class="col-12 mt-3 mb-3">
+                                <!-- Brands -->
+                                <h3 class="fw-bold text">Marca</h3>
+                                <mat-form-field class="chip-list" appearance="outline">
+                                    <mat-label>Seleccionar marca...</mat-label>
+                                    <mat-chip-grid #chipListBrands aria-label="Brands selection">
+                                        <mat-chip-row *ngFor="let brand of brands" (removed)="remove(brand, 'brands')">
+                                            <!-- {{ brand | titlecase }} -->
+                                            {{ brand }}
+                                            <button matChipRemove [attr.aria-label]="'remove ' + brand">
+                                                <mat-icon>cancel</mat-icon>
+                                            </button>
+                                        </mat-chip-row>
+
+                                        <input placeholder="Audi, Chevrolet..." #brandInput [formControl]="brandCtrl" [matAutocomplete]="brand" [matChipInputFor]="chipListBrands" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="add($event, 'brands')">
+                                    </mat-chip-grid>
+
+                                    <mat-autocomplete #brand="matAutocomplete" (optionSelected)="selected($event, 'brands')">
+                                        <mat-option *ngFor="let brand of filteredBrands | async" [value]="brand">
+                                            {{ brand | titlecase }}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>                                
+
+                                <!-- Models -->
+                                <h3 class="fw-bold text">Modelo</h3>
+                                <mat-form-field class="chip-list" appearance="outline">
+                                    <mat-label>Buscar por modelo</mat-label>
+                                    <mat-chip-grid #chipListModels aria-label="Models selection">
+                                        <mat-chip-row *ngFor="let model of models" (removed)="remove(model, 'models')">
+                                            {{ model }}
+                                            <button matChipRemove [attr.aria-label]="'remove ' + model">
+                                                <mat-icon>cancel</mat-icon>
+                                            </button>
+                                        </mat-chip-row>
+
+                                        <input placeholder="Aveo, X3, Rio, A1..." #modelInput [formControl]="modelCtrl" [matAutocomplete]="model" [matChipInputFor]="chipListModels" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="add($event, 'models')">
+                                    </mat-chip-grid>
+
+                                    <mat-autocomplete #model="matAutocomplete" (optionSelected)="selected($event, 'models')">
+                                        <mat-option *ngFor="let model of filteredModels | async" [value]="model">
+                                            {{ model | titlecase }}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+
+                                <!-- Versions -->
+                                <h3 class="fw-bold text">Versión</h3>
+                                <mat-form-field class="chip-list" appearance="outline">
+                                    <mat-label>Seleccionar versión</mat-label>
+                                    <mat-chip-grid #chipListVersion aria-label="Version selection">
+                                        <mat-chip-row *ngFor="let version of versions" (removed)="remove(version, 'versions')">
+                                            {{ version }}
+                                            <button matChipRemove [attr.aria-label]="'remove ' + version ">
+                                                <mat-icon>cancel</mat-icon>
+                                            </button>
+                                        </mat-chip-row>
+
+                                        <input placeholder="versión auto..." #versionInput [formControl]="versionCtrl" [matAutocomplete]="version" [matChipInputFor]="chipListVersion" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="add($event, 'versions')">
+                                    </mat-chip-grid>
+
+                                    <mat-autocomplete #version="matAutocomplete" (optionSelected)="selected($event, 'versions')">
+                                        <mat-option *ngFor="let version of filteredVersions | async" [value]="version">
+                                            {{ version | titlecase}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+
+                                <!-- Bodies -->
+                                <h3 class="fw-bold text">Carrocería</h3>
+                                <mat-form-field class="chip-list" appearance="outline">
+                                    <mat-label>Seleccionar carrocería</mat-label>
+                                    <mat-chip-grid #chipListBody aria-label="Carrocería selection">
+                                        <mat-chip-row *ngFor="let body of bodies" (removed)="remove(body, 'bodies')">
+                                            {{ body }}
+                                            <button matChipRemove [attr.aria-label]="'remove ' + body ">
+                                                <mat-icon>cancel</mat-icon>
+                                            </button>
+                                        </mat-chip-row>
+
+                                        <input placeholder="carrocería auto..." #bodyInput [formControl]="bodyCtrl" [matAutocomplete]="body" [matChipInputFor]="chipListBody" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="add($event, 'bodies')">
+                                    </mat-chip-grid>
+
+                                    <mat-autocomplete #body="matAutocomplete" (optionSelected)="selected($event, 'bodies')">
+                                        <mat-option *ngFor="let body of filteredBodies | async" [value]="body">
+                                            {{ body | titlecase }}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+
+                                <!-- Year Model -->
+                                <h3 class="fw-bold text">Año</h3>
+                                <mat-form-field class="chip-list" appearance="outline">
+                                    <mat-label>Buscar por año</mat-label>
+                                    <mat-chip-grid #chipListYears aria-label="Years selection">
+                                        <mat-chip-row *ngFor="let year of years" (removed)="remove(year, 'years')">
+                                            {{ year }}
+                                            <button matChipRemove [attr.aria-label]="'remove ' + year">
+                                                <mat-icon>cancel</mat-icon>
+                                            </button>
+                                        </mat-chip-row>
+
+                                        <input placeholder="2021..." #yearInput [formControl]="yearCtrl" [matAutocomplete]="year" [matChipInputFor]="chipListYears" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="add($event, 'years')">
+                                    </mat-chip-grid>
+
+                                    <mat-autocomplete #year="matAutocomplete" (optionSelected)="selected($event, 'years')">
+                                        <mat-option *ngFor="let year of filteredYears | async" [value]="year">
+                                            {{ year }}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>                                
+
+                                <!-- Transmission -->
+                                <h3 class="fw-bold text">Transmisión</h3>
+                                <mat-form-field class="chip-list" appearance="outline">
+                                    <mat-label>Buscar por transmisión</mat-label>
+                                    <mat-chip-grid #chipListTransmissions aria-label="Transmission selection">
+                                        <mat-chip-row *ngFor="let transmission of transmissions" (removed)="remove(transmission, 'transmissions')">
+                                            {{ transmission }}
+                                            <button matChipRemove [attr.aria-label]="'remove ' + transmission">
+                                                <mat-icon>cancel</mat-icon>
+                                            </button>
+                                        </mat-chip-row>
+
+                                        <input placeholder="Automatico..." #transmissionInput [formControl]="transmissionCtrl" [matAutocomplete]="transmission" [matChipInputFor]="chipListTransmissions" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="add($event, 'transmissions')">
+                                    </mat-chip-grid>
+
+                                    <mat-autocomplete #transmission="matAutocomplete" (optionSelected)="selected($event, 'transmissions')">
+                                        <mat-option *ngFor="let transmission of filteredTransmissions | async" [value]="transmission">
+                                            {{ transmission | titlecase  }}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+
+                                <h3 class="fw-bold text">Color exterior:</h3>
+                                <mat-form-field class="chip-list" appearance="outline">
+                                    <mat-label>Buscar por color exterior</mat-label>
+                                    <mat-chip-grid #chipListExtColor aria-label="Exterior color selection">
+                                        <mat-chip-row *ngFor="let extColor of extColors" (removed)="remove(extColor, 'extColors')">
+                                            {{ extColor }}
+                                            <button matChipRemove [attr.aria-label]="'remove ' + extColor">
+                                                <mat-icon>cancel</mat-icon>
+                                            </button>
+                                        </mat-chip-row>
+
+                                        <input placeholder="Purpura..." #extColorInput [formControl]="extColorCtrl" [matAutocomplete]="extColor" [matChipInputFor]="chipListExtColor" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="add($event, 'extColors')">
+                                    </mat-chip-grid>
+
+                                    <mat-autocomplete #extColor="matAutocomplete" (optionSelected)="selected($event, 'extColors')">
+                                        <mat-option *ngFor="let extColor of filteredExtColors | async" [value]="extColor">
+                                            {{ extColor | titlecase  }}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+
+                                <h3 class="fw-bold text">Color interior:</h3>
+                                <mat-form-field class="chip-list" appearance="outline">
+                                    <mat-label>Buscar por color interior</mat-label>
+                                    <mat-chip-grid #chipListIntColor aria-label="Interior color selection">
+                                        <mat-chip-row *ngFor="let intColor of intColors" (removed)="remove(intColor, 'intColors')">
+                                            {{ intColor }}
+                                            <button matChipRemove [attr.aria-label]="'remove ' + intColor">
+                                                <mat-icon>cancel</mat-icon>
+                                            </button>
+                                        </mat-chip-row>
+
+                                        <input placeholder="Purpura..." #intColorInput [formControl]="intColorCtrl" [matAutocomplete]="intColor" [matChipInputFor]="chipListIntColor" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="add($event, 'intColors')">
+                                    </mat-chip-grid>
+
+                                    <mat-autocomplete #intColor="matAutocomplete" (optionSelected)="selected($event, 'intColors')">
+                                        <mat-option *ngFor="let intColor of filteredIntColors | async" [value]="intColor">
+                                            {{ intColor | titlecase  }}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+
+                                <h3 class="fw-bold text">Sucursal:</h3>
+                                <mat-form-field class="chip-list" appearance="outline">
+                                    <mat-label>Buscar por sucursal</mat-label>
+                                    <mat-chip-grid #chipListState aria-label="Dealership selection">
+                                        <mat-chip-row *ngFor="let state of states" (removed)="remove(state, 'states')">
+                                            {{ state }}
+                                            <button matChipRemove [attr.aria-label]="'remove ' + state">
+                                                <mat-icon>cancel</mat-icon>
+                                            </button>
+                                        </mat-chip-row>
+
+                                        <input placeholder="Chevrolet..." #stateInput [formControl]="stateCtrl" [matAutocomplete]="state" [matChipInputFor]="chipListState" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="add($event, 'states')">
+                                    </mat-chip-grid>
+
+                                    <mat-autocomplete #state="matAutocomplete" (optionSelected)="selected($event, 'states')">
+                                        <mat-option *ngFor="let state of filteredStates | async" [value]="state">
+                                            {{ state | titlecase  }}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+
+
+                                <!-- Price -->
+                                <h3 class="fw-bold text">Rango de Precio:</h3>
+                                <h3 class="fw-bold text"><span class="fw-bold"> ${{ hitchMin | number:'.2-2' }}</span> : <span class="fw-bold"> ${{ hitchMax | number:'.2-2' }}</span></h3>
+                                <mat-card-content class="sliderPrecios">
+                                    <mat-slider 
+                                        [disabled]="disabled" 
+                                        [min]="min_price"
+                                        [max]="max_price"
+                                        [step]="hitchStep"
+                                        [discrete]="thumbLabel"
+                                        [displayWith]="formatLabelHitch"
+                                        [showTickMarks]="showTicks"
+                                        aria-label="units">
+                                        <input [(ngModel)]="hitchMin" matSliderStartThumb (input)="precio()">
+                                        <input [(ngModel)]="hitchMax" matSliderEndThumb (input)="precio()">
+                                    </mat-slider>
+                                </mat-card-content>                                
+                            </div>
+                        </div>
+                        
+                    </mat-expansion-panel>
+                </mat-accordion>
+            </div>
+        </div>
+
+        <!-- Vehicles & Pagination -->
+        <div [ngClass]="[status ? 'col-12 col-sm-12 col-md-8 col-xl-9' : 'col-12 col-md-12']">
+            <!-- Vehicles -->
+            <div class="row">
+                <ng-container *ngIf="spinner; else elseTemplate">
+                    <app-sk-cube></app-sk-cube>
+                </ng-container>
+                <ng-template #elseTemplate>
+                    <div [ngClass]="[status ? 'col-12 col-sm-12 col-md-6 col-xl-4 mt-2 mb-2' : 'col-12 col-md-6 col-lg-4 mt-2 mb-2']" *ngFor="let vehicle of vehicles">
+                        <c-vender-autos-vehicle [vehicle]="vehicle" [routerLink]="['/compra-tu-auto/detail', vehicle.uuid]"></c-vender-autos-vehicle>
+                    </div>
+                </ng-template>
+            </div>
+
+            <!-- Pagination -->
+            <div class="row">
+                <div class="col-12">
+                    <mat-paginator [length]="length" [pageSize]="pageSize" [pageIndex]="pageIndex - 1" aria-label="Select page" (page)="paginationChange($event)" #paginador>
+                    </mat-paginator>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Find me a vehicle -->
+<div class="container">
+    <div class="row px-4">
+        <div class="col-12 py-5 px-4">
+            <div class="row">
+                <div class="col-12 col-md-5 widget-heading">
+                    <h1 class="fs-1 fw-bold">¿No encontraste tu vehículo ideal?</h1>
+                    <img src="assets/images/abcars-images/buscarVehicleImg.svg" width="100%" alt="Find me vehicle image" />
+
+                </div>
+
+                <div class="col-12 col-md-7 text-center container_Button">
+                    <button mat-raised-button type="button" class="button-BuscameUnAuto" [routerLink]="['/buscame-un-auto']">                                    
+                        BÚSCAME UN AUTO <img class="buscame_unAutoImg" src="../../../../../../assets/icons/Buscame-UnAuto.svg" alt="">
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<app-sticky-whatsapp></app-sticky-whatsapp>

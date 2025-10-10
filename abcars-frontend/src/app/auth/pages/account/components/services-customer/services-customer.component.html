@@ -1,0 +1,27 @@
+<div class="card w-100 h-100">
+    <!-- Imagen Vehicle -->
+    <img class="card-img-top img-fluid" width="50" [src]="vehicle_image" alt="{{ vehicle.vehicle.carmodel.brand.name | titlecase }} {{ vehicle.vehicle.name | titlecase }}">
+
+    <!-- Information Data -->
+    <div class="card-body text-truncate">
+        <span class="text-muted fw-light text-truncate">
+            {{ vehicle.vehicle.carmodel.brand.name | titlecase }} •
+            <span>{{ vehicle.vehicle.name | titlecase }}</span>
+        </span> 
+
+        <h4 class="fw-bold card-title text-truncate">            
+            {{ vehicle.vehicle.vin | uppercase }}
+            <p class="fw-light">
+                {{ vehicle.vehicle.yearModel }} •
+                {{ vehicle.vehicle.km | number }} km •                
+                {{ vehicle.vehicle.transmission | titlecase }}
+            </p>                                
+        </h4>
+       
+        <div class="d-grid gap-2">
+            <button type="button" class="btn abcars-background-btn-black rounded-pill" (click)="openBottomSheet(vehicle.quotes)">
+                Servicios
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,52 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 py-5">
+            <app-products-customer [page]="'Services'"></app-products-customer>
+        </div>
+    </div>
+
+    <!-- Services Customer -->
+    <div class="row">
+        <div class="col-12 text-center">            
+            <h1 class="fs-2 fw-bold">Servicios Vehiculares</h1>
+            <hr />
+        </div>
+    </div>
+
+    <!-- Cars with Services -->
+    <div class="row">
+        <div class="col-12 mt-2 mb-5">
+            <div class="row">
+                <div class="col-12 mb-3 text-end">
+                    <button mat-mini-fab color="abcars-color" class="btn abcars-background-color" (click)="openBottomSheet()" matTooltip="Crear una nueva solicitud de servicio automotriz para su(s) vehículo(s)." [matTooltipPosition]="'left'">
+                        <mat-icon>add</mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <div class="row" *ngIf="!flag">
+                <div class="col-6 col-md-4 col-xl-3 mb-3" *ngFor="let vehicle of vehicles">
+                    <app-services-customer [vehicle]="vehicle"></app-services-customer>
+                </div>
+            </div>
+
+            <div class="row" *ngIf="vehicles.length === 0">
+                <div class="col-12 mt-3">
+                    <div class="alert alert-primary text-center" role="alert">
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill"/></svg>
+                        ¡Vaya! Parece que aún no posee ningún servicio agendado por el momento.
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" *ngIf="flag">
+                <div class="col-12 mt-3">
+                    <div class="alert alert-danger text-center" role="alert">
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                        Al parecer ocurrio un error al cargar sus vehiculos, intente más tarde.
+                    </div>
+                </div>
+            </div>
+        </div>      
+    </div>
+</div>

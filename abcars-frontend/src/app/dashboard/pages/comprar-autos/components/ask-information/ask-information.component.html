@@ -1,0 +1,78 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <!-- Title -->
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="fw-bold fs-2">Más información sobre este {{ vehicle.brand }}</h1>
+                    <p class="fw-light fs-6">Responderemos a tu solicitud lo antes posible.</p>                    
+                </div>
+            </div>
+
+            <!-- Form  -->
+            <div class="row">
+                <div class="col-12 mt-3">
+                    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                        <div class="row mb-2">
+                            <!-- Name -->
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Nombre(s)</mat-label>
+                                    <input matInput type="text" placeholder="Louis" formControlName="name" required>
+                                    <mat-hint *ngIf="nameInvalid">Complete su nombre(s).</mat-hint>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Father and Mother Lastname -->
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Apellidos</mat-label>
+                                    <input matInput type="text" placeholder="Bale" formControlName="surname" required>
+                                    <mat-hint *ngIf="surnameInvalid">Complete sus apellidos.</mat-hint>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- Email and Phone -->
+                        <div class="row">
+                            <!-- Email -->
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Correo Electrónico</mat-label>
+                                    <input matInput type="email" placeholder="a@b.c" formControlName="email" required>
+                                    <mat-hint *ngIf="emailInvalid">Escriba un correo electrónico válido.</mat-hint>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="col-12 col-md-6">
+                                <mat-form-field appearance="outline">
+                                    <mat-label>Número de Teléfono</mat-label>
+                                    <input matInput type="tel" placeholder="1234567890" formControlName="phone" #phone (keyup)="maxLengthCheck(phone)" maxlength="10" required>
+                                    <mat-hint *ngIf="phoneInvalid">Su número debe ser de 10 dígitos, verifique.</mat-hint>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- Checkbox -->
+                        <div class="row">
+                            <div class="col-12 text-end">
+                                <mat-checkbox formControlName="checkbox" required>
+                                    Acepto <a class="fw-bold abcars-color-hover text-decoration-none" [routerLink]="['/externals/privacidad-de-uso']" (click)="openLink()">Aviso</a>,
+                                    <a class="fw-bold abcars-color-hover text-decoration-none" [routerLink]="['/externals/terminos-y-condiciones']" (click)="openLink()">Términos y Condiciones</a>.
+                                </mat-checkbox>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 text-end">
+                            <button mat-button type="button" class="btn abcars-background-color rounded-pill py-2 text-dark" [disabled]="form.invalid || spinner" (click)="onSubmit()">                                
+                                <span *ngIf="!spinner">Enviar</span>
+                                <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>                                    
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

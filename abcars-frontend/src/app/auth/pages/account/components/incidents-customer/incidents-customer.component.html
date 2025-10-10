@@ -1,0 +1,28 @@
+<mat-expansion-panel>
+    <mat-expansion-panel-header>
+        <mat-chip-grid aria-label="Fish selection">
+            <mat-panel-title>
+                <mat-chip [class]="incident.status == 'success' ? 'done' : incident.status == 'close' ? 'close' : 'process'" selected>
+                    {{ 
+                        (incident.status === 'success') ? 'Revisado' : 
+                        (incident.status === 'progress') ? 'Procesando' : 'Cerrado' 
+                    }}
+                </mat-chip>
+            </mat-panel-title>
+        </mat-chip-grid>
+
+        <mat-panel-description>
+            <div class="fw-bold">
+                Incidencia:
+                <span class="fw-light">{{ incident.name }}</span>
+            </div>
+        </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <mat-form-field appearance="fill">
+        <mat-label class="fw-bold mb-3">Descripción</mat-label>
+        <textarea matInput style="resize: none;" disabled>
+            {{ incident.description }}
+        </textarea>
+    </mat-form-field>
+</mat-expansion-panel>

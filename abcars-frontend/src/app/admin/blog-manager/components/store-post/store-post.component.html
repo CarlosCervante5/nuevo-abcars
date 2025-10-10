@@ -1,0 +1,98 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 col-12 mt-5 mb-5">            
+            <!-- Form -->
+            <div class="row">
+                <div class="col-12">
+                    <!-- Title -->
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <h1 class=fw-bold>Crear un nuevo post en tu blog</h1>
+                            <span>Por favor, ingrese la información solicitada.</span>
+                            <hr />
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                                
+                                <div class="row paddingInputs">
+                                    <div class="col-12">
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>Título del post:</mat-label>
+                                            <input matInput type="text" formControlName="title" placeholder="Título de tu post" minlength="1" maxlength="191" required>
+                                            <mat-hint *ngIf="postTitleInvalid">Escribe el título del post. </mat-hint>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+
+                                <div class="row paddingInputs">
+                                    <div class="col-6">
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>Categoría</mat-label>
+                                            <input matInput type="text" formControlName="category" placeholder="MINI" minlength="1" maxlength="191" required>
+                                            <mat-hint *ngIf="postCategoryInvalid">Escribe una categoría </mat-hint>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>Sub categoría:</mat-label>
+                                            <input matInput type="text" formControlName="sub_category" placeholder="S3" minlength="1" maxlength="191">
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+
+                                <div class="row paddingInputs">
+                                    <div class="col-12">
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>Palabras clave:</mat-label>
+                                            <input matInput type="text" formControlName="key_words" placeholder="Título de tu post" minlength="1" maxlength="191">
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                                
+                                <div class="row paddingInputs">
+                                    <div class="col-12">
+                                        <label for="images" 
+                                            class="drop-container"
+                                            [ngClass]="{'invalid-input': pictureInvalid}"
+                                        >
+                                            <span class="drop-title">Drop files here</span> or
+                                            <input type="file" 
+                                                id="picture" 
+                                                formControlName="image" 
+                                                accept=".png, .jpg, .jpeg, .webp" 
+                                                multiple 
+                                                (change)="assignImage($event)" 
+                                                required>
+                                        </label>
+                                        <mat-hint *ngIf="pictureInvalid">Selecciona una imagen para tu post</mat-hint>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-12 text-end">
+                                        <button mat-raised-button type="submit" class="marginButtons btn abcars-background-color-blue  mx-3 px-3" [disabled]="form.invalid || button">                                    
+                                            <span *ngIf="!button; else elseButton">Crear</span>
+                                            <ng-template #elseButton>
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            </ng-template>
+                                        </button>                                            
+
+                                        <button mat-raised-button type="button"class="marginButtons btn  mx-3 px-3" (click)="close()">                                    
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

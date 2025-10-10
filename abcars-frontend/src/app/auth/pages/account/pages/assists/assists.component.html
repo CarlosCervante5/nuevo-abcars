@@ -1,0 +1,65 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 py-5">
+            <app-products-customer [page]="'Assists'"></app-products-customer>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 text-center">
+            <h1 class="fs-2 fw-bold">Asistencia</h1>
+            <h5 class="fs-5 fw-light">Si estas en un altercado contáctanos con cualquiera de estas opciones.</h5>
+            <hr />
+        </div>
+    </div>
+
+    <!-- Packages -->
+    <div class="row">
+        <div class="col-12 mt-4">
+            <div class="row row-cols-1 row-cols-md-3 mt-3 mb-3 text-center">
+                <div class="col mt-5 mb-5">
+                    <div class="card mb-4 shadow">                        
+                        <div class="card-body">                      
+                            <img src="assets/icons/abcars-icons/assists-whatsapp.png" class="icon-card-assists" alt="ABCars Whatsapp">
+                            <div class="widget-heading-whatsapp">
+                                <h3 class="fs-5 fw-light">Contactar por Whatsapp</h3>                          
+                            </div>         
+
+                            <a href="https://api.whatsapp.com/send?phone=+522223039910&amp;text=Hola, requiero la asistencia vial de ABcars.mx" target="_blank">
+                                <button type="button" class="w-100 btn btn-lg abcars-background-color button-card">Contactar</button>                               
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col mt-5 mb-5">
+                    <div class="card mb-4 shadow">
+                        <div class="card-body">                            
+                            <img src="assets/icons/abcars-icons/assists-call.png" class="icon-card-assists" alt="ABCars Call">                                                                                   
+                            <div class="widget-heading-call">
+                                <h3 class="fs-5 fw-light">Contáctanos</h3>                          
+                            </div>         
+
+                            <a href="tel:2223039910">
+                                <button type="button" class="w-100 btn btn-lg abcars-background-color button-card">LLamar</button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col mt-5 mb-5">
+                    <div class="card mb-4 shadow">
+                        <div class="card-body">                            
+                            <img src="assets/icons/abcars-icons/assists-chat.png" class="icon-card-assists" alt="ABCars Chat">
+                            <div class="widget-heading-chat">
+                                <h3 class="fs-5 fw-light">Chatea con un Asesor</h3>                          
+                            </div>         
+
+                            <button type="button" class="w-100 btn btn-lg abcars-background-color button-card" onclick="tidioChatApi.display(true);tidioChatApi.open()">Chatear</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

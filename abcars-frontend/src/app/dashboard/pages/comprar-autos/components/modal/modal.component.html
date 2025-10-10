@@ -1,0 +1,26 @@
+<div *ngIf="showModal" [@modalAnimation]="showModal ? 'visible' : 'hidden'" class="modal" (click)="closeModal($event)">
+  <div id="blur-container"
+      class="blurry modal-content"
+      [ngClass]="{ 'dragging': dragging }"
+      (mousedown)="startDragging($event)"
+      (document:mousemove)="onMouseMove($event)"
+      (document:mouseup)="stopDragging()"
+  >
+    <!-- Contenido del modal -->
+    <div class="card shadow bg-body rounded h-100 card-element" style="padding-bottom: 14px; border: -0.5px solid">
+      <div class="price-container">
+        <div class="image-container">
+          <canvas id="canvas" class="canvas fade-in-image" loading="lazy" #canvas width="700" height="400"></canvas>
+          <input type="range" name="" min="1" [max]="this.vehicle.vehicle_360_images.length" step="1" value="1" id="slider" #slider (input)="handleInputSlider()">
+        </div>
+      </div>      
+    </div>       
+  </div>
+  <p *ngIf="show">
+    <mat-icon>360</mat-icon>    
+  </p> 
+  <p *ngIf="show">    
+    Arrastra para ver 360°
+  </p> 
+</div>
+

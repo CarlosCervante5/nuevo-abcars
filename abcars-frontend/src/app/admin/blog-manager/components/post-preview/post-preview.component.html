@@ -1,0 +1,75 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <div class="row">
+                <div class="col-12">
+                    <h3 class="text-start">{{ postDate }}</h3>
+                    <h3 class="fw-bold" style="font-size: xx-large;">{{ title }}</h3>
+                </div>
+            </div>
+
+            <div *ngFor="let content of contents">
+
+                <div class="col-12" *ngIf="content.content_type === 'full_width_text' ">
+                    <quill-view  [content]="content.content_text" [sanitize]="true" format="html" ></quill-view>
+                </div>
+
+                <div class="row mt-4" *ngIf="content.content_type === 'full_width_image' ">
+                    <div class="col-12">
+                        <div  class="full-width-image-container">
+                            <img [src]="content.content_multimedia_1" alt="Content_multimedia_1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4" *ngIf="content.content_type === 'centered_image' ">
+                    <div class="col-12">
+                        <div  class="centered-image-container">
+                            <img [src]="content.content_multimedia_1" alt="Content_multimedia_1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4" *ngIf="content.content_type === 'left_text_right_image' ">
+                    <div class="col-12">
+                        <div  class="content-wrapper">
+                            <div class="text-column">
+                                <quill-view [content]=" content.content_text"></quill-view>
+                            </div>
+                            <div class="image-column">
+                                <img [src]="content.content_multimedia_1" alt="Imagen">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4" *ngIf="content.content_type === 'left_image_right_text' ">
+                    <div class="col-12">
+                        <div  class="content-wrapper">
+                            <div class="image-column">
+                                <img [src]="content.content_multimedia_1" alt="Imagen">
+                            </div>
+                            <div class="text-column">
+                                <quill-view [content]=" content.content_text"></quill-view>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4" *ngIf="content.content_type === 'two_columns_images' ">
+                    <div class="col-12">
+                        <div  class="content-wrapper">
+                            <div class="image-column">
+                                <img [src]="content.content_multimedia_1" alt="content_multimedia_1">
+                            </div>
+                            <div class="image-column">
+                                <img [src]="content.content_multimedia_2" alt="content_multimedia_2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

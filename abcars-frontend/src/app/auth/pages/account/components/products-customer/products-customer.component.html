@@ -1,0 +1,21 @@
+<div class="container">
+    <!-- Arror Back -->
+    <div class="row mb-3">
+        <div class="col-12 text-start">
+            <a class="text-decoration-none text-dark" [routerLink]="['/auth/mi-cuenta']">
+                <i class="fas fa-arrow-left"></i> Regresar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 mx-auto text-center">
+            <nav mat-tab-nav-bar mat-align-tabs="center" [tabPanel]="tabPanel">
+                <a mat-tab-link *ngFor="let link of navLinks; let i = index" [routerLink]="link.link" [active]="page === link.page">
+                    {{ link.label }}
+                </a>
+            </nav>
+            <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
+        </div>
+    </div>
+</div>

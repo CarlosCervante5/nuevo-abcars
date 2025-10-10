@@ -1,0 +1,106 @@
+.chip-list {
+    width: 100%;
+}
+
+.sliderPrecios{
+    display: flex;
+}
+
+mat-slider {
+    width: 100%;
+}
+
+/* Circle Color */
+::ng-deep .mat-accent .mat-slider-thumb {
+    background-color: #383838 !important;
+}
+
+/* Background when is cliked  */
+::ng-deep .mat-accent .mat-slider-thumb-label {
+    background-color: #707070 !important;
+    /*replace with your color*/
+    padding: 20px;
+}
+
+/* Line color mat-slider */
+::ng-deep .mat-accent .mat-slider-track-fill {
+    background-color: #FFCB54 !important;
+}
+
+.mat-chip.mat-standard-chip.mat-chip-selected.mat-primary {
+    background-color: #FFCB54 !important;
+    color: white !important;
+}
+
+mat-accordion mat-expansion-panel {
+    width: 100%;
+    border-radius: 10px !important;
+}
+
+.widget-heading h1 {
+    font-size: 20px;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.widget-heading h1::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -15px;
+    height: 2px;
+    width: 70px;
+    background: #FFCB54;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.search-navbar-sticky {
+    position: sticky;
+    top: 0px;
+    z-index: 3;
+    background-color: white;
+}
+
+.button-BuscameUnAuto{
+    background-color: #1057DB;
+    color: aliceblue;
+}
+
+.buttonFiltro{
+    background-color: #1057DB;
+    color: white;
+    padding: 10px;
+ }
+
+.buttonHighEnd{
+    background-color: #FFCB54;
+    color: black;
+    padding: 10px;
+ }
+
+.searchIcon{
+    font-size: 25px;
+}
+ 
+@-webkit-keyframes sk-cubeGridScaleDelay {
+    0%, 70%, 100% {
+        -webkit-transform: scale3D(1, 1, 1);
+                transform: scale3D(1, 1, 1);
+    } 35% {
+        -webkit-transform: scale3D(0, 0, 1);
+                transform: scale3D(0, 0, 1); 
+    }
+}
+
+@keyframes sk-cubeGridScaleDelay {
+    0%, 70%, 100% {
+        -webkit-transform: scale3D(1, 1, 1);
+                transform: scale3D(1, 1, 1);
+    } 35% {
+        -webkit-transform: scale3D(0, 0, 1);
+                transform: scale3D(0, 0, 1);
+    } 
+}

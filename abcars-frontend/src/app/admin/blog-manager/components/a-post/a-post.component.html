@@ -1,0 +1,25 @@
+<mat-card class="example-card mt-5">
+
+  <img mat-card-image [src]="post.image_path" class="card-image fade-in-image card-image" alt="{{ post.title | titlecase }}">
+
+  <mat-card-content style="margin-top: 5px;">
+    <div style="font-style: italic;" class="mb-2">
+      {{ post.created_at }}
+    </div>
+    <div class="heading-item">
+      <h2>{{ post.title }}</h2>
+      <div class="underline"></div>
+    </div>
+  </mat-card-content>
+  
+  <mat-card-actions>
+      <button class="custom-button" mat-button [routerLink]="['/admin/blog_manager/detail/', post.uuid]">Editar</button>
+      <button class='custom-button' mat-button (click)="onDelete()">Eliminar</button>
+      <div class="status-icon">
+        <img *ngIf="post.status == 'published'" src="assets/icons-fontawesome/power-off-solid-green.svg" alt="flecha" width="20px" height="20px">
+        <img *ngIf="post.status != 'published'" src="assets/icons-fontawesome/power-off-solid-red.svg" alt="flecha" width="20px" height="20px">
+    </div>
+  </mat-card-actions>
+  
+</mat-card>   
+

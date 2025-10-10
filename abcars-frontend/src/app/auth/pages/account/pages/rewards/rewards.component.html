@@ -1,0 +1,366 @@
+<div class="container">
+    <!-- Header -->
+    <div class="row">
+        <div class="col-12 py-5">
+            <app-products-customer [page]="'Rewards'"></app-products-customer>
+        </div>
+    </div>
+
+    <!-- Level & Activity -->
+    <div class="row">
+        <div class="col-12">
+            <mat-card class="shadow">
+                <mat-card-header class="d-block">
+                    <!-- Level -->
+                    <div class="mx-auto">
+                        <mat-card-title class="text-center">
+                            <div class="avatar-upload">        
+                                <div class="avatar-preview mx-auto">
+                                    <img [src]="pathname" class="img-fluid shadow rounded-pill" width="100" alt="User Image" />                                    
+                                </div>
+                            </div>
+
+                            <h2 class="fw-light mt-3">Disponible <span class="fw-bold fs-4 abcars-color">${{ points | number:'2.2' }}</span></h2>                        
+                        </mat-card-title>
+                        
+                        <mat-card-subtitle>
+                            <div class="mx-auto">
+                                <p class="text-center" *ngIf="points !== 3000">
+                                    Sumando <span class="fw-bold fs-5 abcars-color">${{ pointsRemaining | number:'2.2' }}</span> más, podras alcanzar tu canje.
+                                </p>
+
+                                <p class="text-center" *ngIf="points === 3000">
+                                    ¡Felicidades puedes realizar ahora tu solicitud para obtener tu dinero!
+                                </p>
+                            </div>
+                        </mat-card-subtitle>
+                    </div>
+                </mat-card-header>
+
+                <!-- Points Progress User & Activities -->
+                <mat-card-content>
+                    <div class="progress" style="height: 20px;">
+                        <div class="progress-bar" role="progressbar" [ngStyle]="{'width': ((points * 100) / pointsTotalLevel) + '%' }" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">{{ points }} / {{ pointsTotalLevel }}</div>
+                    </div> 
+
+                    <!-- Button Change Money -->
+                    <ng-container *ngIf="points === 3000 && redemption; else elseTemplate">
+                        <div class="mx-auto text-center mt-3">
+                            <button class="btn btn-outline-secondary px-5 py-2 rounded-pill mx-auto" (click)="requestRedemption()">
+                                Canjear Dinero
+                            </button> 
+                        </div>
+                    </ng-container>
+
+                    <ng-template #elseTemplate>
+                        <p class="text-center text-muted py-2" *ngIf="!redemption">
+                            Su solicitud para canjear su puntaje a dinero esta en progreso, 
+                            pronto nos pondremos en contacto con usted.
+                        </p>
+                    </ng-template>
+                                        
+                    <!-- Activity -->
+                    <!-- <div class="mx-auto text-center mt-3">
+                        <button class="btn btn-outline-secondary px-5 py-2 rounded-pill mx-auto" (click)="shoppingCustomer()">
+                            Actividad
+                        </button> 
+                    </div> -->
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+
+    <!-- Reference Rewards -->
+    <div class="row">
+        <div class="col-12 mt-3 mb-5">            
+            <mat-card class="shadow mat-card-background">                     
+                <mat-card-header>
+                    <mat-card-title>                        
+                        <h1 class="fw-bold fs-4">Refiere y gana dinero</h1>
+                        <p class="fw-light">Envíale tu código a tus amigos para que ellos ganen y tu también</p>
+                    </mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-12 mt-3">
+                            <p class="text-center">Comparte el siguiente código para que lo ingresen en su proceso:</p>
+
+                            <div class="row">
+                                <div class="col-10 col-md-4 text-center mx-auto">
+                                    <div class="row ref-rewards-style">
+                                        <div class="col-6 m-auto">
+                                            <h4 class="m-auto fw-bold fs-4">{{ reward }}</h4>
+                                        </div>
+
+                                        <div class="col-6">
+                                            <div class="text-end">
+                                                <button mat-raised-button class="btn abcars-background-color px-4 rounded-pill text-dark" [matMenuTriggerFor]="menu">
+                                                    <span>Compartir</span>
+                                                </button>
+                                            </div>
+                                
+                                            <mat-menu #menu="matMenu">
+                                                <a mat-menu-item class="text-decoration-none text-dark" href="https://api.whatsapp.com/send?text={{ sharedReward }}" target="_blank">
+                                                    <mat-icon>whatsapp</mat-icon>
+                                                    WhatsApp
+                                                </a>
+                                
+                                                <a mat-menu-item [cdkCopyToClipboard]="sharedReward" (click)="openSnackBarCopy()">
+                                                    <mat-icon><i class="far fa-copy"></i></mat-icon>
+                                                    <span>Copiar al portapapeles</span>
+                                                </a>
+                                            </mat-menu>                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 col-md-5 mt-3 mx-auto">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item"><i class="far fa-check-circle"></i> Refiere a quien quieras y ¡gana dinero cuando hagan alguna compra dentro de ABcars!</li>
+                                        <li class="list-group-item"><i class="far fa-check-circle"></i> Gana hasta $100 por cada persona que se una y compre</li>
+                                        <li class="list-group-item"><i class="far fa-check-circle"></i> Genera y acumula la mayor cantidad posible</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+
+    <!-- Next Levels -->
+    <!-- <div class="row">
+        <div class="col-12 mt-3">            
+            <mat-card class="shadow">
+                <mat-card-header>
+                    <mat-card-title class="text-center">
+                        <h2>Beneficios de los próximos niveles</h2>
+                    </mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-12 mx-auto">
+                            <carousel class="carousel-html-content" [height]="400">
+                                <div class="carousel-cell">
+                                    <div class="card h-100">
+                                        <div class="card-header level-one">
+                                            Nivel 1
+
+                                            <span class="float-end" *ngIf="level < 1">
+                                                <i class="fi fi-rr-lock"></i>
+                                                50
+                                            </span>
+
+                                            <span class="float-end" *ngIf="level === 1">
+                                                <i class="fi fi-rr-star"></i>
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="card-body">
+                                            <ul style="padding-left: 1rem;">
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                            </ul>                         
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="carousel-cell">
+                                    <div class="card h-100">
+                                        <div class="card-header level-two">
+                                            Nivel 2
+
+                                            <span class="float-end" *ngIf="level < 2">
+                                                <i class="fi fi-rr-lock"></i>
+                                                100
+                                            </span>
+
+                                            <span class="float-end" *ngIf="level === 2">
+                                                <i class="fi fi-rr-star"></i>
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="card-body">
+                                            <ul style="padding-left: 1rem;">
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="carousel-cell">
+                                    <div class="card h-100">
+                                        <div class="card-header level-three">
+                                            Nivel 3
+
+                                            <span class="float-end" *ngIf="level < 3">
+                                                <i class="fi fi-rr-lock"></i>
+                                                400
+                                            </span>
+
+                                            <span class="float-end" *ngIf="level === 3">                                                
+                                                <i class="fi fi-rr-star"></i> 
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="card-body">
+                                            <ul style="padding-left: 1rem;">
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                                
+                                <div class="carousel-cell">
+                                    <div class="card h-100">
+                                        <div class="card-header level-four">
+                                            Nivel 4
+
+                                            <span class="float-end" *ngIf="level < 4">
+                                                <i class="fi fi-rr-lock"></i>
+                                                1500
+                                            </span>
+
+                                            <span class="float-end" *ngIf="level === 4">
+                                                <i class="fi fi-rr-star"></i>
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="card-body">
+                                            <ul style="padding-left: 1rem;">
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                                
+                                <div class="carousel-cell">
+                                    <div class="card h-100">
+                                        <div class="card-header level-five">
+                                            Nivel 5
+
+                                            <span class="float-end" *ngIf="level < 5">
+                                                <i class="fi fi-rr-lock"></i>
+                                                4000
+                                            </span>
+
+                                            <span class="float-end" *ngIf="level === 5">
+                                                <i class="fi fi-rr-star"></i>
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="card-body">
+                                            <ul style="padding-left: 1rem;">
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                                
+                                                <li>
+                                                    Obten promociones preferentes a autos de tu preferencia
+                                                </li>
+                                            </ul>
+
+                                            <div class="ms-2 me-auto">
+                                                <div class="fw-bold text-truncate">Acceso Exclusivo</div>
+                                                Obten promociones preferentes a autos de tu preferencia
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>                
+                            </carousel> 
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>-->       
+</div>

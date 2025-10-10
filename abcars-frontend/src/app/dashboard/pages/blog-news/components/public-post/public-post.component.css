@@ -1,0 +1,39 @@
+:host {
+  display: block;
+}
+
+mat-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+mat-card-content div.mb-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-image {
+  object-fit: cover;
+  height: 150px;
+  width: auto;
+  padding: 0;
+}
+
+.heading-item {
+  position: relative;
+}
+
+.underline {
+  width: 70px;
+  border-bottom: 2px solid #000;
+}
+
+.status-icon img {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}

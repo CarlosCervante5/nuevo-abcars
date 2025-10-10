@@ -1,0 +1,44 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 py-5">
+            <app-products-customer [page]="'Cars'"></app-products-customer>
+        </div>
+    </div>
+
+    <!-- Cars Customer -->
+    <div class="row">
+        <div class="col-12">
+            <h1 class="fs-2 fw-bold text-center">Vehículos Adquiridos</h1>
+            <hr />
+        </div>
+    </div>
+    
+    <!-- Cars -->
+    <div class="row">
+        <div class="col-12 mt-2 mb-5">
+            <div class="row" *ngIf="!flag">
+                <div class="col-12 col-md-6 col-xl-4" *ngFor="let vehicle of vehicles">
+                    <app-cars-customer [vehicle]="vehicle"></app-cars-customer>
+                </div>
+            </div>
+
+            <div class="row" *ngIf="vehicles.length === 0">
+                <div class="col-12">
+                    <div class="alert alert-primary text-center" role="alert">                    
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill"/></svg>
+                        ¡Vaya! Parece que aún no posee ningún vehículo, adquiera uno en <a class="fw-bold text-decoration-none" [routerLink]="['/compra-tu-auto']">Elegir mi próximo tu Auto</a>                
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" *ngIf="flag">
+                <div class="col-12">
+                    <div class="alert alert-danger text-center" role="alert">
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                        Al parecer ocurrió un error al cargar sus vehículos, intente más tarde.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,92 @@
+<div class="footer_container">
+    <div class="sucursales">
+        <div class="surcursal">
+            <img src="../../../assets/icons/ubicacionFooter.svg" class="sucursal_Img" alt="location">
+            <div class="sucursal_Content">
+                <h3>VENTAS MATRIZ</h3>
+                <P>Blvrd Esteban de Antuñano 1314, 
+                    Obrera Textil José Abascal, 72130 
+                    Puebla, Pue.</P>
+            </div>
+        </div>
+        <div class="surcursal">
+            <img src="../../../assets/icons/ubicacionFooter.svg" class="sucursal_Img" alt="location">
+            <div class="sucursal_Content">
+                <h3>VENTAS SERDAN</h3>
+                <p>Boulevard Hermanos Serdán 241, 
+                    Ampliación Aquiles Serdán, 
+                    Puebla, Pue.</p>
+            </div>
+        </div>
+        <div class="surcursal">
+            <img src="../../../assets/icons/ubicacionFooter.svg" class="sucursal_Img" alt="location">
+            <div class="sucursal_Content">
+                <h3>VENTAS SUCURSAL TLAXCALA</h3>
+                <p>Carr. Federal Puebla - Tlaxcala Km 18.5, 
+                    Barrio de Guardia, 90740 Zacatelco, Tlax.</p>
+            </div>
+        </div>
+        <div class="surcursal">
+            <img src="../../../assets/icons/ubicacionFooter.svg" class="sucursal_Img" alt="location">
+            <div class="sucursal_Content">
+                <h3>SERVICE, BODY & PAINT</h3>
+                <p>Av. 31 Pte. 4110 Ampliación Reforma Sur
+                    C.P. 72160, Puebla, Pue.</p>
+            </div>
+        </div>
+        <div class="surcursal">
+            <img src="../../../assets/icons/ubicacionFooter.svg" class="sucursal_Img" alt="location">
+            <div class="sucursal_Content">
+                <h3>VENTAS SUCURSAL HIDALGO</h3>
+                <p>Vial, La Paz 113, Adolfo López Mateos, 
+                    42094 Pachuca de Soto, Hgo.</p>
+            </div>
+        </div>
+    </div>
+    <div class="contacto">
+        <div class="contacto_Container_RedSocial">
+            <h3>Siguenos:</h3>
+            <div class="contacto_RedSocial">        
+                <a href="https://www.facebook.com/ABcarsmx-102437159099755" target="_blank"><img class="redsocial_Icons" src="../../../assets/icons/FcaebookRedSocial.svg" alt=""></a>
+                <a href="https://www.instagram.com/accounts/login/?next=/abcars.mx/" target="_blank"><img class="redsocial_Icons" src="../../../assets/icons/InstragramRedSocial.svg" alt=""></a>
+                <a href="https://www.youtube.com/channel/UCp24KS6l8nED1nys2NFkkaw" target="_blank"><img class="redsocial_Icons" src="../../../assets/icons/YoutubeRedSocial.svg" alt=""></a>
+                <a href="https://www.tiktok.com/@abcars.mx" target="_blank"><img class="redsocial_Icons" src="../../../assets/icons/TiktokRedSocial.svg" alt=""></a>
+            </div>
+        </div>
+        <div class="contacto_Container">
+            <h3>Contáctanos:</h3>
+            <h3><span><img class="redsocial_Contac_Icons"  src="../../../assets/icons/whatssapp.svg" alt=""></span>2223039910</h3>
+            <h3><span><img class="redsocial_Contac_Icons"  src="../../../assets/icons/Mail.svg" alt=""></span>contacto&#64;abcars.mx</h3>
+        </div>
+    </div>
+    <div class="sugeridos">
+        <h3>Los seminuevos más buscados</h3>
+        <div> 
+            <p>
+                <a  
+                    class="enlance_footer" 
+                    *ngFor="let vehicle of vehicles"
+                    (click)="redirectStockVehicle(vehicle.carmodel.brand.name, vehicle.carmodel.name)">
+                    {{ vehicle.carmodel.brand.name | titlecase }} {{ vehicle.carmodel.name | titlecase }} /
+                </a>
+            </p>
+        </div>
+    </div>
+    <div class="servicios">
+        <h3>Nuestros Servicios</h3>
+        <div class="servicios_links">
+            <a class="enlance_footer" [routerLink]="['/financiamiento']">Financiamiento</a>
+            <a class="enlance_footer" [routerLink]="['/seguros']">Seguros Automotrices</a>
+            <a class="enlance_footer" [routerLink]="['/servicio-tecnico']">Servicio Técnico</a>
+            <a class="enlance_footer" [routerLink]="['/refacciones']">Refacciones Originales</a>
+            <a class="enlance_footer" [routerLink]="['/valuacion']">Valuación Gratuita</a>
+        </div>
+    </div>
+    <div class="container_Copyright">
+        <div class ="copyright">
+            <p>Copyright &copy; {{ date }}, All Right Reserved <a class="enlance_footer" [routerLink]="['']">ABcars</a></p>
+            <p><a class="enlance_footer"  [routerLink]="['/externals/privacidad-de-uso']">Privacidad de Uso</a></p>
+            <p><a class="enlance_footer"  [routerLink]="['/externals/terminos-y-condiciones']">Términos & Condiciones</a></p>
+        </div>
+    </div>
+</div>

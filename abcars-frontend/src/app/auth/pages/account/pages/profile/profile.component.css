@@ -1,0 +1,25 @@
+.card {
+    cursor: pointer;    
+    border-radius: 30px !important;
+    transition: transform 0.5s ease; 
+}
+
+.card:hover {
+    transform: scale(1.05);
+    border-color: var(--abcars-color-secondary);
+}
+
+.btn-rewards {
+    background-color: var(--abcars-color-secondary);
+}
+
+.body-rewards {
+    padding-left: 10% !important;
+}
+
+.rewards-background-color {
+    background-image: url('/assets/images/abcars-images/banner-profile.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: top;
+}

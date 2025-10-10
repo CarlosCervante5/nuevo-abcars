@@ -1,0 +1,86 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <div class="row">
+                <div class="col-12">
+                    <h4 class="fs-4 fw-bold text-truncate">Reporte Ofertas de autos</h4>
+                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item" [routerLink]="['/admin/valuation_manager']">Overview</li>
+                            <li class="breadcrumb-item active" aria-current="page">Reporte Ofertas de autos</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Buscar...</mat-label>
+                        <input matInput placeholder="Bruce Wayne" #input> <!--(keyup.enter)="filter()" #txtFilter -->
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <section class="example-container mat-elevation-z8" tabindex="0">
+                        <table mat-table [dataSource]="dataSource" matSort>
+                            <ng-container matColumnDef="id"sticky>
+                                <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>#</th>
+                                <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td> <!---->
+                            </ng-container>
+
+                            <ng-container matColumnDef="clientName">
+                                <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Nombre cliente</th>
+                                <td class=" td__table" data-titulo="nombre" class="td__table" mat-cell *matCellDef="let row">{{ row.customer.name }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="clientSurname">
+                                <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Apellidos cliente</th>
+                                <td class=" td__table" data-titulo="apellido" class="td__table" mat-cell *matCellDef="let row">{{ row.customer.last_name }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="clientPhone">
+                                <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Teléfono cliente</th>
+                                <td class=" td__table" data-titulo="telefono" class="td__table" mat-cell *matCellDef="let row">{{ row.customer.phone_1 }}</td>
+                            </ng-container>
+
+                            <!-- <ng-container matColumnDef="vehicleVin">
+                                <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Vehículo Vin</th> -->
+                                <!-- <td class=" td__table" data-titulo="vin" class="td__table" mat-cell *matCellDef="let row">{{ row.vin }}</td> -->
+                            <!-- </ng-container> -->
+
+                            <ng-container matColumnDef="vehicleModel">
+                                <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Modelo</th>
+                                <td class=" td__table" data-titulo="Modelo" class="td__table" mat-cell *matCellDef="let row">{{ row.forms[1].selected_value }} {{ row.forms[0].selected_value }}</td>
+                            </ng-container>
+
+                            <!-- <ng-container matColumnDef="vehiclePriceOriginal">
+                                <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Precio Auto</th> -->
+                                <!-- <td class=" td__table" data-titulo="Precio auto:" class="td__table" mat-cell *matCellDef="let row">${{ row.priceList | number: '1.2-2' }}</td> -->
+                            <!-- </ng-container> -->
+
+                            <ng-container matColumnDef="clientPriceOffer">
+                                <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Oferta cliente:</th>
+                                <td class=" td__table" data-titulo="Oferta cliente:" class="td__table" mat-cell *matCellDef="let row">${{ row.forms[4].selected_value | number: '1.2-2' }}</td>
+                            </ng-container>
+                            
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                            <!-- Row shown when there is no matching data. -->
+                            <tr class="mat-row" *matNoDataRow>
+                                <td class="mat-cell" colspan="4">No hay datos que coincidan con la busqueda: "{{ input.value }}"</td>
+                            </tr>
+
+                        </table>
+
+                        <mat-paginator [pageSize]="10" [length]="length" [pageIndex]="pageIndex - 1" ></mat-paginator> <!--(page)="paginationChange($event)"-->
+                    </section>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

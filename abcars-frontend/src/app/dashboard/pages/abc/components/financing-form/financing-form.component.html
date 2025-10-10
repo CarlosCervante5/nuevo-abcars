@@ -1,0 +1,382 @@
+
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <div class="text-center">
+                <h1 class="fs-2 fw-bold">Precalificar para financiamiento</h1>
+                <h5 class="fs-5 fw-light">Financiamos y encontramos el auto de tus sueños.</h5>
+            </div>
+
+            <div class="row">
+                <div class="col-12 mt-4">
+                    <h4 class="heading-4 horizontal_line mb-4"><span>Cotizar financiamiento a meses</span></h4>
+                    <div class="row">
+                        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                            
+                            <div class="row">
+                                <div class="col-12 col-md-4">
+                                    <mat-form-field appearance="outline">
+                                        <input matInput type="number" placeholder="$100,000" formControlName="sale_price" #price [min]="0" [max]="priceMax" [(ngModel)]="priceValue" (change)="SetMinHitch()" required>
+                                        <mat-label>Precio del vehículo ${{ price.value | number:'.2-2' }}</mat-label>
+                                        <mat-hint *ngIf="fieldInvalid('sale_price')">Especifíque un precio total</mat-hint>
+                                    </mat-form-field>
+                                </div>
+    
+                                <div class="col-12 col-md-4">
+                                    <mat-form-field appearance="outline">
+                                        <input matInput type="number" placeholder="$100,000" formControlName="offer_price" #hitch [min]="hitchMin" [max]="(priceValue * 0.8)" [(ngModel)]="hitchValue" required>
+                                        <mat-label>Enganche ${{ hitchValue | number:'.2-2' }}</mat-label>
+                                        <mat-hint *ngIf="fieldInvalid('offer_price')">Especifíque un enganche.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+    
+                                <div class="col-12 col-md-4">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Año del vehículo</mat-label>
+                                        <mat-select placeholder="Seleccione el año del vehículo" formControlName="model_year" required>
+                                            <mat-option *ngFor="let year of years" value="{{ year }}" > {{ year }} </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+    
+                                <div class="col-12 col-md-4">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Marca del vehículo</mat-label>
+                                        <mat-select placeholder="Seleccionar una Marca" formControlName="vehicle_brand" required>
+                                            <mat-option *ngFor="let brand of brands" (onSelected)="getModelsByBrand(brand.name)" value="{{ brand.name }}">{{ brand.name | titlecase }}</mat-option>
+                                        </mat-select>
+                                        <mat-hint *ngIf="fieldInvalid('vehicle_brand')">Seleccione una marca.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+    
+                                <div class="col-12 col-md-4">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Modelo del vehículo</mat-label>
+                                        <mat-select placeholder="Seleccionar un Modelo" formControlName="vehicle_model" required>
+                                            <mat-option *ngFor="let model of models" value="{{ model.name }}">{{ model.name | titlecase }}</mat-option>
+                                        </mat-select>
+                                        <mat-hint *ngIf="fieldInvalid('vehicle_model')">Seleccione un modelo.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+    
+                                <div class="col-12 col-md-4">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Elija un plan de financiamiento</mat-label>
+                                        <mat-select [(value)]="selected" placeholder="Elija el plan" formControlName="monthly_fees">
+                                            <mat-option value="12" (click)="CalculateOffer(0.35)">12 meses (35% de enganche)</mat-option>
+                                            <mat-option value="24" (click)="CalculateOffer(0.35)">24 meses (35% de enganche)</mat-option>
+                                            <mat-option value="48" (click)="CalculateOffer(0.25)">48 meses (25% de enganche)</mat-option>
+                                            <mat-option value="60" (click)="CalculateOffer(0.20)">60 meses (20% de enganche)</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <h4 class="heading-4 horizontal_line mb-4"><span>Datos Generales</span></h4>
+
+                            <div class="row">
+                                <div class="col-12 col-md-3">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Nombre(s)</mat-label>
+                                        <input matInput type="text" placeholder="Javier" formControlName="name" required>
+                                        <mat-hint *ngIf="fieldInvalid('name')">Complete su nombre(s).</mat-hint>
+                                    </mat-form-field>
+                                </div>
+    
+                                <div class="col-12 col-md-3">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Apellido(s)</mat-label>
+                                        <input matInput type="text" placeholder="Marquez" formControlName="last_name" required>
+                                        <mat-hint *ngIf="fieldInvalid('last_name')">Complete sus apellidos</mat-hint>
+                                    </mat-form-field>
+                                </div>
+    
+                                <div class="col-12 col-md-3">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Género</mat-label>
+                                        <mat-select matInput formControlName="gender"required>
+                                            <mat-option value="f">Mujer</mat-option>
+                                            <mat-option value="m">Hombre</mat-option>
+                                        </mat-select>                                                                      
+                                        <mat-hint *ngIf="fieldInvalid('gender')">Seleccione su género.</mat-hint>
+                                    </mat-form-field> 
+                                </div>
+    
+                                <div class="col-12 col-md-3">                                        
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Correo Electrónico</mat-label>
+                                        <input matInput type="email" placeholder="a@b.c" formControlName="email" required>
+                                        <mat-hint *ngIf="fieldInvalid('email')">Ingrese un correo electrónico válido.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+    
+                                <div class="col-12 col-md-3">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>RFC</mat-label>
+                                        <input matInput type="text" placeholder="ABCDF123" (keyup)="convertMayus($event)" formControlName="rfc" required>     
+                                        <mat-hint *ngIf="fieldInvalid('rfc')">Ingrese su RFC válido.</mat-hint>                                                                 
+                                    </mat-form-field> 
+                                </div>
+    
+                                <div class="col-12 col-md-3">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Número de Teléfono</mat-label>
+                                        <input matInput type="tel" placeholder="1234567890" #phone (keyup)="maxLengthCheck(phone)" maxlength="10" formControlName="phone" required>     
+                                        <mat-hint *ngIf="fieldInvalid('phone')">Ingrese un número telefónico válido.</mat-hint>                                                                 
+                                    </mat-form-field> 
+                                </div>
+    
+                                <div class="col-6 col-md-3">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Estado Civil</mat-label>
+                                        <mat-select matInput formControlName="marital_status" required>
+                                            <mat-option value="Soltero(a)">Soltero(a)</mat-option>
+                                            <mat-option value="Casado(a) - Bienes Mancomunados">Casado(a) - Bienes Mancomunados</mat-option>
+                                            <mat-option value="Casado(a) - Bienes Separados">Casado(a) - Bienes Separados</mat-option>
+                                            <mat-option value="Viudo(a)">Viudo(a)</mat-option>
+                                            <mat-option value="Divorciado(a)">Divorciado(a)</mat-option>
+                                            <mat-option value="Separado(a)">Separado(a)</mat-option>
+                                            <mat-option value="UnionLibre">Unión Libre</mat-option>                                                
+                                        </mat-select>                                                                      
+                                        <mat-hint *ngIf="fieldInvalid('marital_status')">Seleccione su estado civil.</mat-hint>
+                                    </mat-form-field> 
+                                </div>
+    
+                                <div class="col-6 col-md-3">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Nivel de Estudios</mat-label>
+                                        <mat-select matInput formControlName="educational_level" required>
+                                            <mat-option value="Primaria">Primaria</mat-option>
+                                            <mat-option value="Secundaria">Secundaria</mat-option>
+                                            <mat-option value="Bachillerato">Bachillerato</mat-option>
+                                            <mat-option value="Licenciatura">Licenciatura</mat-option>
+                                            <mat-option value="Maestría">Maestría</mat-option>
+                                            <mat-option value="Doctorado">Doctorado</mat-option>
+                                            <mat-option value="NoTiene">No tiene</mat-option>
+                                        </mat-select>                                                                      
+                                        <mat-hint *ngIf="fieldInvalid('educational_level')">Seleccione su nivel de estudios.</mat-hint>
+                                    </mat-form-field> 
+                                </div>
+
+                            </div>
+
+                            <h4 class="heading-4 horizontal_line mb-4"><span>Domicilio Actual</span></h4>
+
+                            <div class="row">
+                                <div class="col-12 col-md-3">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Dirección</mat-label>
+                                        <input matInput type="text" placeholder="Dirección" formControlName="address" required>     
+                                        <mat-hint *ngIf="fieldInvalid('address')">Ingrese una dirección válida.</mat-hint>                                                                 
+                                    </mat-form-field> 
+                                </div>
+    
+                                <div class="col-12 col-md-3">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Número</mat-label>
+                                        <input matInput type="number" placeholder="12345" #number (keyup)="maxLengthCheck(number)" maxlength="10" formControlName="address_number" required>     
+                                        <mat-hint *ngIf="fieldInvalid('address_number')">Ingrese un número válido.</mat-hint>                                                                 
+                                    </mat-form-field> 
+                                </div>
+    
+                                <div class="col-12 col-md-3">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Colonia</mat-label>
+                                        <input matInput type="text" placeholder="Los Santos" formControlName="neighborhood" required>     
+                                        <mat-hint *ngIf="fieldInvalid('neighborhood')">Ingrese una colonia válida.</mat-hint>                                                                 
+                                    </mat-form-field> 
+                                </div>
+    
+                                <div class="col-12 col-md-3">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Código Postal</mat-label>
+                                        <input matInput type="number" placeholder="72000" #postal_code (keyup)="maxLengthCheck(postal_code)" maxlength="10" formControlName="zip_code" required>     
+                                        <mat-hint *ngIf="fieldInvalid('zip_code')">Ingrese su código postal.</mat-hint>                                                                 
+                                    </mat-form-field> 
+                                </div>
+                                
+                                <div class="col-12 col-md-3">                                                
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Estado</mat-label>
+                                        <input matInput type="text" placeholder="Estado" formControlName="state" required> 
+                                        <mat-hint *ngIf="fieldInvalid('state')">Seleccione un estado válido.</mat-hint>                                                                                                                         
+                                    </mat-form-field>
+                                </div>
+    
+                                <div class="col-12 col-md-3">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Municipio</mat-label>
+                                        <input matInput type="text" placeholder="Municipio" formControlName="district" required>     
+                                        <mat-hint *ngIf="fieldInvalid('district')">Escriba su municipio.</mat-hint>                                                                 
+                                    </mat-form-field> 
+                                </div>
+    
+                                <div class="col-12 col-md-3">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Ingreso Mensual (Neto)</mat-label>
+                                        <input matInput type="number" placeholder="$1,2345" #salary (keyup)="maxLengthCheck(salary)" maxlength="10" formControlName="salary" required>     
+                                        <mat-hint *ngIf="fieldInvalid('salary')">Ingrese su ingreso mensual (neto).</mat-hint>
+                                    </mat-form-field> 
+                                </div>
+    
+                                <div class="col-12 col-md-3">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Puesto que desempeña</mat-label>
+                                        <input matInput type="text" placeholder="Administración" formControlName="role" required>     
+                                        <mat-hint *ngIf="fieldInvalid('role')">Ingrese el puesto que desempeña.</mat-hint>
+                                    </mat-form-field> 
+                                </div>
+    
+                                <div class="col-12 col-md-3">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Situación Laboral</mat-label>
+                                        <mat-select matInput formControlName="employment_status" #employment_status required>
+                                            <mat-option value="Independiente">Independiente</mat-option>
+                                            <mat-option value="Asalariado">Asalariado</mat-option>
+                                            <mat-option value="Pers. Fisica con Actividad Empresarial">Pers. Fisica con Actividad Empresarial</mat-option>
+                                        </mat-select>                                                                      
+                                        <mat-hint *ngIf="fieldInvalid('employment_status')">Seleccione su situación laboral.</mat-hint>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-12 col-md-3" *ngIf="employment_status.value === 'Asalariado' || employment_status.value === 'Pers. Fisica con Actividad Empresarial'">
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Nombre de su Empresa</mat-label>
+                                        <input matInput type="text" placeholder="ABcars" formControlName="work_name">     
+                                        <mat-hint *ngIf="fieldInvalid('work_name')">Escriba el nombre de su empresa / organización / giro económico.</mat-hint>                                                                 
+                                    </mat-form-field> 
+                                </div>
+    
+                                <div *ngIf="employment_status.value === 'Asalariado' || employment_status.value === 'Pers. Fisica con Actividad Empresarial'">
+    
+                                    <h4 class="heading-4 horizontal_line mb-4"><span>Dirección de su Empresa</span></h4>
+                                    
+                                    <div class="row">
+
+                                        <div class="col-12 col-md-3">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Número telefónico Empresarial</mat-label>
+                                                <input matInput type="tel" placeholder="1234567890" formControlName="work_phone" #work_phone (keyup)="maxLengthCheck(work_phone)" minlength="10" maxlength="10">     
+                                                <mat-hint *ngIf="fieldInvalid('work_phone')">Especifique el número telefónico de su empresa.</mat-hint>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-12 col-md-3">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Dirección</mat-label>
+                                                <input matInput type="text" placeholder="Avenida ABCars" formControlName="work_address">
+                                                <mat-hint *ngIf="fieldInvalid('work_address')">Ingrese una dirección válida.</mat-hint>                                                                 
+                                            </mat-form-field> 
+                                        </div>
+    
+                                        <div class="col-12 col-md-3">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Número</mat-label>
+                                                <input matInput type="number" placeholder="12345" #number (keyup)="maxLengthCheck(number)" maxlength="10" formControlName="work_address_number">     
+                                                <mat-hint *ngIf="fieldInvalid('work_address_number')">Ingrese un número válido.</mat-hint>                                                                 
+                                            </mat-form-field> 
+                                        </div>
+        
+                                        <div class="col-12 col-md-3">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Colonia</mat-label>
+                                                <input matInput type="text" placeholder="Los Santos" formControlName="work_neighborhood">     
+                                                <mat-hint *ngIf="fieldInvalid('work_neighborhood')">Ingrese una colonia válida.</mat-hint>                                                                 
+                                            </mat-form-field> 
+                                        </div>
+        
+                                        <div class="col-12 col-md-3">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Código Postal</mat-label>
+                                                <input matInput type="number" placeholder="72000" #postal_code (keyup)="maxLengthCheck(postal_code)" maxlength="10" formControlName="work_zip_code">     
+                                                <mat-hint *ngIf="fieldInvalid('work_zip_code')">Ingrese su código postal.</mat-hint>                                                                 
+                                            </mat-form-field> 
+                                        </div>
+        
+                                        <div class="col-6 col-md-3">                                                
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Estado</mat-label>
+                                                    <input matInput type="text" placeholder="Estado" formControlName="work_state"> 
+                                                <mat-hint *ngIf="fieldInvalid('work_state')">Seleccione un estado válido.</mat-hint>                                                                                                                         
+                                            </mat-form-field>
+                                        </div>
+        
+                                        <div class="col-6 col-md-3">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Municipio</mat-label>
+                                                <input matInput type="text" placeholder="Puebla" formControlName="work_district">     
+                                                <mat-hint *ngIf="fieldInvalid('work_district')">Escriba su municipio.</mat-hint>                                                                 
+                                            </mat-form-field> 
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+
+                            <h4 class="heading-4 horizontal_line mb-4"><span>Archivos</span></h4>
+
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-12 text-center mt-5 mb-3">
+                                        <h5 class="fs-5 fw-light">Para poder finalizar requerimos una copia fotográfica de su Credencial de Elector (INE).</h5>
+                                        <p class="mt-2">Formatos admitidos .png, .jpg y .jpeg</p>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3 text-center">
+                                    <div class="col-12 col-md-4">
+                                        <p class="mb-1">Parte frontal de la Credencial de Elector (INE).</p>
+                                        
+                                        <div class="text-center">
+                                            <input type="file" class="dz-message-front text-center" accept=".png, .jpg, .jpeg" formControlName="ine_front" (change)="onFileChange($event, 'front')" required>
+                                            <p class="fw-light mt-1">Arrastra el archivo aquí para adjuntarlo.</p>
+                                        </div>        
+                                        <mat-hint class="text-danger" *ngIf="ineFrontInvalid">Por favor ingrese la parte frontal de su INE.</mat-hint>                                                                        
+                                    </div>
+
+                                    <div class="col-12 col-md-4">                                        
+                                        <p class="mb-1">Parte trasera de la Credencial de Elector (INE).</p>
+                                        
+                                        <div class="text-center">
+                                            <input type="file" class="dz-message-back text-center" accept=".png, .jpg, .jpeg"  (change)="onFileChange($event, 'back')" required>
+                                            <p class="fw-light mt-1">Arrastra el archivo aquí para adjuntarlo.</p>
+                                        </div>
+                                        <mat-hint class="text-danger" *ngIf="ineBackInvalid">Por favor ingrese la parte de atras de su INE.</mat-hint>
+                                    </div>
+                                    
+                                    <div class="col-12 col-md-4">                                        
+                                        <p class="mb-1">Comprobante de domicilio.</p>
+                                        
+                                        <div class="text-center">
+                                            <input type="file" class="dz-message-back text-center" accept=".png, .jpg, .jpeg" (change)="onFileChange($event, 'address')" required>
+                                            <p class="fw-light mt-1">Arrastra el archivo aquí para adjuntarlo.</p>
+                                        </div>
+                                        <mat-hint class="text-danger" *ngIf="addressProofInvalid">Por favor ingrese la imagen del comprobante de domicilio.</mat-hint>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12 text-end">
+                                        <mat-checkbox formControlName="checkbox" required>
+                                            Acepto <a class="fw-bold abcars-color-hover text-decoration-none" [routerLink]="['/externals/privacidad-de-uso']">Aviso</a>,  
+                                            <a class="fw-bold abcars-color-hover text-decoration-none" [routerLink]="['/externals/terminos-y-condiciones']">Términos y Condiciones</a>.
+                                        </mat-checkbox>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 text-end">
+                                <button mat-button type="submit" class="btn abcars-background-color rounded-pill text-dark mx-2"
+                                    [disabled]="form.invalid || spinner">                                    
+                                    <span *ngIf="!spinner">Enviar</span>
+                                    <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,68 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <div class="row">
+                <div class="col-12">
+                    <h4 class="fs-4 fw-bold text-truncate">Impresión de Valuación</h4>
+                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item" [routerLink]="['/admin/valuation_manager']">Overview</li>
+                            <li class="breadcrumb-item active" aria-current="page">Imprimir valuación</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <section class="example-container mat-elevation-z8" tabindex="0">
+                        <mat-card class="example-card">
+                            <mat-card-content class="m-10">
+                                <div class="avatar-edit">
+                                    <label for="images" class="drop-container">
+                                        <span class="drop-title">Puedes imprimir por fecha, por nombre de valuador o por ambos campos,</span>
+                                        <span class="drop-title">si pulsas descargar sin info en los campos, se imprimirán todas las valuaciones.</span>
+                                        <div class="row">
+                                            <div class="col-6 mt-3">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Fecha</mat-label>
+                                                    <mat-date-range-input [rangePicker]="pickerDateValuation">
+                                                        <input matStartDate placeholder="Fecha de inicio" #dateValuation (dateChange)="getDateValuation($event)"> 
+                                                        <input matEndDate placeholder="Fecha fin" #dateEndValuation (dateChange)="getDateEndValuation($event)">
+                                                    </mat-date-range-input>
+
+                                                    <mat-datepicker-toggle matSuffix [for]="pickerDateValuation"></mat-datepicker-toggle>
+                                                    <mat-date-range-picker #pickerDateValuation></mat-date-range-picker>
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-6 mt-3">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Nombre del valuador</mat-label>
+                                                    <mat-select placeholder="Seleccione el valuador" #inputname (selectionChange)="onChange(inputname.value)">
+                                                        <mat-option *ngFor="let valuator of valuators" value="{{ valuator.uuid }}">{{ valuator.user_profile.name }} {{ valuator.user_profile.last_name }}</mat-option>
+                                                        <!-- <mat-option value="cesar">Cesar Fuentes</mat-option>
+                                                        <mat-option value="fabian">Fabian Tapia</mat-option> -->
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </div>
+                                            <!-- <a href="{{url}}/api/valuations/report?valuator_uuid={{iduservaluator}}" class="marginButtons btn abcars-background-color-blue">
+                                                DESCARGAR
+                                            </a> -->
+                                            <!-- <a [href]="iduservaluator || inputDateValuation ? url + '/api/valuations/report?valuator_uuid=' + iduservaluator + '&begin_date=' + inputDateValuation : url + '/api/valuations/report'"
+                                                class="marginButtons btn abcars-background-color-blue">
+                                                DESCARGAR
+                                            </a> -->
+                                            <a [href]="generateDownloadUrl()"
+                                                class="marginButtons btn abcars-background-color-blue">
+                                                DESCARGAR
+                                            </a>
+                                        </div>
+                                    </label>
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

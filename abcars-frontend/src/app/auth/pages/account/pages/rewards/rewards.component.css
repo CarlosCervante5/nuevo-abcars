@@ -1,0 +1,86 @@
+.card-header:first-child {
+    border-radius: 0px !important;
+}
+
+.progress-bar {
+    background-color: var(--abcars-color) !important;
+}
+
+.ref-rewards-style {
+    background-color: #e1e1e15c;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.list-group-item {
+    background-color: #e1e1e15c !important;
+}
+
+.mat-card-background {
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;    
+    background-image: url('/assets/icons/reward.svg');
+}
+
+.level-one {
+    background-color: #78c265;
+    border-color: #78c265;
+    color: white;
+}
+
+.level-two {
+    background-color: #63e6be;
+    border-color: #63e6be;
+    color: white;
+}
+
+.level-three {
+    background-color: #6C63FF;
+    border-color: #6C63FF;
+    color: white;
+}
+
+.level-four {
+    background-color: #ff6363;
+    border-color: #ff6363;
+    color: white;
+}
+
+.level-five {
+    background-color: #638dff;
+    border-color: #638dff;
+    color: white;
+}
+
+
+.avatar-upload {
+    position: relative;
+}
+
+.avatar-preview {
+    width: 15vw;
+    height: 15vw;
+    overflow: hidden;
+    border-radius: 50%;
+    position: relative;        
+    border: 3px solid #eeb8389e;
+    box-shadow: 0px 5px 3px 0px rgba(0, 0, 0, 0.39);
+}
+
+.avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+@media screen and (max-width: 740px) {
+    .avatar-edit {
+        right: 80px !important;
+    }
+
+    .avatar-preview {
+        width: 30vw !important;
+        height: 30vw !important;
+    }
+}

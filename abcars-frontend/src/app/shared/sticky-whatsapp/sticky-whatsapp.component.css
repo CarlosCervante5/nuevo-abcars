@@ -1,0 +1,20 @@
+/* :host {
+  display: block;
+} */
+
+.whatsapp-container {
+  position: fixed;
+  bottom: 50px; 
+  right: 20px;
+  z-index: 1000;
+}
+
+.whatsapp-link {
+  display: block;
+  text-decoration: none;
+}
+
+.whatsapp-link img {
+  width: 70px; /* Ajusta el tamaño del icono según tus preferencias */
+  height: auto; /* Mantiene la proporción del icono */
+}

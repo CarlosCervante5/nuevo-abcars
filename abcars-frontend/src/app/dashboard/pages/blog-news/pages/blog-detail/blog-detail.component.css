@@ -1,0 +1,46 @@
+:host {
+  display: block;
+}
+
+.content-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.text-column,
+.image-column {
+  flex: 1;
+}
+
+.image-column img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.centered-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.centered-image-container img {
+  width: 80%;
+  height: auto;
+  display: block;
+}
+
+.full-width-image-container {
+  /* width: 100vw;
+  margin-left: calc(-50vw + 50%); */
+  display: flex;
+  justify-content: center;
+}
+
+.full-width-image-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+}

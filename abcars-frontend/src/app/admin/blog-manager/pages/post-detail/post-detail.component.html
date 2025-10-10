@@ -1,0 +1,143 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 mb-5 mt-4">
+            <div class="row pb-2 mb-2">
+
+                <div class="col-lg-3 col-md-6 col-sm-12 mb-2 padding-col">
+                    <h4 class="fs-4 fw-bold text-truncate">Detalle del post</h4>
+                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                        <li class="breadcrumb-item" [routerLink]="['/admin/blog_manager']">Overview</li>
+                        <li class="breadcrumb-item" [routerLink]="['/admin/blog_manager/posts']">Post</li>
+                        <li class="breadcrumb-item active" aria-current="page">Detail</li>
+                        </ol>
+                    </nav>
+                </div>
+
+                <div class="col-lg-3 col-md-6 col-sm-12 mb-2 d-flex flex-wrap align-items-center justify-content-center border padding-col">
+                    <button mat-button class="btn abcars-background-color-yellow w-100" (click)="openStorePostContentSheet()" > Crear segmento de contenido </button>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 col-sm-12 mb-2 d-flex flex-wrap align-items-center justify-content-center border padding-col">
+                    <button mat-button class="btn abcars-background-color-yellow w-100" (click)="openPreview(url_name)" > Vista previa </button>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 col-sm-12 mb-2 d-flex flex-wrap align-items-center justify-content-center border padding-col">
+                    <button mat-button class="btn abcars-background-color-yellow w-100" (click)="publishUnpublish()" *ngIf="post.status === 'unpublished' "> Publicar </button>
+                    <button mat-button class="btn abcars-background-color-yellow w-100" (click)="publishUnpublish()" *ngIf="post.status === 'published' "> Despublicar </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="row" style="min-height: 800px;">
+        <div class="col-12 mb-5" style="justify-items: center;">
+            <div cdkDropList class="list" (cdkDropListDropped)="drop($event)">
+                <div class="box" *ngFor="let content of post_for_slider; let i = index" cdkDrag>
+                    <div class="row align-items-center">
+                        <!-- Columna para el número y el checkbox -->
+                        <div class="col-1 d-flex flex-column align-items-center">
+                            <strong class="position-number">#{{ i + 1 }}</strong>
+                            <input type="checkbox" [(ngModel)]="content.selected" class="form-check-input mt-1" />
+                        </div>
+                
+                        <!-- Columna para el contenido dinámico -->
+                        <div class="col-10">
+                            <!-- Renderizado dinámico según el tipo de contenido -->
+                            <ng-container [ngSwitch]="content.content_type">
+                                
+                                <!-- Texto a ancho completo -->
+                                <div *ngSwitchCase="'full_width_text'" class="row">
+                                    <h4> Texto tamaño completo</h4>
+                                    <div class="truncate-text">
+                                        <quill-view [content]="content.content_text"></quill-view>
+                                    </div>
+                                </div>
+                    
+                                <!-- Izquierda texto, derecha imagen -->
+                                <div *ngSwitchCase="'left_text_right_image'" class="row">
+                                    <h4> Texto a la izquierda, imagen a la derecha</h4>
+                                    <div class="col-9">
+                                        <div class="truncate-text">
+                                            <quill-view [content]="content.content_text"></quill-view>
+                                        </div>
+                                    </div>
+                                    <div class="col-3 content-box-image">
+                                        <img [src]="content.content_multimedia_1"  (error)="retryImageLoad_1($event, content)" alt="content_multimedia_1">
+                                    </div>
+                                </div>
+                    
+                                <!-- Izquierda imagen, derecha texto -->
+                                <div *ngSwitchCase="'left_image_right_text'" class="row">
+                                    <h4> Imagen a la izquierda, texto a la derecha</h4>
+                                    <div class="col-3 content-box-image">
+                                        <img [src]="content.content_multimedia_1" (error)="retryImageLoad_1($event, content)" alt="content_multimedia_1">
+                                    </div>
+                                    <div class="col-9 truncate-text">
+                                        <quill-view [content]="content.content_text"></quill-view>
+                                    </div>
+                                </div>
+                    
+                                <!-- Dos imágenes a dos columnas -->
+                                <div *ngSwitchCase="'two_columns_images'" class="row">
+                                    <h4> Imagenes a dos columnas</h4>
+                                    <div class="col-6" style="justify-items: center;">
+                                        <div class="content-box-image">
+                                            <img [src]="content.content_multimedia_1"  (error)="retryImageLoad_1($event, content)" alt="Content_multimedia_1">
+
+                                        </div>
+                                    </div>
+                                    <div class="col-6" style="justify-items: center;">
+                                        <div class="content-box-image">
+                                            <img [src]="content.content_multimedia_2"  (error)="retryImageLoad_2($event, content)" alt="Content_multimedia_2">
+
+                                        </div>
+                                    </div>
+                                </div>
+                    
+                                <!-- Imagen a ancho completo -->
+                                <div *ngSwitchCase="'full_width_image'">
+                                    <h4> Imagen al ancho completo</h4>
+                                    <div class="col-12">
+                                        <div class="content-box-image" style="justify-self: center;">
+                                            <img [src]="content.content_multimedia_1"  (error)="retryImageLoad_1($event, content)" alt="Content_multimedia_1">
+                                        </div>
+                                    </div>
+                                </div>
+                    
+                                <!-- Imagen centrada -->
+                                <div *ngSwitchCase="'centered_image'">
+                                    <h4> Imagen centrada </h4>
+                                    <div class="col-12">
+                                        <div class="content-box-image" style="justify-self: center;">
+                                            <img [src]="content.content_multimedia_1"  (error)="retryImageLoad_1($event, content)" alt="Content_multimedia_1">
+                                        </div>
+                                    </div>
+                                </div>
+                    
+                                <!-- Si el tipo de contenido no coincide -->
+                                <div *ngSwitchDefault>
+                                    <p class="text-muted">Tipo de contenido desconocido</p>
+                                </div>
+                    
+                            </ng-container>
+                        </div>
+                    
+                        <!-- Nueva columna para eliminar contenido -->
+                        <div class="col-1 d-flex flex-column align-items-center justify-content-center">
+                            <button class="btn btn-danger btn-sm" (click)="deleteContent(content.id, i)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                
+            </div>
+        </div>
+    </div>
+    
+
+</div>

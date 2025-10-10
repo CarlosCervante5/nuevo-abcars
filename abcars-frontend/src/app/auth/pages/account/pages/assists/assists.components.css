@@ -1,0 +1,48 @@
+.card {
+    border-radius: 2rem;
+}
+
+.icon-card-assists {
+    width: 50%;
+    margin-top: -10vh;
+    margin-bottom: 10%;
+}
+
+.button-card {
+    z-index: 2;
+    margin-bottom: -2rem;
+}
+
+/* Widget Text Assists */
+.widget-heading-whatsapp h3::before {
+    content: "";
+    left: 0;
+    transform: translate(200%, -10px);
+    position: absolute;    
+    height: 7px;
+    width: 20%;
+    border-radius: 2rem;    
+    background-color: #5dc358;
+}
+
+.widget-heading-call h3::before {
+    content: "";
+    left: 0;
+    transform: translate(200%, -10px);
+    position: absolute;    
+    height: 7px;
+    width: 20%;
+    border-radius: 2rem;    
+    background-color: #3fa9f5;
+}
+
+.widget-heading-chat h3::before {
+    content: "";
+    left: 0;
+    transform: translate(200%, -10px);
+    position: absolute;    
+    height: 7px;
+    width: 20%;
+    border-radius: 2rem;    
+    background-color: #662d91;
+}

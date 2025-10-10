@@ -1,0 +1,12 @@
+<h2 mat-dialog-title>Video del Vehículo</h2>
+<mat-dialog-content>
+  <div style="position: relative; padding-bottom: 56.25%; height: 0;">
+    <iframe
+      [src]="data.videoUrl | safeUrl"
+      frameborder="0"
+      allowfullscreen
+      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+    </iframe>
+  </div>
+</mat-dialog-content>
+

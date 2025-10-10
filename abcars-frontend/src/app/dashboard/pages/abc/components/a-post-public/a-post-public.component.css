@@ -1,0 +1,53 @@
+:host {
+  display: block;
+}
+
+mat-card {
+  display: flex;
+  flex-direction: column;
+  /* height: 590px; */
+  height: 510px;
+  max-width: 390px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+mat-card-content div.mb-2 {
+  display: -webkit-box;
+  /* -webkit-line-clamp: 3;  Limita el texto a 3 líneas */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+mat-card-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-image {
+  height: 350px;
+  object-fit: cover;
+  width: auto;
+  top: -20px;
+  bottom: 10px;
+  transform: translateX(-20px);
+  padding: 0;
+}
+
+.heading-item {
+  position: relative;
+}
+
+.underline {
+  width: 70px;
+  border-bottom: 2px solid #000;
+}
+
+.status-icon img {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}

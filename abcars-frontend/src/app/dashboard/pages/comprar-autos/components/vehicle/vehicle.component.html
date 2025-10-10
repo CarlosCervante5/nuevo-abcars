@@ -1,0 +1,42 @@
+<div class="card  bg-body rounded h-100 card-element" style="padding-bottom: 14px; border: -0.5px solid"> <!-- shadow style="width: 18rem;"-->
+    
+    <div class="price-container">
+        <div > <!--class="cover-image"-->
+            <img [src]="vehicle_image" class="card-img-top fade-in-image" width="300" alt="{{ vehicle.name | titlecase }}">
+        </div>
+        
+        <div class="price-align">
+            <div class="price" *ngIf="!vehicle.offer_price">
+                ${{ vehicle.sale_price | number:'.2-2' }}
+            </div>
+            
+            <div class="price" *ngIf="vehicle.offer_price">
+                ${{ vehicle.offer_price | number:'.2-2' }}
+
+                <div class="my-tag">
+                    <div class="tag-choice" *ngIf="vehicle.offer_price">
+                        <span class="badge rounded-pill price-promo" style="background: #1057DB; font-size: x-small;">¡EN LIQUIDACIÓN!</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body font-generic">
+            <div class="row">
+                <div class="col-12">
+                    <p class="card-text" style="font-weight: 700; font-size: larger;">{{ vehicle.brand.name| titlecase }} {{ vehicle.model.name | titlecase }}</p>
+                    <p class="card-text" style="font-size: medium;">{{ vehicle.mileage | number }} km • {{ vehicle.model.year }} • {{ vehicle.dealership.location }}</p>
+                    <hr style="border: 1px solid #707070; margin-top: 10px;">
+                    <div class="divider mt-2 mb-2"></div>
+                    <p *ngFor="let camp of vehicle.campaigns">
+                        {{camp.name}}
+                    </p>
+                </div>
+            </div>                
+    </div>
+
+    <div class="tag-choice" *ngIf="choice">
+        <span class="badge rounded-pill" style="background: rgb(254, 143, 0);">¡APARTADO!</span>
+    </div>
+
+</div>

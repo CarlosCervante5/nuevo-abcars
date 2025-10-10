@@ -1,0 +1,53 @@
+<!-- Collapse Block Services -->
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-3">
+            <h3 class="fs-5 fw-bold">Servicios de tu Vehículo</h3> 
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="overflow-auto" style="max-height: 500px;">
+            <div class="row">
+                <div class="col-12 mt-3">
+                    <!-- Quotes List -->      
+                    <ul class="list-group list-group-flush ns-resize mb-2" *ngFor="let quote of quotes; let i = index;">                        
+                        <p class="text-muted"> 
+                            <span class="badge rounded-pill bg-primary" [ngClass]="{
+                                'bg-success': (quote.status === 'successful'),
+                                'bg-secondary': (quote.status === 'progress'),
+                                'bg-danger': (quote.status === 'failed')
+                            }">
+                                {{
+                                    (quote.status === 'successful') ? 'Atendido' :
+                                    (quote.status === 'progress') ? 'En Espera' : 'Rechazado'
+                                }}
+                            </span>
+                            <a class="fw-bold text-decoration-none abcars-color"> Servicios del {{ quote.quoteDate | date }}</a>
+                        </p>
+
+                        <!-- Services List -->
+                        <li class="list-group-item d-flex justify-content-between align-items-start"
+                            *ngFor="let service of quote.services">
+                            <span class="rounded-pill">
+                                <mat-icon mat-list-icon>                                    
+                                    <i class="
+                                        {{ 
+                                            (quote.status === 'successful') ? 'fi fi-rr-shield-check' : 
+                                            (quote.status === 'progress') ? 'fi fi-rr-time-past' : 'fi fi-rr-exclamation' 
+                                        }}">
+                                    </i>
+                                </mat-icon>
+                            </span>
+            
+                            <div class="ms-2 me-auto text-truncate">
+                                <div class="fw-bold text-truncate">{{ service.name | titlecase }}</div>
+                                {{ service.description | titlecase }}
+                            </div>
+                        </li>               
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

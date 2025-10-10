@@ -1,0 +1,123 @@
+.footer_container{
+    background-color: #474849;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+.sucursales{
+    display: grid;
+    grid-template-columns: repeat(3 ,1fr);
+    padding: 40px 0 60px 0;
+}
+.surcursal{
+    display: flex;
+    margin-left: 50px;
+    gap: 10px ;
+    align-items: flex-start;
+
+}
+.sucursal_Img{
+    width: 30px;
+}
+.sucursal_Content{
+    width: 70%;
+}
+.sucursal_Content,h3,p, a {
+    color: white;
+}
+.contacto{
+    display: flex;
+    /* justify-content: space-evenly; */
+    gap: calc(10%);
+    margin: 0 2rem;
+    border-bottom: #0080ff 5px solid;
+}
+.contacto h3{
+    font-weight:bold ;
+}
+.contacto_Container,.contacto_Container_RedSocial{
+    display: flex;
+    gap: 30px;
+}
+.contacto_RedSocial{
+    display: flex;
+    gap: 5px;
+}
+.redsocial_Icons{
+    width: 25px;
+}
+.redsocial_Contac_Icons
+{
+    width: 25px;
+    height: 25px;
+    margin: 0 5px;
+}
+.sugeridos{
+    margin: 10px 0 10px 40px;
+}
+.servicios{
+    margin: 10px 0 10px 40px;
+}
+.servicios_links{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+.container_Copyright{
+    background-color: #666666;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding-top:10px ;
+}
+.copyright{
+    margin: 10px 0 0 40px;
+    display: flex;
+    gap: 10px;
+}
+a{
+    text-decoration: none;
+}
+@media (max-width: 780px) {
+    .sucursales{
+        display: grid;
+        grid-template-columns: repeat(2 ,1fr);
+        padding: 40px 0 100px 0;
+        margin-left: -35px;
+    }
+    .contacto{
+        
+        display: flex;
+        flex-direction: column;
+        margin-left: 18px; /** 40px */
+    }
+    .contacto_Container{
+        display: flex;
+        flex-direction: column;
+
+        gap: 0;
+    }
+    .contacto_Container_RedSocial{
+        display: flex;
+        margin-bottom: 0;
+    }
+
+    .sugeridos {
+        margin: 10px 0 10px 18px;
+    }
+
+    .servicios {
+        margin: 10px 0 10px 18px;
+    }
+
+    .servicios_links {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .copyright {
+        margin: 10px 0 0 18px;
+    }
+}
+.enlance_footer:hover{
+    color: #0080ff;
+} 

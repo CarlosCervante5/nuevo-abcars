@@ -1,0 +1,107 @@
+<!-- Navbar de Administración -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" [routerLink]="['/']" style="font-size: 1.5rem; color: #333; cursor: pointer;">
+            <i class="fas fa-car me-2" style="color: #007bff;"></i>
+            ABCars Admin
+        </a>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center me-3">
+                <img [src]="image_path" alt="User" class="rounded-circle me-2" width="32" height="32">
+                <div class="d-flex flex-column">
+                    <span class="fw-bold" style="font-size: 0.9rem;">{{ name }}</span>
+                    <span class="text-muted" style="font-size: 0.75rem;">{{ role }}</span>
+                </div>
+            </div>
+            
+            <a [routerLink]="['/']" class="btn btn-sm btn-outline-primary" title="Ir al sitio web">
+                <i class="fas fa-home"></i>
+            </a>
+            
+            <button (click)="logout()" class="btn btn-sm btn-danger" title="Cerrar sesión">
+                <i class="fas fa-sign-out-alt me-1"></i>
+                Salir
+            </button>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <!-- Role Information -->
+            <div class="row">
+
+                <div class="row align-items-center">
+                    <div class="col-1"></div>
+            
+                    <div class="col-auto" >
+                        <h3 class="fw-bold mb-0" style="font-size: x-large;">ABCars Dashboard</h3>
+                        <br>
+                        <h6 class="fw-light" style="font-size: large; text-align: justify;"></h6>
+                    </div>
+            
+                    <div class="col-auto"></div>
+                </div>
+                
+                <hr>
+
+                <div class="col-12 col-sm-12 col-md-8 col-lg-9">
+                    <app-valuation-statistics-overview *ngIf="overview?.user?.role === 'valuation_manager' "></app-valuation-statistics-overview>
+                    <div class="row mt-5">
+                        <div class="col-12">
+                            <h3 class="text-start fw-bold">Mis Modulos</h3>
+                            <div class="row">                                
+                                <!-- <div class="col-6 col-sm-4 col-md-6 col-lg-3 mb-3" *ngFor="let page of overview?.pages">
+                                    <div class="card text-center card-module h-100" [routerLink]="[page.permalink]">
+                                        <div class="card-body m-3">
+
+                                            <h4 class="fw-bold mt-3">{{ page.title }}</h4>
+                                            
+                                            <a class="link-module text-muted" [routerLink]="[page.permalink]">
+                                                Ver más 
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div> -->
+
+                                <div class="col-6 col-sm-4 col-md-6 col-lg-3 mb-3" *ngFor="let page of overview?.pages">
+                                    <div 
+                                      class="card text-center card-module h-100" 
+                                      [routerLink]="page.permalink" 
+                                      (click)="page.action ? page.action() : null"
+                                      [class.cursor-pointer]="page.action"
+                                      [class.disabled]="!page.permalink && !page.action">
+                                        <div class="card-body m-3">
+                                            <h4 class="fw-bold mt-3">{{ page.title }}</h4>
+                                            <a 
+                                            class="link-module text-muted" 
+                                            *ngIf="page.permalink" 
+                                            [routerLink]="page.permalink"
+                                            (click)="$event.stopPropagation()"
+                                            >
+                                            Ver más 
+                                            <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                            <a 
+                                            class="link-module text-muted" 
+                                            *ngIf="page.action && !page.permalink" 
+                                            (click)="page.action(); $event.stopPropagation()"
+                                            >
+                                            Ver más 
+                                            <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                  
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

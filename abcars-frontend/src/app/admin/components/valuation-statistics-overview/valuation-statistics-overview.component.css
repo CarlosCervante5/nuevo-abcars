@@ -1,0 +1,40 @@
+:host {
+  display: block;
+}
+
+.plans {
+  display: flex;
+  justify-content: space-around;
+  padding: 45px 30px;
+  box-sizing: border-box;
+  border-radius: 20px;
+  box-shadow: 0px 8px 10px 0px #d8dfeb;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.plans .plan .plan-content {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  padding: 40px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  border: 2px solid #e1e2e7;
+  border-radius: 10px;
+  -webkit-transition: -webkit-box-shadow 0.4s;
+  transition: -webkit-box-shadow 0.4s;
+  -o-transition: box-shadow 0.4s;
+  transition: box-shadow 0.4s;
+  transition: box-shadow 0.4s, -webkit-box-shadow 0.4s;
+  position: relative;
+}
+
+.plans .plan .plan-details h1 {
+  margin-bottom: 10px;
+  display: block;
+  font-size: 50px;
+  line-height: 20px;
+  color: #EEB838;
+  margin-top: 50%;
+}

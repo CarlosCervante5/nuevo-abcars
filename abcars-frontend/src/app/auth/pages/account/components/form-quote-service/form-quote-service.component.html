@@ -1,0 +1,144 @@
+<div class="container">
+    <div class="row py-3">
+        <div class="col-12">
+            <h2 class="fw-bold text-center">Agenda tu Cita</h2>
+        </div>
+    </div>
+
+    <!-- Form Quote Service -->
+    <div class="row">
+        <div class="col-12">
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                <!-- Mode -->
+                <div class="row">
+                    <div class="col-12">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Seleccionar modo de Cita</mat-label>                                
+                            <mat-select 
+                                placeholder="Cita para..."                               
+                                required>
+                                <mat-option value="vehicles" (click)="changeQuote = 'vehicles'">Mis vehículos</mat-option>                                        
+                                <mat-option value="others" (click)="changeQuote = 'others'">Otros vehículos</mat-option>                                        
+                            </mat-select>                            
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Vehicles -->
+                <div class="row" *ngIf="changeQuote == 'vehicles'">
+                    <div class="col-12">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Seleccionar de mis vehículos</mat-label>                                
+                            <mat-select 
+                                placeholder="Seleccionar su vehículo"                                
+                                required>
+                                <mat-option *ngFor="let vehicle of vehicles" (click)="setVehicle(vehicle)" value="{{ vehicle }}">{{ vehicle.carmodel.brand.name | titlecase }} - {{ vehicle.name | titlecase }}</mat-option>                                        
+                            </mat-select>
+                            <mat-hint *ngIf="brandInvalid">Seleccione el vehículo para su servicio</mat-hint>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Brand -->
+                <div class="row" *ngIf="changeQuote == 'others'">
+                    <div class="col-12">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Seleccionar una Marca</mat-label>                                
+                            <mat-select 
+                                placeholder="Seleccionar su marca"
+                                formControlName="brand_id"
+                                required>
+                                <!-- <mat-option *ngFor="let brand of brands" (click)="getModels(brand.id)" value="{{ brand.id }}">{{ brand.name | titlecase }}</mat-option>                                         -->
+                            </mat-select>
+                            <mat-hint *ngIf="brandInvalid">Seleccione la marca de su vehículo</mat-hint>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Model -->
+                <div class="row" *ngIf="changeQuote == 'others'">
+                    <div class="col-12">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Seleccionar Modelo</mat-label>                                
+                            <mat-select 
+                                placeholder="Seleccionar el modelo"
+                                formControlName="carmodel_id"
+                                required>
+                                <mat-option *ngFor="let model of models" value="{{ model.id }}">{{ model.name | titlecase }}</mat-option>                                        
+                            </mat-select>
+                            <mat-hint *ngIf="modelInvalid">Seleccione el modelo de su vehículo</mat-hint>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- VIN -->
+                <div class="row" *ngIf="changeQuote == 'others'">
+                    <div class="col-12">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Número de Serie (VIN)</mat-label>                                
+                            <input matInput
+                                type="text"
+                                placeholder="Número de serie"                
+                                formControlName="vin"  
+                                (keyup)="convertMayus($event)"    
+                                minlength="17"
+                                maxlength="17"                                
+                                required>
+                            <mat-hint *ngIf="vinInvalid">Escriba el número de serie del vehículo</mat-hint>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Service -->
+                <div class="row" *ngIf="changeQuote == 'vehicles' || changeQuote == 'others'">
+                    <div class="col-12">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Servicios</mat-label>                                
+                            <mat-select 
+                                placeholder="Seleccionar servicio"
+                                formControlName="services"
+                                required>
+                                <mat-option *ngFor="let service of services" value="{{ service.id }}">
+                                    {{ service.name | titlecase }}
+                                    <small class="text-muted">({{ service.description | titlecase }})</small>
+                                </mat-option>
+                            </mat-select>
+                            <mat-hint *ngIf="serviceInvalid">Seleccione los servicios a requerir</mat-hint>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Date Quote -->
+                <div class="row" *ngIf="changeQuote == 'vehicles' || changeQuote == 'others'">
+                    <div class="col-12">
+                        <mat-form-field class="example-full-width" appearance="outline">
+                            <mat-label>Seleccionar Fecha</mat-label>
+                            <input matInput
+                                [matDatepickerFilter]="myFilter" 
+                                [matDatepicker]="picker"
+                                [min]="minDate"
+                                [max]="maxDate"
+                                placeholder="Día / Mes / Año"                                       
+                                formControlName="quoteDate"                                      
+                                required>
+                            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                            <mat-datepicker #picker></mat-datepicker>
+                            <mat-hint *ngIf="dateInvalid">Seleccione la fecha de su cita</mat-hint>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Button Submit -->
+                <div class="row" *ngIf="changeQuote == 'vehicles' || changeQuote == 'others'">
+                    <div class="col-12 text-center">
+                        <button mat-raised-button type="submit" [disabled]="form.invalid || spinner" 
+                            class="btn abcars-background-color px-5 py-1 mt-3 mb-5 rounded-pill text-dark">                                    
+                            <span *ngIf="!spinner">AGENDAR</span>
+                            <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

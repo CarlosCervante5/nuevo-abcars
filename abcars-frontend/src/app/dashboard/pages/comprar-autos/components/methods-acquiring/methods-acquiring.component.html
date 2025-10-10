@@ -1,0 +1,25 @@
+<div class="container">
+    <div class="row">        
+        <h1 class="fs-3 fw-bold py-4 text-center mx-auto">¿Como quieres adquirir tu auto?</h1>
+        
+        <!-- Buy -->
+        <div class="col-12 col-md-6 mb-3">
+            <div class="card card-cover h-100" [routerLink]="['compra-tu-auto/acquisition/vehicle/pay/', vin]" (click)="openLink($event)">
+                <div class="d-flex flex-column h-100 p-5 pb-3 text-shadow-1">
+                    <img class="float-start w-50" src="assets/icons/credit_card_payment.svg" alt="Buy Vehicle Icon" />
+                    <h2 class="position-absolute bottom-0 end-0 fw-bold px-5">Comprarlo de Contado</h2>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Drive -->              
+        <div class="col-12 col-md-6 mb-3">
+            <div class="card card-cover h-100" [routerLink]="['/abc/financiamiento/solicitud/credit', vin]" (click)="openLink($event)">
+                <div class="d-flex flex-column h-100 p-5 pb-3 text-shadow-1">
+                    <img class="float-start w-50" src="assets/icons/city_driver.svg" alt="City Driver Icon" />
+                    <h2 class="position-absolute bottom-0 end-0 fw-bold px-5">Comprarlo a Crédito</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,47 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 py-5">
+            <app-products-customer [page]="'Incidents'"></app-products-customer>
+        </div>
+    </div>
+
+    <!-- Incidents Customer -->
+    <div class="row">
+        <div class="col-12 text-center">            
+            <h1 class="fs-2 fw-bold">Incidencias</h1>
+            <hr />
+        </div>
+    </div>
+
+    <!-- Incidents -->
+    <div class="row">
+        <div class="col-12 mt-2 mb-5">
+            <div class="row">
+                <div class="col-12 text-end">
+                    <button mat-mini-fab color="abcars-color" class="btn abcars-background-color" (click)="openBottomSheet()" matTooltip="En caso de presentar algun problema con su vehículo, envie la incidencia presentada para poder ser atendido lo antes posible." [matTooltipPosition]="'left'">
+                        <mat-icon>add</mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <div class="row" *ngIf="flag">
+                <div class="col-12 mt-3">
+                    <mat-accordion>
+                        <div class="overflow-auto" style="max-height: 450px;">
+                            <app-incidents-customer *ngFor="let incident of incidents" [incident]="incident"></app-incidents-customer>
+                        </div>
+                    </mat-accordion>
+                </div>    
+            </div>
+
+            <div class="row" *ngIf="!flag">
+                <div class="col-12 mt-3">
+                    <div class="alert alert-primary text-center" role="alert">                    
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill"/></svg>
+                        ¡Actualmente no cuenta con alguna incidencia!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

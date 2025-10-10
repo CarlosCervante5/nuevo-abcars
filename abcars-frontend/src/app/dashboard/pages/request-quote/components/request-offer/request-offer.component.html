@@ -1,0 +1,195 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <div class="text-center">
+                <h1 class="fs-2 fw-bold">¡Queremos escucharte!</h1>
+                <h5 class="fs-5 fw-light">Proporciona tus datos y la cantidad que ofreces por el auto.</h5>
+            </div>
+
+            <!-- Form -->
+            <div class="row">
+                <!-- Request Offer -->
+                <div class="col-12 mt-4">
+                    <h4 class="heading-4 horizontal_line mb-4"><span>Tipo de auto</span></h4>
+                    <div class="row">
+                        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                            <div class="col-12">
+                                <div class="row">
+                                    <!-- Bodies -->
+                                    <div class="col-12 col-md-4">
+                                        <mat-form-field appearance="outline">
+                                            <input matInput type="text" formControlName="body" required [disabled]="disabled">
+                                            <mat-label>Carrocería</mat-label>
+                                        </mat-form-field>
+                                    </div>
+                                    <!-- Brands -->
+                                    <div class="col-12 col-md-4">
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>Marca</mat-label>
+                                            <input matInput type="text" formControlName="brand" required>
+                                        </mat-form-field>
+                                    </div>
+                                    <!-- Models -->
+                                    <div class="col-12 col-md-4">
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>Modelo</mat-label>
+                                            <input matInput type="text" formControlName="model" required>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row-12">
+                                <div class="row">
+                                
+                                    <div class="col-sm-12 col-md-12 col-lg-12 col-xl-7 mb-3">
+                                        <div #myModal class="modal">
+                                            <div class="modal-container position-relative">
+                                                <img class="modal-content" #img01>
+                                                <span class="btnClose" (click)="closeModal('yes')">
+                                                    <i class="fas fa-times-circle icon"></i>
+                                                </span>
+                                                <div class="texto"> 
+                                                    <div #caption></div> 
+                                                </div> 
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <swiper-container class="container-big" #mainSwiper slides-per-view="1" loop="true"  zoom="true">
+                                                    <swiper-slide class="slider-c" *ngFor="let image of imagesForSlider">
+                                                        <div class="slide-big" (click)="showModal(image.path)">
+                                                            <img class="image_big" src="{{image.path}}" alt="">
+                                                        </div>
+                                                    </swiper-slide>
+                                                </swiper-container>
+                                            </div>
+                                            <div class="col-lg-12 mt-3">
+                                                <swiper-container  #thumbsSwiper slides-per-view="4" loop="true"  navigation="true" zoom="true" >
+                                                    <swiper-slide class="slider-c3" *ngFor="let image of vehicle.images; let i = index">
+                                                        <div class="slide-small" (click)="changeImageSelected (image.service_image_url, i)">
+                                                            <img class="img-small" src="{{image.service_image_url}}" alt="">
+                                                        </div>
+                                                    </swiper-slide>
+                                                </swiper-container>
+                                            </div>
+                                        </div>
+                                    </div>
+                                 
+                                    <div class="col-sm-12 col-md-12 col-lg-12 col-xl-5 mb-3 mt-5">
+                                        <div #divZoom id="div-zoom" class="div-zoom-no-active"></div>
+                                        <h1>{{ vehicle != undefined ? (vehicle.name) : '' }}</h1>
+                                        <div class="row">
+                                            <div class="row" *ngIf="!priceOffer">
+                                                <div class="col-12">
+                                                    <p class="fw-light">Compra por:</p>
+                                                    <span class="fs-4 fw-bold abcars-color">
+                                                        <!-- ${{ vehicle != undefined ? (vehicle.list_price | number:'.2-2') : '' }} -->
+                                                         $xxxxxx
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="row" *ngIf="priceOffer">
+                                                <div class="col-12">
+                                                    <p class="fw-light">Compra por:</p>
+                                                    <span class="fs-4 fw-bold abcars-offer"><del>
+                                                        <!-- ${{ vehicle != undefined ? (vehicle.list_price | number:'.2-2') : '' }} -->
+                                                        $xxxxxx
+                                                    </del></span>
+                                                </div>
+                                            </div>
+
+                                            <div class="row" *ngIf="priceOffer">
+                                                <div class="col-12">
+                                                    <p class="fw-light">Precio de oferta:</p>
+                                                    <span class="fs-4 fw-bold abcars-color">
+                                                        <!-- ${{ vehicle != undefined ? (vehicle.offer_price | number:'.2-2') : '' }} -->
+                                                        $xxxxxx
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <h6 class="fw-bold fs-5 mt-3 mb-2">¡Oportunidad!</h6>
+                                                <p style="margin: 0 0 0px" *ngFor="let description of descriptions"> {{ description }}</p> 
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h4 class="heading-4 horizontal_line mb-4"><span>Tus Datos</span></h4>
+                                <div class="row">
+                                    <div class="col-12">
+                                    
+                                        <div class="row">
+                                            <div class="col-12 col-md-4">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Nombre(s)</mat-label>
+                                                    <input matInput type="text" placeholder="Robert" formControlName="name" required>
+                                                    <mat-hint *ngIf="nameInvalid">Complete su nombre(s).</mat-hint>
+                                                </mat-form-field>
+                                            </div>
+
+                                            <div class="col-12 col-md-4">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Apellidos</mat-label>
+                                                    <input matInput type="text" placeholder="Downey" formControlName="last_name" required>
+                                                    <mat-hint *ngIf="lastnameInvalid">Complete sus apellidos.</mat-hint>
+                                                </mat-form-field>
+                                            </div>
+
+                                            <div class="col-12 col-md-4">                                        
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Correo Electrónico</mat-label>
+                                                    <input matInput type="email" placeholder="a@b.c" formControlName="email" required>
+                                                    <mat-hint *ngIf="emailInvalid">Ingrese un correo electrónico válido.</mat-hint>
+                                                </mat-form-field>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-12 col-md-6">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Número de Teléfono</mat-label>
+                                                    <input matInput type="tel" placeholder="1234567890" #phone (keyup)="maxLengthCheck(phone)" maxlength="10" formControlName="phone" required>     
+                                                    <mat-hint *ngIf="phoneInvalid">Ingrese un número telefónico válido.</mat-hint>                                                                 
+                                                </mat-form-field> 
+                                            </div>
+
+                                            <div class="col-12 col-md-6 mb-2">
+                                                <mat-form-field appearance="outline">
+                                                    <mat-label>Haz tu oferta:</mat-label>
+                                                    <input matInput type="text" placeholder="Ingrese el monto sin signos, sin puntos, sin comas, sin espacios." formControlName="clientPriceOffer" required>     
+                                                    <mat-hint *ngIf="clientPriceOfferInvalid">Ingrese el monto sin signos, sin puntos, sin comas, sin espacios.</mat-hint>
+                                                </mat-form-field>
+                                            </div>
+
+                                            <div class="col-12 text-end">
+                                                <mat-checkbox formControlName="checkbox" required>
+                                                    Acepto <a class="fw-bold abcars-color-hover text-decoration-none" [routerLink]="['/externals/privacidad-de-uso']">Aviso</a>,  
+                                                    <a class="fw-bold abcars-color-hover text-decoration-none" [routerLink]="['/externals/terminos-y-condiciones']">Términos y Condiciones</a>.
+                                                </mat-checkbox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 text-end">
+                                <button mat-button type="submit" class="btn abcars-background-color rounded-pill text-dark mx-2"
+                                    [disabled]="form.invalid" spinner>
+                                    <span *ngIf="!spinner">Enviar</span>
+                                    <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

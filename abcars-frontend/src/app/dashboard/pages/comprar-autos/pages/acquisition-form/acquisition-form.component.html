@@ -1,0 +1,252 @@
+<div class="container">
+    <!-- Breadcrumb -->
+    <div class="row">
+        <div class="col-10 col-md-11 mt-5">
+            <nav aria-label="breadcrumb">
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a class="fw-bold text-dark text-decoration-none" [routerLink]="['/compra-tu-auto']">
+                            <i class="fas fa-arrow-left"></i> Volver a resultados
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item" aria-current="page">
+                        <!-- <p class="text-truncate" [routerLink]="['/compra-tu-auto/detail/', vehicle.vin]">Detalles del Vehículo</p> -->
+                    </li>
+
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <p class="text-truncate">Apartar</p>
+                    </li>
+                </ul>                
+            </nav>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="row">
+        <div class="col-12 mx-auto">
+            <div class="text-center">
+                <h1 class="fs-2 fw-bold">Apartar Vehículo</h1>
+                <p class="fs-5 fw-light">Proporciona la información requerida para continuar con tu proceso</p>
+            </div>  
+        </div>
+    </div>
+    
+    <!-- Form and Vehicle Details -->
+    <div class="row mt-5">
+        <!-- Vehicle Details -->
+        <div class="col-12 col-md-12 col-xl-6">
+        
+            <!-- Picture Main -->
+            <div class="row">
+                <div class="col-12">
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Client -->
+        <div class="col-12 col-md-12 col-xl-6 mt-3">
+            <h2 class="fw-bold">Información de Contacto</h2>
+            
+            <!-- Form Client -->
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                <!-- Name, Father Lastname, Mother Lastname -->
+                <div class="row mb-2">
+                    <!-- Name -->
+                    <div class="col-12 col-md-6">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Nombre(s)</mat-label>
+                            <input matInput type="text" placeholder="Louis" formControlName="name" required>     
+                            <mat-hint *ngIf="nameInvalid">Complete su nombre(s)</mat-hint>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Father and Mother Lastname -->
+                    <div class="col-12 col-md-6">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Apellidos</mat-label>
+                            <input matInput type="text" placeholder="Example" formControlName="surname" required> 
+                            <mat-hint *ngIf="surnameInvalid">Complete sus apellidos</mat-hint>                                    
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- PhoneOne and PhoneTwo -->
+                <div class="row mb-2">
+                    <!-- Phone One -->
+                    <div class="col-12 col-md-6">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Número de Teléfono Principal</mat-label>
+                            <input matInput type="tel" placeholder="1234567890" formControlName="phoneOne" (keyup)="maxLengthCheck(rewardInput)" maxlength="10" required>
+                            <mat-hint *ngIf="phoneOneInvalid">Ingrese un número telefónico</mat-hint>                            
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Phone Two -->
+                    <div class="col-12 col-md-6">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Número de Teléfono Secundario</mat-label>
+                            <input matInput type="tel" placeholder="1234567890" formControlName="phoneTwo" (keyup)="maxLengthCheck(rewardInput)" maxlength="10" required>     
+                            <mat-hint *ngIf="phoneTwoInvalid">Ingrese un número telefónico valido</mat-hint>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Email and Gender -->
+                <div class="row mb-2">
+                    <!-- Email -->
+                    <div class="col-12 col-md-6">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Correo Electrónico</mat-label>
+                            <input matInput type="email" placeholder="a@b.c" formControlName="email" required>
+                            <mat-hint *ngIf="emailInvalid">Ingrese un correo electronico valido</mat-hint>                                                                 
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="col-12 col-md-6">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Género</mat-label>
+                            <mat-select matInput formControlName="gender" required>
+                                <mat-option value="f">Mujer</mat-option>
+                                <mat-option value="m">Hombre</mat-option>
+                            </mat-select>                                                                      
+                            <mat-hint *ngIf="genderInvalid">Seleccione su género</mat-hint>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Curp -->
+                <div class="row mb-2">
+                    <div class="col-12">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Clave Única de Registro de Población (CURP)</mat-label>
+                            <input matInput type="text" placeholder="ABC123" formControlName="curp" (keyup)="convertMayus($event)" required>
+                            <mat-hint *ngIf="curp">Ingrese correctamente su Clave Única de Registro de Población</mat-hint>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Reference Rewards -->
+                <div class="row mb-3">
+                    <div class="col-6 text-start">
+                        <p class="fw-light">¿Tienes un cupón de recomendación?</p>
+                        <mat-form-field appearance="outline">
+                            <mat-label>Cupón de Rewards</mat-label>
+                            <input matInput type="text" placeholder="D3m0123" formControlName="rewards" #rewardInput (change)="rewardValidate(rewardInput)" (keyup)="maxLengthCheck(rewardInput)" maxlength="8">
+                            <mat-hint class="text-danger" *ngIf="rewardsFlag === 'equals'">¡Opps, al parecer no puedes auto referenciarte a ti mismo!</mat-hint>
+                            <mat-hint class="text-success" *ngIf="rewardsFlag === 'diff'">Código de Rewards valido.</mat-hint>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="row">
+                    <div class="col-12 text-end">
+                        <mat-checkbox formControlName="checkbox" required>
+                            Acepto <a class="fw-bold abcars-color-hover text-decoration-none" [routerLink]="['/externals/privacidad-de-uso']">Aviso</a>, 
+                            <a class="fw-bold abcars-color-hover text-decoration-none" [routerLink]="['/externals/terminos-y-condiciones']">Términos y Condiciones</a>.
+                        </mat-checkbox>  
+                    </div>                    
+                </div>
+
+                <!-- Button Submit -->
+                <div class="row">
+                    <div class="col-12 text-end">
+                        <button mat-raised-button type="submit" [disabled]="form.invalid || spinner"
+                            class="btn abcars-background-color px-5 py-2 mt-4 rounded-pill text-dark">
+                            <span *ngIf="!spinner">CONTINUAR</span>
+                            <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        </button> 
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>  
+    
+    <!-- Features -->
+    <div class="row">
+        <div class="col-12 mt-4 mb-4">
+            <h2 class="fw-bold fs-3 mb-3">Características</h2>
+
+            <div class="row">
+                <div class="container">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-2 g-lg-3">
+                        <!-- <div class="col">                            
+                            <div class="details-bg">
+                                <img class="rounded-circle" src="assets/icons/abcars-icons/details-vehicle/marca.svg" width="32" height="32" alt="Icon Brand Vehicle" />
+                                <span class="detail-text">Marca</span>
+                                <span class="detail-content fw-bold">{{ vehicle != undefined ? (vehicle.carmodel.brand.name | titlecase) : '' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="details-bg">                                
+                                <img class="rounded-circle" src="assets/icons/abcars-icons/details-vehicle/transmision.svg" width="32" height="32" alt="Icon Transmission Vehicle" />
+                                <span class="detail-text">Transmisión</span>
+                                <span class="detail-content fw-bold">{{ vehicle != undefined ? (vehicle.transmission | titlecase) : '' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="details-bg">                                
+                                <img class="rounded-circle" src="assets/icons/abcars-icons/details-vehicle/kilometraje.svg" width="32" height="32" alt="Icon Mileage Vehicle" />
+                                <span class="detail-text">Kilometraje</span>
+                                <span class="detail-content fw-bold">{{ vehicle != undefined ? (vehicle.km | number) : '' }} km</span>
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="details-bg">                                
+                                <img class="rounded-circle" src="assets/icons/abcars-icons/details-vehicle/year.svg" width="32" height="32" alt="Icon Year Vehicle" />
+                                <span class="detail-text">Año</span>
+                                <span class="detail-content fw-bold">{{ vehicle != undefined ? (vehicle.yearModel) : '' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="details-bg">                                
+                                <img class="rounded-circle" src="assets/icons/abcars-icons/details-vehicle/color.svg" width="32" height="32" alt="Icon Color Vehicle" />
+                                <span class="detail-text">Color Interno</span>
+                                <span class="detail-content fw-bold">{{ vehicle != undefined ? (vehicle.colorInt | titlecase) : '' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="details-bg">                                
+                                <img class="rounded-circle" src="assets/icons/abcars-icons/details-vehicle/color.svg" width="32" height="32" alt="Icon Color Vehicle" />
+                                <span class="detail-text">Color Externo</span>
+                                <span class="detail-content fw-bold">{{ vehicle != undefined ? (vehicle.colorExt | titlecase) : '' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="details-bg">                                
+                                <img class="rounded-circle" src="assets/icons/abcars-icons/details-vehicle/cylinders.svg" width="32" height="32" alt="Icon Cylinders Vehicle" />
+                                <span class="detail-text">Cilindros</span>
+                                <span class="detail-content fw-bold">{{ vehicle != undefined ? (vehicle.cylinders) : '' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="details-bg">                                
+                                <img class="rounded-circle" src="assets/icons/abcars-icons/details-vehicle/ubicacion.svg" width="32" height="32" alt="Icon Location Vehicle" />
+                                <span class="detail-text">Locación</span>
+                                <span class="detail-content fw-bold">{{ vehicle != undefined ? (vehicle.branch.state.name | titlecase) : '' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="details-bg">                                
+                                <img class="rounded-circle" src="assets/icons/abcars-icons/details-vehicle/carline.svg" width="32" height="32" alt="Icon Carline Vehicle" />
+                                <span class="detail-text">Carroceria</span>
+                                <span class="detail-content fw-bold">{{ vehicle != undefined ? (vehicle.vehiclebody.name | titlecase) : '' }}</span>
+                            </div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

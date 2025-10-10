@@ -1,0 +1,102 @@
+<div class="container">
+    <!-- Header -->
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <div class="position-relative">
+                <div class="position-absolute top-0 start-0">
+                    <h1 class="fs-4 fw-bold text-truncate">Hola, <span class="fw-light">{{ name | titlecase }}</span> </h1>
+                </div>
+
+                <div class="position-absolute top-0 end-0 d-flex gap-3">
+                    <span class="fw-italic">
+                        <i class="fas fa-cog"></i>
+                        <a class="text-decoration-none text-dark" [routerLink]="['/auth/mi-cuenta/ajustes']"> Perfil </a>  
+                    </span>
+                    <span class="fw-italic">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <a class="text-decoration-none text-dark" style="cursor: pointer;" (click)="logout()"> Cerrar sesión </a>  
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blocks User -->
+    <div class="row">
+        <div class="col-12 mt-2 mb-2">
+            <div class="row">
+                <div class="col-6 col-md-3 col-lg-2 mb-3">
+                    <div class="card h-100 shadow" [routerLink]="['/auth/mi-cuenta/autos']">
+                        <h4 class="card-title fw-bold text-truncate fs-5 m-3">Mis autos</h4>
+                        <div class="card-body">
+                            <img class="img-fluid mx-auto d-block w-100 mt-3 mb-3 mx-auto" src="assets/icons/abcars-icons/profile-icon-2.png" alt="Vehicles Icon">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-3 col-lg-2 mb-3">
+                    <div class="card h-100 shadow" [routerLink]="['/auth/mi-cuenta/servicios']">
+                        <h4 class="card-title fw-bold text-truncate fs-5 m-3">Servicios</h4>
+                        <div class="card-body">
+                            <img class="img-fluid mx-auto d-block w-100 mt-3 mb-3 mx-auto" src="assets/icons/abcars-icons/profile-icon-3.png" alt="Services Icon">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-3 col-lg-2 mb-3">
+                    <div class="card h-100 shadow" [routerLink]="['/auth/mi-cuenta/incidencias']">
+                        <h4 class="card-title fw-bold text-truncate fs-5 m-3">Incidencias</h4>
+                        <div class="card-body">
+                            <img class="img-fluid mx-auto d-block w-100 mt-3 mb-3 mx-auto" src="assets/icons/abcars-icons/profile-icon-4.png" alt="Incidents Icon">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-3 col-lg-2 mb-3">
+                    <div class="card h-100 shadow" [routerLink]="['/auth/mi-cuenta/asistencias']">
+                        <h4 class="card-title fw-bold text-truncate fs-5 m-3">Asistencia</h4>
+                        <div class="card-body">
+                            <img class="img-fluid mx-auto d-block w-100 mt-3 mb-3 mx-auto" src="assets/icons/abcars-icons/profile-icon-1.png" alt="Assistance Icon">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-3 col-lg-2 mb-3">
+                    <div class="card h-100 shadow" [routerLink]="['/auth/mi-cuenta/financiamientos']">
+                        <h4 class="card-title fw-bold text-truncate fs-5 m-3">Financiamiento</h4>
+                        <div class="card-body">
+                            <img class="img-fluid mx-auto d-block w-100 mt-3 mb-3 mx-auto" src="assets/icons/abcars-icons/profile-icon-5.png" alt="Financing Icon">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-3 col-lg-2 mb-3">
+                    <div class="card h-100 shadow" [routerLink]="['/auth/mi-cuenta/apartados']">
+                        <h4 class="card-title fw-bold text-truncate fs-5 m-3">Apartados</h4>
+                        <div class="card-body">
+                            <img class="img-fluid mx-auto d-block w-100 mt-3 mb-3 mx-auto" src="assets/icons/abcars-icons/profile-icon-6.png" alt="Reserved Icon">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AB Rewards -->
+    <div class="row">
+        <div class="col-12 mb-5">
+            <div class="card rewards-background-color">                
+                <div class="card-body body-rewards" [routerLink]="['/auth/mi-cuenta/recompensas']">                    
+                    <h4 class="card-title fs-3 fw-bold mt-5 text-start">Rewards</h4>
+
+                    <p class="fs-5 fw-light text-start">Descubre todos los beneficios al ser cliente AB <br> y recomendar a otras personas.</p>
+                    <p class="text-start mt-5">
+                        <button mat-button class="btn btn-rewards text-white rounded-pill px-4">
+                            Ver más
+                        </button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

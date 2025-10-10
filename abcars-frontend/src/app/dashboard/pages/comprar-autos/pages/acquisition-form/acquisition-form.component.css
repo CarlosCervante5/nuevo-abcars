@@ -1,0 +1,23 @@
+mat-form-field {
+    width: 100%;
+}
+
+::ng-deep .mat-checkbox-checked.mat-accent .mat-checkbox-background, .mat-checkbox-indeterminate.mat-accent .mat-checkbox-background {
+    background-color: #383838 !important;
+}
+
+.details-bg {
+    align-items: center;
+    background: rgb(246, 246, 246);
+    border-radius: 8px;    
+    display: flex;  
+    padding: 15px;
+}
+
+.detail-text {
+    padding: 0px 8px;
+}
+
+.detail-content {
+    margin-left: auto;
+}
