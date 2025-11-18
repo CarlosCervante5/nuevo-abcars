@@ -1,14 +1,16 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HomeNavComponent } from '../../../shared/components/home-nav/home-nav.component';
 import { ModernFooterComponent } from '../../../shared/components/modern-footer/modern-footer.component';
+import { StregaService } from '../../../shared/services/strega.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-technical-service',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, HomeNavComponent, ModernFooterComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, HomeNavComponent, ModernFooterComponent],
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Navbar -->
@@ -64,11 +66,11 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
                       </div>
                       <div class="flex-1">
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ service.name }}</h3>
-                        <p class="text-gray-600 text-sm mb-3">{{ service.description }}</p>
-                        <div class="flex items-center justify-between">
+                        <p class="text-gray-600 text-sm">{{ service.description }}</p>
+                        <!-- <div class="flex items-center justify-between">
                           <span class="text-lg font-bold text-red-600">MXN {{ service.price | number }}</span>
                           <span class="text-sm text-gray-500">{{ service.duration }}</span>
-                        </div>
+                        </div> -->
                       </div>
                     </div>
                   </div>
@@ -109,10 +111,10 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
                         Revisión de luces
                       </li>
                     </ul>
-                    <div class="mt-4 flex items-center justify-between">
+                    <!-- <div class="mt-4 flex items-center justify-between">
                       <span class="text-lg font-bold text-red-600">MXN 1,200</span>
                       <span class="text-sm text-gray-500">2 horas</span>
-                    </div>
+                    </div> -->
                   </div>
                   
                   <div class="border-l-4 border-blue-500 pl-6">
@@ -144,10 +146,10 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
                         Revisión de sistema eléctrico
                       </li>
                     </ul>
-                    <div class="mt-4 flex items-center justify-between">
+                    <!-- <div class="mt-4 flex items-center justify-between">
                       <span class="text-lg font-bold text-red-600">MXN 2,500</span>
                       <span class="text-sm text-gray-500">4 horas</span>
-                    </div>
+                    </div> -->
                   </div>
                   
                   <div class="border-l-4 border-green-500 pl-6">
@@ -179,10 +181,10 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
                         Revisión de transmisión
                       </li>
                     </ul>
-                    <div class="mt-4 flex items-center justify-between">
+                    <!-- <div class="mt-4 flex items-center justify-between">
                       <span class="text-lg font-bold text-red-600">MXN 4,500</span>
                       <span class="text-sm text-gray-500">6 horas</span>
-                    </div>
+                    </div> -->
                   </div>
                 </div>
               </div>
@@ -204,11 +206,11 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
                         <p class="text-sm text-gray-600">Revisión completa del sistema</p>
                       </div>
                     </div>
-                    <p class="text-gray-600 text-sm mb-4">Análisis completo de todos los sistemas del vehículo usando tecnología de punta.</p>
-                    <div class="flex items-center justify-between">
+                    <p class="text-gray-600 text-sm mb-2">Análisis completo de todos los sistemas del vehículo usando tecnología de punta.</p>
+                    <!-- <div class="flex items-center justify-between">
                       <span class="text-lg font-bold text-blue-600">MXN 800</span>
                       <span class="text-sm text-gray-500">1 hora</span>
-                    </div>
+                    </div> -->
                   </div>
                   
                   <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6">
@@ -223,11 +225,11 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
                         <p class="text-sm text-gray-600">Revisión de sistema específico</p>
                       </div>
                     </div>
-                    <p class="text-gray-600 text-sm mb-4">Diagnóstico enfocado en un sistema específico del vehículo.</p>
-                    <div class="flex items-center justify-between">
+                    <p class="text-gray-600 text-sm mb-2">Diagnóstico enfocado en un sistema específico del vehículo.</p>
+                    <!-- <div class="flex items-center justify-between">
                       <span class="text-lg font-bold text-green-600">MXN 500</span>
                       <span class="text-sm text-gray-500">30 min</span>
-                    </div>
+                    </div> -->
                   </div>
                 </div>
               </div>
@@ -240,59 +242,106 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
               <div class="bg-white rounded-3xl p-6 shadow-sm sticky top-8">
                 <h3 class="text-xl font-bold text-gray-900 mb-4">Agendar Servicio</h3>
                 
-                <form class="space-y-4">
+                <form [formGroup]="serviceForm" (ngSubmit)="onSubmitService()" class="space-y-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre completo *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre *</label>
                     <input 
                       type="text" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      placeholder="Tu nombre completo"
-                      required
+                      formControlName="name"
+                      class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      [class.border-gray-300]="!serviceForm.get('name')?.invalid || !serviceForm.get('name')?.touched"
+                      [class.border-red-500]="serviceForm.get('name')?.invalid && serviceForm.get('name')?.touched"
+                      placeholder="Tu nombre"
                     >
+                    <p *ngIf="serviceForm.get('name')?.invalid && serviceForm.get('name')?.touched" class="text-red-500 text-xs mt-1">
+                      El nombre es requerido
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Apellidos *</label>
+                    <input 
+                      type="text" 
+                      formControlName="last_name"
+                      class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      [class.border-gray-300]="!serviceForm.get('last_name')?.invalid || !serviceForm.get('last_name')?.touched"
+                      [class.border-red-500]="serviceForm.get('last_name')?.invalid && serviceForm.get('last_name')?.touched"
+                      placeholder="Tus apellidos"
+                    >
+                    <p *ngIf="serviceForm.get('last_name')?.invalid && serviceForm.get('last_name')?.touched" class="text-red-500 text-xs mt-1">
+                      Los apellidos son requeridos
+                    </p>
                   </div>
                   
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
                     <input 
                       type="tel" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      placeholder="Tu número de teléfono"
-                      required
+                      formControlName="phone"
+                      maxlength="10"
+                      pattern="[0-9]{10}"
+                      inputmode="numeric"
+                      class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      [class.border-gray-300]="!serviceForm.get('phone')?.invalid || !serviceForm.get('phone')?.touched"
+                      [class.border-red-500]="serviceForm.get('phone')?.invalid && serviceForm.get('phone')?.touched"
+                      placeholder="10 dígitos"
                     >
+                    <p *ngIf="serviceForm.get('phone')?.invalid && serviceForm.get('phone')?.touched" class="text-red-500 text-xs mt-1">
+                      <span *ngIf="serviceForm.get('phone')?.errors?.['required']">El teléfono es requerido</span>
+                      <span *ngIf="serviceForm.get('phone')?.errors?.['pattern'] && !serviceForm.get('phone')?.errors?.['required']">El teléfono debe tener exactamente 10 dígitos</span>
+                    </p>
                   </div>
                   
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                     <input 
                       type="email" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      formControlName="email"
+                      class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      [class.border-gray-300]="!serviceForm.get('email')?.invalid || !serviceForm.get('email')?.touched"
+                      [class.border-red-500]="serviceForm.get('email')?.invalid && serviceForm.get('email')?.touched"
                       placeholder="tu@email.com"
-                      required
                     >
+                    <p *ngIf="serviceForm.get('email')?.invalid && serviceForm.get('email')?.touched" class="text-red-500 text-xs mt-1">
+                      <span *ngIf="serviceForm.get('email')?.errors?.['required']">El email es requerido</span>
+                      <span *ngIf="serviceForm.get('email')?.errors?.['email'] && !serviceForm.get('email')?.errors?.['required']">El email no es válido</span>
+                    </p>
                   </div>
                   
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de servicio *</label>
-                    <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" required>
+                    <select 
+                      formControlName="serviceType"
+                      class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      [class.border-gray-300]="!serviceForm.get('serviceType')?.invalid || !serviceForm.get('serviceType')?.touched"
+                      [class.border-red-500]="serviceForm.get('serviceType')?.invalid && serviceForm.get('serviceType')?.touched"
+                    >
                       <option value="">Selecciona servicio</option>
                       <option value="mantenimiento">Mantenimiento preventivo</option>
                       <option value="diagnostico">Diagnóstico computarizado</option>
                       <option value="reparacion">Reparación</option>
                       <option value="otro">Otro</option>
                     </select>
+                    <p *ngIf="serviceForm.get('serviceType')?.invalid && serviceForm.get('serviceType')?.touched" class="text-red-500 text-xs mt-1">
+                      El tipo de servicio es requerido
+                    </p>
                   </div>
                   
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Fecha preferida</label>
                     <input 
                       type="date" 
+                      formControlName="preferredDate"
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     >
                   </div>
                   
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Hora preferida</label>
-                    <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                    <select 
+                      formControlName="preferredTime"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    >
                       <option value="">Selecciona hora</option>
                       <option value="09:00">9:00 AM</option>
                       <option value="10:00">10:00 AM</option>
@@ -302,14 +351,18 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
                       <option value="14:00">2:00 PM</option>
                       <option value="15:00">3:00 PM</option>
                       <option value="16:00">4:00 PM</option>
+                      <option value="17:00">5:00 PM</option>
+                      <option value="18:00">6:00 PM</option>
                     </select>
                   </div>
                   
                   <button 
                     type="submit"
-                    class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl transition-colors"
+                    [disabled]="isSubmitting"
+                    class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
-                    Agendar Servicio
+                    <span *ngIf="!isSubmitting">Agendar Servicio</span>
+                    <span *ngIf="isSubmitting">Enviando...</span>
                   </button>
                 </form>
               </div>
@@ -330,6 +383,114 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
   `]
 })
 export class TechnicalServiceComponent {
+  serviceForm: FormGroup;
+  isSubmitting: boolean = false;
+
+  constructor(
+    private fb: FormBuilder,
+    private stregaService: StregaService
+  ) {
+    this.serviceForm = this.fb.group({
+      name: ['', Validators.required],
+      last_name: ['', Validators.required],
+      phone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      email: ['', [Validators.required, Validators.email]],
+      serviceType: ['', Validators.required],
+      preferredDate: [''],
+      preferredTime: ['']
+    });
+  }
+
+  buildQComments(serviceType: string, preferredDate: string, preferredTime: string): string {
+    const serviceTypeText = serviceType === 'mantenimiento' ? 'Mantenimiento preventivo' :
+                            serviceType === 'diagnostico' ? 'Diagnóstico computarizado' :
+                            serviceType === 'reparacion' ? 'Reparación' :
+                            serviceType === 'otro' ? 'Otro' : 'No especificado';
+
+    // Parsear fecha manualmente para evitar problemas de zona horaria
+    let dateFormatted = 'No especificada';
+    if (preferredDate) {
+      const [year, month, day] = preferredDate.split('-');
+      dateFormatted = `${day}/${month}/${year}`;
+    }
+
+    const timeFormatted = preferredTime || 'No especificada';
+
+    return `Tipo de servicio: ${serviceTypeText}, Fecha preferida: ${dateFormatted}, Hora preferida: ${timeFormatted}`;
+  }
+
+  onSubmitService() {
+    if (this.serviceForm.invalid || this.isSubmitting) {
+      // Marcar todos los campos como touched para mostrar errores
+      Object.keys(this.serviceForm.controls).forEach(key => {
+        this.serviceForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    this.isSubmitting = true;
+
+    // Obtener valores para q_comments (NO se envían en formData)
+    const serviceType = this.serviceForm.value.serviceType;
+    const preferredDate = this.serviceForm.value.preferredDate;
+    const preferredTime = this.serviceForm.value.preferredTime;
+
+    // Construir q_comments
+    const qComments = this.buildQComments(serviceType, preferredDate, preferredTime);
+
+    // Preparar datos con campos adicionales para enviar (EXCLUYENDO serviceType, preferredDate, preferredTime)
+    const formData = {
+      name: this.serviceForm.value.name,
+      last_name: this.serviceForm.value.last_name,
+      phone: this.serviceForm.value.phone,
+      email: this.serviceForm.value.email,
+      q_model_interest: '',
+      q_brand_interest: '',
+      q_initial_investment: '',
+      q_time_to_buy: '',
+      q_comments: qComments,
+      opportunity_type: 'lead',
+      dealership_name: 'Chevrolet Serdán',
+      campaign_name: 'Página ABCars',
+      campaign_channel: 'WEB ABCars',
+      campaign_source: 'Solicitud de agendamiento de servicio técnico'
+    };
+
+    // Crear FormGroup temporal solo para cumplir con la firma del servicio
+    const formToSend = this.fb.group(formData);
+
+    this.stregaService.createLead(formToSend).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+        
+        // Limpiar formulario inmediatamente después del éxito
+        this.serviceForm.reset();
+        
+        Swal.fire({
+          icon: 'success',
+          title: '¡Solicitud enviada!',
+          text: 'Tu solicitud de agendamiento de servicio técnico ha sido enviada exitosamente. Nos pondremos en contacto contigo pronto.',
+          showConfirmButton: true,
+          confirmButtonColor: '#dc2626',
+          timer: 5000
+        });
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        
+        console.error('Error al enviar solicitud:', error);
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un problema al enviar tu solicitud. Por favor, intenta de nuevo más tarde.',
+          showConfirmButton: true,
+          confirmButtonColor: '#ef4444'
+        });
+      }
+    });
+  }
+
   services = [
     {
       name: 'Cambio de aceite',

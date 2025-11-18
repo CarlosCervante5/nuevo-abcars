@@ -93,8 +93,8 @@ interface MediaItem {
                 <!-- Imagen -->
                 <img 
                   *ngIf="mediaItems[selectedMediaIndex]?.type === 'image'"
-                  [src]="mediaItems[selectedMediaIndex]?.url" 
-                  [alt]="mediaItems[selectedMediaIndex]?.title"
+                  [src]="mediaItems[selectedMediaIndex].url" 
+                  [alt]="mediaItems[selectedMediaIndex].title"
                   class="w-full h-96 lg:h-[500px] object-cover cursor-pointer transition-all duration-300 hover:scale-105 gallery-main-image gallery-transition"
                   (click)="openLightbox()"
                 />
@@ -106,7 +106,7 @@ interface MediaItem {
                   (click)="openLightbox()"
                 >
                   <video 
-                    [src]="mediaItems[selectedMediaIndex]?.url"
+                    [src]="mediaItems[selectedMediaIndex].url"
                     class="w-full h-full object-cover"
                     controls
                     preload="metadata"
@@ -130,7 +130,7 @@ interface MediaItem {
                   (click)="openLightbox()"
                 >
                   <iframe 
-                    [src]="mediaItems[selectedMediaIndex]?.url"
+                    [src]="mediaItems[selectedMediaIndex].url"
                     class="w-full h-full border-0"
                     allowfullscreen
                     loading="lazy"
@@ -164,8 +164,8 @@ interface MediaItem {
                 <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
                   {{ selectedMediaIndex + 1 }} / {{ mediaItems.length }}
                   <span class="ml-2 text-xs opacity-75">
-                    {{ mediaItems[selectedMediaIndex]?.type === 'image' ? 'Imagen' : 
-                       mediaItems[selectedMediaIndex]?.type === 'video' ? 'Video' : 'Vista 360°' }}
+                    {{ mediaItems[selectedMediaIndex].type === 'image' ? 'Imagen' : 
+                       mediaItems[selectedMediaIndex].type === 'video' ? 'Video' : 'Vista 360°' }}
                   </span>
                 </div>
 
@@ -1002,8 +1002,8 @@ interface MediaItem {
         <!-- Imagen del lightbox -->
         <img 
           *ngIf="mediaItems[selectedMediaIndex]?.type === 'image'"
-          [src]="mediaItems[selectedMediaIndex]?.url" 
-          [alt]="mediaItems[selectedMediaIndex]?.title"
+          [src]="mediaItems[selectedMediaIndex].url" 
+          [alt]="mediaItems[selectedMediaIndex].title"
           class="max-w-full max-h-full object-contain"
           (click)="$event.stopPropagation()"
         />
@@ -1015,7 +1015,7 @@ interface MediaItem {
           (click)="$event.stopPropagation()"
         >
           <video 
-            [src]="mediaItems[selectedMediaIndex]?.url"
+            [src]="mediaItems[selectedMediaIndex].url"
             class="max-w-full max-h-full object-contain"
             controls
             autoplay
@@ -1031,7 +1031,7 @@ interface MediaItem {
           (click)="$event.stopPropagation()"
         >
           <iframe 
-            [src]="mediaItems[selectedMediaIndex]?.url"
+            [src]="mediaItems[selectedMediaIndex].url"
             class="w-full h-full border-0"
             allowfullscreen
           ></iframe>
@@ -1070,8 +1070,8 @@ interface MediaItem {
         <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-lg backdrop-blur-sm">
           {{ selectedMediaIndex + 1 }} / {{ mediaItems.length }}
           <span class="ml-2 text-sm opacity-75">
-            {{ mediaItems[selectedMediaIndex]?.type === 'image' ? 'Imagen' : 
-               mediaItems[selectedMediaIndex]?.type === 'video' ? 'Video' : 'Vista 360°' }}
+            {{ mediaItems[selectedMediaIndex].type === 'image' ? 'Imagen' : 
+               mediaItems[selectedMediaIndex].type === 'video' ? 'Video' : 'Vista 360°' }}
           </span>
         </div>
 

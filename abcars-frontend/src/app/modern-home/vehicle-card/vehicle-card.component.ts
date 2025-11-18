@@ -107,11 +107,32 @@ export class VehicleCardComponent {
   }
 
   getContadoPrice(): number {
-    return Math.round(this.vehicle.price * 0.95); // 5% descuento por contado
+    return this.vehicle.price;
   }
 
   getMonthlyPayment(): number {
-    return Math.round(this.vehicle.price * 0.08); // 8% anual / 12 meses
+    // Parámetros de financiamiento
+    const downPaymentPercentage = 10; // 10% de enganche
+    const annualInterestRate = 12.5; // 12.5% anual
+    const termMonths = 60; // 60 meses
+    
+    // Calcular monto a financiar
+    const downPayment = (this.vehicle.price * downPaymentPercentage) / 100;
+    const principal = this.vehicle.price - downPayment;
+    
+    // Tasa de interés mensual
+    const monthlyRate = annualInterestRate / 100 / 12;
+    
+    // Fórmula de amortización
+    if (monthlyRate === 0) {
+      return Math.round(principal / termMonths);
+    }
+    
+    const monthlyPayment = principal * 
+      (monthlyRate * Math.pow(1 + monthlyRate, termMonths)) / 
+      (Math.pow(1 + monthlyRate, termMonths) - 1);
+    
+    return Math.round(monthlyPayment);
   }
 
   onViewDetails(event: Event): void {
