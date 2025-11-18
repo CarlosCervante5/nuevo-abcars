@@ -28,7 +28,8 @@ export class AppointmentService {
 
   public setExternalAppointmentValuation( form: FormGroup ): Observable<GralResponse>{
     let headers = new HttpHeaders().set('content-type', 'application/json').set('X-Requested-With', 'XMLHttpRequest');
-    return this._http.post<GralResponse>(`${this.baseUrl}/api/appointment`, form, {headers: headers});
+    // Enviar form.value en lugar del FormGroup completo para evitar referencias circulares
+    return this._http.post<GralResponse>(`${this.baseUrl}/api/appointment`, form.value, {headers: headers});
   }
 
   public getAppointments( page: number, keyword: string = ''): Observable<ValuationAppointments>{

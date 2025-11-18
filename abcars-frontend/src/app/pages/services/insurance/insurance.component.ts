@@ -1,14 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HomeNavComponent } from '../../../shared/components/home-nav/home-nav.component';
 import { ModernFooterComponent } from '../../../shared/components/modern-footer/modern-footer.component';
+import { VehicleService } from '../../../shared/services/vehicle.service';
+import { Brand, BrandsResponse } from '../../../shared/interfaces/vehicle_data.interface';
+import { StregaService } from '../../../shared/services/strega.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-insurance',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, HomeNavComponent, ModernFooterComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, HomeNavComponent, ModernFooterComponent],
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Navbar -->
@@ -65,14 +69,7 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     >
                       <option value="">Selecciona marca</option>
-                      <option value="toyota">Toyota</option>
-                      <option value="honda">Honda</option>
-                      <option value="nissan">Nissan</option>
-                      <option value="volkswagen">Volkswagen</option>
-                      <option value="chevrolet">Chevrolet</option>
-                      <option value="ford">Ford</option>
-                      <option value="hyundai">Hyundai</option>
-                      <option value="kia">Kia</option>
+                      <option *ngFor="let brand of brands" [value]="brand.name">{{ brand.name }}</option>
                     </select>
                   </div>
                   
@@ -335,52 +332,97 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
               <div class="bg-white rounded-3xl p-6 shadow-sm sticky top-8">
                 <h3 class="text-xl font-bold text-gray-900 mb-4">Solicitar Cotización</h3>
                 
-                <form class="space-y-4">
+                <form [formGroup]="insuranceForm" (ngSubmit)="onSubmitInsurance()" class="space-y-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre completo *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre *</label>
                     <input 
                       type="text" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="Tu nombre completo"
-                      required
+                      formControlName="name"
+                      class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      [class.border-gray-300]="!insuranceForm.get('name')?.invalid || !insuranceForm.get('name')?.touched"
+                      [class.border-red-500]="insuranceForm.get('name')?.invalid && insuranceForm.get('name')?.touched"
+                      placeholder="Tu nombre"
                     >
+                    <p *ngIf="insuranceForm.get('name')?.invalid && insuranceForm.get('name')?.touched" class="text-red-500 text-xs mt-1">
+                      El nombre es requerido
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Apellidos *</label>
+                    <input 
+                      type="text" 
+                      formControlName="last_name"
+                      class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      [class.border-gray-300]="!insuranceForm.get('last_name')?.invalid || !insuranceForm.get('last_name')?.touched"
+                      [class.border-red-500]="insuranceForm.get('last_name')?.invalid && insuranceForm.get('last_name')?.touched"
+                      placeholder="Tus apellidos"
+                    >
+                    <p *ngIf="insuranceForm.get('last_name')?.invalid && insuranceForm.get('last_name')?.touched" class="text-red-500 text-xs mt-1">
+                      Los apellidos son requeridos
+                    </p>
                   </div>
                   
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
                     <input 
                       type="tel" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="Tu número de teléfono"
-                      required
+                      formControlName="phone"
+                      maxlength="10"
+                      pattern="[0-9]{10}"
+                      inputmode="numeric"
+                      class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      [class.border-gray-300]="!insuranceForm.get('phone')?.invalid || !insuranceForm.get('phone')?.touched"
+                      [class.border-red-500]="insuranceForm.get('phone')?.invalid && insuranceForm.get('phone')?.touched"
+                      placeholder="10 dígitos"
                     >
+                    <p *ngIf="insuranceForm.get('phone')?.invalid && insuranceForm.get('phone')?.touched" class="text-red-500 text-xs mt-1">
+                      <span *ngIf="insuranceForm.get('phone')?.errors?.['required']">El teléfono es requerido</span>
+                      <span *ngIf="insuranceForm.get('phone')?.errors?.['pattern'] && !insuranceForm.get('phone')?.errors?.['required']">El teléfono debe tener exactamente 10 dígitos</span>
+                    </p>
                   </div>
                   
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                     <input 
                       type="email" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      formControlName="email"
+                      class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      [class.border-gray-300]="!insuranceForm.get('email')?.invalid || !insuranceForm.get('email')?.touched"
+                      [class.border-red-500]="insuranceForm.get('email')?.invalid && insuranceForm.get('email')?.touched"
                       placeholder="tu@email.com"
-                      required
                     >
+                    <p *ngIf="insuranceForm.get('email')?.invalid && insuranceForm.get('email')?.touched" class="text-red-500 text-xs mt-1">
+                      <span *ngIf="insuranceForm.get('email')?.errors?.['required']">El email es requerido</span>
+                      <span *ngIf="insuranceForm.get('email')?.errors?.['email'] && !insuranceForm.get('email')?.errors?.['required']">El email no es válido</span>
+                    </p>
                   </div>
                   
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de cobertura</label>
-                    <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de cobertura *</label>
+                    <select 
+                      formControlName="coverageType"
+                      class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      [class.border-gray-300]="!insuranceForm.get('coverageType')?.invalid || !insuranceForm.get('coverageType')?.touched"
+                      [class.border-red-500]="insuranceForm.get('coverageType')?.invalid && insuranceForm.get('coverageType')?.touched"
+                    >
                       <option value="">Selecciona cobertura</option>
                       <option value="basica">Básica</option>
                       <option value="estandar">Estándar</option>
                       <option value="premium">Premium</option>
                     </select>
+                    <p *ngIf="insuranceForm.get('coverageType')?.invalid && insuranceForm.get('coverageType')?.touched" class="text-red-500 text-xs mt-1">
+                      El tipo de cobertura es requerido
+                    </p>
                   </div>
                   
                   <button 
                     type="submit"
-                    class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl transition-colors"
+                    [disabled]="isSubmitting"
+                    class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
-                    Solicitar Cotización
+                    <span *ngIf="!isSubmitting">Solicitar Cotización</span>
+                    <span *ngIf="isSubmitting">Enviando...</span>
                   </button>
                 </form>
               </div>
@@ -400,7 +442,9 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
     }
   `]
 })
-export class InsuranceComponent {
+export class InsuranceComponent implements OnInit {
+  brands: Brand[] = [];
+  
   quoteData = {
     brand: '',
     model: '',
@@ -411,6 +455,38 @@ export class InsuranceComponent {
   };
 
   quoteResult: any = null;
+
+  insuranceForm: FormGroup;
+  isSubmitting: boolean = false;
+
+  constructor(
+    private vehicleService: VehicleService,
+    private fb: FormBuilder,
+    private stregaService: StregaService
+  ) {
+    this.insuranceForm = this.fb.group({
+      name: ['', Validators.required],
+      last_name: ['', Validators.required],
+      phone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      email: ['', [Validators.required, Validators.email]],
+      coverageType: ['', Validators.required]
+    });
+  }
+
+  ngOnInit() {
+    this.getBrands();
+  }
+
+  getBrands(): void {
+    this.vehicleService.getBrands().subscribe({
+      next: (response: BrandsResponse) => {
+        this.brands = response.data.vehicle_brands;
+      },
+      error: (error) => {
+        console.error('Error al cargar marcas:', error);
+      }
+    });
+  }
 
   getYears(): number[] {
     const currentYear = new Date().getFullYear();
@@ -434,5 +510,103 @@ export class InsuranceComponent {
     } else {
       this.quoteResult = null;
     }
+  }
+
+  getCoverageAmount(): number {
+    if (!this.quoteResult) return 0;
+    
+    const coverageType = this.insuranceForm.value.coverageType;
+    if (coverageType === 'basica') return this.quoteResult.basic;
+    if (coverageType === 'estandar') return this.quoteResult.standard;
+    if (coverageType === 'premium') return this.quoteResult.premium;
+    return 0;
+  }
+
+  buildQComments(coverageAmount: number): string {
+    const coverageTypeText = this.insuranceForm.value.coverageType === 'basica' ? 'Básica' :
+                             this.insuranceForm.value.coverageType === 'estandar' ? 'Estándar' :
+                             this.insuranceForm.value.coverageType === 'premium' ? 'Premium' : '';
+
+    return `Marca: ${this.quoteData.brand}, Modelo: ${this.quoteData.model}, Año: ${this.quoteData.year}, Valor comercial: $${this.quoteData.value.toLocaleString()} MXN, Tipo de cobertura: ${coverageTypeText}, Monto de la cobertura elegida: $${coverageAmount.toLocaleString()} MXN`;
+  }
+
+  onSubmitInsurance() {
+    if (this.insuranceForm.invalid || this.isSubmitting) {
+      // Marcar todos los campos como touched para mostrar errores
+      Object.keys(this.insuranceForm.controls).forEach(key => {
+        this.insuranceForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    this.isSubmitting = true;
+
+    // Obtener monto de cobertura según tipo seleccionado
+    const coverageAmount = this.getCoverageAmount();
+    
+    // Construir q_comments
+    const qComments = this.buildQComments(coverageAmount);
+    
+    // Preparar datos con campos adicionales para enviar
+    const formData = {
+      ...this.insuranceForm.value,
+      q_model_interest: '',
+      q_brand_interest: '',
+      q_initial_investment: String(coverageAmount),
+      q_time_to_buy: '',
+      q_comments: qComments,
+      opportunity_type: 'lead',
+      dealership_name: 'Chevrolet Serdán',
+      campaign_name: 'Página ABCars',
+      campaign_channel: 'WEB ABCars',
+      campaign_source: 'Solicitud de cotización de seguros'
+    };
+
+    // Crear FormGroup temporal solo para cumplir con la firma del servicio
+    const formToSend = this.fb.group(formData);
+
+    this.stregaService.createLead(formToSend).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+        
+        // Limpiar formulario de solicitud
+        this.insuranceForm.reset();
+        
+        // Limpiar cotizador de seguros
+        this.quoteData = {
+          brand: '',
+          model: '',
+          year: '',
+          value: 0,
+          usage: '',
+          zipCode: ''
+        };
+        
+        // Limpiar resultados de cotización
+        this.quoteResult = null;
+        
+        Swal.fire({
+          icon: 'success',
+          title: '¡Solicitud enviada!',
+          text: 'Tu solicitud de cotización de seguros ha sido enviada exitosamente. Nos pondremos en contacto contigo pronto.',
+          showConfirmButton: true,
+          confirmButtonColor: '#10b981',
+          timer: 5000
+        });
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        
+        console.error('Error al enviar solicitud:', error);
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un problema al enviar tu solicitud. Por favor, intenta de nuevo más tarde.',
+          showConfirmButton: true,
+          confirmButtonColor: '#ef4444'
+        });
+      }
+    });
   }
 }

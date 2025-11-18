@@ -66,7 +66,8 @@ export class AdminService {
         let user_token = localStorage.getItem('user_token');
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
 
-        return this._http.post<RegisterResponse>(`${this.baseUrl}/api/auth/iternally_register`, form, { headers });
+        // Enviar form.value en lugar del FormGroup completo para evitar referencias circulares
+        return this._http.post<RegisterResponse>(`${this.baseUrl}/api/auth/iternally_register`, form.value, { headers });
     }
 
     public detailReward (reward_uuid: string){

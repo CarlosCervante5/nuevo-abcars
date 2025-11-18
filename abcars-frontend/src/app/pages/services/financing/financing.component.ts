@@ -1,14 +1,16 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HomeNavComponent } from '../../../shared/components/home-nav/home-nav.component';
 import { ModernFooterComponent } from '../../../shared/components/modern-footer/modern-footer.component';
+import { StregaService } from '../../../shared/services/strega.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-financing',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, HomeNavComponent, ModernFooterComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, HomeNavComponent, ModernFooterComponent],
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Navbar -->
@@ -102,8 +104,8 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
                       type="number" 
                       step="0.1"
                       [(ngModel)]="calculatorData.interestRate"
-                      (input)="updateCalculations()"
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      readonly
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
                       placeholder="Ej: 12.5"
                     >
                   </div>
@@ -259,41 +261,77 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
               <div class="bg-white rounded-3xl p-6 shadow-sm sticky top-8">
                 <h3 class="text-xl font-bold text-gray-900 mb-4">Solicitar Financiamiento</h3>
                 
-                <form class="space-y-4">
+                <form [formGroup]="financingForm" (ngSubmit)="onSubmitFinancing()" class="space-y-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre completo *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre *</label>
                     <input 
                       type="text" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Tu nombre completo"
-                      required
+                      formControlName="name"
+                      class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      [class.border-gray-300]="!financingForm.get('name')?.invalid || !financingForm.get('name')?.touched"
+                      [class.border-red-500]="financingForm.get('name')?.invalid && financingForm.get('name')?.touched"
+                      placeholder="Tu nombre"
                     >
+                    <p *ngIf="financingForm.get('name')?.invalid && financingForm.get('name')?.touched" class="text-red-500 text-xs mt-1">
+                      El nombre es requerido
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Apellidos *</label>
+                    <input 
+                      type="text" 
+                      formControlName="last_name"
+                      class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      [class.border-gray-300]="!financingForm.get('last_name')?.invalid || !financingForm.get('last_name')?.touched"
+                      [class.border-red-500]="financingForm.get('last_name')?.invalid && financingForm.get('last_name')?.touched"
+                      placeholder="Tus apellidos"
+                    >
+                    <p *ngIf="financingForm.get('last_name')?.invalid && financingForm.get('last_name')?.touched" class="text-red-500 text-xs mt-1">
+                      Los apellidos son requeridos
+                    </p>
                   </div>
                   
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
                     <input 
                       type="tel" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Tu número de teléfono"
-                      required
+                      formControlName="phone"
+                      maxlength="10"
+                      pattern="[0-9]{10}"
+                      inputmode="numeric"
+                      class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      [class.border-gray-300]="!financingForm.get('phone')?.invalid || !financingForm.get('phone')?.touched"
+                      [class.border-red-500]="financingForm.get('phone')?.invalid && financingForm.get('phone')?.touched"
+                      placeholder="10 dígitos"
                     >
+                    <p *ngIf="financingForm.get('phone')?.invalid && financingForm.get('phone')?.touched" class="text-red-500 text-xs mt-1">
+                      <span *ngIf="financingForm.get('phone')?.errors?.['required']">El teléfono es requerido</span>
+                      <span *ngIf="financingForm.get('phone')?.errors?.['pattern'] && !financingForm.get('phone')?.errors?.['required']">El teléfono debe tener exactamente 10 dígitos</span>
+                    </p>
                   </div>
                   
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                     <input 
                       type="email" 
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      formControlName="email"
+                      class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      [class.border-gray-300]="!financingForm.get('email')?.invalid || !financingForm.get('email')?.touched"
+                      [class.border-red-500]="financingForm.get('email')?.invalid && financingForm.get('email')?.touched"
                       placeholder="tu@email.com"
-                      required
                     >
+                    <p *ngIf="financingForm.get('email')?.invalid && financingForm.get('email')?.touched" class="text-red-500 text-xs mt-1">
+                      <span *ngIf="financingForm.get('email')?.errors?.['required']">El email es requerido</span>
+                      <span *ngIf="financingForm.get('email')?.errors?.['email'] && !financingForm.get('email')?.errors?.['required']">El email no es válido</span>
+                    </p>
                   </div>
                   
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Monto a financiar</label>
                     <input 
                       type="number" 
+                      formControlName="offer_price"
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Ej: 350000"
                     >
@@ -301,9 +339,11 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
                   
                   <button 
                     type="submit"
-                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-xl transition-colors"
+                    [disabled]="isSubmitting"
+                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-xl transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
-                    Solicitar Financiamiento
+                    <span *ngIf="!isSubmitting">Solicitar Financiamiento</span>
+                    <span *ngIf="isSubmitting">Enviando...</span>
                   </button>
                 </form>
               </div>
@@ -326,10 +366,26 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
 export class FinancingComponent {
   calculatorData = {
     vehiclePrice: 500000,
-    downPaymentPercentage: 30,
-    termMonths: 48,
+    downPaymentPercentage: 10,
+    termMonths: 60,
     interestRate: 12.5
   };
+
+  financingForm: FormGroup;
+  isSubmitting: boolean = false;
+
+  constructor(
+    private fb: FormBuilder,
+    private stregaService: StregaService
+  ) {
+    this.financingForm = this.fb.group({
+      name: ['', Validators.required],
+      last_name: ['', Validators.required],
+      phone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      email: ['', [Validators.required, Validators.email]],
+      offer_price: ['']
+    });
+  }
 
   updateCalculations() {
     // Los cálculos se actualizan automáticamente con los getters
@@ -361,5 +417,74 @@ export class FinancingComponent {
 
   getTotalAmount(): number {
     return this.getDownPayment() + (this.getMonthlyPayment() * this.calculatorData.termMonths);
+  }
+
+  onSubmitFinancing() {
+    if (this.financingForm.invalid || this.isSubmitting) {
+      // Marcar todos los campos como touched para mostrar errores
+      Object.keys(this.financingForm.controls).forEach(key => {
+        this.financingForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    this.isSubmitting = true;
+
+    // Obtener valores de la calculadora de financiamiento
+    const downPayment = this.getDownPayment();
+    const monthlyPayment = this.getMonthlyPayment();
+    const totalAmount = this.getTotalAmount();
+
+    // Formatear valores con formato de moneda y concatenar en q_comments
+    const qComments = `El enganche 10%: $${downPayment.toLocaleString()} MXN Mensualidad: $${monthlyPayment.toLocaleString()} MXN Total a pagar: $${totalAmount.toLocaleString()} MXN`;
+
+    // Preparar datos con campos adicionales para enviar
+    const formData = {
+      ...this.financingForm.value,
+      q_model_interest: '',
+      q_brand_interest: '',
+      q_initial_investment: this.financingForm.value.offer_price ? String(this.financingForm.value.offer_price) : '',
+      q_time_to_buy: '',
+      q_comments: qComments,
+      opportunity_type: 'lead',
+      dealership_name: 'Chevrolet Serdán',
+      campaign_name: 'Página ABCars',
+      campaign_channel: 'WEB ABCars',
+      campaign_source: 'Solicitud de financiamiento'
+    };
+
+    // Crear FormGroup temporal solo para cumplir con la firma del servicio
+    const formToSend = this.fb.group(formData);
+
+    this.stregaService.createLead(formToSend).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+        
+        Swal.fire({
+          icon: 'success',
+          title: '¡Solicitud enviada!',
+          text: 'Tu solicitud de financiamiento ha sido enviada exitosamente. Nos pondremos en contacto contigo pronto.',
+          showConfirmButton: true,
+          confirmButtonColor: '#3b82f6',
+          timer: 5000
+        }).then(() => {
+          // Limpiar formulario después del éxito
+          this.financingForm.reset();
+        });
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        
+        console.error('Error al enviar solicitud:', error);
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un problema al enviar tu solicitud. Por favor, intenta de nuevo más tarde.',
+          showConfirmButton: true,
+          confirmButtonColor: '#ef4444'
+        });
+      }
+    });
   }
 }

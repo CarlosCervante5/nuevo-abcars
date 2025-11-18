@@ -33,6 +33,11 @@ export class CampaingService {
         return this._http.post<GetcampaingResponse>(`${this.baseUrl}/api/campaigns/active`, {headers: headers });
     }
 
+    public getCampaingPublic(): Observable<GetcampaingResponse> {
+        // Endpoint público sin autenticación
+        return this._http.post<GetcampaingResponse>(`${this.baseUrl}/api/campaigns/active`, {});
+    }
+
     public changeOrder(uuid:number, imagesData:  ImageOrderPromo[]):Observable<ChangeOrder>{
        
         const body = {

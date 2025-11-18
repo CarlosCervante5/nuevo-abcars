@@ -1,14 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HomeNavComponent } from '../../../shared/components/home-nav/home-nav.component';
 import { ModernFooterComponent } from '../../../shared/components/modern-footer/modern-footer.component';
+import { VehicleService } from '../../../shared/services/vehicle.service';
+import { Brand, BrandsResponse, Model, ModelsResponse } from '../../../shared/interfaces/vehicle_data.interface';
+import { AdminService } from '../../../shared/services/admin.service';
+import { Dealership, DealerShipResponse } from '../../../shared/interfaces/admin.interfaces';
+import { AppointmentService } from '../../../shared/services/appointment.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-valuation',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, HomeNavComponent, ModernFooterComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, HomeNavComponent, ModernFooterComponent],
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Navbar -->
@@ -47,6 +53,7 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
       <!-- Contenido principal -->
       <div class="container mx-auto px-4 py-16">
         <div class="max-w-6xl mx-auto">
+          <form [formGroup]="valuationForm" (ngSubmit)="submitValuation($event)">
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <!-- Columna principal -->
@@ -56,58 +63,65 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
               <div class="bg-white rounded-3xl p-8 shadow-sm">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Solicitar Valuación</h2>
                 
-                <form class="space-y-6">
+                <div class="space-y-6">
                   <!-- Información del vehículo -->
                   <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Información del Vehículo</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Marca *</label>
-                        <select 
-                          [(ngModel)]="valuationData.brand"
-                          name="brand"
+                        <input 
+                          type="text"
+                          formControlName="brand"
+                          list="brands-list"
+                          (input)="onBrandInput(valuationForm.get('brand')?.value || '')"
+                          [class.border-red-500]="valuationForm.get('brand')?.invalid && valuationForm.get('brand')?.touched"
                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                          required
+                          placeholder="Escribe o selecciona una marca"
                         >
-                          <option value="">Selecciona marca</option>
-                          <option value="toyota">Toyota</option>
-                          <option value="honda">Honda</option>
-                          <option value="nissan">Nissan</option>
-                          <option value="volkswagen">Volkswagen</option>
-                          <option value="chevrolet">Chevrolet</option>
-                          <option value="ford">Ford</option>
-                          <option value="hyundai">Hyundai</option>
-                          <option value="kia">Kia</option>
-                          <option value="mazda">Mazda</option>
-                          <option value="mitsubishi">Mitsubishi</option>
-                        </select>
+                        <datalist id="brands-list">
+                          <option *ngFor="let brand of brands" [value]="brand.name">
+                        </datalist>
+                        <p *ngIf="valuationForm.get('brand')?.invalid && valuationForm.get('brand')?.touched" class="mt-1 text-sm text-red-600">
+                          La marca es requerida
+                        </p>
                       </div>
                       
                       <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Modelo *</label>
                         <input 
-                          type="text" 
-                          [(ngModel)]="valuationData.model"
-                          name="model"
+                          type="text"
+                          formControlName="model"
+                          [attr.list]="models.length > 0 ? 'models-list' : null"
+                          autocomplete="off"
+                          [class.border-red-500]="valuationForm.get('model')?.invalid && valuationForm.get('model')?.touched"
                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                          placeholder="Ej: Corolla"
-                          required
+                          placeholder="Escribe o selecciona un modelo"
                         >
+                        <datalist *ngIf="models.length > 0" id="models-list">
+                          <option *ngFor="let model of models" [value]="model.name">
+                        </datalist>
+                        <p *ngIf="valuationForm.get('model')?.invalid && valuationForm.get('model')?.touched" class="mt-1 text-sm text-red-600">
+                          El modelo es requerido
+                        </p>
                       </div>
                       
                       <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Año *</label>
                         <select 
-                          [(ngModel)]="valuationData.year"
-                          name="year"
+                          formControlName="year"
+                          [class.border-red-500]="valuationForm.get('year')?.invalid && valuationForm.get('year')?.touched"
                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                          required
                         >
                           <option value="">Selecciona año</option>
                           <option *ngFor="let year of getYears()" [value]="year">{{ year }}</option>
                         </select>
+                        <p *ngIf="valuationForm.get('year')?.invalid && valuationForm.get('year')?.touched" class="mt-1 text-sm text-red-600">
+                          El año es requerido
+                        </p>
                       </div>
                       
+                      <!-- 
                       <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Versión</label>
                         <input 
@@ -118,19 +132,24 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
                           placeholder="Ej: LE, XLE, Sport"
                         >
                       </div>
+                      -->
                       
                       <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Kilometraje *</label>
                         <input 
                           type="number" 
-                          [(ngModel)]="valuationData.mileage"
-                          name="mileage"
+                          formControlName="mileage"
+                          [class.border-red-500]="valuationForm.get('mileage')?.invalid && valuationForm.get('mileage')?.touched"
                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                           placeholder="Ej: 50000"
-                          required
                         >
+                        <p *ngIf="valuationForm.get('mileage')?.invalid && valuationForm.get('mileage')?.touched" class="mt-1 text-sm text-red-600">
+                          <span *ngIf="valuationForm.get('mileage')?.errors?.['required']">El kilometraje es requerido</span>
+                          <span *ngIf="valuationForm.get('mileage')?.errors?.['pattern']">El kilometraje debe ser un número válido</span>
+                        </p>
                       </div>
                       
+                      <!-- 
                       <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
                         <select 
@@ -150,153 +169,11 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
                           <option value="otro">Otro</option>
                         </select>
                       </div>
+                      -->
                     </div>
                   </div>
 
-                  <!-- Estado del vehículo -->
-                  <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Estado del Vehículo</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Estado general *</label>
-                        <select 
-                          [(ngModel)]="valuationData.condition"
-                          name="condition"
-                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                          required
-                        >
-                          <option value="">Selecciona estado</option>
-                          <option value="excelente">Excelente</option>
-                          <option value="muy-bueno">Muy bueno</option>
-                          <option value="bueno">Bueno</option>
-                          <option value="regular">Regular</option>
-                          <option value="malo">Malo</option>
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de transmisión</label>
-                        <select 
-                          [(ngModel)]="valuationData.transmission"
-                          name="transmission"
-                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                        >
-                          <option value="">Selecciona transmisión</option>
-                          <option value="automatica">Automática</option>
-                          <option value="manual">Manual</option>
-                          <option value="cvt">CVT</option>
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Combustible</label>
-                        <select 
-                          [(ngModel)]="valuationData.fuel"
-                          name="fuel"
-                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                        >
-                          <option value="">Selecciona combustible</option>
-                          <option value="gasolina">Gasolina</option>
-                          <option value="diesel">Diésel</option>
-                          <option value="hibrido">Híbrido</option>
-                          <option value="electrico">Eléctrico</option>
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Número de puertas</label>
-                        <select 
-                          [(ngModel)]="valuationData.doors"
-                          name="doors"
-                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                        >
-                          <option value="">Selecciona puertas</option>
-                          <option value="2">2 puertas</option>
-                          <option value="4">4 puertas</option>
-                          <option value="5">5 puertas</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Equipamiento -->
-                  <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Equipamiento</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      <label class="flex items-center gap-3">
-                        <input 
-                          type="checkbox" 
-                          [(ngModel)]="valuationData.airConditioning"
-                          name="airConditioning"
-                          class="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
-                        >
-                        <span class="text-sm text-gray-700">Aire acondicionado</span>
-                      </label>
-                      
-                      <label class="flex items-center gap-3">
-                        <input 
-                          type="checkbox" 
-                          [(ngModel)]="valuationData.powerSteering"
-                          name="powerSteering"
-                          class="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
-                        >
-                        <span class="text-sm text-gray-700">Dirección hidráulica</span>
-                      </label>
-                      
-                      <label class="flex items-center gap-3">
-                        <input 
-                          type="checkbox" 
-                          [(ngModel)]="valuationData.powerWindows"
-                          name="powerWindows"
-                          class="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
-                        >
-                        <span class="text-sm text-gray-700">Vidrios eléctricos</span>
-                      </label>
-                      
-                      <label class="flex items-center gap-3">
-                        <input 
-                          type="checkbox" 
-                          [(ngModel)]="valuationData.centralLock"
-                          name="centralLock"
-                          class="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
-                        >
-                        <span class="text-sm text-gray-700">Seguros centrales</span>
-                      </label>
-                      
-                      <label class="flex items-center gap-3">
-                        <input 
-                          type="checkbox" 
-                          [(ngModel)]="valuationData.alarm"
-                          name="alarm"
-                          class="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
-                        >
-                        <span class="text-sm text-gray-700">Alarma</span>
-                      </label>
-                      
-                      <label class="flex items-center gap-3">
-                        <input 
-                          type="checkbox" 
-                          [(ngModel)]="valuationData.gps"
-                          name="gps"
-                          class="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
-                        >
-                        <span class="text-sm text-gray-700">GPS</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  <!-- Observaciones -->
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Observaciones adicionales</label>
-                    <textarea 
-                      [(ngModel)]="valuationData.observations"
-                      name="observations"
-                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                      rows="4"
-                      placeholder="Describe cualquier detalle adicional sobre el estado del vehículo, accidentes, reparaciones, etc."
-                    ></textarea>
-                  </div>
-                </form>
+                </div>
               </div>
 
               <!-- Proceso de valuación -->
@@ -393,66 +270,134 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
               <div class="bg-white rounded-3xl p-6 shadow-sm sticky top-8">
                 <h3 class="text-xl font-bold text-gray-900 mb-4">Información de Contacto</h3>
                 
-                <form class="space-y-4">
+                <div class="space-y-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre completo *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre *</label>
                     <input 
                       type="text" 
-                      [(ngModel)]="contactData.fullName"
-                      name="fullName"
+                      formControlName="fullName"
+                      [class.border-red-500]="valuationForm.get('fullName')?.invalid && valuationForm.get('fullName')?.touched"
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                      placeholder="Tu nombre completo"
-                      required
+                      placeholder="Tu nombre"
                     >
+                    <p *ngIf="valuationForm.get('fullName')?.invalid && valuationForm.get('fullName')?.touched" class="mt-1 text-sm text-red-600">
+                      El nombre es requerido
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Apellidos *</label>
+                    <input 
+                      type="text" 
+                      formControlName="lastName"
+                      [class.border-red-500]="valuationForm.get('lastName')?.invalid && valuationForm.get('lastName')?.touched"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="Tus apellidos"
+                    >
+                    <p *ngIf="valuationForm.get('lastName')?.invalid && valuationForm.get('lastName')?.touched" class="mt-1 text-sm text-red-600">
+                      Los apellidos son requeridos
+                    </p>
                   </div>
                   
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
                     <input 
                       type="tel" 
-                      [(ngModel)]="contactData.phone"
-                      name="phone"
+                      formControlName="phone"
+                      maxlength="10"
+                      (keypress)="onPhoneKeyPress($event)"
+                      (input)="onPhoneInput($event)"
+                      [class.border-red-500]="valuationForm.get('phone')?.invalid && valuationForm.get('phone')?.touched"
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                       placeholder="Tu número de teléfono"
-                      required
                     >
+                    <p *ngIf="valuationForm.get('phone')?.invalid && valuationForm.get('phone')?.touched" class="mt-1 text-sm text-red-600">
+                      <span *ngIf="valuationForm.get('phone')?.errors?.['required']">El teléfono es requerido</span>
+                      <span *ngIf="valuationForm.get('phone')?.errors?.['pattern']">El teléfono debe tener 10 dígitos</span>
+                    </p>
                   </div>
                   
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                     <input 
                       type="email" 
-                      [(ngModel)]="contactData.email"
-                      name="email"
+                      formControlName="email"
+                      [class.border-red-500]="valuationForm.get('email')?.invalid && valuationForm.get('email')?.touched"
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                       placeholder="tu@email.com"
-                      required
                     >
+                    <p *ngIf="valuationForm.get('email')?.invalid && valuationForm.get('email')?.touched" class="mt-1 text-sm text-red-600">
+                      <span *ngIf="valuationForm.get('email')?.errors?.['required']">El email es requerido</span>
+                      <span *ngIf="valuationForm.get('email')?.errors?.['email']">El email no es válido</span>
+                    </p>
                   </div>
                   
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Ciudad</label>
-                    <input 
-                      type="text" 
-                      [(ngModel)]="contactData.city"
-                      name="city"
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Sucursal *</label>
+                    <select 
+                      formControlName="city"
+                      [class.border-red-500]="valuationForm.get('city')?.invalid && valuationForm.get('city')?.touched"
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                      placeholder="Tu ciudad"
                     >
+                      <option value="">Selecciona sucursal</option>
+                      <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+                    </select>
+                    <p *ngIf="valuationForm.get('city')?.invalid && valuationForm.get('city')?.touched" class="mt-1 text-sm text-red-600">
+                      La sucursal es requerida
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de cita *</label>
+                    <input 
+                      type="date" 
+                      formControlName="preferredDate"
+                      [class.border-red-500]="valuationForm.get('preferredDate')?.invalid && valuationForm.get('preferredDate')?.touched"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    >
+                    <p *ngIf="valuationForm.get('preferredDate')?.invalid && valuationForm.get('preferredDate')?.touched" class="mt-1 text-sm text-red-600">
+                      La fecha de cita es requerida
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Hora de cita *</label>
+                    <select 
+                      formControlName="preferredTime"
+                      [class.border-red-500]="valuationForm.get('preferredTime')?.invalid && valuationForm.get('preferredTime')?.touched"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    >
+                      <option value="">Selecciona hora</option>
+                      <option value="09:00">9:00 AM</option>
+                      <option value="10:00">10:00 AM</option>
+                      <option value="11:00">11:00 AM</option>
+                      <option value="12:00">12:00 PM</option>
+                      <option value="13:00">1:00 PM</option>
+                      <option value="14:00">2:00 PM</option>
+                      <option value="15:00">3:00 PM</option>
+                      <option value="16:00">4:00 PM</option>
+                      <option value="17:00">5:00 PM</option>
+                      <option value="18:00">6:00 PM</option>
+                    </select>
+                    <p *ngIf="valuationForm.get('preferredTime')?.invalid && valuationForm.get('preferredTime')?.touched" class="mt-1 text-sm text-red-600">
+                      La hora de cita es requerida
+                    </p>
                   </div>
                   
                   <button 
                     type="submit"
-                    (click)="submitValuation()"
-                    class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-xl transition-colors"
+                    [disabled]="isSubmitting"
+                    class="w-full bg-teal-500 hover:bg-teal-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-colors"
                   >
-                    Solicitar Valuación Gratuita
+                    <span *ngIf="!isSubmitting">Solicitar Valuación Gratuita</span>
+                    <span *ngIf="isSubmitting">Enviando...</span>
                   </button>
-                </form>
+                </div>
               </div>
 
             </div>
           </div>
+          </form>
         </div>
       </div>
       
@@ -466,33 +411,124 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
     }
   `]
 })
-export class ValuationComponent {
-  valuationData = {
-    brand: '',
-    model: '',
-    year: '',
-    version: '',
-    mileage: 0,
-    color: '',
-    condition: '',
-    transmission: '',
-    fuel: '',
-    doors: '',
-    airConditioning: false,
-    powerSteering: false,
-    powerWindows: false,
-    centralLock: false,
-    alarm: false,
-    gps: false,
-    observations: ''
-  };
+export class ValuationComponent implements OnInit {
+  brands: Brand[] = [];
+  dealerships: Dealership[] = [];
+  models: Model[] = [];
+  valuationForm: FormGroup;
+  isSubmitting: boolean = false;
 
-  contactData = {
-    fullName: '',
-    phone: '',
-    email: '',
-    city: ''
-  };
+  constructor(
+    private vehicleService: VehicleService,
+    private adminService: AdminService,
+    private appointmentService: AppointmentService,
+    private fb: FormBuilder
+  ) {
+    this.valuationForm = this.fb.group({
+      // Información del vehículo
+      brand: ['', Validators.required],
+      model: ['', Validators.required],
+      year: ['', Validators.required],
+      mileage: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
+      // Información de contacto
+      fullName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      phone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      email: ['', [Validators.required, Validators.email]],
+      city: ['', Validators.required],
+      preferredDate: ['', Validators.required],
+      preferredTime: ['', Validators.required]
+    });
+  }
+
+  ngOnInit() {
+    this.getBrands();
+    this.getDealerships();
+  }
+
+  getBrands(): void {
+    this.vehicleService.getBrands().subscribe({
+      next: (response: BrandsResponse) => {
+        this.brands = response.data.vehicle_brands;
+      },
+      error: (error) => {
+        console.error('Error al cargar marcas:', error);
+      }
+    });
+  }
+
+  getDealerships(): void {
+    this.adminService.getDealerships().subscribe({
+      next: (response: DealerShipResponse) => {
+        this.dealerships = response.data;
+      },
+      error: (error) => {
+        console.error('Error al cargar sucursales:', error);
+      }
+    });
+  }
+
+  onBrandInput(brand: string): void {
+    // Si el valor coincide con una marca de la API, cargar modelos
+    const foundBrand = this.brands.find(b => b.name.toLowerCase() === brand.toLowerCase());
+    
+    if (foundBrand) {
+      this.onBrandSelected(foundBrand.name);
+    } else {
+      // Si no coincide, limpiar modelos
+      this.models = [];
+      this.valuationForm.patchValue({ model: '' });
+    }
+  }
+
+  onBrandSelected(brand: string): void {
+    // Limpiar modelo anterior
+    this.valuationForm.patchValue({ model: '' });
+    this.models = [];
+
+    if (!brand) {
+      return;
+    }
+
+    this.vehicleService.getModelsByBrand(brand).subscribe({
+      next: (response: ModelsResponse) => {
+        this.models = response.data.line_models;
+      },
+      error: (error) => {
+        console.error('Error al cargar modelos:', error);
+        this.models = [];
+      }
+    });
+  }
+
+  formatDate(dateString: string): string {
+    if (!dateString) {
+      return '';
+    }
+    // Asegurarse de que la fecha esté en formato YYYY-MM-DD
+    const [year, month, day] = dateString.split('-');
+    const paddedMonth = month.padStart(2, '0');
+    const paddedDay = day.padStart(2, '0');
+    return `${year}-${paddedMonth}-${paddedDay}`;
+  }
+
+  onPhoneKeyPress(event: KeyboardEvent): void {
+    // Solo permitir números (0-9)
+    const charCode = event.which ? event.which : event.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+      event.preventDefault();
+    }
+  }
+
+  onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    // Remover cualquier carácter que no sea número
+    const value = input.value.replace(/\D/g, '');
+    // Limitar a 10 dígitos
+    const limitedValue = value.slice(0, 10);
+    // Actualizar el valor del formulario
+    this.valuationForm.patchValue({ phone: limitedValue }, { emitEvent: false });
+  }
 
   getYears(): number[] {
     const currentYear = new Date().getFullYear();
@@ -503,12 +539,112 @@ export class ValuationComponent {
     return years;
   }
 
-  submitValuation() {
-    // Aquí se enviaría la información al backend
-    console.log('Valuation data:', this.valuationData);
-    console.log('Contact data:', this.contactData);
+  submitValuation(event?: Event) {
+    if (event) {
+      event.preventDefault();
+    }
     
-    // Simulación de envío exitoso
-    alert('¡Valuación solicitada exitosamente! Te contactaremos en menos de 24 horas.');
+    // Validar formulario
+    if (this.valuationForm.invalid || this.isSubmitting) {
+      // Marcar todos los campos como touched para mostrar errores
+      Object.keys(this.valuationForm.controls).forEach(key => {
+        this.valuationForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    this.isSubmitting = true;
+
+    const formValue = this.valuationForm.value;
+    
+    // Construir objeto para registro del cliente
+    const clientData = {
+      name: formValue.fullName || '',
+      last_name: formValue.lastName || '',
+      email: formValue.email || '',
+      phone_1: formValue.phone || ''
+    };
+
+    // Crear FormGroup temporal para el cliente
+    const clientForm = this.fb.group(clientData);
+
+    // Paso 1: Registrar el cliente
+    this.adminService.setRiders(clientForm).subscribe({
+      next: (response) => {
+        // Verificar que la respuesta tenga la estructura esperada
+        if (response && response.data && response.data.profile && response.data.profile.uuid) {
+          const customerUuid = response.data.profile.uuid;
+          
+          // Hacer patchValue al formulario con el customer_uuid
+          this.valuationForm.patchValue({ customer_uuid: customerUuid });
+
+          // Construir scheduled_date con formato YYYY-MM-DD HH:MM
+          const formattedDate = formValue.preferredDate ? this.formatDate(formValue.preferredDate) : '';
+          const scheduledDateTime = formattedDate && formValue.preferredTime
+            ? `${formattedDate} ${formValue.preferredTime}`
+            : '';
+
+          // Construir objeto para la cita de valuación
+          const appointmentData = {
+            type: 'valuation',
+            customer_uuid: customerUuid,
+            brand_name: formValue.brand || '',
+            model_name: formValue.model || '',
+            year: formValue.year || '',
+            mileage: formValue.mileage ? String(formValue.mileage) : '0',
+            scheduled_date: scheduledDateTime,
+            dealership_name: formValue.city || ''
+          };
+
+          // Crear FormGroup temporal para la cita
+          const appointmentForm = this.fb.group(appointmentData);
+
+          // Paso 2: Crear la cita de valuación
+          this.appointmentService.setExternalAppointmentValuation(appointmentForm).subscribe({
+            next: (appointmentResponse) => {
+              this.isSubmitting = false;
+              
+              // Mostrar mensaje de éxito
+              Swal.fire({
+                icon: 'success',
+                title: 'Cita creada exitosamente',
+                timer: 2000,
+                showConfirmButton: false
+              }).then(() => {
+                // Recargar la página
+                window.location.reload();
+              });
+            },
+            error: (error) => {
+              this.isSubmitting = false;
+              
+              // Mostrar mensaje de error
+              Swal.fire({
+                icon: 'error',
+                title: 'Lo sentimos, hubo un error',
+                text: 'Hubo un problema al procesar la solicitud, inténtelo más tarde. ' + (error?.error?.message || error?.message || '')
+              });
+            }
+          });
+        } else {
+          this.isSubmitting = false;
+          Swal.fire({
+            icon: 'error',
+            title: 'Lo sentimos, hubo un error',
+            text: 'No se pudo obtener el identificador del cliente. Por favor, inténtelo más tarde.'
+          });
+        }
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        
+        // Mostrar mensaje de error
+        Swal.fire({
+          icon: 'error',
+          title: 'Lo sentimos, hubo un error',
+          text: 'Hubo un problema al procesar la solicitud, inténtelo más tarde. ' + (error?.error?.message || error?.message || '')
+        });
+      }
+    });
   }
 }
