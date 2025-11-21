@@ -11,6 +11,8 @@ import { TechnicalServiceComponent } from './pages/services/technical-service/te
 import { PartsComponent } from './pages/services/parts/parts.component';
 import { ValuationComponent } from './pages/services/valuation/valuation.component';
 import { ServicesComponent } from './pages/services/services.component';
+import { PrivacidadDeUsoComponent } from './pages/externals/privacidad-de-uso/privacidad-de-uso.component';
+import { TerminosYCondicionesComponent } from './pages/externals/terminos-y-condiciones/terminos-y-condiciones.component';
 import { ScrollTopGuard } from './shared/guards/scroll-top.guard';
 
 const routes: Routes = [
@@ -70,6 +72,18 @@ const routes: Routes = [
   {
     path: 'valuacion',
     component: ValuationComponent,
+    canActivate: [ScrollTopGuard]
+  },
+  
+  // Rutas externas
+  {
+    path: 'externals/privacidad-de-uso',
+    component: PrivacidadDeUsoComponent,
+    canActivate: [ScrollTopGuard]
+  },
+  {
+    path: 'externals/terminos-y-condiciones',
+    component: TerminosYCondicionesComponent,
     canActivate: [ScrollTopGuard]
   },
   
