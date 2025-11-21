@@ -24,18 +24,18 @@ export class CampaingService {
     ):Observable<createcampaing>{
         let user_token = localStorage.getItem('user_token');
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
-        return this._http.post<createcampaing>(`${this.baseUrl}/api/campaigns`, form, {headers: headers });
+        return this._http.post<createcampaing>(`${this.baseUrl}/campaigns`, form, {headers: headers });
     }
 
     public getCampaing (){
         let user_token = localStorage.getItem('user_token');
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
-        return this._http.post<GetcampaingResponse>(`${this.baseUrl}/api/campaigns/active`, {headers: headers });
+        return this._http.post<GetcampaingResponse>(`${this.baseUrl}/campaigns/active`, {headers: headers });
     }
 
     public getCampaingPublic(): Observable<GetcampaingResponse> {
         // Endpoint público sin autenticación
-        return this._http.post<GetcampaingResponse>(`${this.baseUrl}/api/campaigns/active`, {});
+        return this._http.post<GetcampaingResponse>(`${this.baseUrl}/campaigns/active`, {});
     }
 
     public changeOrder(uuid:number, imagesData:  ImageOrderPromo[]):Observable<ChangeOrder>{
@@ -47,19 +47,19 @@ export class CampaingService {
         }))
         }  
         let headers = new HttpHeaders().set('Authorization', JSON.stringify(localStorage.getItem('user_token'))).set('X-Requested-With', 'XMLHttpRequest');        
-        return this._http.post<ChangeOrder>(`${this.baseUrl}/api/promotions/sort_update`, body, {headers: headers });
+        return this._http.post<ChangeOrder>(`${this.baseUrl}/promotions/sort_update`, body, {headers: headers });
       }
     
       public deleteImage( uuid:any ): Observable<DeleteVehicleImage>{
         let data = {uuid};
         let headers = new HttpHeaders().set('Authorization', JSON.stringify(localStorage.getItem('user_token'))).set('X-Requested-With', 'XMLHttpRequest');        
-        return this._http.post<DeleteVehicleImage>(`${this.baseUrl}/api/promotions/delete`, data,  {headers: headers });
+        return this._http.post<DeleteVehicleImage>(`${this.baseUrl}/promotions/delete`, data,  {headers: headers });
       }
 
       public deleteCampaign( uuid:string): Observable<DeleteCampaign>{
         let data = {uuid};
         let headers = new HttpHeaders().set('Authorization', JSON.stringify(localStorage.getItem('user_token'))).set('X-Requested-With', 'XMLHttpRequest');        
-        return this._http.post<DeleteVehicleImage>(`${this.baseUrl}/api/campaigns/delete`, data,  {headers: headers });
+        return this._http.post<DeleteVehicleImage>(`${this.baseUrl}/campaigns/delete`, data,  {headers: headers });
       }
 
       public searchByName(){
@@ -68,7 +68,7 @@ export class CampaingService {
         }
         let user_token = localStorage.getItem('user_token');
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
-        return this._http.post<GetcampaingResponse>(`${this.baseUrl}/api/campaigns/active_by_name`,body, {headers: headers });
+        return this._http.post<GetcampaingResponse>(`${this.baseUrl}/campaigns/active_by_name`,body, {headers: headers });
       }
 
       public setCarCare(name:string, email:string, phone:string, model:string, year:number, dealership:string, service:string, comments:string, brand:string, date:string, hour:string){
@@ -86,7 +86,7 @@ export class CampaingService {
         }
         let user_token = localStorage.getItem('user_token');
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
-        return this._http.post<GralResponse>(`${this.baseUrl}/api/leads/car_care`,body,{headers: headers });
+        return this._http.post<GralResponse>(`${this.baseUrl}/leads/car_care`,body,{headers: headers });
       }
     
 }

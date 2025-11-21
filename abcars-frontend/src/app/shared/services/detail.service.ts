@@ -21,7 +21,7 @@ export class DetailService {
 
   public getVehicleDetail( uuid: string ): Observable<DetailResponse>{        
     const body = { uuid: uuid };
-    return this._http.post<DetailResponse>(`${this.baseUrl}/api/vehicles/detail`, body, { headers: this.headers });
+    return this._http.post<DetailResponse>(`${this.baseUrl}/vehicles/detail`, body, { headers: this.headers });
   }
 
   public getRecommendedVehicles( priceMin: number, priceMax: number): Observable<RecommendedResponse>{
@@ -29,12 +29,12 @@ export class DetailService {
     const body = { 
       prices: [priceMin, priceMax]
     };
-    return this._http.post<RecommendedResponse>(`${ this.baseUrl }/api/vehicles/random`, body, {headers: this.headers});
+    return this._http.post<RecommendedResponse>(`${ this.baseUrl }/vehicles/random`, body, {headers: this.headers});
     
   }
 
   public generateLead( form: UntypedFormGroup ):Observable<Lead>{
-    return this._http.post<Lead>(`${ this.baseUrl }/api/leads/ask_information`, form);
+    return this._http.post<Lead>(`${ this.baseUrl }/leads/ask_information`, form);
   }
   
 }

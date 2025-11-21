@@ -88,11 +88,7 @@ export interface Vehicle {
 
         <!-- Action Buttons -->
         <div class="flex gap-3">
-          <button class="btn-abcars-secondary flex-1" (click)="contactVehicle($event)">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 3v7a6 6 0 006 6 6 6 0 006-6V3"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 21v-7a6 6 0 00-6-6H6a6 6 0 00-6 6v7"></path>
-            </svg>
+          <button class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-300" (click)="contactVehicle($event)">
             Contacto
           </button>
           <button class="btn-abcars-secondary px-4" (click)="toggleFavorite($event)">

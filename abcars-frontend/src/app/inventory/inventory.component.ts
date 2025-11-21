@@ -44,24 +44,189 @@ interface VehicleWithApiData extends Vehicle {
           </div>
 
           <!-- Contador de resultados y ordenamiento -->
-          <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">{{ filteredItems.length }} Resultados</h1>
-            <div class="flex items-center space-x-4">
-              <span class="text-gray-600">Ordenar por:</span>
-              <select [(ngModel)]="sortBy" (change)="onSortChange()" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <div class="flex items-center justify-between w-full sm:w-auto">
+              <h1 class="text-2xl font-bold text-gray-900">{{ filteredItems.length }} Resultados</h1>
+              <!-- Botón para abrir filtros en móvil -->
+              <button (click)="openFiltersModal()" class="lg:hidden bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded-lg transition-colors flex items-center space-x-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                </svg>
+                <span>Filtros</span>
+              </button>
+            </div>
+            <div class="flex items-center space-x-4 w-full sm:w-auto">
+              <span class="text-gray-600 hidden sm:inline">Ordenar por:</span>
+              <select [(ngModel)]="sortBy" (change)="onSortChange()" class="w-full sm:w-auto border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
                 <option value="newest">Más recientes</option>
                 <option value="price-low">Precio: Menor a mayor</option>
                 <option value="price-high">Precio: Mayor a menor</option>
+                <option value="mileage-asc">Kilometraje: menor</option>
               </select>
             </div>
           </div>
 
           <div class="flex flex-col lg:flex-row gap-8">
-            <!-- Barra lateral de Filtros mejorada -->
-            <aside class="lg:w-1/4 xl:w-1/5">
-              <div class="sticky top-28 space-y-6">
+            <!-- Barra lateral de Filtros mejorada (solo visible en desktop) -->
+            <aside class="hidden lg:block lg:w-1/4 xl:w-1/5">
+              <div class="sticky top-24 space-y-6">
                 
-                <!-- Promoción superior -->
+                <!-- Filtros principales -->
+                <div>
+                  <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="p-4 border-b border-gray-200">
+                      <h2 class="text-lg font-bold text-gray-900">Filtros</h2>
+                    </div>
+                  
+                  <!-- Filtro Precio -->
+                  <div class="border-b border-gray-100">
+                    <button (click)="toggleFilter('price')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                      <span class="font-medium text-gray-700">Precio</span>
+                      <svg [class.rotate-180]="openFilters.price" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </button>
+                    <div *ngIf="openFilters.price" class="px-4 pb-4">
+                      <div class="space-y-2">
+                        <div class="flex items-center justify-between text-sm">
+                          <span class="text-gray-600">Desde: <span class="font-medium text-gray-900">{{ '$' + formatPrice(filters.priceMin) }}</span></span>
+                          <span class="text-gray-600">Hasta: <span class="font-medium text-gray-900">{{ '$' + formatPrice(filters.priceMax) }}</span></span>
+                        </div>
+                        <div class="relative h-2">
+                          <input type="range" [(ngModel)]="filters.priceMin" (input)="applyFilters()" [min]="priceRange.min" [max]="priceRange.max" class="absolute top-0 left-0 w-full h-2 bg-transparent appearance-none cursor-pointer" style="z-index: 2;">
+                          <input type="range" [(ngModel)]="filters.priceMax" (input)="applyFilters()" [min]="priceRange.min" [max]="priceRange.max" class="absolute top-0 left-0 w-full h-2 bg-transparent appearance-none cursor-pointer" style="z-index: 1;">
+                          <div class="absolute top-0 left-0 w-full h-2 bg-gray-200 rounded-lg" style="z-index: 0;"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Filtro Marca -->
+                  <div class="border-b border-gray-100">
+                    <button (click)="toggleFilter('brand')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                      <span class="font-medium text-gray-700">Marca</span>
+                      <svg [class.rotate-180]="openFilters.brand" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </button>
+                    <div *ngIf="openFilters.brand" class="px-4 pb-4 max-h-48 overflow-y-auto">
+                      <div class="space-y-2">
+                        <label *ngFor="let brand of availableBrands" class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                          <input type="checkbox" [value]="brand" [(ngModel)]="filters.selectedBrands[brand]" (change)="applyFilters()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                          <span class="text-sm text-gray-700">{{ brand }}</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Filtro Año -->
+                  <div class="border-b border-gray-100">
+                    <button (click)="toggleFilter('year')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                      <span class="font-medium text-gray-700">Año</span>
+                      <svg [class.rotate-180]="openFilters.year" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </button>
+                    <div *ngIf="openFilters.year" class="px-4 pb-4">
+                      <div class="space-y-2">
+                        <div class="flex items-center justify-between text-sm">
+                          <span class="text-gray-600">Desde: <span class="font-medium text-gray-900">{{ filters.yearFrom }}</span></span>
+                          <span class="text-gray-600">Hasta: <span class="font-medium text-gray-900">{{ filters.yearTo }}</span></span>
+                        </div>
+                        <div class="relative h-2">
+                          <input type="range" [(ngModel)]="filters.yearFrom" (input)="applyFilters()" [min]="yearRange.min" [max]="yearRange.max" class="absolute top-0 left-0 w-full h-2 bg-transparent appearance-none cursor-pointer" style="z-index: 2;">
+                          <input type="range" [(ngModel)]="filters.yearTo" (input)="applyFilters()" [min]="yearRange.min" [max]="yearRange.max" class="absolute top-0 left-0 w-full h-2 bg-transparent appearance-none cursor-pointer" style="z-index: 1;">
+                          <div class="absolute top-0 left-0 w-full h-2 bg-gray-200 rounded-lg" style="z-index: 0;"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Filtro Kilometraje -->
+                  <div class="border-b border-gray-100">
+                    <button (click)="toggleFilter('mileage')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                      <span class="font-medium text-gray-700">Kilometraje</span>
+                      <svg [class.rotate-180]="openFilters.mileage" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </button>
+                    <div *ngIf="openFilters.mileage" class="px-4 pb-4">
+                      <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                          <span class="text-sm text-gray-600">Hasta</span>
+                          <span class="text-sm font-medium">{{ formatMileage(filters.maxMileage ?? mileageRange.max) }} km</span>
+                        </div>
+                        <input type="range" [(ngModel)]="filters.maxMileage" (input)="applyFilters()" [min]="mileageRange.min" [max]="mileageRange.max" [value]="filters.maxMileage ?? mileageRange.max" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Filtro Tipo de auto -->
+                  <div class="border-b border-gray-100">
+                    <button (click)="toggleFilter('body')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                      <span class="font-medium text-gray-700">Tipo de auto</span>
+                      <svg [class.rotate-180]="openFilters.body" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </button>
+                    <div *ngIf="openFilters.body" class="px-4 pb-4 max-h-48 overflow-y-auto">
+                      <div class="space-y-2">
+                        <label *ngFor="let body of availableBodies" class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                          <input type="checkbox" [value]="body" [(ngModel)]="filters.selectedBodies[body]" (change)="applyFilters()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                          <span class="text-sm text-gray-700">{{ body }}</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Filtro Mecánica -->
+                  <div class="border-b border-gray-100">
+                    <button (click)="toggleFilter('transmission')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                      <span class="font-medium text-gray-700">Transmisión</span>
+                      <svg [class.rotate-180]="openFilters.transmission" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </button>
+                    <div *ngIf="openFilters.transmission" class="px-4 pb-4">
+                      <div class="space-y-2">
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                          <input type="checkbox" value="manual" [(ngModel)]="filters.selectedTransmissions.manual" (change)="applyFilters()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                          <span class="text-sm text-gray-700">Manual</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                          <input type="checkbox" value="automatic" [(ngModel)]="filters.selectedTransmissions.automatic" (change)="applyFilters()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                          <span class="text-sm text-gray-700">Automática</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Filtro Color exterior -->
+                  <div class="border-b border-gray-100">
+                    <button (click)="toggleFilter('color')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                      <span class="font-medium text-gray-700">Color exterior</span>
+                      <svg [class.rotate-180]="openFilters.color" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </button>
+                    <div *ngIf="openFilters.color" class="px-4 pb-4 max-h-48 overflow-y-auto">
+                      <div class="space-y-2">
+                        <label *ngFor="let color of availableColors" class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                          <input type="checkbox" [value]="color" [(ngModel)]="filters.selectedColors[color]" (change)="applyFilters()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                          <span class="text-sm text-gray-700 capitalize">{{ color }}</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+                  
+                  <!-- Botón limpiar filtros -->
+                  <button (click)="clearFilters()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-xl transition-all duration-300 mt-4">
+                    Limpiar Filtros
+                  </button>
+                </div>
+
+                <!-- Promoción (Call to Action) -->
                 <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
                   <div class="flex items-start space-x-3">
                     <div class="flex-1">
@@ -81,137 +246,20 @@ interface VehicleWithApiData extends Vehicle {
                   </div>
                 </div>
 
-                <!-- Filtros principales -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-                  <div class="p-4 border-b border-gray-200">
-                    <h2 class="text-lg font-bold text-gray-900">Filtros</h2>
-                  </div>
-                  
-                  <!-- Filtro Precio -->
-                  <div class="border-b border-gray-100">
-                    <button class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Precio</span>
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                      </svg>
-                    </button>
-                    <div class="px-4 pb-4">
-                      <div class="space-y-3">
-                        <div class="flex items-center justify-between">
-                          <span class="text-sm text-gray-600">Desde</span>
-                          <span class="text-sm font-medium">$173,999</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                          <span class="text-sm text-gray-600">Hasta</span>
-                          <span class="text-sm font-medium">$2,000,000+</span>
-                        </div>
-                        <input type="range" min="0" max="2000000" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Filtro Ofertas -->
-                  <div class="border-b border-gray-100">
-                    <button class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Ofertas</span>
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                      </svg>
-                    </button>
-                  </div>
-
-                  <!-- Filtro Ubicación -->
-                  <div class="border-b border-gray-100">
-                    <button class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Ubicación</span>
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                      </svg>
-                    </button>
-                  </div>
-
-                  <!-- Filtro Marca -->
-                  <div class="border-b border-gray-100">
-                    <button class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Marca</span>
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                      </svg>
-                    </button>
-                  </div>
-
-                  <!-- Filtro Modelo -->
-                  <div class="border-b border-gray-100">
-                    <button class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Modelo</span>
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                      </svg>
-                    </button>
-                  </div>
-
-                  <!-- Filtro Año y Kilometraje -->
-                  <div class="border-b border-gray-100">
-                    <button class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Año y Kilometraje</span>
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                      </svg>
-                    </button>
-                  </div>
-
-                  <!-- Filtro Tipo de auto -->
-                  <div class="border-b border-gray-100">
-                    <button class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Tipo de auto</span>
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                      </svg>
-                    </button>
-                  </div>
-
-                  <!-- Filtro Mecánica -->
-                  <div class="border-b border-gray-100">
-                    <button class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Mecánica</span>
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                      </svg>
-                    </button>
-                  </div>
-
-                  <!-- Filtro Color exterior -->
-                  <div class="border-b border-gray-100">
-                    <button class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Color exterior</span>
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                      </svg>
-                    </button>
-                </div>
-
-                  <!-- Filtro Estado -->
-                  <div class="border-b border-gray-100">
-                    <button class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Estado</span>
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                      </svg>
-                    </button>
-                   </div>
-                </div>
-                
-                <!-- Botón aplicar filtros -->
-                <button class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105">
-                  Aplicar Filtros
-                </button>
-
               </div>
             </aside>
 
             <!-- Grid de Vehículos y Banners -->
             <div class="lg:w-3/4 xl:w-4/5">
-              <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div *ngIf="isLoading" class="text-center py-12">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
+                <p class="mt-4 text-gray-600">Cargando vehículos...</p>
+              </div>
+              <div *ngIf="!isLoading && filteredItems.length === 0" class="text-center py-12">
+                <p class="text-gray-600 text-lg">No se encontraron vehículos con los filtros seleccionados.</p>
+                <button (click)="clearFilters()" class="mt-4 text-yellow-500 hover:text-yellow-600 font-medium">Limpiar filtros</button>
+              </div>
+              <div *ngIf="!isLoading && filteredItems.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 <ng-container *ngFor="let item of filteredItems">
                   <!-- Vehículo -->
                   <app-vehicle-card-tailwind *ngIf="isVehicle(item)" [vehicle]="item"></app-vehicle-card-tailwind>
@@ -233,6 +281,190 @@ interface VehicleWithApiData extends Vehicle {
       </main>
     </div>
     <app-modern-footer></app-modern-footer>
+
+    <!-- Modal de Filtros para Móvil -->
+    <div *ngIf="showFiltersModal" class="fixed inset-0 z-50 lg:hidden" (click)="closeFiltersModal()">
+      <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+      <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+        <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between z-10">
+          <h2 class="text-xl font-bold text-gray-900">Filtros</h2>
+          <button (click)="closeFiltersModal()" class="text-gray-500 hover:text-gray-700">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="p-4 space-y-6">
+          
+          <!-- Filtro Precio -->
+          <div class="border-b border-gray-100 pb-4">
+            <button (click)="toggleFilter('price')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+              <span class="font-medium text-gray-700">Precio</span>
+              <svg [class.rotate-180]="openFilters.price" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div *ngIf="openFilters.price" class="px-4 pb-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-gray-600">Desde: <span class="font-medium text-gray-900">{{ '$' + formatPrice(filters.priceMin) }}</span></span>
+                  <span class="text-gray-600">Hasta: <span class="font-medium text-gray-900">{{ '$' + formatPrice(filters.priceMax) }}</span></span>
+                </div>
+                <div class="relative h-2">
+                  <input type="range" [(ngModel)]="filters.priceMin" (input)="applyFilters()" [min]="priceRange.min" [max]="priceRange.max" class="absolute top-0 left-0 w-full h-2 bg-transparent appearance-none cursor-pointer" style="z-index: 2;">
+                  <input type="range" [(ngModel)]="filters.priceMax" (input)="applyFilters()" [min]="priceRange.min" [max]="priceRange.max" class="absolute top-0 left-0 w-full h-2 bg-transparent appearance-none cursor-pointer" style="z-index: 1;">
+                  <div class="absolute top-0 left-0 w-full h-2 bg-gray-200 rounded-lg" style="z-index: 0;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtro Marca -->
+          <div class="border-b border-gray-100 pb-4">
+            <button (click)="toggleFilter('brand')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+              <span class="font-medium text-gray-700">Marca</span>
+              <svg [class.rotate-180]="openFilters.brand" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div *ngIf="openFilters.brand" class="px-4 pb-4 max-h-48 overflow-y-auto">
+              <div class="space-y-2">
+                <label *ngFor="let brand of availableBrands" class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                  <input type="checkbox" [value]="brand" [(ngModel)]="filters.selectedBrands[brand]" (change)="applyFilters()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                  <span class="text-sm text-gray-700">{{ brand }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtro Año -->
+          <div class="border-b border-gray-100 pb-4">
+            <button (click)="toggleFilter('year')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+              <span class="font-medium text-gray-700">Año</span>
+              <svg [class.rotate-180]="openFilters.year" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div *ngIf="openFilters.year" class="px-4 pb-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-gray-600">Desde: <span class="font-medium text-gray-900">{{ filters.yearFrom }}</span></span>
+                  <span class="text-gray-600">Hasta: <span class="font-medium text-gray-900">{{ filters.yearTo }}</span></span>
+                </div>
+                <div class="relative h-2">
+                  <input type="range" [(ngModel)]="filters.yearFrom" (input)="applyFilters()" [min]="yearRange.min" [max]="yearRange.max" class="absolute top-0 left-0 w-full h-2 bg-transparent appearance-none cursor-pointer" style="z-index: 2;">
+                  <input type="range" [(ngModel)]="filters.yearTo" (input)="applyFilters()" [min]="yearRange.min" [max]="yearRange.max" class="absolute top-0 left-0 w-full h-2 bg-transparent appearance-none cursor-pointer" style="z-index: 1;">
+                  <div class="absolute top-0 left-0 w-full h-2 bg-gray-200 rounded-lg" style="z-index: 0;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtro Kilometraje -->
+          <div class="border-b border-gray-100 pb-4">
+            <button (click)="toggleFilter('mileage')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+              <span class="font-medium text-gray-700">Kilometraje</span>
+              <svg [class.rotate-180]="openFilters.mileage" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div *ngIf="openFilters.mileage" class="px-4 pb-4">
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600">Hasta</span>
+                  <span class="text-sm font-medium">{{ formatMileage(filters.maxMileage ?? mileageRange.max) }} km</span>
+                </div>
+                <input type="range" [(ngModel)]="filters.maxMileage" (input)="applyFilters()" [min]="mileageRange.min" [max]="mileageRange.max" [value]="filters.maxMileage ?? mileageRange.max" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtro Tipo de auto -->
+          <div class="border-b border-gray-100 pb-4">
+            <button (click)="toggleFilter('body')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+              <span class="font-medium text-gray-700">Tipo de auto</span>
+              <svg [class.rotate-180]="openFilters.body" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div *ngIf="openFilters.body" class="px-4 pb-4 max-h-48 overflow-y-auto">
+              <div class="space-y-2">
+                <label *ngFor="let body of availableBodies" class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                  <input type="checkbox" [value]="body" [(ngModel)]="filters.selectedBodies[body]" (change)="applyFilters()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                  <span class="text-sm text-gray-700">{{ body }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtro Transmisión -->
+          <div class="border-b border-gray-100 pb-4">
+            <button (click)="toggleFilter('transmission')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+              <span class="font-medium text-gray-700">Transmisión</span>
+              <svg [class.rotate-180]="openFilters.transmission" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div *ngIf="openFilters.transmission" class="px-4 pb-4">
+              <div class="space-y-2">
+                <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                  <input type="checkbox" value="manual" [(ngModel)]="filters.selectedTransmissions.manual" (change)="applyFilters()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                  <span class="text-sm text-gray-700">Manual</span>
+                </label>
+                <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                  <input type="checkbox" value="automatic" [(ngModel)]="filters.selectedTransmissions.automatic" (change)="applyFilters()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                  <span class="text-sm text-gray-700">Automática</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtro Color exterior -->
+          <div class="border-b border-gray-100 pb-4">
+            <button (click)="toggleFilter('color')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+              <span class="font-medium text-gray-700">Color exterior</span>
+              <svg [class.rotate-180]="openFilters.color" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div *ngIf="openFilters.color" class="px-4 pb-4 max-h-48 overflow-y-auto">
+              <div class="space-y-2">
+                <label *ngFor="let color of availableColors" class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                  <input type="checkbox" [value]="color" [(ngModel)]="filters.selectedColors[color]" (change)="applyFilters()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                  <span class="text-sm text-gray-700 capitalize">{{ color }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botón limpiar filtros -->
+          <button (click)="clearFilters()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-xl transition-all duration-300 mb-4">
+            Limpiar Filtros
+          </button>
+
+          <!-- Call to Action en móvil -->
+          <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
+            <div class="flex items-start space-x-3">
+              <div class="flex-1">
+                <h3 class="font-semibold text-blue-900 mb-2">Encuentra el auto ideal para tu presupuesto</h3>
+                <a href="#" class="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center">
+                  Simular plan a meses
+                  <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </a>
+              </div>
+              <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
   `,
   styles: [
     `
@@ -290,6 +522,45 @@ export class InventoryComponent implements OnInit {
   brands: string[] = [];
   isLoading: boolean = true;
   loadError: string = '';
+
+  // Modal de filtros para móvil
+  showFiltersModal: boolean = false;
+  
+  filters = {
+    priceMin: 0,
+    priceMax: 2000000,
+    selectedBrands: {} as { [key: string]: boolean },
+    yearFrom: 0,
+    yearTo: new Date().getFullYear(),
+    maxMileage: null as number | null,
+    selectedBodies: {} as { [key: string]: boolean },
+    selectedTransmissions: {
+      manual: false,
+      automatic: false
+    },
+    selectedColors: {} as { [key: string]: boolean }
+  };
+
+  // Acordeones
+  openFilters: { [key: string]: boolean } = {
+    price: false,
+    brand: false,
+    year: false,
+    mileage: false,
+    body: false,
+    transmission: false,
+    color: false
+  };
+
+  // Datos disponibles para filtros
+  availableBrands: string[] = [];
+  availableBodies: string[] = ['Sedán', 'SUV', 'Hatchback', 'Pickup', 'Coupe', 'Convertible', 'Minivan'];
+  availableColors: string[] = ['Negro', 'Blanco', 'Gris', 'Rojo', 'Azul', 'Verde', 'Amarillo', 'Naranja', 'Beige'];
+
+  // Rangos
+  priceRange = { min: 0, max: 2000000 };
+  yearRange = { min: 2000, max: new Date().getFullYear() };
+  mileageRange = { min: 0, max: 200000 };
 
   constructor(
     private vehicleService: VehicleService,
@@ -656,19 +927,49 @@ export class InventoryComponent implements OnInit {
     // 2) Preparar helpers de coincidencia
     const normalizedSearch = (this.searchTerm || '').toString().trim().toLowerCase();
 
-    // 3) Aplicar filtros de búsqueda
+    // 3) Aplicar filtros de búsqueda y filtros avanzados
     const filteredVehicles: VehicleWithApiData[] = vehicleItems.filter((item: VehicleWithApiData) => {
+      // Búsqueda por texto
       const brand = (item.brand?.name || '').toString();
       const model = (item.model?.name || '').toString();
       const name = (item.name || '').toString();
-
-      // Búsqueda por texto en uuid, vin, brand, model, year, name
       const uuid = (item.uuid || '').toString().toLowerCase();
       const vin = (item.apiData?.vin || '').toString().toLowerCase();
       const textHaystack = `${uuid} ${vin} ${brand} ${model} ${item.year} ${name}`.toLowerCase();
       const matchesSearch = !normalizedSearch || textHaystack.includes(normalizedSearch);
 
-      return matchesSearch;
+      // Filtro de precio
+      const matchesPrice = (item.sale_price || 0) >= this.filters.priceMin && (item.sale_price || 0) <= this.filters.priceMax;
+
+      // Filtro de marca
+      const selectedBrands = Object.keys(this.filters.selectedBrands).filter(key => this.filters.selectedBrands[key]);
+      const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(brand);
+
+      // Filtro de año
+      const itemYear = item.year || item.model?.year || new Date().getFullYear();
+      const matchesYear = itemYear >= this.filters.yearFrom && itemYear <= this.filters.yearTo;
+
+      // Filtro de kilometraje
+      const matchesMileage = !this.filters.maxMileage || (item.mileage || 0) <= this.filters.maxMileage;
+
+      // Filtro de tipo de auto (body)
+      const selectedBodies = Object.keys(this.filters.selectedBodies).filter(key => this.filters.selectedBodies[key]);
+      const itemBody = (item as any).body?.name || item.apiData?.body?.name || '';
+      const matchesBody = selectedBodies.length === 0 || selectedBodies.includes(itemBody);
+
+      // Filtro de transmisión
+      const transmission = ((item as any).transmission || item.apiData?.transmission || '').toLowerCase();
+      const matchesTransmission = 
+        (!this.filters.selectedTransmissions.manual && !this.filters.selectedTransmissions.automatic) ||
+        (this.filters.selectedTransmissions.manual && transmission.includes('manual')) ||
+        (this.filters.selectedTransmissions.automatic && (transmission.includes('automatic') || transmission.includes('automática')));
+
+      // Filtro de color
+      const selectedColors = Object.keys(this.filters.selectedColors).filter(key => this.filters.selectedColors[key]);
+      const itemColor = (item.exterior_color || '').toLowerCase();
+      const matchesColor = selectedColors.length === 0 || selectedColors.some(color => itemColor.includes(color.toLowerCase()));
+
+      return matchesSearch && matchesPrice && matchesBrand && matchesYear && matchesMileage && matchesBody && matchesTransmission && matchesColor;
     });
 
     // 4) Aplicar ordenamiento sobre vehículos filtrados
@@ -702,6 +1003,8 @@ export class InventoryComponent implements OnInit {
           return (a.sale_price || 0) - (b.sale_price || 0);
         case 'price-high': 
           return (b.sale_price || 0) - (a.sale_price || 0);
+        case 'mileage-asc':
+          return (a.mileage || 0) - (b.mileage || 0);
         case 'newest':
         default: 
           return (b.year || 0) - (a.year || 0);
@@ -717,5 +1020,98 @@ export class InventoryComponent implements OnInit {
       }
     });
     this.brands = Array.from(brands).sort();
+    this.availableBrands = this.brands;
+    
+    // Inicializar checkboxes
+    this.availableBrands.forEach(brand => {
+      this.filters.selectedBrands[brand] = false;
+    });
+    this.availableBodies.forEach(body => {
+      this.filters.selectedBodies[body] = false;
+    });
+    this.availableColors.forEach(color => {
+      this.filters.selectedColors[color] = false;
+    });
+
+    // Calcular rangos
+    if (this.sampleVehicles.length > 0) {
+      const prices = this.sampleVehicles.map(v => v.sale_price);
+      this.priceRange.min = Math.min(...prices);
+      this.priceRange.max = Math.max(...prices);
+      this.filters.priceMin = this.priceRange.min;
+      this.filters.priceMax = this.priceRange.max;
+
+      const years = this.sampleVehicles.map(v => v.year || v.model?.year || new Date().getFullYear());
+      this.yearRange.min = Math.min(...years);
+      this.yearRange.max = Math.max(...years);
+      this.filters.yearFrom = this.yearRange.min;
+      this.filters.yearTo = this.yearRange.max;
+
+      const mileages = this.sampleVehicles.map(v => v.mileage || 0);
+      this.mileageRange.min = 0;
+      this.mileageRange.max = Math.max(...mileages, 200000);
+      if (!this.filters.maxMileage) {
+        this.filters.maxMileage = this.mileageRange.max;
+      }
+    }
+
+    // Aplicar filtros iniciales
+    this.applyFilters();
+  }
+
+  toggleFilter(filterName: string): void {
+    this.openFilters[filterName] = !this.openFilters[filterName];
+  }
+
+  openFiltersModal(): void {
+    this.showFiltersModal = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeFiltersModal(): void {
+    this.showFiltersModal = false;
+    document.body.style.overflow = '';
+  }
+
+
+  clearFilters(): void {
+    this.searchTerm = '';
+    this.filters.priceMin = this.priceRange.min;
+    this.filters.priceMax = this.priceRange.max;
+    this.filters.yearFrom = this.yearRange.min;
+    this.filters.yearTo = this.yearRange.max;
+    this.filters.maxMileage = this.mileageRange.max;
+    this.filters.selectedBrands = {};
+    this.filters.selectedBodies = {};
+    this.filters.selectedTransmissions = { manual: false, automatic: false };
+    this.filters.selectedColors = {};
+    this.sortBy = 'newest';
+    
+    // Reinicializar checkboxes
+    this.availableBrands.forEach(brand => {
+      this.filters.selectedBrands[brand] = false;
+    });
+    this.availableBodies.forEach(body => {
+      this.filters.selectedBodies[body] = false;
+    });
+    this.availableColors.forEach(color => {
+      this.filters.selectedColors[color] = false;
+    });
+    
+    this.applyFilters();
+  }
+
+  formatPrice(price: number): string {
+    return new Intl.NumberFormat('es-MX', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(price);
+  }
+
+  formatMileage(mileage: number): string {
+    return new Intl.NumberFormat('es-MX', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(mileage);
   }
 } 
