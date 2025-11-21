@@ -21,9 +21,9 @@ export interface Vehicle {
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="vehicle-card group max-w-sm cursor-pointer" (click)="navigateToDetail()">
+    <div class="vehicle-card group max-w-sm cursor-pointer rounded-2xl overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-shadow duration-300" (click)="navigateToDetail()">
       <!-- Image Container -->
-      <div class="relative overflow-hidden rounded-t-2xl">
+      <div class="relative overflow-hidden">
         <img 
           [src]="vehicle.first_image?.service_image_url || '/assets/placeholder-image.jpg'" 
           [alt]="vehicle.name"
@@ -100,7 +100,7 @@ export interface Vehicle {
       </div>
 
       <!-- Hover Effect Overlay -->
-      <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl pointer-events-none"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"></div>
     </div>
   `,
   styles: [`
