@@ -5,7 +5,6 @@ import { RouterModule } from '@angular/router';
 import { VehicleCardTailwindComponent, Vehicle } from '../shared/components/vehicle-card-tailwind/vehicle-card-tailwind.component';
 import { DarkNavComponent } from 'src/app/shared/components/dark-nav/dark-nav.component';
 import { ModernFooterComponent } from 'src/app/shared/components/modern-footer/modern-footer.component';
-import { BannerGenericComponent } from '../shared/components/banner-generic/banner-generic.component';
 import { VehicleService } from '../shared/services/vehicle.service';
 import { CampaingService } from '../shared/services/campaing.service';
 import { Vehicle as ApiVehicle } from '../shared/interfaces/vehicle_data.interface';
@@ -18,7 +17,7 @@ interface VehicleWithApiData extends Vehicle {
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, VehicleCardTailwindComponent, DarkNavComponent, ModernFooterComponent, BannerGenericComponent],
+  imports: [CommonModule, FormsModule, RouterModule, VehicleCardTailwindComponent, DarkNavComponent, ModernFooterComponent],
   template: `
     <app-dark-nav></app-dark-nav>
     <div class="bg-gray-50">
@@ -255,11 +254,24 @@ interface VehicleWithApiData extends Vehicle {
                 <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
                 <p class="mt-4 text-gray-600">Cargando vehículos...</p>
               </div>
-              <div *ngIf="!isLoading && filteredItems.length === 0" class="text-center py-12">
+              <!-- Mensaje de error -->
+              <div *ngIf="loadError && !isLoading" class="text-center py-12">
+                <div class="bg-red-50 border border-red-200 rounded-lg p-6 max-w-2xl mx-auto">
+                  <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <h3 class="text-xl font-bold text-red-900 mb-2">Error al cargar vehículos</h3>
+                  <p class="text-red-700 mb-4">{{ loadError }}</p>
+                  <button (click)="loadVehicles()" class="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors">
+                    Reintentar
+                  </button>
+                </div>
+              </div>
+              <div *ngIf="!isLoading && !loadError && filteredItems.length === 0" class="text-center py-12">
                 <p class="text-gray-600 text-lg">No se encontraron vehículos con los filtros seleccionados.</p>
                 <button (click)="clearFilters()" class="mt-4 text-yellow-500 hover:text-yellow-600 font-medium">Limpiar filtros</button>
               </div>
-              <div *ngIf="!isLoading && filteredItems.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div *ngIf="!isLoading && !loadError && filteredItems.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 <ng-container *ngFor="let item of filteredItems">
                   <!-- Vehículo -->
                   <app-vehicle-card-tailwind *ngIf="isVehicle(item)" [vehicle]="item"></app-vehicle-card-tailwind>
@@ -631,18 +643,26 @@ export class InventoryComponent implements OnInit {
   }
 
   loadVehicles(): void {
+    console.log('🚀 [INVENTORY] Iniciando carga de vehículos desde la API...');
     this.isLoading = true;
     this.loadError = '';
 
     this.vehicleService.searchVehicles({}, 1, 20).subscribe({
       next: (response) => {
+        console.log('📦 [INVENTORY] Respuesta de la API recibida:', response);
+        
         if (response.status === 200 && response.data && response.data.data) {
+          const apiVehicles = response.data.data;
+          console.log(`✅ [INVENTORY] ${apiVehicles.length} vehículos recibidos de la API`);
+          
           // Mapear vehículos de la API para incluir el año desde model.year y guardar apiData
-          this.sampleVehicles = response.data.data.map(v => ({
+          this.sampleVehicles = apiVehicles.map(v => ({
             ...v,
             year: v.model?.year || new Date().getFullYear(),
             apiData: v
           }));
+          
+          console.log('🔄 [INVENTORY] Vehículos mapeados:', this.sampleVehicles.length);
           
           // Insertar banners con promociones activas o banner por defecto
           let vehiclesWithBanners: (VehicleWithApiData | { type: 'banner'; imageUrl?: string })[];
@@ -664,12 +684,24 @@ export class InventoryComponent implements OnInit {
           this.mixedItems = vehiclesWithBanners;
           this.filteredItems = [...this.mixedItems];
           this.populateFilters();
+          console.log('✅ [INVENTORY] Vehículos cargados exitosamente. Total con banner:', this.mixedItems.length);
+        } else {
+          console.warn('⚠️ [INVENTORY] Respuesta de la API sin datos esperados:', response);
+          this.loadError = 'Error al cargar los vehículos. Por favor, intenta de nuevo más tarde.';
+          this.loadFallbackVehicles();
         }
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error al cargar vehículos:', error);
-        this.loadError = 'Error al cargar los vehículos';
+        console.error('❌ [INVENTORY] Error al cargar vehículos:', error);
+        console.error('❌ [INVENTORY] Detalles del error:', {
+          status: error.status,
+          statusText: error.statusText,
+          message: error.message,
+          url: error.url,
+          error: error.error
+        });
+        this.loadError = 'Error al cargar los vehículos. Por favor, intenta de nuevo más tarde.';
         this.isLoading = false;
         this.loadFallbackVehicles();
       }
