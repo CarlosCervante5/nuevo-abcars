@@ -1,16 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { VehicleCardTailwindComponent, Vehicle } from '../shared/components/vehicle-card-tailwind/vehicle-card-tailwind.component';
 import { DarkNavComponent } from 'src/app/shared/components/dark-nav/dark-nav.component';
 import { ModernFooterComponent } from 'src/app/shared/components/modern-footer/modern-footer.component';
 import { BannerGenericComponent } from '../shared/components/banner-generic/banner-generic.component';
 import { VehicleService } from '../shared/services/vehicle.service';
+import { CampaingService } from '../shared/services/campaing.service';
+import { Vehicle as ApiVehicle } from '../shared/interfaces/vehicle_data.interface';
+
+// Extender Vehicle para incluir apiData
+interface VehicleWithApiData extends Vehicle {
+  apiData?: ApiVehicle;
+}
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule, RouterModule, VehicleCardTailwindComponent, DarkNavComponent, ModernFooterComponent, BannerGenericComponent],
+  imports: [CommonModule, FormsModule, RouterModule, VehicleCardTailwindComponent, DarkNavComponent, ModernFooterComponent, BannerGenericComponent],
   template: `
     <app-dark-nav></app-dark-nav>
     <div class="bg-gray-50">
@@ -26,6 +34,8 @@ import { VehicleService } from '../shared/services/vehicle.service';
                 </svg>
                 <input 
                   type="text" 
+                  [(ngModel)]="searchTerm"
+                  (input)="onSearchChange()"
                   placeholder="Busca por modelo, marca, año, características..."
                   class="w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all bg-white shadow-sm"
                 >
@@ -35,15 +45,13 @@ import { VehicleService } from '../shared/services/vehicle.service';
 
           <!-- Contador de resultados y ordenamiento -->
           <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">{{ mixedItems.length }} Resultados</h1>
+            <h1 class="text-2xl font-bold text-gray-900">{{ filteredItems.length }} Resultados</h1>
             <div class="flex items-center space-x-4">
               <span class="text-gray-600">Ordenar por:</span>
-              <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
-                <option>Más relevantes</option>
-                <option>Precio: menor a mayor</option>
-                <option>Precio: mayor a menor</option>
-                <option>Año: más reciente</option>
-                <option>Kilometraje: menor</option>
+              <select [(ngModel)]="sortBy" (change)="onSortChange()" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                <option value="newest">Más recientes</option>
+                <option value="price-low">Precio: Menor a mayor</option>
+                <option value="price-high">Precio: Mayor a menor</option>
               </select>
             </div>
           </div>
@@ -204,17 +212,19 @@ import { VehicleService } from '../shared/services/vehicle.service';
             <!-- Grid de Vehículos y Banners -->
             <div class="lg:w-3/4 xl:w-4/5">
               <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                <ng-container *ngFor="let item of mixedItems">
+                <ng-container *ngFor="let item of filteredItems">
                   <!-- Vehículo -->
                   <app-vehicle-card-tailwind *ngIf="isVehicle(item)" [vehicle]="item"></app-vehicle-card-tailwind>
                   
-                  <!-- Banner de publicidad -->
-                  <app-banner-generic *ngIf="isBanner(item)" 
-                    [title]="item.title" 
-                    [description]="item.description" 
-                    [buttonText]="item.buttonText"
-                    [imageUrl]="item.imageUrl">
-                  </app-banner-generic>
+                  <!-- Banner de promoción -->
+                  <div *ngIf="isBanner(item)" class="relative rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 h-full">
+                    <img 
+                      [src]="getBannerImageUrl(item)" 
+                      alt="Promoción" 
+                      class="w-full h-full object-cover"
+                      (error)="onBannerImageError($event)"
+                    />
+                  </div>
                 </ng-container>
               </div>
             </div>
@@ -267,17 +277,86 @@ import { VehicleService } from '../shared/services/vehicle.service';
 })
 export class InventoryComponent implements OnInit {
   
-  sampleVehicles: Vehicle[] = [];
-  mixedItems: (Vehicle | { type: 'banner', title: string, description: string, buttonText: string, imageUrl: string })[] = [];
+  // Propiedades de búsqueda y filtrado
+  searchTerm: string = '';
+  sortBy: string = 'newest';
+  
+  // Datos de vehículos
+  sampleVehicles: VehicleWithApiData[] = [];
+  mixedItems: (VehicleWithApiData | { type: 'banner'; imageUrl?: string })[] = [];
+  filteredItems: (VehicleWithApiData | { type: 'banner'; imageUrl?: string })[] = [];
+  activePromotionImages: string[] = [];
   
   brands: string[] = [];
   isLoading: boolean = true;
   loadError: string = '';
 
-  constructor(private vehicleService: VehicleService) {}
+  constructor(
+    private vehicleService: VehicleService,
+    private campaingService: CampaingService
+  ) {}
 
   ngOnInit(): void {
-    this.loadVehicles();
+    // Cargar promociones primero, los vehículos se cargarán cuando las promociones estén listas
+    this.loadActivePromotions();
+  }
+
+  loadActivePromotions() {
+    // Llamar al endpoint público sin headers de autenticación
+    this.campaingService.getCampaingPublic().subscribe({
+      next: (response) => {
+        console.log('📦 [INVENTORY] Respuesta completa de promociones:', response);
+        
+        if (response.status === 200 && response.data && response.data.campaigns) {
+          const promotionImages: string[] = [];
+          
+          // Recorrer todas las campañas activas
+          response.data.campaigns.forEach((campaign: any) => {
+            // Recorrer todas las promociones de cada campaña
+            if (campaign.promotions && Array.isArray(campaign.promotions)) {
+              campaign.promotions.forEach((promotion: any) => {
+                // Intentar diferentes campos posibles para la URL de la imagen
+                const imageUrl = promotion.promo_Path || promotion.path || promotion.image_path || '';
+                
+                if (imageUrl && imageUrl.trim() !== '') {
+                  promotionImages.push(imageUrl.trim());
+                }
+              });
+            }
+          });
+          
+          this.activePromotionImages = promotionImages;
+          console.log('✅ [INVENTORY] Promociones activas cargadas:', this.activePromotionImages.length, 'imágenes');
+          
+          // Si ya se cargaron vehículos, reinsertar banners con las promociones
+          if (this.sampleVehicles.length > 0) {
+            if (this.activePromotionImages.length > 0) {
+              const vehiclesWithBanners = this.insertBannersRandomly(this.sampleVehicles, this.activePromotionImages);
+              this.mixedItems = vehiclesWithBanners;
+              this.filteredItems = [...this.mixedItems];
+              console.log('✅ [INVENTORY] Banners actualizados con promociones');
+            }
+          } else {
+            // Si los vehículos aún no se han cargado, cargarlos ahora que las promociones están listas
+            this.loadVehicles();
+          }
+        } else {
+          console.warn('⚠️ [INVENTORY] Respuesta sin estructura esperada:', response);
+          // Si no hay promociones, cargar vehículos de todas formas
+          if (this.sampleVehicles.length === 0) {
+            this.loadVehicles();
+          }
+        }
+      },
+      error: (error) => {
+        console.error('❌ [INVENTORY] Error al cargar promociones activas:', error);
+        this.activePromotionImages = [];
+        // Si hay error, cargar vehículos de todas formas
+        if (this.sampleVehicles.length === 0) {
+          this.loadVehicles();
+        }
+      }
+    });
   }
 
   loadVehicles(): void {
@@ -287,12 +366,32 @@ export class InventoryComponent implements OnInit {
     this.vehicleService.searchVehicles({}, 1, 20).subscribe({
       next: (response) => {
         if (response.status === 200 && response.data && response.data.data) {
-          // Mapear vehículos de la API para incluir el año desde model.year
+          // Mapear vehículos de la API para incluir el año desde model.year y guardar apiData
           this.sampleVehicles = response.data.data.map(v => ({
             ...v,
-            year: v.model?.year || new Date().getFullYear()
+            year: v.model?.year || new Date().getFullYear(),
+            apiData: v
           }));
-          this.createMixedItems();
+          
+          // Insertar banners con promociones activas o banner por defecto
+          let vehiclesWithBanners: (VehicleWithApiData | { type: 'banner'; imageUrl?: string })[];
+          
+          if (this.activePromotionImages.length > 0) {
+            // Insertar 2 banners aleatoriamente con promociones activas seleccionadas aleatoriamente
+            vehiclesWithBanners = this.insertBannersRandomly(this.sampleVehicles, this.activePromotionImages);
+            console.log('✅ [INVENTORY] Banners de promociones insertados aleatoriamente');
+          } else {
+            // Insertar banner por defecto después de 3 vehículos
+            vehiclesWithBanners = [
+              ...this.sampleVehicles.slice(0, 3),
+              { type: 'banner' },
+              ...this.sampleVehicles.slice(3)
+            ];
+            console.log('✅ [INVENTORY] Banner por defecto insertado (sin promociones activas)');
+          }
+
+          this.mixedItems = vehiclesWithBanners;
+          this.filteredItems = [...this.mixedItems];
           this.populateFilters();
         }
         this.isLoading = false;
@@ -409,74 +508,205 @@ export class InventoryComponent implements OnInit {
       }
     ];
 
-    this.createMixedItems();
+    // Insertar banners con promociones activas o banner por defecto
+    let vehiclesWithBanners: (Vehicle | { type: 'banner'; imageUrl?: string })[];
+    
+    if (this.activePromotionImages.length > 0) {
+      vehiclesWithBanners = this.insertBannersRandomly(this.sampleVehicles, this.activePromotionImages);
+    } else {
+      vehiclesWithBanners = [
+        ...this.sampleVehicles.slice(0, 3),
+        { type: 'banner' },
+        ...this.sampleVehicles.slice(3)
+      ];
+    }
+
+    this.mixedItems = vehiclesWithBanners;
+    this.filteredItems = [...this.mixedItems];
     this.populateFilters();
   }
 
   // Type guards para distinguir entre vehículos y banners
-  isVehicle(item: any): item is Vehicle {
-    return item && (item as Vehicle).brand !== undefined;
+  isVehicle(item: any): item is VehicleWithApiData {
+    return item && (item as VehicleWithApiData).brand !== undefined;
   }
 
-  isBanner(item: any): item is { type: 'banner', title: string, description: string, buttonText: string, imageUrl: string } {
+  isBanner(item: any): item is { type: 'banner'; imageUrl?: string } {
     return item && item.type === 'banner';
   }
 
-  // Crear array mixto con vehículos y banners
-  private createMixedItems(): void {
-    this.mixedItems = [];
+  insertBannersRandomly(vehicles: VehicleWithApiData[], promotionImages: string[]): (VehicleWithApiData | { type: 'banner'; imageUrl?: string })[] {
+    if (promotionImages.length === 0 || vehicles.length === 0) {
+      return vehicles;
+    }
+
+    // Siempre mostrar exactamente 2 banners con promociones aleatorias
+    const numBanners = 2;
+    const numVehicles = vehicles.length;
     
-    // Agregar vehículos y banners en posiciones específicas
-    for (let i = 0; i < this.sampleVehicles.length; i++) {
-      this.mixedItems.push(this.sampleVehicles[i]);
+    // Seleccionar 2 promociones aleatorias del conjunto total
+    let selectedPromotions: string[] = [];
+    if (promotionImages.length === 1) {
+      // Si solo hay 1 promoción, repetirla 2 veces
+      selectedPromotions = [promotionImages[0], promotionImages[0]];
+    } else if (promotionImages.length === 2) {
+      // Si hay 2 promociones, usar ambas
+      selectedPromotions = [...promotionImages];
+    } else {
+      // Si hay más de 2 promociones, seleccionar 2 aleatoriamente
+      const shuffled = [...promotionImages].sort(() => Math.random() - 0.5);
+      selectedPromotions = shuffled.slice(0, 2);
+    }
+    
+    // Crear array de posiciones posibles (índices donde se pueden insertar banners)
+    const possiblePositions: number[] = [];
+    for (let i = 1; i <= numVehicles; i++) {
+      possiblePositions.push(i);
+    }
+
+    // Seleccionar posiciones aleatorias para los banners (sin consecutivos)
+    const selectedPositions: number[] = [];
+    let attempts = 0;
+    const maxAttempts = 1000;
+
+    while (selectedPositions.length < numBanners && attempts < maxAttempts) {
+      const randomIndex = Math.floor(Math.random() * possiblePositions.length);
+      const position = possiblePositions[randomIndex];
       
-      // Agregar banner después del 3er, 6to y 9no vehículo
-      if (i === 2 || i === 5 || i === 8) {
-        this.mixedItems.push({
-          type: 'banner',
-          title: this.getBannerTitle(i),
-          description: this.getBannerDescription(i),
-          buttonText: this.getBannerButtonText(i),
-          imageUrl: this.getBannerImageUrl(i)
-        });
+      // Verificar que no sea consecutivo con ninguna posición ya seleccionada
+      const isConsecutive = selectedPositions.some(selectedPos => 
+        Math.abs(selectedPos - position) <= 1
+      );
+      
+      if (!selectedPositions.includes(position) && !isConsecutive) {
+        selectedPositions.push(position);
       }
+      
+      attempts++;
+    }
+
+    // Ordenar posiciones para insertar de forma secuencial
+    selectedPositions.sort((a, b) => a - b);
+
+    // Si no pudimos colocar todos los banners, usar las posiciones que sí funcionaron
+    let validPositions = selectedPositions.length > 0 ? selectedPositions : [];
+    
+    // Asegurar que siempre tengamos 2 posiciones para los 2 banners
+    if (validPositions.length === 0 && numVehicles > 0) {
+      // Caso extremo: insertar después del primer y último vehículo
+      validPositions = [1, numVehicles];
+    } else if (validPositions.length === 1) {
+      // Si solo encontramos 1 posición, agregar otra que no sea consecutiva
+      const firstPos = validPositions[0];
+      const secondPos = firstPos >= numVehicles - 1 ? 1 : numVehicles;
+      validPositions.push(secondPos);
+      validPositions.sort((a, b) => a - b);
+    }
+
+    // Construir el array final insertando vehículos y banners
+    const result: (VehicleWithApiData | { type: 'banner'; imageUrl?: string })[] = [];
+    let bannerIndex = 0;
+
+    for (let i = 0; i < numVehicles; i++) {
+      // Insertar vehículo
+      result.push(vehicles[i]);
+      
+      // Insertar banner si esta posición (después del vehículo i) está seleccionada
+      if (validPositions.includes(i + 1) && bannerIndex < selectedPromotions.length) {
+        result.push({
+          type: 'banner',
+          imageUrl: selectedPromotions[bannerIndex]
+        });
+        bannerIndex++;
+      }
+    }
+
+    return result;
+  }
+
+  getBannerImageUrl(item: any): string {
+    if (this.isBanner(item)) {
+      if (item.imageUrl) {
+        return item.imageUrl;
+      }
+    }
+    return 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=600&q=80';
+  }
+
+  onBannerImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img) {
+      img.src = 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=600&q=80';
     }
   }
 
-  private getBannerTitle(index: number): string {
-    const titles = [
-      '¡Financiamiento Especial!',
-      'Garantía Extendida',
-      'Seguro Automotriz'
-    ];
-    return titles[Math.floor(index / 3) % titles.length];
+  onSearchChange() {
+    this.applyFilters();
   }
 
-  private getBannerDescription(index: number): string {
-    const descriptions = [
-      'Obtén tu auto con 0% de enganche y tasas preferenciales. Aprobación en 24 horas.',
-      'Protege tu inversión con nuestra garantía extendida de hasta 3 años adicionales.',
-      'Seguro automotriz con las mejores coberturas y precios del mercado.'
-    ];
-    return descriptions[Math.floor(index / 3) % descriptions.length];
+  onSortChange() {
+    this.applyFilters();
   }
 
-  private getBannerButtonText(index: number): string {
-    const buttons = [
-      'Solicitar crédito',
-      'Ver garantías',
-      'Cotizar seguro'
-    ];
-    return buttons[Math.floor(index / 3) % buttons.length];
+  applyFilters() {
+    // 1) Separar vehículos y banners (preservar banners con sus imágenes)
+    const banners: { type: 'banner'; imageUrl?: string }[] = this.mixedItems.filter((i: any) => this.isBanner(i)) as { type: 'banner'; imageUrl?: string }[];
+    const vehicleItems: Vehicle[] = (this.mixedItems.filter((i: any) => this.isVehicle(i)) as Vehicle[]);
+
+    // 2) Preparar helpers de coincidencia
+    const normalizedSearch = (this.searchTerm || '').toString().trim().toLowerCase();
+
+    // 3) Aplicar filtros de búsqueda
+    const filteredVehicles: VehicleWithApiData[] = vehicleItems.filter((item: VehicleWithApiData) => {
+      const brand = (item.brand?.name || '').toString();
+      const model = (item.model?.name || '').toString();
+      const name = (item.name || '').toString();
+
+      // Búsqueda por texto en uuid, vin, brand, model, year, name
+      const uuid = (item.uuid || '').toString().toLowerCase();
+      const vin = (item.apiData?.vin || '').toString().toLowerCase();
+      const textHaystack = `${uuid} ${vin} ${brand} ${model} ${item.year} ${name}`.toLowerCase();
+      const matchesSearch = !normalizedSearch || textHaystack.includes(normalizedSearch);
+
+      return matchesSearch;
+    });
+
+    // 4) Aplicar ordenamiento sobre vehículos filtrados
+    this.sortVehicles(filteredVehicles);
+
+    // 5) Reinsertar banners aleatoriamente si hay promociones activas, o banner por defecto
+    let rebuilt: (VehicleWithApiData | { type: 'banner'; imageUrl?: string })[];
+    
+    if (this.activePromotionImages.length > 0) {
+      // Reinsertar 2 banners aleatoriamente con promociones seleccionadas aleatoriamente
+      rebuilt = this.insertBannersRandomly(filteredVehicles, this.activePromotionImages);
+    } else if (banners.length > 0) {
+      // Si hay banners pero no promociones activas, insertar banner por defecto después de 3 vehículos
+      rebuilt = [
+        ...filteredVehicles.slice(0, 3),
+        { type: 'banner' },
+        ...filteredVehicles.slice(3)
+      ];
+    } else {
+      // Sin banners
+      rebuilt = [...filteredVehicles];
+    }
+
+    this.filteredItems = rebuilt;
   }
 
-  private getBannerImageUrl(index: number): string {
-    const images = [
-      'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=600&q=80',
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=80',
-      'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=600&q=80'
-    ];
-    return images[Math.floor(index / 3) % images.length];
+  sortVehicles(vehicles: VehicleWithApiData[]) {
+    vehicles.sort((a, b) => {
+      switch (this.sortBy) {
+        case 'price-low': 
+          return (a.sale_price || 0) - (b.sale_price || 0);
+        case 'price-high': 
+          return (b.sale_price || 0) - (a.sale_price || 0);
+        case 'newest':
+        default: 
+          return (b.year || 0) - (a.year || 0);
+      }
+    });
   }
 
   private populateFilters(): void {
