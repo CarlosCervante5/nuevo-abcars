@@ -30,6 +30,7 @@ export class OverviewComponent implements OnInit {
     public name: string = '';
     public email: string = '';
     public role: string = '';
+    public mobileMenuOpen: boolean = false;
 
     constructor(
         private _accountService: AccountService, 
@@ -99,5 +100,13 @@ export class OverviewComponent implements OnInit {
                 this._router.navigate(['/']);
             }
         });
+    }
+
+    public toggleMobileMenu() {
+        this.mobileMenuOpen = !this.mobileMenuOpen;
+    }
+
+    public closeMobileMenu() {
+        this.mobileMenuOpen = false;
     }
 }

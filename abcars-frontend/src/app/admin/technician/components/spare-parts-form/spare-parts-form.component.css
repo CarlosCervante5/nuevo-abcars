@@ -1,0 +1,10 @@
+:host {
+  display: block;
+  background-color: white;
+}
+
+::ng-deep .mat-bottom-sheet-container {
+  background-color: white !important;
+  padding: 0 !important;
+}
+

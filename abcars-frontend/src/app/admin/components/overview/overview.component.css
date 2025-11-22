@@ -38,3 +38,18 @@
     height: 100%;
     object-fit: cover;
 }
+
+/* Mobile Menu Styles */
+.mobile-menu-btn {
+    @apply p-2 rounded-lg transition-colors duration-200;
+}
+
+.mobile-menu {
+    @apply absolute top-full left-0 right-0 bg-white shadow-xl transform -translate-y-full opacity-0 invisible transition-all duration-300;
+    max-height: calc(100vh - 5rem);
+    overflow-y: auto;
+}
+
+.mobile-menu.active {
+    @apply translate-y-0 opacity-100 visible;
+}

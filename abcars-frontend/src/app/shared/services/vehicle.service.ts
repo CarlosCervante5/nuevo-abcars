@@ -29,28 +29,28 @@ constructor(
             relationship_names: ['brand', 'line', 'model', 'body', 'version', 'dealership', 'campaigns.promotions', 'images'],
         }
 
-        return this._http.post<FullDetailResponse>(`${ this.baseUrl }/vehicles/detail`, data, { headers });
+        return this._http.post<FullDetailResponse>(`${ this.baseUrl }/api/vehicles/detail`, data, { headers });
 
     }
 
     public getBrands():Observable<BrandsResponse>{
-        return this._http.get<BrandsResponse>(`${ this.baseUrl }/vehicle_brands`);
+        return this._http.get<BrandsResponse>(`${ this.baseUrl }/api/vehicle_brands`);
     }
 
     public getModels(brand: string):Observable<ModelsResponse>{
-        return this._http.get<ModelsResponse>(`${ this.baseUrl }/line_models/by_brand/${brand}`);
+        return this._http.get<ModelsResponse>(`${ this.baseUrl }/api/line_models/by_brand/${brand}`);
     }
 
     public getModelsByBrand(brand: string):Observable<ModelsResponse>{
-        return this._http.get<ModelsResponse>(`${ this.baseUrl }/line_models/by_brand/${brand}`);
+        return this._http.get<ModelsResponse>(`${ this.baseUrl }/api/line_models/by_brand/${brand}`);
     }
 
     public getVersions(model: string):Observable<VersionsResponse>{
-        return this._http.get<VersionsResponse>(`${ this.baseUrl }/model_versions/by_model/${model}`);
+        return this._http.get<VersionsResponse>(`${ this.baseUrl }/api/model_versions/by_model/${model}`);
     }
 
     public getBodies():Observable<BodiesResponse>{
-        return this._http.get<BodiesResponse>(`${ this.baseUrl }/vehicle_bodies`);
+        return this._http.get<BodiesResponse>(`${ this.baseUrl }/api/vehicle_bodies`);
     }
 
     public attachVehicle(ids : string[], vehicle_id : string):Observable<GralResponse>{
@@ -63,7 +63,7 @@ constructor(
         let user_token = localStorage.getItem('user_token');
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
 
-        return this._http.post<VehicleUpdateResponse>(`${ this.baseUrl }/campaigns/attach_vehicle`, data, { headers });
+        return this._http.post<VehicleUpdateResponse>(`${ this.baseUrl }/api/campaigns/attach_vehicle`, data, { headers });
         
     }
 
@@ -72,7 +72,7 @@ constructor(
         let user_token = localStorage.getItem('user_token');
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
 
-        return this._http.post<VehicleStoreResponse>(`${ this.baseUrl }/vehicles`, form, { headers });
+        return this._http.post<VehicleStoreResponse>(`${ this.baseUrl }/api/vehicles`, form, { headers });
     }
 
 
@@ -80,7 +80,7 @@ constructor(
         let user_token = localStorage.getItem('user_token');
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
 
-        return this._http.post<VehicleUpdateResponse>(`${ this.baseUrl }/vehicles/update`, form, { headers });
+        return this._http.post<VehicleUpdateResponse>(`${ this.baseUrl }/api/vehicles/update`, form, { headers });
     }
     
 
@@ -108,7 +108,7 @@ constructor(
 
         params = params.set('has_images', false);
 
-        return this._http.get<SearchResponse>(`${ this.baseUrl }/vehicles/search`, {params} );
+        return this._http.get<SearchResponse>(`${ this.baseUrl }/api/vehicles/search`, {params} );
     }
 
     public searchVehicles(filters: any = {}, page: number = 1, paginate: number = 12):Observable<SearchResponse>{
@@ -171,11 +171,11 @@ constructor(
         // Solo vehículos activos
         params = params.set('status', 'active');
 
-        return this._http.get<SearchResponse>(`${ this.baseUrl }/vehicles/search`, {params} );
+        return this._http.get<SearchResponse>(`${ this.baseUrl }/api/vehicles/search`, {params} );
     }
 
     public getMinMaxPrices():Observable<MinMaxResponse>{
-        return this._http.get<MinMaxResponse>(`${ this.baseUrl }/vehicles/min_max`);
+        return this._http.get<MinMaxResponse>(`${ this.baseUrl }/api/vehicles/min_max`);
     }
 
     public getRandomVehicles(quantity: number = 8):Observable<SearchResponse>{
@@ -184,6 +184,6 @@ constructor(
             status: ['active']
         };
 
-        return this._http.post<SearchResponse>(`${ this.baseUrl }/vehicles/random`, data);
+        return this._http.post<SearchResponse>(`${ this.baseUrl }/api/vehicles/random`, data);
     }
 }

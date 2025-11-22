@@ -289,9 +289,21 @@ export class ModernHomeComponent implements OnInit {
           status: error.status,
           statusText: error.statusText,
           message: error.message,
-          url: error.url
+          url: error.url,
+          error: error.error
         });
-        this.loadError = 'Error al cargar los vehículos. Por favor, intenta de nuevo más tarde.';
+        
+        // Mensaje de error más descriptivo
+        if (error.status === 0) {
+          this.loadError = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+        } else if (error.status === 404) {
+          this.loadError = 'El endpoint no fue encontrado. Verifica que el servidor esté corriendo.';
+        } else if (error.status >= 500) {
+          this.loadError = 'Error del servidor. Por favor, intenta de nuevo más tarde.';
+        } else {
+          this.loadError = `Error al cargar los vehículos (${error.status}). Por favor, intenta de nuevo.`;
+        }
+        
         this.isLoading = false;
         
         // Mantener datos de ejemplo en caso de error

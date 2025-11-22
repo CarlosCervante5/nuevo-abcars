@@ -315,3 +315,14 @@ app-public-post {
         @apply hidden;
     }
 }
+
+/* Global Bottom Sheet Styles - Fondo blanco sólido para todos los modales */
+::ng-deep .mat-bottom-sheet-container {
+    background-color: white !important;
+    padding: 0 !important;
+}
+
+/* Asegurar que los componentes dentro de bottom sheets tengan fondo blanco */
+::ng-deep .mat-bottom-sheet-container > * {
+    background-color: white;
+}

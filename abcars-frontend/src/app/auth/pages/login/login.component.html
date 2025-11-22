@@ -18,7 +18,7 @@
                             type="email"
                             formControlName="email"
                             placeholder="tu@email.com"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200"
                             [class.border-red-500]="emailInvalid"
                             [class.focus:ring-red-500]="emailInvalid"
                         >
@@ -38,7 +38,7 @@
                                 [type]="hide ? 'password' : 'text'"
                                 formControlName="password"
                                 placeholder="Tu contraseña"
-                                class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200"
                                 [class.border-red-500]="passwordInvalid || passwordLength"
                                 [class.focus:ring-red-500]="passwordInvalid || passwordLength"
                             >
@@ -72,7 +72,7 @@
                     <button
                         type="submit"
                         [disabled]="form.invalid || spinner"
-                        class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
+                        class="w-full bg-yellow-500 text-white py-3 px-4 rounded-lg font-semibold hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
                     >
                         <span *ngIf="!spinner">Iniciar Sesión</span>
                         <span *ngIf="spinner" class="flex items-center">
@@ -88,13 +88,13 @@
                     <div class="text-center space-y-2">
                         <p class="text-sm text-gray-600">
                             ¿No tienes cuenta? 
-                            <a [routerLink]="['/auth/registro']" class="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200">
+                            <a [routerLink]="['/auth/registro']" class="text-yellow-600 hover:text-yellow-700 font-medium transition-colors duration-200">
                                 Regístrate aquí
                             </a>
                         </p>
                         <p class="text-sm text-gray-600">
                             ¿Olvidaste tu contraseña? 
-                            <a [routerLink]="['/auth/recuperar']" class="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200">
+                            <a [routerLink]="['/auth/recuperar']" class="text-yellow-600 hover:text-yellow-700 font-medium transition-colors duration-200">
                                 Recuperar contraseña
                             </a>
                         </p>

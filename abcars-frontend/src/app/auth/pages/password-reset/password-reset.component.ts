@@ -11,15 +11,7 @@ import Swal from 'sweetalert2';
 @Component({
     selector: 'app-password-reset',
     templateUrl: './password-reset.component.html',
-    styles: [`
-        mat-form-field { 
-        width: 100%;
-        }
-
-        button {
-        width: 80%;
-        }
-    `],
+    styles: [],
     standalone: false
 })
 export class PasswordResetComponent implements OnInit {

@@ -12,15 +12,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
     selector: 'app-recover-account',
     templateUrl: './recover-account.component.html',
-    styles: [`
-    mat-form-field { 
-      width: 100%;
-    }
-
-    button {
-      width: 80%;
-    }
-  `],
+    styles: [],
     standalone: false
 })
 

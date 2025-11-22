@@ -1,33 +1,95 @@
 <!-- Navbar de Administración -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" [routerLink]="['/']" style="font-size: 1.5rem; color: #333; cursor: pointer;">
-            <i class="fas fa-car me-2" style="color: #007bff;"></i>
-            ABCars Admin
-        </a>
-        
-        <div class="d-flex align-items-center gap-3">
-            <div class="d-flex align-items-center me-3">
-                <img [src]="image_path" alt="User" class="rounded-circle me-2" width="32" height="32">
-                <div class="d-flex flex-column">
-                    <span class="fw-bold" style="font-size: 0.9rem;">{{ name }}</span>
-                    <span class="text-muted" style="font-size: 0.75rem;">{{ role }}</span>
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-sm">
+    <div class="w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-20">
+            
+            <!-- Logo Section -->
+            <a [routerLink]="['/']" class="flex items-center">
+                <img src="assets/images/logo.svg" class="h-10 transition-all" alt="ABCars Logo">
+            </a>
+
+            <!-- Desktop Navigation - User Info and Actions -->
+            <div class="hidden lg:flex items-center space-x-4">
+                <!-- User Info -->
+                <div class="flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                    <img [src]="image_path" alt="User" class="rounded-full w-10 h-10 object-cover border-2 border-gray-200">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-semibold text-gray-900">{{ name }}</span>
+                        <span class="text-xs text-gray-500 capitalize">{{ role }}</span>
+                    </div>
+                </div>
+
+                <!-- Home Button -->
+                <a [routerLink]="['/']" 
+                   class="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 hover:bg-yellow-500 hover:text-white text-gray-700 transition-all duration-300" 
+                   title="Ir al sitio web">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                </a>
+                
+                <!-- Logout Button -->
+                <button (click)="logout()" 
+                        class="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-all duration-300" 
+                        title="Cerrar sesión">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    <span class="hidden xl:inline">Salir</span>
+                </button>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <div class="lg:hidden flex items-center space-x-2">
+                <!-- User Avatar (Mobile) -->
+                <div class="flex items-center space-x-2">
+                    <img [src]="image_path" alt="User" class="rounded-full w-8 h-8 object-cover border-2 border-gray-200">
+                </div>
+                
+                <button class="mobile-menu-btn text-gray-700" (click)="toggleMobileMenu()">
+                    <svg *ngIf="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                    <svg *ngIf="mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu lg:hidden" [class.active]="mobileMenuOpen">
+        <div class="px-4 py-4 border-b border-gray-200">
+            <div class="flex items-center space-x-3 mb-4">
+                <img [src]="image_path" alt="User" class="rounded-full w-12 h-12 object-cover border-2 border-gray-200">
+                <div class="flex flex-col">
+                    <span class="text-sm font-semibold text-gray-900">{{ name }}</span>
+                    <span class="text-xs text-gray-500 capitalize">{{ role }}</span>
                 </div>
             </div>
-            
-            <a [routerLink]="['/']" class="btn btn-sm btn-outline-primary" title="Ir al sitio web">
-                <i class="fas fa-home"></i>
+        </div>
+        <div class="px-4 py-4 space-y-3">
+            <a [routerLink]="['/']" 
+               class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-gray-100 hover:bg-yellow-500 hover:text-white text-gray-700 transition-all duration-300" 
+               (click)="closeMobileMenu()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                <span>Ir al sitio web</span>
             </a>
-            
-            <button (click)="logout()" class="btn btn-sm btn-danger" title="Cerrar sesión">
-                <i class="fas fa-sign-out-alt me-1"></i>
-                Salir
+            <button (click)="logout(); closeMobileMenu()" 
+                    class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-all duration-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                <span>Salir</span>
             </button>
         </div>
     </div>
 </nav>
 
-<div class="container">
+<div class="container pt-24">
     <div class="row">
         <div class="col-12 mt-5 mb-5">
             <!-- Role Information -->

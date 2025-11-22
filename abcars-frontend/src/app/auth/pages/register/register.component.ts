@@ -15,15 +15,7 @@ import { RegisterResponse } from '@interfaces/auth.interface';
 @Component({
     selector: 'app-register',
     templateUrl: './register.component.html',
-    styles: [`
-        mat-form-field { 
-            width: 100%;
-        }
-
-        button {
-            width: 80%;
-        }
-    `],
+    styles: [],
     standalone: false
 })
 

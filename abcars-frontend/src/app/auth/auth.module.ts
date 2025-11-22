@@ -13,6 +13,9 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { RecoverAccountComponent } from './pages/recover-account/recover-account.component';
 import { PasswordResetComponent } from './pages/password-reset/password-reset.component';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { HomeNavComponent } from '../shared/components/home-nav/home-nav.component';
+import { ModernFooterComponent } from '../shared/components/modern-footer/modern-footer.component';
 @NgModule({ declarations: [
         RegisterComponent,
         RecoverAccountComponent,
@@ -23,6 +26,9 @@ import { CommonModule } from '@angular/common';
         AccountRoutingModule,
         AccountModule,
         FormsModule,
-        ReactiveFormsModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
+        ReactiveFormsModule,
+        RouterModule,
+        HomeNavComponent,
+        ModernFooterComponent], providers: [provideHttpClient(withInterceptorsFromDi())] })
 
 export class AuthModule { }

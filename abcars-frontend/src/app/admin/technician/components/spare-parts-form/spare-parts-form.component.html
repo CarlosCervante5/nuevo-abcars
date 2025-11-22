@@ -1,79 +1,138 @@
-<div class="container">
-    <div class="col-12 text-center">
-        <h1 class=fw-bold>Solicitud de refacciones</h1>
-        <span>Agregar refacción.</span>
-        <hr />
+<div class="bg-white rounded-t-2xl p-6 min-h-screen md:min-h-0">
+    <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Solicitud de refacciones</h1>
+        <span class="text-gray-600">Agregar refacción.</span>
+        <hr class="mt-4 border-gray-300" />
     </div>
+
     <div>
-        <form [formGroup]="form" >
-            <div class="row">
-                <!-- Input para el nombre -->
-                <div class="col-12 col-md-12">
-                    <mat-form-field appearance="outline">
-                        <mat-label>Nombre de la refacción:</mat-label>
-                        <input matInput type="text" formControlName="name" placeholder="Nombre" minlength="1" maxlength="191" required>
-                        <mat-hint *ngIf="nameInvalid">Escribe el nombre de la refacción</mat-hint>
-                    </mat-form-field>
+        <form [formGroup]="form" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Nombre de la refacción -->
+                <div class="md:col-span-2">
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Nombre de la refacción:
+                    </label>
+                    <input
+                        id="name"
+                        type="text"
+                        formControlName="name"
+                        placeholder="Nombre"
+                        minlength="1"
+                        maxlength="191"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200"
+                        [class.border-red-500]="nameInvalid"
+                        [class.focus:ring-red-500]="nameInvalid"
+                    >
+                    <p *ngIf="nameInvalid" class="mt-2 text-sm text-red-600">
+                        Escribe el nombre de la refacción
+                    </p>
                 </div>
-                <!-- Input para la cantidad de refacciones-->
-                <div class="col-12 col-md-6">
-                    <mat-form-field appearance="outline">
-                        <mat-label>Piezas (Cantidad):</mat-label>
-                        <input matInput type="number" formControlName="amount" #amount placeholder="Nombre" placeholder="1" min="1" minlength="1" maxlength="2" (keyup)="maxLengthCheck(amount)" required>
-                        <mat-hint *ngIf="nameInvalid">Escribe el nombre de la refacción</mat-hint>
-                    </mat-form-field>
+
+                <!-- Piezas (Cantidad) -->
+                <div>
+                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
+                        Piezas (Cantidad):
+                    </label>
+                    <input
+                        id="amount"
+                        type="number"
+                        formControlName="amount"
+                        #amount
+                        placeholder="1"
+                        min="1"
+                        minlength="1"
+                        maxlength="2"
+                        (keyup)="maxLengthCheck(amount)"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200"
+                        [class.border-red-500]="amountInvalid"
+                        [class.focus:ring-red-500]="amountInvalid"
+                    >
+                    <p *ngIf="amountInvalid" class="mt-2 text-sm text-red-600">
+                        Ingrese la cantidad de piezas
+                    </p>
                 </div>
-                <!-- Time -->
-                <div class="col-12 col-md-6">
-                    <mat-form-field appearance="outline">
-                        <mat-label>Tiempo (Horas)</mat-label>
-                        <input matInput type="number" formControlName="hours" min="0" placeholder="1 o 0.3" required>
-                        <mat-hint *ngIf="hoursInvalid">Ingrese el número de horas.</mat-hint>
-                    </mat-form-field>
+
+                <!-- Tiempo (Horas) -->
+                <div>
+                    <label for="hours" class="block text-sm font-medium text-gray-700 mb-2">
+                        Tiempo (Horas)
+                    </label>
+                    <input
+                        id="hours"
+                        type="number"
+                        formControlName="hours"
+                        min="0"
+                        placeholder="1 o 0.3"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200"
+                        [class.border-red-500]="hoursInvalid"
+                        [class.focus:ring-red-500]="hoursInvalid"
+                    >
+                    <p *ngIf="hoursInvalid" class="mt-2 text-sm text-red-600">
+                        Ingrese el número de horas.
+                    </p>
                 </div>
             </div>
-            <div class="row mt-5">
-                <div class="col-12 text-end">
-                    <button mat-raised-button type="submit" class="marginButtons btn abcars-background-color-blue  mx-3 px-3" (click)="onSubmit()" [disabled]="form.invalid" >                                    
-                        <span >Registrar</span>
-                    </button>  
 
-                    <button mat-raised-button type="button"class="marginButtons btn  mx-3 px-3" (click)="close()">                                    
-                        Cancelar
-                    </button>
-                </div>
+            <!-- Botones -->
+            <div class="flex justify-end gap-3 mt-6">
+                <button
+                    type="submit"
+                    (click)="onSubmit()"
+                    [disabled]="form.invalid"
+                    class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    Registrar
+                </button>
+
+                <button
+                    type="button"
+                    (click)="close()"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition-all duration-200"
+                >
+                    Cancelar
+                </button>
             </div>
         </form>
 
-        <hr>
+        <hr class="my-6 border-gray-300">
 
-        <div class="row">
-            <div class="col-12 mt-2 mb-3">
-                <h4 class="d-flex justify-content-between align-items-center mb-3">
-                  <span class="fw-bold">Solicitud de Refacciones</span>
-                  <span class="badge bg-primary rounded-pill">{{ list_spare_parts.length }}</span>
-                </h4>
-                <ng-container *ngIf="list_spare_parts.length === 0; else elseTemplate">
-                    <div class="alert alert-info text-center" role="alert">                            
-                        Aún no has agregado ninguna refaccion a solicitar.
-                    </div>
-                </ng-container>
-                <ng-template #elseTemplate>
-                    <div class="overflow-auto" style="max-height: 250px;">
-                        <ol class="list-group list-group-numbered">
-                            <li class="list-group-item d-flex justify-content-between align-items-start" *ngFor="let part of list_spare_parts; let i = index">
-                                <div class="ms-2 me-auto">
-                                    <div class="fw-bold">{{ part.name }}</div>
-                                    <small class="text-muted mx-2">Cantidad: {{ part.quantity }} pza(s)</small>
-                                    <small class="text-muted">Ensamble: {{ part.labor_time }} hrs(s)</small>
+        <!-- Lista de Refacciones -->
+        <div class="mt-6">
+            <h4 class="flex justify-between items-center mb-4 text-lg font-bold text-gray-900">
+                <span>Solicitud de Refacciones</span>
+                <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">{{ list_spare_parts.length }}</span>
+            </h4>
+
+            <ng-container *ngIf="list_spare_parts.length === 0; else elseTemplate">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center text-blue-800">
+                    Aún no has agregado ninguna refacción a solicitar.
+                </div>
+            </ng-container>
+
+            <ng-template #elseTemplate>
+                <div class="overflow-auto max-h-64 border border-gray-200 rounded-lg">
+                    <ol class="list-decimal list-inside space-y-2 p-4">
+                        <li *ngFor="let part of list_spare_parts; let i = index" class="flex justify-between items-start p-3 bg-gray-50 rounded-lg">
+                            <div class="flex-1">
+                                <div class="font-semibold text-gray-900">{{ part.name }}</div>
+                                <div class="text-sm text-gray-600 mt-1">
+                                    <span class="mx-2">Cantidad: {{ part.quantity }} pza(s)</span>
+                                    <span>Ensamble: {{ part.labor_time }} hrs(s)</span>
                                 </div>
-
-                                <span class="badge bg-danger p-2" (click)="deletePart(part.valuation_uuid, i)"><i class="fi fi-rr-cross-circle"></i></span>
-                            </li>
-                        </ol>
-                    </div>
-                </ng-template>
-            </div>
+                            </div>
+                            <button
+                                (click)="deletePart(part.valuation_uuid, i)"
+                                class="text-red-500 hover:text-red-700 p-2 transition-colors"
+                            >
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z"/>
+                                </svg>
+                            </button>
+                        </li>
+                    </ol>
+                </div>
+            </ng-template>
         </div>
     </div>
 </div>

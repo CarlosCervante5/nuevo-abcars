@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
 import { AdminRoutingModule } from './admin-routing.module';
 import { OverviewComponent } from './components/overview/overview.component';
@@ -15,6 +16,7 @@ import { ValuationStatisticsOverviewComponent } from './components/valuation-sta
   ],
   imports: [
     CommonModule,
+    RouterModule,
     AdminRoutingModule,
     AngularMaterialModule,
     SkCubeComponent
