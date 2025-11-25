@@ -1,6 +1,6 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder, Validators, FormControl } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { concatMap } from 'rxjs';
 
 // Angular Material
@@ -31,7 +31,8 @@ import { BodyworkPaintValuatorFormComponent } from '../../components/bodywork-pa
     selector: 'app-checklist',
     templateUrl: './checklist.component.html',
     styleUrls: ['./checklist.component.css'],
-    standalone: false
+    standalone: false,
+    encapsulation: ViewEncapsulation.None
 })
 export class ChecklistComponent implements OnInit {
     @ViewChild('inputdate') inputdate!: ElementRef<HTMLInputElement>
@@ -74,7 +75,8 @@ export class ChecklistComponent implements OnInit {
         private _activatedRoute: ActivatedRoute,
         private _bottomSheet: MatBottomSheet,
         private _checklistService: ChecklistService,
-        private _detailValuationService: DetailValuationService
+        private _detailValuationService: DetailValuationService,
+        private _router: Router
     ) {
         this.customerInformationFormInit();
         this.mechanicElectricForm = this._formBuilder.group({});
@@ -442,16 +444,54 @@ export class ChecklistComponent implements OnInit {
     }
 
     public getChecklist(uuid_valuation: string) {
+        const token = localStorage.getItem('user_token');
+        if (!token) {
+            this._router.navigate(['/auth/iniciar-sesion'], { replaceUrl: true });
+            return;
+        }
         this._checklistService.getChecklist(uuid_valuation)
             .subscribe({
                 next: ( checklists: GetChecklist ) => {
-                    this.checklist = checklists.data;
+                    console.log('Checklist completo recibido:', checklists);
+                    this.checklist = checklists.data || [];
+                    console.log('Total de checkpoints:', this.checklist.length);
+                    console.log('Secciones encontradas:', [...new Set(this.checklist.map(chk => chk.section_name))]);
+                    
                     this.checklistMechanicElectric = this.checklist.filter(chk => chk.section_name === 'Mecánica y Eléctrica');
                     this.checklistExternalReview = this.checklist.filter(chk => chk.section_name === 'Revisión Exterior');
                     this.checklistInternalReview = this.checklist.filter(chk => chk.section_name === 'Revisión Interior');
                     this.checklistCertification = this.checklist.filter(chk => chk.section_name === 'Certificación de Vehículo');
                     
+                    console.log('Mecánica y Eléctrica:', this.checklistMechanicElectric.length);
+                    console.log('Revisión Exterior:', this.checklistExternalReview.length);
+                    console.log('Revisión Interior:', this.checklistInternalReview.length);
+                    console.log('Certificación:', this.checklistCertification.length);
+                    
+                    if (this.checklist.length === 0) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Sin datos',
+                            text: 'No se encontraron checkpoints para esta valuación. Por favor, verifica que la valuación tenga checkpoints asociados.',
+                            confirmButtonText: 'Aceptar'
+                        });
+                    }
+                    
                     this.createFormControls();
+                },
+                error: (error: any) => {
+                    console.error('Error al cargar el checklist:', error);
+                    if (error.status === 401) {
+                        // El interceptor ya manejará el 401
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo cargar el checklist. Por favor, intenta nuevamente.',
+                            confirmButtonText: 'Aceptar'
+                        }).then(() => {
+                            this._router.navigate(['/admin/valuator/appointment']);
+                        });
+                    }
                 }
             });
     }
@@ -469,69 +509,120 @@ export class ChecklistComponent implements OnInit {
         this._detailValuationService.getDetailValuation(uuid_valuation)
             .subscribe({
                 next: ( detailValuation: GetDetailValuation) => {
-                    if (detailValuation.data.vehicle === null) {
-                        const customer = detailValuation.data.appointment.customer;
-                        this.customerInformationForm.patchValue({
-                            name:      customer.name,
-                            last_name: customer.last_name,
-                            phone_1:     customer.phone_1,
-                            dealership_name: detailValuation.data.dealership.name,
-                            location: detailValuation.data.dealership.location,
-                            brand: detailValuation.data.appointment.vehicle.brand_name,
-                            model: detailValuation.data.appointment.vehicle.model_name,
-                            year: detailValuation.data.appointment.vehicle.year,
-                            mileage: detailValuation.data.appointment.vehicle.mileage
+                    // Validar que appointment existe antes de acceder a sus propiedades
+                    if (!detailValuation.data || !detailValuation.data.appointment) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo cargar la información de la cita. Por favor, verifica que la cita existe.',
+                            confirmButtonText: 'Aceptar'
+                        }).then(() => {
+                            this._router.navigate(['/admin/valuator/appointment']);
                         });
-    
-                        const valuationDate = detailValuation.data.appointment.scheduled_date
-                        const valDate = valuationDate.slice(0, -6);
-    
-                        this.customerInformationForm.controls['scheduled_date'].setValue(valDate);
-                        const vd = valDate.split("-").reverse().join("-");
-                        this.inputdate.nativeElement.value = vd;
-                        
-                        this.customerInformationForm.controls['name'].disable();
-                        this.customerInformationForm.controls['last_name'].disable();
-                        this.customerInformationForm.controls['phone_1'].disable();
-                        this.customerInformationForm.controls['dealership_name'].disable();
-                        this.customerInformationForm.controls['scheduled_date'].disable();
-                        this.customerInformationForm.controls['brand'].disable();
-                        this.customerInformationForm.controls['model'].disable();
-                        this.customerInformationForm.controls['year'].disable();
-                        this.customerInformationForm.controls['mileage'].disable();
-                    }else {
-                        const customer = detailValuation.data.appointment.customer;
+                        return;
+                    }
+                    
+                    if (detailValuation.data.vehicle === null) {
+                        const customer = detailValuation.data.appointment?.customer;
+                        if (!customer) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'No se pudo cargar la información del cliente. Por favor, verifica los datos.',
+                                confirmButtonText: 'Aceptar'
+                            });
+                            return;
+                        }
                         this.customerInformationForm.patchValue({
-                            name:      customer.name,
-                            last_name: customer.last_name,
-                            phone_1:     customer.phone_1,
-                            dealership_name: detailValuation.data.dealership.name,
-                            location: detailValuation.data.dealership.location,
-                            brand: detailValuation.data.vehicle.brand.name,
-                            model: detailValuation.data.vehicle.model.name,
-                            country_of_origin: detailValuation.data.vehicle.specification.country_of_origin.toLowerCase(),
-                            transmission: detailValuation.data.vehicle.transmission,
-                            intake_engine: detailValuation.data.vehicle.specification.intake_engine.toLowerCase(),
-                            auto_start_stop: detailValuation.data.vehicle.specification.auto_start_stop.toLowerCase(),
-                            vin: detailValuation.data.vehicle.vin,
-                            // line: detailValuation.data.vehicle.line.name,
-                            version: detailValuation.data.vehicle.version.name,
-                            year: detailValuation.data.appointment.vehicle.year,
-                            body: detailValuation.data.vehicle.body.name,
-                            mileage: detailValuation.data.vehicle.mileage,
-                            exterior_color: detailValuation.data.vehicle.exterior_color,
-                            plates: detailValuation.data.vehicle.specification.plates,
-                            cylinders: detailValuation.data.vehicle.cylinders.toString(),
-                            engine_type: detailValuation.data.vehicle.specification.engine_type.toString(),
-                            appraiserTechnician: detailValuation.data.technician[0].uuid
+                            name:      customer.name || '',
+                            last_name: customer.last_name || '',
+                            phone_1:     customer.phone_1 || '',
+                            dealership_name: detailValuation.data.dealership?.name || '',
+                            location: detailValuation.data.dealership?.location || '',
+                            brand: detailValuation.data.appointment?.vehicle?.brand_name || '',
+                            model: detailValuation.data.appointment?.vehicle?.model_name || '',
+                            year: detailValuation.data.appointment?.vehicle?.year || '',
+                            mileage: detailValuation.data.appointment?.vehicle?.mileage || 0
                         });
 
-                        const valuationDate = detailValuation.data.appointment.scheduled_date
-                        const valDate = valuationDate.slice(0, -6);
-    
-                        this.customerInformationForm.controls['scheduled_date'].setValue(valDate);
-                        const vd = valDate.split("-").reverse().join("-");
-                        this.inputdate.nativeElement.value = vd;
+                        const valuationDate = detailValuation.data.appointment?.scheduled_date;
+                        if (valuationDate) {
+                            const valDate = valuationDate.slice(0, -6);
+                            this.customerInformationForm.controls['scheduled_date']?.setValue(valDate);
+                            const vd = valDate.split("-").reverse().join("-");
+                            if (this.inputdate) {
+                                this.inputdate.nativeElement.value = vd;
+                            }
+                        }
+
+                        this.btn_save = true;
+                        this.btn_follow = false;
+
+                        if (this.customerInformationForm.controls['name']) this.customerInformationForm.controls['name'].disable();
+                        if (this.customerInformationForm.controls['last_name']) this.customerInformationForm.controls['last_name'].disable();
+                        if (this.customerInformationForm.controls['phone_1']) this.customerInformationForm.controls['phone_1'].disable();
+                        if (this.customerInformationForm.controls['dealership_name']) this.customerInformationForm.controls['dealership_name'].disable();
+                        if (this.customerInformationForm.controls['scheduled_date']) this.customerInformationForm.controls['scheduled_date'].disable();
+                        if (this.customerInformationForm.controls['brand']) this.customerInformationForm.controls['brand'].disable();
+                        if (this.customerInformationForm.controls['model']) this.customerInformationForm.controls['model'].disable();
+                        if (this.customerInformationForm.controls['year']) this.customerInformationForm.controls['year'].disable();
+                        if (this.customerInformationForm.controls['mileage']) this.customerInformationForm.controls['mileage'].disable();
+                    } else {
+                        // Validar que appointment y vehicle existen
+                        if (!detailValuation.data.appointment || !detailValuation.data.vehicle) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'No se pudo cargar la información del vehículo. Por favor, verifica los datos.',
+                                confirmButtonText: 'Aceptar'
+                            });
+                            return;
+                        }
+                        
+                        const customer = detailValuation.data.appointment?.customer;
+                        if (!customer) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'No se pudo cargar la información del cliente. Por favor, verifica los datos.',
+                                confirmButtonText: 'Aceptar'
+                            });
+                            return;
+                        }
+                            this.customerInformationForm.patchValue({
+                                name:      customer.name || '',
+                                last_name: customer.last_name || '',
+                                phone_1:     customer.phone_1 || '',
+                                dealership_name: detailValuation.data.dealership?.name || '',
+                                location: detailValuation.data.dealership?.location || '',
+                                brand: detailValuation.data.vehicle?.brand?.name || '',
+                                model: detailValuation.data.vehicle?.model?.name || '',
+                                country_of_origin: detailValuation.data.vehicle?.specification?.country_of_origin?.toLowerCase() || '',
+                                transmission: detailValuation.data.vehicle?.transmission || '',
+                                intake_engine: detailValuation.data.vehicle?.specification?.intake_engine?.toLowerCase() || '',
+                                auto_start_stop: detailValuation.data.vehicle?.specification?.auto_start_stop?.toLowerCase() || '',
+                                vin: detailValuation.data.vehicle?.vin || '',
+                                // line: detailValuation.data.vehicle.line.name,
+                                version: detailValuation.data.vehicle?.version?.name || '',
+                                year: detailValuation.data.appointment?.vehicle?.year || '',
+                                body: detailValuation.data.vehicle?.body?.name || '',
+                                mileage: detailValuation.data.vehicle?.mileage || 0,
+                                exterior_color: detailValuation.data.vehicle?.exterior_color || '',
+                                plates: detailValuation.data.vehicle?.specification?.plates || '',
+                                cylinders: detailValuation.data.vehicle?.cylinders?.toString() || '',
+                                engine_type: detailValuation.data.vehicle?.specification?.engine_type?.toString() || '',
+                                appraiserTechnician: detailValuation.data.technician?.[0]?.uuid || ''
+                            });
+
+                        const valuationDate = detailValuation.data.appointment?.scheduled_date;
+                        if (valuationDate) {
+                            const valDate = valuationDate.slice(0, -6);
+                            this.customerInformationForm.controls['scheduled_date']?.setValue(valDate);
+                            const vd = valDate.split("-").reverse().join("-");
+                            if (this.inputdate) {
+                                this.inputdate.nativeElement.value = vd;
+                            }
+                        }
 
                         this.btn_save = false;
                         this.btn_follow = true;
@@ -557,13 +648,25 @@ export class ChecklistComponent implements OnInit {
                         this.customerInformationForm.controls['plates'].disable();
                         this.customerInformationForm.controls['cylinders'].disable();
                         this.customerInformationForm.controls['engine_type'].disable();
-                        this.customerInformationForm.controls['appraiserTechnician'].disable();
+                        // appraiserTechnician se mantiene habilitado para permitir edición
+                        // this.customerInformationForm.controls['appraiserTechnician'].disable();
                     }
-                }
-            });
+                },
+            error: (error) => {
+                console.error('Error al cargar la valuación:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo cargar la información de la valuación. Por favor, intenta nuevamente.',
+                    confirmButtonText: 'Aceptar'
+                }).then(() => {
+                    this._router.navigate(['/admin/valuator/appointment']);
+                });
+            }
+        });
     }
 
-    private createFormControls() {
+    public createFormControls() {
         this.checklist.forEach(check => {
             if (check.section_name === 'Mecánica y Eléctrica') {
                 const selectedValue = check.value_type === 'textArea' && check.selected_value

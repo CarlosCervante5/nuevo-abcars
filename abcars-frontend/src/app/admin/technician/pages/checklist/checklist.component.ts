@@ -1,6 +1,6 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder, Validators, FormControl } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { concatMap } from 'rxjs';
 
 // Angular Material
@@ -13,6 +13,7 @@ import Swal from 'sweetalert2';
 // Services
 import { ChecklistService } from '@services/checklist.service';
 import { DetailValuationService } from '@services/detail-valuation.service';
+import { reload } from '@helpers/session.helper';
 
 // Interfaces
 import { Checklist, GetChecklist, GralResponse } from '@interfaces/getChecklist.interface';
@@ -31,7 +32,8 @@ import { BodyworkPaintValuatorFormComponent } from '../../components/bodywork-pa
     selector: 'app-checklist',
     templateUrl: './checklist.component.html',
     styleUrls: ['./checklist.component.css'],
-    standalone: false
+    standalone: false,
+    encapsulation: ViewEncapsulation.None
 })
 export class ChecklistComponent implements OnInit {
     @ViewChild('inputdate') inputdate!: ElementRef<HTMLInputElement>
@@ -74,7 +76,8 @@ export class ChecklistComponent implements OnInit {
         private _activatedRoute: ActivatedRoute,
         private _bottomSheet: MatBottomSheet,
         private _checklistService: ChecklistService,
-        private _detailValuationService: DetailValuationService
+        private _detailValuationService: DetailValuationService,
+        private _router: Router
     ) {
         this.customerInformationFormInit();
         this.mechanicElectricForm = this._formBuilder.group({});
@@ -84,6 +87,13 @@ export class ChecklistComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        // Verificar si hay token antes de hacer peticiones
+        const token = localStorage.getItem('user_token');
+        if (!token) {
+            this._router.navigate(['/auth/iniciar-sesion']);
+            return;
+        }
+
         // Years of vehicles allowed
         let year = new Date().getFullYear()+1;
         for (let i = year; i > year-23; i--) {
@@ -452,6 +462,19 @@ export class ChecklistComponent implements OnInit {
                     this.checklistCertification = this.checklist.filter(chk => chk.section_name === 'Certificación de Vehículo');
                     
                     this.createFormControls();
+                },
+                error: (error: any) => {
+                    console.error('Error al cargar el checklist:', error);
+                    if (error.status === 401) {
+                        reload(error, this._router);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo cargar el checklist. Por favor, intenta nuevamente.',
+                            confirmButtonText: 'Aceptar'
+                        });
+                    }
                 }
             });
     }
@@ -461,6 +484,12 @@ export class ChecklistComponent implements OnInit {
             .subscribe({
                 next: ( technicians: GetUsersByRol ) => {
                     this.technicians = technicians.data.users;
+                },
+                error: (error: any) => {
+                    console.error('Error al cargar los técnicos:', error);
+                    if (error.status === 401) {
+                        reload(error, this._router);
+                    }
                 }
             });
     }
@@ -469,101 +498,164 @@ export class ChecklistComponent implements OnInit {
         this._detailValuationService.getDetailValuation(uuid_valuation)
             .subscribe({
                 next: ( detailValuation: GetDetailValuation) => {
-                    if (detailValuation.data.vehicle === null) {
-                        const customer = detailValuation.data.appointment.customer;
-                        this.customerInformationForm.patchValue({
-                            name:      customer.name,
-                            last_name: customer.last_name,
-                            phone_1:     customer.phone_1,
-                            dealership_name: detailValuation.data.dealership.name,
-                            location: detailValuation.data.dealership.location,
-                            brand: detailValuation.data.appointment.vehicle.brand_name,
-                            model: detailValuation.data.appointment.vehicle.model_name,
-                            year: detailValuation.data.appointment.vehicle.year,
-                            mileage: detailValuation.data.appointment.vehicle.mileage
+                    // Validar que appointment existe antes de acceder a sus propiedades
+                    if (!detailValuation.data || !detailValuation.data.appointment) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo cargar la información de la cita. Por favor, verifica que la cita existe.',
+                            confirmButtonText: 'Aceptar'
+                        }).then(() => {
+                            this._router.navigate(['/admin/technician/appointment']);
                         });
-    
-                        const valuationDate = detailValuation.data.appointment.scheduled_date
-                        const valDate = valuationDate.slice(0, -6);
-    
-                        this.customerInformationForm.controls['scheduled_date'].setValue(valDate);
-                        const vd = valDate.split("-").reverse().join("-");
-                        this.inputdate.nativeElement.value = vd;
-                        
-                        this.customerInformationForm.controls['name'].disable();
-                        this.customerInformationForm.controls['last_name'].disable();
-                        this.customerInformationForm.controls['phone_1'].disable();
-                        this.customerInformationForm.controls['dealership_name'].disable();
-                        this.customerInformationForm.controls['scheduled_date'].disable();
-                        this.customerInformationForm.controls['brand'].disable();
-                        this.customerInformationForm.controls['model'].disable();
-                        this.customerInformationForm.controls['year'].disable();
-                        this.customerInformationForm.controls['mileage'].disable();
-                    }else {
-                        const customer = detailValuation.data.appointment.customer;
+                        return;
+                    }
+                    
+                    if (detailValuation.data.vehicle === null) {
+                        const customer = detailValuation.data.appointment?.customer;
+                        if (!customer) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'No se pudo cargar la información del cliente. Por favor, verifica los datos.',
+                                confirmButtonText: 'Aceptar'
+                            });
+                            return;
+                        }
                         this.customerInformationForm.patchValue({
-                            name:      customer.name,
-                            last_name: customer.last_name,
-                            phone_1:     customer.phone_1,
-                            dealership_name: detailValuation.data.dealership.name,
-                            location: detailValuation.data.dealership.location,
-                            brand: detailValuation.data.vehicle.brand.name,
-                            model: detailValuation.data.vehicle.model.name,
-                            country_of_origin: detailValuation.data.vehicle.specification.country_of_origin.toLowerCase(),
-                            transmission: detailValuation.data.vehicle.transmission,
-                            intake_engine: detailValuation.data.vehicle.specification.intake_engine.toLowerCase(),
-                            auto_start_stop: detailValuation.data.vehicle.specification.auto_start_stop.toLowerCase(),
-                            vin: detailValuation.data.vehicle.vin,
-                            // line: detailValuation.data.vehicle.line.name,
-                            version: detailValuation.data.vehicle.version.name,
-                            year: detailValuation.data.appointment.vehicle.year,
-                            body: detailValuation.data.vehicle.body.name,
-                            mileage: detailValuation.data.vehicle.mileage,
-                            exterior_color: detailValuation.data.vehicle.exterior_color,
-                            plates: detailValuation.data.vehicle.specification.plates,
-                            cylinders: detailValuation.data.vehicle.cylinders.toString(),
-                            engine_type: detailValuation.data.vehicle.specification.engine_type.toString(),
-                            appraiserTechnician: detailValuation.data.technician[0].uuid
+                            name:      customer.name || '',
+                            last_name: customer.last_name || '',
+                            phone_1:     customer.phone_1 || '',
+                            dealership_name: detailValuation.data.dealership?.name || '',
+                            location: detailValuation.data.dealership?.location || '',
+                            brand: detailValuation.data.appointment?.vehicle?.brand_name || '',
+                            model: detailValuation.data.appointment?.vehicle?.model_name || '',
+                            year: detailValuation.data.appointment?.vehicle?.year || '',
+                            mileage: detailValuation.data.appointment?.vehicle?.mileage || 0
                         });
 
-                        const valuationDate = detailValuation.data.appointment.scheduled_date
-                        const valDate = valuationDate.slice(0, -6);
-    
-                        this.customerInformationForm.controls['scheduled_date'].setValue(valDate);
-                        const vd = valDate.split("-").reverse().join("-");
-                        this.inputdate.nativeElement.value = vd;
+                        const valuationDate = detailValuation.data.appointment?.scheduled_date;
+                        if (valuationDate) {
+                            const valDate = valuationDate.slice(0, -6);
+                            this.customerInformationForm.controls['scheduled_date']?.setValue(valDate);
+                            const vd = valDate.split("-").reverse().join("-");
+                            if (this.inputdate) {
+                                this.inputdate.nativeElement.value = vd;
+                            }
+                        }
+
+                        this.btn_save = true; // Mantener en true si es un nuevo registro o no se ha guardado
+                        this.btn_follow = false; // Deshabilitar siguiente hasta guardar
+
+                        if (this.customerInformationForm.controls['name']) this.customerInformationForm.controls['name'].disable();
+                        if (this.customerInformationForm.controls['last_name']) this.customerInformationForm.controls['last_name'].disable();
+                        if (this.customerInformationForm.controls['phone_1']) this.customerInformationForm.controls['phone_1'].disable();
+                        if (this.customerInformationForm.controls['dealership_name']) this.customerInformationForm.controls['dealership_name'].disable();
+                        if (this.customerInformationForm.controls['scheduled_date']) this.customerInformationForm.controls['scheduled_date'].disable();
+                        if (this.customerInformationForm.controls['brand']) this.customerInformationForm.controls['brand'].disable();
+                        if (this.customerInformationForm.controls['model']) this.customerInformationForm.controls['model'].disable();
+                        if (this.customerInformationForm.controls['year']) this.customerInformationForm.controls['year'].disable();
+                        if (this.customerInformationForm.controls['mileage']) this.customerInformationForm.controls['mileage'].disable();
+                    } else {
+                        // Validar que appointment y vehicle existen
+                        if (!detailValuation.data.appointment || !detailValuation.data.vehicle) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'No se pudo cargar la información del vehículo. Por favor, verifica los datos.',
+                                confirmButtonText: 'Aceptar'
+                            });
+                            return;
+                        }
+                        
+                        const customer = detailValuation.data.appointment?.customer;
+                        if (!customer || !detailValuation.data.vehicle || !detailValuation.data.dealership || !detailValuation.data.vehicle.brand || !detailValuation.data.vehicle.model || !detailValuation.data.vehicle.specification || !detailValuation.data.vehicle.version || !detailValuation.data.vehicle.body || !detailValuation.data.technician || detailValuation.data.technician.length === 0) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Faltan datos esenciales del vehículo o cliente para cargar el checklist.',
+                                confirmButtonText: 'Aceptar'
+                            }).then(() => {
+                                this._router.navigate(['/admin/technician/appointment']);
+                            });
+                            return;
+                        }
+                        this.customerInformationForm.patchValue({
+                            name:      customer.name || '',
+                            last_name: customer.last_name || '',
+                            phone_1:     customer.phone_1 || '',
+                            dealership_name: detailValuation.data.dealership?.name || '',
+                            location: detailValuation.data.dealership?.location || '',
+                            brand: detailValuation.data.vehicle?.brand?.name || '',
+                            model: detailValuation.data.vehicle?.model?.name || '',
+                            country_of_origin: detailValuation.data.vehicle?.specification?.country_of_origin?.toLowerCase() || '',
+                            transmission: detailValuation.data.vehicle?.transmission || '',
+                            intake_engine: detailValuation.data.vehicle?.specification?.intake_engine?.toLowerCase() || '',
+                            auto_start_stop: detailValuation.data.vehicle?.specification?.auto_start_stop?.toLowerCase() || '',
+                            vin: detailValuation.data.vehicle?.vin || '',
+                            version: detailValuation.data.vehicle?.version?.name || '',
+                            year: detailValuation.data.appointment?.vehicle?.year || '',
+                            body: detailValuation.data.vehicle?.body?.name || '',
+                            mileage: detailValuation.data.vehicle?.mileage || 0,
+                            exterior_color: detailValuation.data.vehicle?.exterior_color || '',
+                            plates: detailValuation.data.vehicle?.specification?.plates || '',
+                            cylinders: detailValuation.data.vehicle?.cylinders?.toString() || '',
+                            engine_type: detailValuation.data.vehicle?.specification?.engine_type?.toString() || '',
+                            appraiserTechnician: detailValuation.data.technician?.[0]?.uuid || ''
+                        });
+
+                        const valuationDate = detailValuation.data.appointment?.scheduled_date;
+                        if (valuationDate) {
+                            const valDate = valuationDate.slice(0, -6);
+                            this.customerInformationForm.controls['scheduled_date']?.setValue(valDate);
+                            const vd = valDate.split("-").reverse().join("-");
+                            if (this.inputdate) {
+                                this.inputdate.nativeElement.value = vd;
+                            }
+                        }
 
                         this.btn_save = false;
                         this.btn_follow = true;
 
-                        this.customerInformationForm.controls['name'].disable();
-                        this.customerInformationForm.controls['last_name'].disable();
-                        this.customerInformationForm.controls['phone_1'].disable();
-                        this.customerInformationForm.controls['dealership_name'].disable();
-                        this.customerInformationForm.controls['scheduled_date'].disable();
-                        this.customerInformationForm.controls['brand'].disable();
-                        this.customerInformationForm.controls['model'].disable();
-                        this.customerInformationForm.controls['country_of_origin'].disable();
-                        this.customerInformationForm.controls['transmission'].disable();
-                        this.customerInformationForm.controls['intake_engine'].disable();
-                        this.customerInformationForm.controls['auto_start_stop'].disable();
-                        this.customerInformationForm.controls['vin'].disable();
-                        // this.customerInformationForm.controls['line'].disable();
-                        this.customerInformationForm.controls['version'].disable();
-                        this.customerInformationForm.controls['year'].disable();
-                        this.customerInformationForm.controls['body'].disable();
-                        this.customerInformationForm.controls['mileage'].disable();
-                        this.customerInformationForm.controls['exterior_color'].disable();
-                        this.customerInformationForm.controls['plates'].disable();
-                        this.customerInformationForm.controls['cylinders'].disable();
-                        this.customerInformationForm.controls['engine_type'].disable();
-                        this.customerInformationForm.controls['appraiserTechnician'].disable();
+                        if (this.customerInformationForm.controls['name']) this.customerInformationForm.controls['name'].disable();
+                        if (this.customerInformationForm.controls['last_name']) this.customerInformationForm.controls['last_name'].disable();
+                        if (this.customerInformationForm.controls['phone_1']) this.customerInformationForm.controls['phone_1'].disable();
+                        if (this.customerInformationForm.controls['dealership_name']) this.customerInformationForm.controls['dealership_name'].disable();
+                        if (this.customerInformationForm.controls['scheduled_date']) this.customerInformationForm.controls['scheduled_date'].disable();
+                        if (this.customerInformationForm.controls['brand']) this.customerInformationForm.controls['brand'].disable();
+                        if (this.customerInformationForm.controls['model']) this.customerInformationForm.controls['model'].disable();
+                        if (this.customerInformationForm.controls['country_of_origin']) this.customerInformationForm.controls['country_of_origin'].disable();
+                        if (this.customerInformationForm.controls['transmission']) this.customerInformationForm.controls['transmission'].disable();
+                        if (this.customerInformationForm.controls['intake_engine']) this.customerInformationForm.controls['intake_engine'].disable();
+                        if (this.customerInformationForm.controls['auto_start_stop']) this.customerInformationForm.controls['auto_start_stop'].disable();
+                        if (this.customerInformationForm.controls['vin']) this.customerInformationForm.controls['vin'].disable();
+                        if (this.customerInformationForm.controls['version']) this.customerInformationForm.controls['version'].disable();
+                        if (this.customerInformationForm.controls['year']) this.customerInformationForm.controls['year'].disable();
+                        if (this.customerInformationForm.controls['body']) this.customerInformationForm.controls['body'].disable();
+                        if (this.customerInformationForm.controls['mileage']) this.customerInformationForm.controls['mileage'].disable();
+                        if (this.customerInformationForm.controls['exterior_color']) this.customerInformationForm.controls['exterior_color'].disable();
+                        if (this.customerInformationForm.controls['plates']) this.customerInformationForm.controls['plates'].disable();
+                        if (this.customerInformationForm.controls['cylinders']) this.customerInformationForm.controls['cylinders'].disable();
+                        if (this.customerInformationForm.controls['engine_type']) this.customerInformationForm.controls['engine_type'].disable();
+                        // appraiserTechnician se mantiene habilitado para permitir edición
+                        // if (this.customerInformationForm.controls['appraiserTechnician']) this.customerInformationForm.controls['appraiserTechnician'].disable();
                     }
-                }
-            });
+                },
+                error: (error: any) => {
+                console.error('Error al cargar la valuación:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo cargar la información de la valuación. Por favor, intenta nuevamente.',
+                    confirmButtonText: 'Aceptar'
+                }).then(() => {
+                    this._router.navigate(['/admin/technician/appointment']);
+                });
+            }
+        });
     }
 
-    private createFormControls() {
+    public createFormControls() {
         this.checklist.forEach(check => {
             if (check.section_name === 'Mecánica y Eléctrica') {
                 const selectedValue = check.value_type === 'textArea' && check.selected_value
