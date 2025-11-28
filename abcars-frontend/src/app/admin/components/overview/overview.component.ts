@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 
@@ -16,7 +16,8 @@ import Swal from 'sweetalert2';
     selector: 'app-overview',
     templateUrl: './overview.component.html',
     styleUrls: ['./overview.component.css'],
-    standalone: false
+    standalone: false,
+    encapsulation: ViewEncapsulation.None
 })
 
 export class OverviewComponent implements OnInit {

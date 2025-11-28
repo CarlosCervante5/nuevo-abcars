@@ -9,7 +9,7 @@
 
 .card-module {
     border: 1px dashed #939393 !important;
-    background-color: rgba(248,246,242,.3);    
+    background-color: rgba(248,246,242,.3) !important;    
 }
 
 .link-module {
