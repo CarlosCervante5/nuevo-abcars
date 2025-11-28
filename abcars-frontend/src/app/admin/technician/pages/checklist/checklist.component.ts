@@ -259,7 +259,6 @@ export class ChecklistComponent implements OnInit {
 
         bottomSheetRef.instance.imagesUploaded.subscribe((areAllUploaded: boolean) => {
             if (areAllUploaded) {
-                console.log('Todas las imágenes requeridas están presentes.');
                 Swal.fire({
                     icon: 'success',
                     title: 'Completado',
@@ -268,7 +267,6 @@ export class ChecklistComponent implements OnInit {
                     timer: 3500
                 });
             } else {
-                console.log('Faltan imágenes por subir.');
                 Swal.fire({
                     icon: 'warning',
                     title: 'Atención',
@@ -279,12 +277,7 @@ export class ChecklistComponent implements OnInit {
         });
 
         bottomSheetRef.afterDismissed().subscribe((dataFromChild) => {
-            console.log(dataFromChild?.data);
-            if(dataFromChild?.data === true ){
-                console.log('Todas las imágenes requeridas están presentes.');
-            } 
-            else {
-                console.log('No se realizaron modificaciones en las imágenes.');
+            if(dataFromChild?.data !== true) {
                 Swal.fire({
                     icon: 'info',
                     title: 'Sin cambios',
@@ -303,7 +296,6 @@ export class ChecklistComponent implements OnInit {
 
         bottomSheetRef.instance.imagesInternalUploaded.subscribe((areAllInternalUploaded: boolean) => {
             if (areAllInternalUploaded) {
-                console.log('Todsas las imágenes requeridas están presentes.');
                 Swal.fire({
                     icon: 'success',
                     title: 'Completado',
@@ -312,7 +304,6 @@ export class ChecklistComponent implements OnInit {
                     timer: 3500
                 });
             } else {
-                console.log('Faltan imágenes por subir.');
                 Swal.fire({
                     icon: 'warning',
                     title: 'Atención',
@@ -323,11 +314,7 @@ export class ChecklistComponent implements OnInit {
         });
 
         bottomSheetRef.afterDismissed().subscribe((dataFromChild) => {
-            console.log(dataFromChild?.data);
-            if (dataFromChild?.data === true) {
-                console.log('Todas las imágenes requeridas están presentes.');
-            } else {
-                console.log('No se realizaron modificaciones en las imágenes');
+            if (dataFromChild?.data !== true) {
                 Swal.fire({
                     icon: 'info',
                     title: 'Sin cambios',
@@ -351,7 +338,6 @@ export class ChecklistComponent implements OnInit {
 
     public onSelectChange(event: any, uuid_check: string){
         const valorSeleccionado = event.value || (event.target as HTMLSelectElement).value;
-        console.log('Opción seleccionada:', valorSeleccionado, ' Uuid del check:', uuid_check);
         this.attachCheck(this.valuation_uuid, uuid_check, valorSeleccionado);
     }
 
@@ -363,7 +349,6 @@ export class ChecklistComponent implements OnInit {
 
     public onInputChange(event: Event, uuid_check: string) {
         const valor = (event.target as HTMLInputElement).value;
-        console.log('Texto ingresado:', valor, ' check_uuid:', uuid_check);
         this.inputValor = valor;
         this.check_uuid = uuid_check;
         //this.attachCheck(this.valuation_uuid, uuid_check, valor);
@@ -459,7 +444,6 @@ export class ChecklistComponent implements OnInit {
                     this.createFormControls();
                 },
                 error: (error: any) => {
-                    console.error('Error al cargar el checklist:', error);
                     if (error.status === 401) {
                         reload(error, this._router);
                     } else {
@@ -481,7 +465,6 @@ export class ChecklistComponent implements OnInit {
                     this.technicians = technicians.data.users;
                 },
                 error: (error: any) => {
-                    console.error('Error al cargar los técnicos:', error);
                     if (error.status === 401) {
                         reload(error, this._router);
                     }
@@ -639,7 +622,6 @@ export class ChecklistComponent implements OnInit {
                     }
                 },
                 error: (error: any) => {
-                console.error('Error al cargar la valuación:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',

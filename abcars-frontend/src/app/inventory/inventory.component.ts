@@ -589,8 +589,6 @@ export class InventoryComponent implements OnInit {
     // Llamar al endpoint público sin headers de autenticación
     this.campaingService.getCampaingPublic().subscribe({
       next: (response) => {
-        console.log('📦 [INVENTORY] Respuesta completa de promociones:', response);
-        
         if (response.status === 200 && response.data && response.data.campaigns) {
           const promotionImages: string[] = [];
           
@@ -610,7 +608,6 @@ export class InventoryComponent implements OnInit {
           });
           
           this.activePromotionImages = promotionImages;
-          console.log('✅ [INVENTORY] Promociones activas cargadas:', this.activePromotionImages.length, 'imágenes');
           
           // Si ya se cargaron vehículos, reinsertar banners con las promociones
           if (this.sampleVehicles.length > 0) {
@@ -618,14 +615,12 @@ export class InventoryComponent implements OnInit {
               const vehiclesWithBanners = this.insertBannersRandomly(this.sampleVehicles, this.activePromotionImages);
               this.mixedItems = vehiclesWithBanners;
               this.filteredItems = [...this.mixedItems];
-              console.log('✅ [INVENTORY] Banners actualizados con promociones');
             }
           } else {
             // Si los vehículos aún no se han cargado, cargarlos ahora que las promociones están listas
             this.loadVehicles();
           }
         } else {
-          console.warn('⚠️ [INVENTORY] Respuesta sin estructura esperada:', response);
           // Si no hay promociones, cargar vehículos de todas formas
           if (this.sampleVehicles.length === 0) {
             this.loadVehicles();
@@ -633,7 +628,6 @@ export class InventoryComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('❌ [INVENTORY] Error al cargar promociones activas:', error);
         this.activePromotionImages = [];
         // Si hay error, cargar vehículos de todas formas
         if (this.sampleVehicles.length === 0) {
@@ -644,17 +638,13 @@ export class InventoryComponent implements OnInit {
   }
 
   loadVehicles(): void {
-    console.log('🚀 [INVENTORY] Iniciando carga de vehículos desde la API...');
     this.isLoading = true;
     this.loadError = '';
 
     this.vehicleService.searchVehicles({}, 1, 20).subscribe({
       next: (response) => {
-        console.log('📦 [INVENTORY] Respuesta de la API recibida:', response);
-        
         if (response.status === 200 && response.data && response.data.data) {
           const apiVehicles = response.data.data;
-          console.log(`✅ [INVENTORY] ${apiVehicles.length} vehículos recibidos de la API`);
           
           // Mapear vehículos de la API para incluir el año desde model.year y guardar apiData
           this.sampleVehicles = apiVehicles.map(v => ({
@@ -663,15 +653,12 @@ export class InventoryComponent implements OnInit {
             apiData: v
           }));
           
-          console.log('🔄 [INVENTORY] Vehículos mapeados:', this.sampleVehicles.length);
-          
           // Insertar banners con promociones activas o banner por defecto
           let vehiclesWithBanners: (VehicleWithApiData | { type: 'banner'; imageUrl?: string })[];
           
           if (this.activePromotionImages.length > 0) {
             // Insertar 2 banners aleatoriamente con promociones activas seleccionadas aleatoriamente
             vehiclesWithBanners = this.insertBannersRandomly(this.sampleVehicles, this.activePromotionImages);
-            console.log('✅ [INVENTORY] Banners de promociones insertados aleatoriamente');
           } else {
             // Insertar banner por defecto después de 3 vehículos
             vehiclesWithBanners = [
@@ -679,29 +666,18 @@ export class InventoryComponent implements OnInit {
               { type: 'banner' },
               ...this.sampleVehicles.slice(3)
             ];
-            console.log('✅ [INVENTORY] Banner por defecto insertado (sin promociones activas)');
           }
 
           this.mixedItems = vehiclesWithBanners;
           this.filteredItems = [...this.mixedItems];
           this.populateFilters();
-          console.log('✅ [INVENTORY] Vehículos cargados exitosamente. Total con banner:', this.mixedItems.length);
         } else {
-          console.warn('⚠️ [INVENTORY] Respuesta de la API sin datos esperados:', response);
           this.loadError = 'Error al cargar los vehículos. Por favor, intenta de nuevo más tarde.';
           this.loadFallbackVehicles();
         }
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('❌ [INVENTORY] Error al cargar vehículos:', error);
-        console.error('❌ [INVENTORY] Detalles del error:', {
-          status: error.status,
-          statusText: error.statusText,
-          message: error.message,
-          url: error.url,
-          error: error.error
-        });
         this.loadError = 'Error al cargar los vehículos. Por favor, intenta de nuevo más tarde.';
         this.isLoading = false;
         this.loadFallbackVehicles();

@@ -38,8 +38,7 @@ export class RecoverAccountComponent implements OnInit {
     }
 
     scrollTop() {
-        var scrollElem = document.querySelector('#moveTop');
-        scrollElem!.scrollIntoView();  
+        window.scrollTo(0, 0);
     }
 
     get emailInvalid() {
