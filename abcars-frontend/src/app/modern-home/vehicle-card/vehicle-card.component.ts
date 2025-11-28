@@ -88,7 +88,6 @@ export class VehicleCardComponent {
   getVehicleImage(): string {
     // Usar la imagen real de la API si está disponible
     if (this.vehicle.image_url && this.vehicle.image_url.trim() !== '') {
-      console.log(`🖼️ [CARD] ${this.vehicle.brand} ${this.vehicle.model} usando imagen API:`, this.vehicle.image_url);
       return this.vehicle.image_url;
     }
     

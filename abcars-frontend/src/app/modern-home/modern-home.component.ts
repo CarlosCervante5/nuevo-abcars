@@ -132,50 +132,25 @@ export class ModernHomeComponent implements OnInit {
     // Llamar al endpoint público sin headers de autenticación
     this.campaingService.getCampaingPublic().subscribe({
       next: (response) => {
-        console.log('📦 [PROMO] Respuesta completa de promociones:', response);
-        
         if (response.status === 200 && response.data && response.data.campaigns) {
           const promotionImages: string[] = [];
           
-          console.log('📋 [PROMO] Total de campañas recibidas:', response.data.campaigns.length);
-          
           // Recorrer todas las campañas activas
-          response.data.campaigns.forEach((campaign: any, campaignIndex: number) => {
-            console.log(`📋 [PROMO] Campaña ${campaignIndex + 1}:`, {
-              uuid: campaign.uuid,
-              name: campaign.name,
-              promotions_count: campaign.promotions?.length || 0,
-              promotions: campaign.promotions
-            });
-            
+          response.data.campaigns.forEach((campaign: any) => {
             // Recorrer todas las promociones de cada campaña
             if (campaign.promotions && Array.isArray(campaign.promotions)) {
-              campaign.promotions.forEach((promotion: any, promoIndex: number) => {
-                console.log(`  📸 [PROMO] Promoción ${promoIndex + 1}:`, {
-                  promo_Path: promotion.promo_Path,
-                  path: promotion.path,
-                  id: promotion.id,
-                  full_object: promotion
-                });
-                
+              campaign.promotions.forEach((promotion: any) => {
                 // Intentar diferentes campos posibles para la URL de la imagen
                 const imageUrl = promotion.promo_Path || promotion.path || promotion.image_path || '';
                 
                 if (imageUrl && imageUrl.trim() !== '') {
                   promotionImages.push(imageUrl.trim());
-                  console.log(`  ✅ [PROMO] Imagen agregada: ${imageUrl.trim()}`);
-                } else {
-                  console.log(`  ⚠️ [PROMO] Promoción sin URL de imagen válida`);
                 }
               });
-            } else {
-              console.log(`  ⚠️ [PROMO] Campaña sin promociones o promociones no es array`);
             }
           });
           
           this.activePromotionImages = promotionImages;
-          console.log('✅ [PROMO] Promociones activas cargadas:', this.activePromotionImages.length, 'imágenes');
-          console.log('📋 [PROMO] URLs de imágenes:', this.activePromotionImages);
           
           // Si ya se cargaron vehículos, reinsertar banners con las promociones
           if (this.vehicles.length > 0) {
@@ -184,7 +159,6 @@ export class ModernHomeComponent implements OnInit {
               if (this.activePromotionImages.length > 0) {
                 this.vehicles = this.insertBannersRandomly(vehicleItems, this.activePromotionImages);
                 this.filteredVehicles = [...this.vehicles];
-                console.log('✅ [PROMO] Banners actualizados con promociones');
               }
             }
           } else {
@@ -192,7 +166,6 @@ export class ModernHomeComponent implements OnInit {
             this.loadVehicles();
           }
         } else {
-          console.warn('⚠️ [PROMO] Respuesta sin estructura esperada:', response);
           // Si no hay promociones, cargar vehículos de todas formas
           if (this.vehicles.length === 0) {
             this.loadVehicles();
@@ -200,7 +173,6 @@ export class ModernHomeComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('❌ [PROMO] Error al cargar promociones activas:', error);
         this.activePromotionImages = [];
         // Si hay error, cargar vehículos de todas formas
         if (this.vehicles.length === 0) {
@@ -211,28 +183,18 @@ export class ModernHomeComponent implements OnInit {
   }
 
   loadVehicles() {
-    console.log('🚀 [HOME] Iniciando carga de vehículos desde la API...');
     this.isLoading = true;
     this.loadError = '';
 
     // Cargar 7 vehículos desde la API (el 8vo será el banner)
     this.vehicleService.searchVehicles({}, 1, 7).subscribe({
       next: (response) => {
-        console.log('📦 [HOME] Respuesta de la API recibida:', response);
-        
         if (response.status === 200 && response.data && response.data.data) {
           const apiVehicles = response.data.data;
-          console.log(`✅ [HOME] ${apiVehicles.length} vehículos recibidos de la API`);
           
           // Convertir vehículos de la API al formato del componente
-          const mappedVehicles: Vehicle[] = apiVehicles.map((v, index) => {
+          const mappedVehicles: Vehicle[] = apiVehicles.map((v) => {
             const imageUrl = v.first_image?.service_image_url || v.images?.[0]?.service_image_url || '';
-            console.log(`🖼️ [HOME] Vehículo ${index + 1} (${v.brand?.name} ${v.model?.name}):`, {
-              uuid: v.uuid,
-              first_image: v.first_image?.service_image_url,
-              images_count: v.images?.length || 0,
-              final_image_url: imageUrl
-            });
             
         return {
           uuid: v.uuid,
@@ -250,18 +212,12 @@ export class ModernHomeComponent implements OnInit {
         };
           });
 
-          console.log('🔄 [HOME] Vehículos mapeados:', mappedVehicles.length);
-          console.log('📋 [HOME] Promociones activas disponibles:', this.activePromotionImages.length);
-          console.log('📋 [HOME] URLs de promociones:', this.activePromotionImages);
-
           // Insertar banners con promociones activas o banner por defecto
           let vehiclesWithBanners: (Vehicle | { type: 'banner'; imageUrl?: string })[];
           
           if (this.activePromotionImages.length > 0) {
             // Insertar 2 banners aleatoriamente con promociones activas seleccionadas aleatoriamente
             vehiclesWithBanners = this.insertBannersRandomly(mappedVehicles, this.activePromotionImages);
-            console.log('✅ [HOME] 2 banners de promociones insertados aleatoriamente');
-            console.log('📋 [HOME] Banners insertados:', vehiclesWithBanners.filter((i: any) => this.isBanner(i)));
           } else {
             // Insertar banner por defecto después de 3 vehículos
             vehiclesWithBanners = [
@@ -269,30 +225,16 @@ export class ModernHomeComponent implements OnInit {
               { type: 'banner' },
               ...mappedVehicles.slice(3)
             ];
-            console.log('✅ [HOME] Banner por defecto insertado (sin promociones activas)');
           }
 
           this.vehicles = vehiclesWithBanners;
           this.filteredVehicles = [...this.vehicles];
-          console.log('✅ [HOME] Vehículos cargados exitosamente. Total con banner:', this.vehicles.length);
-          console.log('📋 [HOME] filteredVehicles:', this.filteredVehicles);
-          console.log('🔍 [HOME] Primer vehículo:', this.filteredVehicles[0]);
         } else {
-          console.warn('⚠️ [HOME] Respuesta de la API sin datos esperados:', response);
           this.loadFallbackVehicles();
         }
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('❌ [HOME] Error al cargar vehículos:', error);
-        console.error('❌ [HOME] Detalles del error:', {
-          status: error.status,
-          statusText: error.statusText,
-          message: error.message,
-          url: error.url,
-          error: error.error
-        });
-        
         // Mensaje de error más descriptivo
         if (error.status === 0) {
           this.loadError = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
@@ -307,7 +249,6 @@ export class ModernHomeComponent implements OnInit {
         this.isLoading = false;
         
         // Mantener datos de ejemplo en caso de error
-        console.log('🔄 [HOME] Cargando vehículos de respaldo...');
         this.loadFallbackVehicles();
       }
     });
@@ -366,10 +307,7 @@ export class ModernHomeComponent implements OnInit {
   getBannerImageUrl(item: any): string {
     if (this.isBanner(item)) {
       if (item.imageUrl) {
-        console.log('🖼️ [BANNER] Usando imagen de promoción:', item.imageUrl);
         return item.imageUrl;
-      } else {
-        console.log('🖼️ [BANNER] Banner sin imageUrl, usando imagen por defecto');
       }
     }
     return 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=600&q=80';
@@ -404,8 +342,6 @@ export class ModernHomeComponent implements OnInit {
       const shuffled = [...promotionImages].sort(() => Math.random() - 0.5);
       selectedPromotions = shuffled.slice(0, 2);
     }
-    
-    console.log('🎲 [BANNER] Promociones seleccionadas aleatoriamente:', selectedPromotions);
     
     // Crear array de posiciones posibles (índices donde se pueden insertar banners)
     // Posiciones: 1, 2, 3, ..., numVehicles (después de cada vehículo)
@@ -584,7 +520,6 @@ export class ModernHomeComponent implements OnInit {
 
   // Métodos de navegación
   viewVehicleDetail(vehicle: Vehicle) {
-    console.log('Navegando a detalles del vehículo:', vehicle);
     this.router.navigate(['/vehiculo', vehicle.uuid]);
   }
 

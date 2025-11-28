@@ -90,16 +90,7 @@ export class LoginComponent implements OnInit {
      * Form Client Information
      */
     public onSubmit() {
-        console.log('=== LOGIN ATTEMPT ===');
-        console.log('Form valid:', this.form.valid);
-        console.log('Form value:', this.form.value);
-        console.log('Form errors:', this.form.errors);
-        
         if (this.form.invalid) {
-            console.error('Form is invalid:', {
-                email: this.form.get('email')?.errors,
-                password: this.form.get('password')?.errors
-            });
             return;
         }
         
@@ -110,8 +101,6 @@ export class LoginComponent implements OnInit {
         this._authService.login(this.form)
         .subscribe({
             next: ( loginResponse : LoginResponse) => {
-                console.log('Login successful:', loginResponse);
-                
                 // Usar el AuthStateService para manejar el estado
                 this._authService.setAuthState(
                     loginResponse.data.token,
@@ -121,8 +110,6 @@ export class LoginComponent implements OnInit {
                 
                 // Guardar el perfil por separado
                 localStorage.setItem('profile', JSON.stringify( loginResponse.data.profile));
-
-                console.log('Navigating to:', loginResponse.data.role === 'client' ? '/auth/mi-cuenta' : `/admin/${loginResponse.data.role}`);
 
                 // Lista de roles válidos con vistas
                 const validRoles = [
@@ -153,8 +140,6 @@ export class LoginComponent implements OnInit {
                 this.spinner = false;
             },
             error: (error) => {
-                console.error('Login error:', error);
-
                 Swal.fire({
                     icon: 'error',
                     title: 'Oupps..',

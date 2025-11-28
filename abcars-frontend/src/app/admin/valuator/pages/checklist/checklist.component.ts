@@ -251,7 +251,6 @@ export class ChecklistComponent implements OnInit {
 
         bottomSheetRef.instance.imagesUploaded.subscribe((areAllUploaded: boolean) => {
             if (areAllUploaded) {
-                console.log('Todas las imágenes requeridas están presentes.');
                 Swal.fire({
                     icon: 'success',
                     title: 'Completado',
@@ -260,7 +259,6 @@ export class ChecklistComponent implements OnInit {
                     timer: 3500
                 });
             } else {
-                console.log('Faltan imágenes por subir.');
                 Swal.fire({
                     icon: 'warning',
                     title: 'Atención',
@@ -271,12 +269,7 @@ export class ChecklistComponent implements OnInit {
         });
 
         bottomSheetRef.afterDismissed().subscribe((dataFromChild) => {
-            console.log(dataFromChild?.data);
-            if(dataFromChild?.data === true ){
-                console.log('Todas las imágenes requeridas están presentes.');
-            } 
-            else {
-                console.log('No se realizaron modificaciones en las imágenes.');
+            if(dataFromChild?.data !== true) {
                 Swal.fire({
                     icon: 'info',
                     title: 'Sin cambios',
@@ -295,7 +288,6 @@ export class ChecklistComponent implements OnInit {
 
         bottomSheetRef.instance.imagesInternalUploaded.subscribe((areAllInternalUploaded: boolean) => {
             if (areAllInternalUploaded) {
-                console.log('Todsas las imágenes requeridas están presentes.');
                 Swal.fire({
                     icon: 'success',
                     title: 'Completado',
@@ -304,7 +296,6 @@ export class ChecklistComponent implements OnInit {
                     timer: 3500
                 });
             } else {
-                console.log('Faltan imágenes por subir.');
                 Swal.fire({
                     icon: 'warning',
                     title: 'Atención',
@@ -315,11 +306,7 @@ export class ChecklistComponent implements OnInit {
         });
 
         bottomSheetRef.afterDismissed().subscribe((dataFromChild) => {
-            console.log(dataFromChild?.data);
-            if (dataFromChild?.data === true) {
-                console.log('Todas las imágenes requeridas están presentes.');
-            } else {
-                console.log('No se realizaron modificaciones en las imágenes');
+            if (dataFromChild?.data !== true) {
                 Swal.fire({
                     icon: 'info',
                     title: 'Sin cambios',
@@ -343,7 +330,6 @@ export class ChecklistComponent implements OnInit {
 
     public onSelectChange(event: any, uuid_check: string){
         const valorSeleccionado = event.value || (event.target as HTMLSelectElement).value;
-        console.log('Opción seleccionada:', valorSeleccionado, ' Uuid del check:', uuid_check);
         this.attachCheck(this.valuation_uuid, uuid_check, valorSeleccionado);
     }
 
@@ -355,7 +341,6 @@ export class ChecklistComponent implements OnInit {
 
     public onInputChange(event: Event, uuid_check: string) {
         const valor = (event.target as HTMLInputElement).value;
-        console.log('Texto ingresado:', valor, ' check_uuid:', uuid_check);
         this.inputValor = valor;
         this.check_uuid = uuid_check;
         //this.attachCheck(this.valuation_uuid, uuid_check, valor);
@@ -447,20 +432,12 @@ export class ChecklistComponent implements OnInit {
         this._checklistService.getChecklist(uuid_valuation)
             .subscribe({
                 next: ( checklists: GetChecklist ) => {
-                    console.log('Checklist completo recibido:', checklists);
                     this.checklist = checklists.data || [];
-                    console.log('Total de checkpoints:', this.checklist.length);
-                    console.log('Secciones encontradas:', [...new Set(this.checklist.map(chk => chk.section_name))]);
                     
                     this.checklistMechanicElectric = this.checklist.filter(chk => chk.section_name === 'Mecánica y Eléctrica');
                     this.checklistExternalReview = this.checklist.filter(chk => chk.section_name === 'Revisión Exterior');
                     this.checklistInternalReview = this.checklist.filter(chk => chk.section_name === 'Revisión Interior');
                     this.checklistCertification = this.checklist.filter(chk => chk.section_name === 'Certificación de Vehículo');
-                    
-                    console.log('Mecánica y Eléctrica:', this.checklistMechanicElectric.length);
-                    console.log('Revisión Exterior:', this.checklistExternalReview.length);
-                    console.log('Revisión Interior:', this.checklistInternalReview.length);
-                    console.log('Certificación:', this.checklistCertification.length);
                     
                     if (this.checklist.length === 0) {
                         Swal.fire({
