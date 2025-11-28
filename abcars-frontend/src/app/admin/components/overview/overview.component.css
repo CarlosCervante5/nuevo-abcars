@@ -39,17 +39,176 @@
     object-fit: cover;
 }
 
+/* Navbar Styles */
+.admin-navbar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 50 !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.admin-navbar-container {
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+
+@media (min-width: 640px) {
+    .admin-navbar-container {
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    .admin-navbar-container {
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+    }
+}
+
+.admin-navbar-flex {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    height: 5rem !important;
+}
+
+.admin-logo-img {
+    height: 2.5rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.admin-user-name {
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    color: #111827 !important;
+}
+
+.admin-user-role {
+    font-size: 0.75rem !important;
+    color: #6b7280 !important;
+    text-transform: capitalize !important;
+}
+
+.admin-home-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    border-radius: 0.5rem !important;
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+    transition: all 0.3s ease !important;
+    text-decoration: none !important;
+}
+
+.admin-home-btn:hover {
+    background-color: #eab308 !important;
+    color: #ffffff !important;
+}
+
+.admin-logout-btn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    padding: 0.5rem 1rem !important;
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    border-radius: 0.5rem !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.admin-logout-btn:hover {
+    background-color: #dc2626 !important;
+}
+
+.admin-logout-btn-text {
+    display: none !important;
+}
+
+@media (min-width: 1280px) {
+    .admin-logout-btn-text {
+        display: inline !important;
+    }
+}
+
+.admin-desktop-nav {
+    display: none !important;
+}
+
+@media (min-width: 1024px) {
+    .admin-desktop-nav {
+        display: flex !important;
+        align-items: center !important;
+        gap: 1rem !important;
+    }
+}
+
+.admin-mobile-nav {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+@media (min-width: 1024px) {
+    .admin-mobile-nav {
+        display: none !important;
+    }
+}
+
+/* Dashboard Title */
+.admin-dashboard-title {
+    font-weight: 700 !important;
+    margin-bottom: 0 !important;
+    font-size: x-large !important;
+}
+
+.admin-modules-title {
+    text-align: start !important;
+    font-weight: 700 !important;
+}
+
 /* Mobile Menu Styles */
 .mobile-menu-btn {
-    @apply p-2 rounded-lg transition-colors duration-200;
+    padding: 0.5rem !important;
+    border-radius: 0.5rem !important;
+    transition: all 0.2s ease !important;
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    color: #374151 !important;
 }
 
 .mobile-menu {
-    @apply absolute top-full left-0 right-0 bg-white shadow-xl transform -translate-y-full opacity-0 invisible transition-all duration-300;
-    max-height: calc(100vh - 5rem);
-    overflow-y: auto;
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    transform: translateY(-100%) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: all 0.3s ease !important;
+    max-height: calc(100vh - 5rem) !important;
+    overflow-y: auto !important;
 }
 
 .mobile-menu.active {
-    @apply translate-y-0 opacity-100 visible;
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }

@@ -1,56 +1,56 @@
 <!-- Navbar de Administración -->
-<nav class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-sm">
-    <div class="w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-20">
+<nav class="admin-navbar">
+    <div class="admin-navbar-container">
+        <div class="admin-navbar-flex">
             
             <!-- Logo Section -->
-            <a [routerLink]="['/']" class="flex items-center">
-                <img src="assets/images/logo.svg" class="h-10 transition-all" alt="ABCars Logo">
+            <a [routerLink]="['/']" style="display: flex; align-items: center;">
+                <img src="assets/images/logo.svg" class="admin-logo-img" alt="ABCars Logo">
             </a>
 
             <!-- Desktop Navigation - User Info and Actions -->
-            <div class="hidden lg:flex items-center space-x-4">
+            <div class="admin-desktop-nav">
                 <!-- User Info -->
-                <div class="flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-                    <img [src]="image_path" alt="User" class="rounded-full w-10 h-10 object-cover border-2 border-gray-200">
-                    <div class="flex flex-col">
-                        <span class="text-sm font-semibold text-gray-900">{{ name }}</span>
-                        <span class="text-xs text-gray-500 capitalize">{{ role }}</span>
+                <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background-color 0.2s ease;" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='transparent'">
+                    <img [src]="image_path" alt="User" style="border-radius: 50%; width: 2.5rem; height: 2.5rem; object-fit: cover; border: 2px solid #e5e7eb;">
+                    <div style="display: flex; flex-direction: column;">
+                        <span class="admin-user-name">{{ name }}</span>
+                        <span class="admin-user-role">{{ role }}</span>
                     </div>
                 </div>
 
                 <!-- Home Button -->
                 <a [routerLink]="['/']" 
-                   class="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 hover:bg-yellow-500 hover:text-white text-gray-700 transition-all duration-300" 
+                   class="admin-home-btn" 
                    title="Ir al sitio web">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                     </svg>
                 </a>
                 
                 <!-- Logout Button -->
                 <button (click)="logout()" 
-                        class="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-all duration-300" 
+                        class="admin-logout-btn" 
                         title="Cerrar sesión">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                     </svg>
-                    <span class="hidden xl:inline">Salir</span>
+                    <span class="admin-logout-btn-text">Salir</span>
                 </button>
             </div>
 
             <!-- Mobile Menu Button -->
-            <div class="lg:hidden flex items-center space-x-2">
+            <div class="admin-mobile-nav">
                 <!-- User Avatar (Mobile) -->
-                <div class="flex items-center space-x-2">
-                    <img [src]="image_path" alt="User" class="rounded-full w-8 h-8 object-cover border-2 border-gray-200">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <img [src]="image_path" alt="User" style="border-radius: 50%; width: 2rem; height: 2rem; object-fit: cover; border: 2px solid #e5e7eb;">
                 </div>
                 
-                <button class="mobile-menu-btn text-gray-700" (click)="toggleMobileMenu()">
-                    <svg *ngIf="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button class="mobile-menu-btn" (click)="toggleMobileMenu()">
+                    <svg *ngIf="!mobileMenuOpen" style="width: 1.5rem; height: 1.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
-                    <svg *ngIf="mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg *ngIf="mobileMenuOpen" style="width: 1.5rem; height: 1.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
@@ -59,28 +59,32 @@
     </div>
 
     <!-- Mobile Menu -->
-    <div class="mobile-menu lg:hidden" [class.active]="mobileMenuOpen">
-        <div class="px-4 py-4 border-b border-gray-200">
-            <div class="flex items-center space-x-3 mb-4">
-                <img [src]="image_path" alt="User" class="rounded-full w-12 h-12 object-cover border-2 border-gray-200">
-                <div class="flex flex-col">
-                    <span class="text-sm font-semibold text-gray-900">{{ name }}</span>
-                    <span class="text-xs text-gray-500 capitalize">{{ role }}</span>
+    <div class="mobile-menu" [class.active]="mobileMenuOpen">
+        <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                <img [src]="image_path" alt="User" style="border-radius: 50%; width: 3rem; height: 3rem; object-fit: cover; border: 2px solid #e5e7eb;">
+                <div style="display: flex; flex-direction: column;">
+                    <span class="admin-user-name">{{ name }}</span>
+                    <span class="admin-user-role">{{ role }}</span>
                 </div>
             </div>
         </div>
-        <div class="px-4 py-4 space-y-3">
+        <div style="padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
             <a [routerLink]="['/']" 
-               class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-gray-100 hover:bg-yellow-500 hover:text-white text-gray-700 transition-all duration-300" 
+               style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background-color: #f3f4f6; color: #374151; text-decoration: none; transition: all 0.3s ease;" 
+               onmouseover="this.style.backgroundColor='#eab308'; this.style.color='#ffffff';" 
+               onmouseout="this.style.backgroundColor='#f3f4f6'; this.style.color='#374151';"
                (click)="closeMobileMenu()">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                 </svg>
                 <span>Ir al sitio web</span>
             </a>
             <button (click)="logout(); closeMobileMenu()" 
-                    class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-all duration-300">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; background-color: #ef4444; color: #ffffff; font-weight: 600; border-radius: 0.5rem; border: none; cursor: pointer; transition: all 0.3s ease;"
+                    onmouseover="this.style.backgroundColor='#dc2626';" 
+                    onmouseout="this.style.backgroundColor='#ef4444';">
+                <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                 </svg>
                 <span>Salir</span>
@@ -99,7 +103,7 @@
                     <div class="col-1"></div>
             
                     <div class="col-auto" >
-                        <h3 class="fw-bold mb-0" style="font-size: x-large;">ABCars Dashboard</h3>
+                        <h3 class="admin-dashboard-title">ABCars Dashboard</h3>
                         <br>
                         <h6 class="fw-light" style="font-size: large; text-align: justify;"></h6>
                     </div>
@@ -113,7 +117,7 @@
                     <app-valuation-statistics-overview *ngIf="overview?.user?.role === 'valuation_manager' "></app-valuation-statistics-overview>
                     <div class="row mt-5">
                         <div class="col-12">
-                            <h3 class="text-start fw-bold">Mis Modulos</h3>
+                            <h3 class="admin-modules-title">Mis Modulos</h3>
                             <div class="row">                                
                                 <!-- <div class="col-6 col-sm-4 col-md-6 col-lg-3 mb-3" *ngFor="let page of overview?.pages">
                                     <div class="card text-center card-module h-100" [routerLink]="[page.permalink]">
