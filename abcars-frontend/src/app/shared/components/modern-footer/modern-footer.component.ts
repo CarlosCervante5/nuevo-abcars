@@ -73,13 +73,13 @@ import { Brand, BrandsResponse } from '@interfaces/vehicle_data.interface';
           <div class="space-y-4">
             <h4 class="text-lg font-bold text-white mb-4">Marcas disponibles</h4>
             <ng-container *ngIf="availableBrands.length; else noBrands">
-              <ul class="space-y-2">
+            <ul class="space-y-2">
                 <li *ngFor="let brand of availableBrands | slice:0:maxBrandsToShow; trackBy: trackByBrand">
                   <a href="#" class="text-gray-300 hover:text-white transition-colors text-sm">
                     {{ brand.name }}
                   </a>
                 </li>
-              </ul>
+            </ul>
             </ng-container>
             <ng-template #noBrands>
               <p class="text-gray-400 text-sm">Cargando marcas...</p>

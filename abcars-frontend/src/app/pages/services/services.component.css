@@ -1,0 +1,245 @@
+/* ============================================
+   ESTILOS PROTEGIDOS PARA SERVICES
+   Evita conflictos con ViewEncapsulation.None
+   ============================================ */
+
+/* Título principal del hero "Nuestros Servicios" */
+.services-hero-title {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 2rem !important; /* 32px - móvil */
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em !important;
+  color: #ffffff !important;
+  margin-bottom: 1.5rem !important; /* 24px */
+}
+
+@media (min-width: 768px) {
+  .services-hero-title {
+    font-size: 2.5rem !important; /* 40px - tablet */
+  }
+}
+
+@media (min-width: 1024px) {
+  .services-hero-title {
+    font-size: 3rem !important; /* 48px - desktop */
+  }
+}
+
+/* Títulos de las tarjetas de servicios */
+.service-card-title {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1.5rem !important; /* 24px */
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.01em !important;
+  color: #1f2937 !important; /* gray-800 */
+  margin-bottom: 1rem !important; /* 16px */
+}
+
+/* Textos descriptivos de las tarjetas de servicios */
+.service-card-description {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1rem !important; /* 16px */
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  color: #4b5563 !important; /* gray-600 */
+  margin-bottom: 1.5rem !important; /* 24px */
+}
+
+/* Título de la sección CTA "¿Necesitas Ayuda?" */
+.cta-section-title {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1.875rem !important; /* 30px - móvil */
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em !important;
+  color: #ffffff !important;
+  margin-bottom: 1.5rem !important; /* 24px */
+}
+
+@media (min-width: 768px) {
+  .cta-section-title {
+    font-size: 2.25rem !important; /* 36px - tablet y desktop */
+  }
+}
+
+/* Texto descriptivo de la sección CTA */
+.cta-description {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1.25rem !important; /* 20px */
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  color: #bfdbfe !important; /* blue-100 */
+  margin-bottom: 2rem !important; /* 32px */
+  max-width: 42rem !important; /* 672px */
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Botón primario blanco - Ver Vehículos Disponibles */
+.cta-btn-primary {
+  display: inline-block !important;
+  background-color: #ffffff !important;
+  color: #2563eb !important; /* blue-600 */
+  padding: 0.75rem 2rem !important; /* 12px 32px */
+  border-radius: 0.5rem !important; /* 8px */
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1rem !important; /* 16px */
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  text-decoration: none !important;
+  transition: background-color 0.3s ease, transform 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.cta-btn-primary:hover {
+  background-color: #f3f4f6 !important; /* gray-100 */
+  transform: translateY(-1px) !important;
+}
+
+/* Botón secundario amarillo - Solicitar Financiamiento */
+.cta-btn-secondary {
+  display: inline-block !important;
+  background-color: #eab308 !important; /* yellow-500 */
+  color: #ffffff !important;
+  padding: 0.75rem 2rem !important; /* 12px 32px */
+  border-radius: 0.5rem !important; /* 8px */
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1rem !important; /* 16px */
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  text-decoration: none !important;
+  transition: background-color 0.3s ease, transform 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.cta-btn-secondary:hover {
+  background-color: #ca8a04 !important; /* yellow-600 */
+  transform: translateY(-1px) !important;
+}
+
+/* ============================================
+   BOTONES DE LAS TARJETAS DE SERVICIOS
+   ============================================ */
+
+/* Botón azul - Ver Vehículos */
+.service-btn-blue {
+  display: inline-block !important;
+  background-color: #2563eb !important; /* blue-600 */
+  color: #ffffff !important;
+  padding: 0.75rem 1.5rem !important; /* 12px 24px */
+  border-radius: 0.5rem !important; /* 8px */
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1rem !important; /* 16px */
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  text-decoration: none !important;
+  transition: background-color 0.3s ease !important;
+  cursor: pointer !important;
+}
+
+.service-btn-blue:hover {
+  background-color: #1d4ed8 !important; /* blue-700 */
+}
+
+/* Botón verde - Solicitar Financiamiento */
+.service-btn-green {
+  display: inline-block !important;
+  background-color: #16a34a !important; /* green-600 */
+  color: #ffffff !important;
+  padding: 0.75rem 1.5rem !important; /* 12px 24px */
+  border-radius: 0.5rem !important; /* 8px */
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1rem !important; /* 16px */
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  text-decoration: none !important;
+  transition: background-color 0.3s ease !important;
+  cursor: pointer !important;
+}
+
+.service-btn-green:hover {
+  background-color: #15803d !important; /* green-700 */
+}
+
+/* Botón morado - Cotizar Seguro */
+.service-btn-purple {
+  display: inline-block !important;
+  background-color: #9333ea !important; /* purple-600 */
+  color: #ffffff !important;
+  padding: 0.75rem 1.5rem !important; /* 12px 24px */
+  border-radius: 0.5rem !important; /* 8px */
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1rem !important; /* 16px */
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  text-decoration: none !important;
+  transition: background-color 0.3s ease !important;
+  cursor: pointer !important;
+}
+
+.service-btn-purple:hover {
+  background-color: #7e22ce !important; /* purple-700 */
+}
+
+/* Botón rojo - Agendar Servicio */
+.service-btn-red {
+  display: inline-block !important;
+  background-color: #dc2626 !important; /* red-600 */
+  color: #ffffff !important;
+  padding: 0.75rem 1.5rem !important; /* 12px 24px */
+  border-radius: 0.5rem !important; /* 8px */
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1rem !important; /* 16px */
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  text-decoration: none !important;
+  transition: background-color 0.3s ease !important;
+  cursor: pointer !important;
+}
+
+.service-btn-red:hover {
+  background-color: #b91c1c !important; /* red-700 */
+}
+
+/* Botón índigo - Ver Refacciones */
+.service-btn-indigo {
+  display: inline-block !important;
+  background-color: #4f46e5 !important; /* indigo-600 */
+  color: #ffffff !important;
+  padding: 0.75rem 1.5rem !important; /* 12px 24px */
+  border-radius: 0.5rem !important; /* 8px */
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1rem !important; /* 16px */
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  text-decoration: none !important;
+  transition: background-color 0.3s ease !important;
+  cursor: pointer !important;
+}
+
+.service-btn-indigo:hover {
+  background-color: #4338ca !important; /* indigo-700 */
+}
+
+/* Botón teal - Valuar Mi Auto */
+.service-btn-teal {
+  display: inline-block !important;
+  background-color: #0d9488 !important; /* teal-600 */
+  color: #ffffff !important;
+  padding: 0.75rem 1.5rem !important; /* 12px 24px */
+  border-radius: 0.5rem !important; /* 8px */
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1rem !important; /* 16px */
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  text-decoration: none !important;
+  transition: background-color 0.3s ease !important;
+  cursor: pointer !important;
+}
+
+.service-btn-teal:hover {
+  background-color: #0f766e !important; /* teal-700 */
+}
+

@@ -1,0 +1,337 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Navbar -->
+  <app-home-nav></app-home-nav>
+  
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16 pt-32">
+    <div class="container mx-auto px-4">
+      <div class="max-w-4xl mx-auto text-center">
+        <h1 class="financing-hero-title">Financiamiento Automotriz</h1>
+        <p class="financing-hero-description">Obtén el financiamiento que necesitas para tu vehículo con las mejores condiciones del mercado</p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            <span class="hero-feature-badge">Aprobación rápida</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            <span class="hero-feature-badge">Tasas competitivas</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            <span class="hero-feature-badge">Plazos flexibles</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="container mx-auto px-4 py-16">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Columna principal -->
+        <div class="lg:col-span-2 space-y-8">
+          
+          <!-- Calculadora de financiamiento -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm">
+            <h2 class="section-title">Calculadora de Financiamiento</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="form-label">Precio del vehículo</label>
+                <input 
+                  type="number" 
+                  [(ngModel)]="calculatorData.vehiclePrice"
+                  (input)="updateCalculations()"
+                  class="form-input"
+                  placeholder="Ej: 500000"
+                >
+              </div>
+              
+              <div>
+                <label class="form-label">Enganche (%)</label>
+                <input 
+                  type="range" 
+                  min="10" 
+                  max="50" 
+                  [(ngModel)]="calculatorData.downPaymentPercentage"
+                  (input)="updateCalculations()"
+                  class="w-full"
+                >
+                <div class="percentage-display">{{ calculatorData.downPaymentPercentage }}%</div>
+              </div>
+              
+              <div>
+                <label class="form-label">Plazo (meses)</label>
+                <select 
+                  [(ngModel)]="calculatorData.termMonths"
+                  (change)="updateCalculations()"
+                  class="form-input"
+                >
+                  <option value="12">12 meses</option>
+                  <option value="24">24 meses</option>
+                  <option value="36">36 meses</option>
+                  <option value="48">48 meses</option>
+                  <option value="60">60 meses</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="form-label">Tasa de interés anual (%)</label>
+                <input 
+                  type="number" 
+                  step="0.1"
+                  [(ngModel)]="calculatorData.interestRate"
+                  readonly
+                  class="form-input-readonly"
+                  placeholder="Ej: 12.5"
+                >
+              </div>
+            </div>
+            
+            <!-- Resultados -->
+            <div class="mt-8 p-6 bg-blue-50 rounded-2xl">
+              <h3 class="summary-title">Resumen de tu financiamiento</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="text-center">
+                  <div class="summary-amount">MXN {{ getDownPayment() | number:'1.2-2' }}</div>
+                  <div class="summary-label">Enganche</div>
+                </div>
+                <div class="text-center">
+                  <div class="summary-amount">MXN {{ getMonthlyPayment() | number:'1.2-2' }}</div>
+                  <div class="summary-label">Mensualidad</div>
+                </div>
+                <div class="text-center">
+                  <div class="summary-amount">MXN {{ getTotalAmount() | number:'1.2-2' }}</div>
+                  <div class="summary-label">Total a pagar</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Beneficios del financiamiento -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm">
+            <h2 class="section-title">¿Por qué elegir nuestro financiamiento?</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="benefit-title">Aprobación rápida</h3>
+                  <p class="benefit-description">Respuesta en menos de 24 horas con documentación mínima requerida.</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="benefit-title">Tasas competitivas</h3>
+                  <p class="benefit-description">Las mejores tasas del mercado desde 12% anual con historial crediticio favorable.</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="benefit-title">Plazos flexibles</h3>
+                  <p class="benefit-description">Desde 12 hasta 60 meses para adaptarse a tu presupuesto mensual.</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="benefit-title">Sin penalizaciones</h3>
+                  <p class="benefit-description">Puedes liquidar anticipadamente sin penalizaciones ni comisiones adicionales.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Requisitos -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm">
+            <h2 class="section-title">Requisitos para el financiamiento</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 class="requirement-subtitle">Documentación personal</h3>
+                <ul class="space-y-2">
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="requirement-text">Identificación oficial vigente</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="requirement-text">Comprobante de domicilio (máximo 3 meses)</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="requirement-text">Comprobante de ingresos</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="requirement-text">Referencias personales</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 class="requirement-subtitle">Requisitos financieros</h3>
+                <ul class="space-y-2">
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="requirement-text">Ingresos mínimos de $15,000 mensuales</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="requirement-text">Antigüedad laboral mínima de 6 meses</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="requirement-text">Historial crediticio favorable</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="requirement-text">Edad entre 18 y 70 años</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+          
+          <!-- Formulario de solicitud -->
+          <div class="bg-white rounded-3xl p-6 shadow-sm sticky top-8">
+            <h3 class="form-request-title">Solicitar Financiamiento</h3>
+            
+            <form [formGroup]="financingForm" (ngSubmit)="onSubmitFinancing()" class="space-y-4">
+              <div>
+                <label class="form-request-label">Nombre *</label>
+                <input 
+                  type="text" 
+                  formControlName="name"
+                  [ngClass]="(financingForm.get('name')?.invalid && financingForm.get('name')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="Tu nombre"
+                >
+                <p *ngIf="financingForm.get('name')?.invalid && financingForm.get('name')?.touched" class="form-error-message">
+                  El nombre es requerido
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Apellidos *</label>
+                <input 
+                  type="text" 
+                  formControlName="last_name"
+                  [ngClass]="(financingForm.get('last_name')?.invalid && financingForm.get('last_name')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="Tus apellidos"
+                >
+                <p *ngIf="financingForm.get('last_name')?.invalid && financingForm.get('last_name')?.touched" class="form-error-message">
+                  Los apellidos son requeridos
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Teléfono *</label>
+                <input 
+                  type="tel" 
+                  formControlName="phone"
+                  maxlength="10"
+                  pattern="[0-9]{10}"
+                  inputmode="numeric"
+                  [ngClass]="(financingForm.get('phone')?.invalid && financingForm.get('phone')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="10 dígitos"
+                >
+                <p *ngIf="financingForm.get('phone')?.invalid && financingForm.get('phone')?.touched" class="form-error-message">
+                  <span *ngIf="financingForm.get('phone')?.errors?.['required']">El teléfono es requerido</span>
+                  <span *ngIf="financingForm.get('phone')?.errors?.['pattern'] && !financingForm.get('phone')?.errors?.['required']">El teléfono debe tener exactamente 10 dígitos</span>
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Email *</label>
+                <input 
+                  type="email" 
+                  formControlName="email"
+                  [ngClass]="(financingForm.get('email')?.invalid && financingForm.get('email')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="tu@email.com"
+                >
+                <p *ngIf="financingForm.get('email')?.invalid && financingForm.get('email')?.touched" class="form-error-message">
+                  <span *ngIf="financingForm.get('email')?.errors?.['required']">El email es requerido</span>
+                  <span *ngIf="financingForm.get('email')?.errors?.['email'] && !financingForm.get('email')?.errors?.['required']">El email no es válido</span>
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Monto a financiar</label>
+                <input 
+                  type="number" 
+                  formControlName="offer_price"
+                  class="form-request-input"
+                  placeholder="Ej: 350000"
+                >
+              </div>
+              
+              <button 
+                type="submit"
+                [disabled]="isSubmitting"
+                class="form-submit-btn"
+              >
+                <span *ngIf="!isSubmitting">Solicitar Financiamiento</span>
+                <span *ngIf="isSubmitting">Enviando...</span>
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <app-modern-footer></app-modern-footer>
+</div>
+

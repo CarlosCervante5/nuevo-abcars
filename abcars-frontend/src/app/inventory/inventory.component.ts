@@ -18,6 +18,7 @@ interface VehicleWithApiData extends Vehicle {
   selector: 'app-inventory',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, VehicleCardTailwindComponent, DarkNavComponent, ModernFooterComponent],
+  styleUrls: ['./inventory.component.css'],
   template: `
     <app-dark-nav></app-dark-nav>
     <div class="bg-gray-50">
@@ -45,7 +46,7 @@ interface VehicleWithApiData extends Vehicle {
           <!-- Contador de resultados y ordenamiento -->
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div class="flex items-center justify-between w-full sm:w-auto">
-              <h1 class="text-2xl font-bold text-gray-900">{{ filteredItems.length }} Resultados</h1>
+              <h1 class="results-title">{{ filteredItems.length }} Resultados</h1>
               <!-- Botón para abrir filtros en móvil -->
               <button (click)="openFiltersModal()" class="lg:hidden bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded-lg transition-colors flex items-center space-x-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,13 +75,13 @@ interface VehicleWithApiData extends Vehicle {
                 <div>
                   <div class="bg-white rounded-xl shadow-sm border border-gray-200">
                     <div class="p-4 border-b border-gray-200">
-                      <h2 class="text-lg font-bold text-gray-900">Filtros</h2>
+                      <h2 class="filters-title">Filtros</h2>
                     </div>
                   
                   <!-- Filtro Precio -->
                   <div class="border-b border-gray-100">
                     <button (click)="toggleFilter('price')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Precio</span>
+                      <span class="filter-label">Precio</span>
                       <svg [class.rotate-180]="openFilters.price" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                       </svg>
@@ -103,7 +104,7 @@ interface VehicleWithApiData extends Vehicle {
                   <!-- Filtro Marca -->
                   <div class="border-b border-gray-100">
                     <button (click)="toggleFilter('brand')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Marca</span>
+                      <span class="filter-label">Marca</span>
                       <svg [class.rotate-180]="openFilters.brand" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                       </svg>
@@ -121,7 +122,7 @@ interface VehicleWithApiData extends Vehicle {
                   <!-- Filtro Año -->
                   <div class="border-b border-gray-100">
                     <button (click)="toggleFilter('year')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Año</span>
+                      <span class="filter-label">Año</span>
                       <svg [class.rotate-180]="openFilters.year" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                       </svg>
@@ -144,7 +145,7 @@ interface VehicleWithApiData extends Vehicle {
                   <!-- Filtro Kilometraje -->
                   <div class="border-b border-gray-100">
                     <button (click)="toggleFilter('mileage')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Kilometraje</span>
+                      <span class="filter-label">Kilometraje</span>
                       <svg [class.rotate-180]="openFilters.mileage" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                       </svg>
@@ -163,7 +164,7 @@ interface VehicleWithApiData extends Vehicle {
                   <!-- Filtro Tipo de auto -->
                   <div class="border-b border-gray-100">
                     <button (click)="toggleFilter('body')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Tipo de auto</span>
+                      <span class="filter-label">Tipo de auto</span>
                       <svg [class.rotate-180]="openFilters.body" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                       </svg>
@@ -181,7 +182,7 @@ interface VehicleWithApiData extends Vehicle {
                   <!-- Filtro Mecánica -->
                   <div class="border-b border-gray-100">
                     <button (click)="toggleFilter('transmission')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Transmisión</span>
+                      <span class="filter-label">Transmisión</span>
                       <svg [class.rotate-180]="openFilters.transmission" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                       </svg>
@@ -203,7 +204,7 @@ interface VehicleWithApiData extends Vehicle {
                   <!-- Filtro Color exterior -->
                   <div class="border-b border-gray-100">
                     <button (click)="toggleFilter('color')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                      <span class="font-medium text-gray-700">Color exterior</span>
+                      <span class="filter-label">Color exterior</span>
                       <svg [class.rotate-180]="openFilters.color" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                       </svg>
@@ -220,7 +221,7 @@ interface VehicleWithApiData extends Vehicle {
                   </div>
                   
                   <!-- Botón limpiar filtros -->
-                  <button (click)="clearFilters()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-xl transition-all duration-300 mt-4">
+                  <button (click)="clearFilters()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 px-4 rounded-xl transition-all duration-300 mt-4 clear-filters-btn">
                     Limpiar Filtros
                   </button>
                 </div>
@@ -229,8 +230,8 @@ interface VehicleWithApiData extends Vehicle {
                 <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
                   <div class="flex items-start space-x-3">
                     <div class="flex-1">
-                      <h3 class="font-semibold text-blue-900 mb-2">Encuentra el auto ideal para tu presupuesto</h3>
-                      <a href="#" class="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center">
+                      <h3 class="cta-title">Encuentra el auto ideal para tu presupuesto</h3>
+                      <a routerLink="/financiamiento" class="cta-link flex items-center">
                         Simular plan a meses
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -299,7 +300,7 @@ interface VehicleWithApiData extends Vehicle {
       <div class="absolute inset-0 bg-black bg-opacity-50"></div>
       <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
         <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between z-10">
-          <h2 class="text-xl font-bold text-gray-900">Filtros</h2>
+          <h2 class="filters-title-mobile">Filtros</h2>
           <button (click)="closeFiltersModal()" class="text-gray-500 hover:text-gray-700">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -450,7 +451,7 @@ interface VehicleWithApiData extends Vehicle {
           </div>
 
           <!-- Botón limpiar filtros -->
-          <button (click)="clearFilters()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-xl transition-all duration-300 mb-4">
+          <button (click)="clearFilters()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 px-4 rounded-xl transition-all duration-300 mb-4 clear-filters-btn">
             Limpiar Filtros
           </button>
 
@@ -458,8 +459,8 @@ interface VehicleWithApiData extends Vehicle {
           <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
             <div class="flex items-start space-x-3">
               <div class="flex-1">
-                <h3 class="font-semibold text-blue-900 mb-2">Encuentra el auto ideal para tu presupuesto</h3>
-                <a href="#" class="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center">
+                <h3 class="cta-title">Encuentra el auto ideal para tu presupuesto</h3>
+                <a routerLink="/financiamiento" class="cta-link flex items-center">
                   Simular plan a meses
                   <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
