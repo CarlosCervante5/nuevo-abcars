@@ -1,0 +1,354 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Navbar -->
+  <app-home-nav></app-home-nav>
+  
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-red-600 to-red-800 text-white py-16 pt-32">
+    <div class="container mx-auto px-4">
+      <div class="max-w-4xl mx-auto text-center">
+        <h1 class="service-hero-title">Servicio Técnico</h1>
+        <p class="service-hero-description">Mantenimiento y reparación especializada con técnicos certificados</p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            <span class="hero-feature-badge">Técnicos certificados</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            <span class="hero-feature-badge">Refacciones originales</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            <span class="hero-feature-badge">Garantía en servicio</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="container mx-auto px-4 py-16">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Columna principal -->
+        <div class="lg:col-span-2 space-y-8">
+          
+          <!-- Servicios disponibles -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm">
+            <h2 class="section-title">Nuestros Servicios</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div *ngFor="let service of services" class="border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-start gap-3">
+                  <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" [class]="service.colorClass">
+                    <svg class="w-6 h-6 text-white" [innerHTML]="service.icon"></svg>
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="service-card-title">{{ service.name }}</h3>
+                    <p class="service-card-description">{{ service.description }}</p>
+                    <!-- <div class="flex items-center justify-between">
+                      <span class="text-lg font-bold text-red-600">MXN {{ service.price | number }}</span>
+                      <span class="text-sm text-gray-500">{{ service.duration }}</span>
+                    </div> -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mantenimiento preventivo -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm">
+            <h2 class="section-title">Mantenimiento Preventivo</h2>
+            
+            <div class="space-y-6">
+              <div class="border-l-4 border-red-500 pl-6">
+                <h3 class="maintenance-title">Servicio de 10,000 km</h3>
+                <p class="maintenance-description">Mantenimiento básico que incluye cambio de aceite, filtros y revisión general.</p>
+                <ul class="space-y-1">
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="maintenance-item">Cambio de aceite y filtro</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="maintenance-item">Revisión de frenos</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="maintenance-item">Revisión de llantas</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="maintenance-item">Revisión de luces</span>
+                  </li>
+                </ul>
+                <!-- <div class="mt-4 flex items-center justify-between">
+                  <span class="text-lg font-bold text-red-600">MXN 1,200</span>
+                  <span class="text-sm text-gray-500">2 horas</span>
+                </div> -->
+              </div>
+              
+              <div class="border-l-4 border-blue-500 pl-6">
+                <h3 class="maintenance-title">Servicio de 20,000 km</h3>
+                <p class="maintenance-description">Mantenimiento intermedio con revisión más profunda del vehículo.</p>
+                <ul class="space-y-1">
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="maintenance-item">Todo lo del servicio de 10,000 km</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="maintenance-item">Cambio de filtro de aire</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="maintenance-item">Revisión de suspensión</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="maintenance-item">Revisión de sistema eléctrico</span>
+                  </li>
+                </ul>
+                <!-- <div class="mt-4 flex items-center justify-between">
+                  <span class="text-lg font-bold text-red-600">MXN 2,500</span>
+                  <span class="text-sm text-gray-500">4 horas</span>
+                </div> -->
+              </div>
+              
+              <div class="border-l-4 border-green-500 pl-6">
+                <h3 class="maintenance-title">Servicio de 40,000 km</h3>
+                <p class="maintenance-description">Mantenimiento mayor con cambio de componentes importantes.</p>
+                <ul class="space-y-1">
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="maintenance-item">Todo lo del servicio de 20,000 km</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="maintenance-item">Cambio de bujías</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="maintenance-item">Cambio de filtro de combustible</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="maintenance-item">Revisión de transmisión</span>
+                  </li>
+                </ul>
+                <!-- <div class="mt-4 flex items-center justify-between">
+                  <span class="text-lg font-bold text-red-600">MXN 4,500</span>
+                  <span class="text-sm text-gray-500">6 horas</span>
+                </div> -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Diagnóstico computarizado -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm">
+            <h2 class="section-title">Diagnóstico Computarizado</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="diagnostic-card-title">Diagnóstico General</h3>
+                    <p class="diagnostic-card-subtitle">Revisión completa del sistema</p>
+                  </div>
+                </div>
+                <p class="diagnostic-card-description">Análisis completo de todos los sistemas del vehículo usando tecnología de punta.</p>
+                <!-- <div class="flex items-center justify-between">
+                  <span class="text-lg font-bold text-blue-600">MXN 800</span>
+                  <span class="text-sm text-gray-500">1 hora</span>
+                </div> -->
+              </div>
+              
+              <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="diagnostic-card-title">Diagnóstico Específico</h3>
+                    <p class="diagnostic-card-subtitle">Revisión de sistema específico</p>
+                  </div>
+                </div>
+                <p class="diagnostic-card-description">Diagnóstico enfocado en un sistema específico del vehículo.</p>
+                <!-- <div class="flex items-center justify-between">
+                  <span class="text-lg font-bold text-green-600">MXN 500</span>
+                  <span class="text-sm text-gray-500">30 min</span>
+                </div> -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+          
+          <!-- Formulario de agendamiento -->
+          <div class="bg-white rounded-3xl p-6 shadow-sm sticky top-8">
+            <h3 class="form-request-title">Agendar Servicio</h3>
+            
+            <form [formGroup]="serviceForm" (ngSubmit)="onSubmitService()" class="space-y-4">
+              <div>
+                <label class="form-request-label">Nombre *</label>
+                <input 
+                  type="text" 
+                  formControlName="name"
+                  [ngClass]="(serviceForm.get('name')?.invalid && serviceForm.get('name')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="Tu nombre"
+                >
+                <p *ngIf="serviceForm.get('name')?.invalid && serviceForm.get('name')?.touched" class="form-error-message">
+                  El nombre es requerido
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Apellidos *</label>
+                <input 
+                  type="text" 
+                  formControlName="last_name"
+                  [ngClass]="(serviceForm.get('last_name')?.invalid && serviceForm.get('last_name')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="Tus apellidos"
+                >
+                <p *ngIf="serviceForm.get('last_name')?.invalid && serviceForm.get('last_name')?.touched" class="form-error-message">
+                  Los apellidos son requeridos
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Teléfono *</label>
+                <input 
+                  type="tel" 
+                  formControlName="phone"
+                  maxlength="10"
+                  pattern="[0-9]{10}"
+                  inputmode="numeric"
+                  [ngClass]="(serviceForm.get('phone')?.invalid && serviceForm.get('phone')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="10 dígitos"
+                >
+                <p *ngIf="serviceForm.get('phone')?.invalid && serviceForm.get('phone')?.touched" class="form-error-message">
+                  <span *ngIf="serviceForm.get('phone')?.errors?.['required']">El teléfono es requerido</span>
+                  <span *ngIf="serviceForm.get('phone')?.errors?.['pattern'] && !serviceForm.get('phone')?.errors?.['required']">El teléfono debe tener exactamente 10 dígitos</span>
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Email *</label>
+                <input 
+                  type="email" 
+                  formControlName="email"
+                  [ngClass]="(serviceForm.get('email')?.invalid && serviceForm.get('email')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="tu@email.com"
+                >
+                <p *ngIf="serviceForm.get('email')?.invalid && serviceForm.get('email')?.touched" class="form-error-message">
+                  <span *ngIf="serviceForm.get('email')?.errors?.['required']">El email es requerido</span>
+                  <span *ngIf="serviceForm.get('email')?.errors?.['email'] && !serviceForm.get('email')?.errors?.['required']">El email no es válido</span>
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Tipo de servicio *</label>
+                <select 
+                  formControlName="serviceType"
+                  [ngClass]="(serviceForm.get('serviceType')?.invalid && serviceForm.get('serviceType')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                >
+                  <option value="">Selecciona servicio</option>
+                  <option value="mantenimiento">Mantenimiento preventivo</option>
+                  <option value="diagnostico">Diagnóstico computarizado</option>
+                  <option value="reparacion">Reparación</option>
+                  <option value="otro">Otro</option>
+                </select>
+                <p *ngIf="serviceForm.get('serviceType')?.invalid && serviceForm.get('serviceType')?.touched" class="form-error-message">
+                  El tipo de servicio es requerido
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Fecha preferida</label>
+                <input 
+                  type="date" 
+                  formControlName="preferredDate"
+                  class="form-request-input"
+                >
+              </div>
+              
+              <div>
+                <label class="form-request-label">Hora preferida</label>
+                <select 
+                  formControlName="preferredTime"
+                  class="form-request-input"
+                >
+                  <option value="">Selecciona hora</option>
+                  <option value="09:00">9:00 AM</option>
+                  <option value="10:00">10:00 AM</option>
+                  <option value="11:00">11:00 AM</option>
+                  <option value="12:00">12:00 PM</option>
+                  <option value="13:00">1:00 PM</option>
+                  <option value="14:00">2:00 PM</option>
+                  <option value="15:00">3:00 PM</option>
+                  <option value="16:00">4:00 PM</option>
+                  <option value="17:00">5:00 PM</option>
+                  <option value="18:00">6:00 PM</option>
+                </select>
+              </div>
+              
+              <button 
+                type="submit"
+                [disabled]="isSubmitting"
+                class="form-submit-btn"
+              >
+                <span *ngIf="!isSubmitting">Agendar Servicio</span>
+                <span *ngIf="isSubmitting">Enviando...</span>
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <app-modern-footer></app-modern-footer>
+</div>
+

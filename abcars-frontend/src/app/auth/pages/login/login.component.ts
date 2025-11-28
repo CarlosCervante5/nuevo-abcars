@@ -14,7 +14,7 @@ import { AuthService } from '../../services/auth.service';
 import { LoginResponse } from '../../../shared/interfaces/auth.interface';
 
 // Components
-import { HomeNavComponent } from '../../../shared/components/home-nav/home-nav.component';
+import { DarkNavComponent } from '../../../shared/components/dark-nav/dark-nav.component';
 import { ModernFooterComponent } from '../../../shared/components/modern-footer/modern-footer.component';
 
 @Component({
@@ -27,7 +27,7 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
     }
   `],
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, RouterModule, HomeNavComponent, ModernFooterComponent]
+    imports: [CommonModule, ReactiveFormsModule, RouterModule, DarkNavComponent, ModernFooterComponent]
 })
 
 export class LoginComponent implements OnInit {

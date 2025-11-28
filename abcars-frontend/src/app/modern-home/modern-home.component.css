@@ -184,4 +184,77 @@ html {
 
 .shadow-xl {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-} 
+}
+
+/* ============================================
+   CLASES PERSONALIZADAS PARA TÍTULOS
+   No afectadas por ViewEncapsulation.None
+   ============================================ */
+
+/* Título del hero */
+.hero-title {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 2.25rem !important; /* 36px */
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em !important;
+  color: #facc15 !important; /* yellow-400 */
+}
+
+/* Responsive - tablet */
+@media (min-width: 768px) {
+  .hero-title {
+    font-size: 3rem !important; /* 48px */
+  }
+}
+
+/* Responsive - desktop */
+@media (min-width: 1024px) {
+  .hero-title {
+    font-size: 3.75rem !important; /* 60px */
+  }
+}
+
+/* Títulos de sección (h2) */
+.section-title {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1.875rem !important; /* 30px */
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.02em !important;
+  color: #111827 !important; /* gray-900 */
+  margin-top: 0 !important;
+  margin-bottom: 1.5rem !important; /* 24px de espacio inferior */
+}
+
+/* Responsive - desktop para section-title */
+@media (min-width: 1024px) {
+  .section-title {
+    font-size: 2.25rem !important; /* 36px */
+  }
+}
+
+/* Variante grande para "Nuestras Sucursales" */
+.section-title-large {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 2.25rem !important; /* 36px */
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em !important;
+  color: #111827 !important; /* gray-900 */
+  margin-top: 0 !important;
+  margin-bottom: 2rem !important; /* 32px de espacio inferior */
+}
+
+/* Responsive - desktop para section-title-large */
+@media (min-width: 1024px) {
+  .section-title-large {
+    font-size: 3rem !important; /* 48px */
+  }
+}
+
+/* Variante blanca */
+.section-title.\!text-white,
+.section-title-large.\!text-white {
+  color: #ffffff !important;
+}

@@ -1,0 +1,412 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Navbar -->
+  <app-home-nav></app-home-nav>
+  
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-green-600 to-green-800 text-white py-16 pt-32">
+    <div class="container mx-auto px-4">
+      <div class="max-w-4xl mx-auto text-center">
+        <h1 class="insurance-hero-title">Seguros Automotrices</h1>
+        <p class="insurance-hero-description">Protege tu inversión con las mejores coberturas y precios del mercado</p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            <span class="hero-feature-badge">Cobertura completa</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            <span class="hero-feature-badge">Asistencia 24/7</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            <span class="hero-feature-badge">Precios competitivos</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="container mx-auto px-4 py-16">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Columna principal -->
+        <div class="lg:col-span-2 space-y-8">
+          
+          <!-- Cotizador de seguros -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm">
+            <h2 class="section-title">Cotizador de Seguros</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="form-label">Marca del vehículo</label>
+                <select 
+                  [(ngModel)]="quoteData.brand"
+                  (change)="updateQuote()"
+                  class="form-input"
+                >
+                  <option value="">Selecciona marca</option>
+                  <option *ngFor="let brand of brands" [value]="brand.name">{{ brand.name }}</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="form-label">Modelo</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="quoteData.model"
+                  (input)="updateQuote()"
+                  class="form-input"
+                  placeholder="Ej: Corolla"
+                >
+              </div>
+              
+              <div>
+                <label class="form-label">Año</label>
+                <select 
+                  [(ngModel)]="quoteData.year"
+                  (change)="updateQuote()"
+                  class="form-input"
+                >
+                  <option value="">Selecciona año</option>
+                  <option *ngFor="let year of getYears()" [value]="year">{{ year }}</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="form-label">Valor comercial</label>
+                <input 
+                  type="number" 
+                  [(ngModel)]="quoteData.value"
+                  (input)="updateQuote()"
+                  class="form-input"
+                  placeholder="Ej: 250000"
+                >
+              </div>
+              
+              <div>
+                <label class="form-label">Uso del vehículo</label>
+                <select 
+                  [(ngModel)]="quoteData.usage"
+                  (change)="updateQuote()"
+                  class="form-input"
+                >
+                  <option value="">Selecciona uso</option>
+                  <option value="particular">Particular</option>
+                  <option value="comercial">Comercial</option>
+                  <option value="taxi">Taxi</option>
+                  <option value="uber">Uber/Didi</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="form-label">Código postal</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="quoteData.zipCode"
+                  (input)="updateQuote()"
+                  class="form-input"
+                  placeholder="Ej: 03100"
+                >
+              </div>
+            </div>
+            
+            <!-- Resultado de cotización -->
+            <div *ngIf="quoteResult" class="mt-8 p-6 bg-green-50 rounded-2xl">
+              <h3 class="summary-title">Tu cotización</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="text-center">
+                  <div class="summary-amount">MXN {{ quoteResult.basic | number }}</div>
+                  <div class="summary-label">Cobertura básica</div>
+                </div>
+                <div class="text-center">
+                  <div class="summary-amount">MXN {{ quoteResult.standard | number }}</div>
+                  <div class="summary-label">Cobertura estándar</div>
+                </div>
+                <div class="text-center">
+                  <div class="summary-amount">MXN {{ quoteResult.premium | number }}</div>
+                  <div class="summary-label">Cobertura premium</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tipos de cobertura -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm">
+            <h2 class="section-title">Tipos de Cobertura</h2>
+            
+            <div class="space-y-6">
+              <!-- Cobertura básica -->
+              <div class="border border-gray-200 rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="coverage-card-title">Cobertura Básica</h3>
+                  <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">Recomendada</span>
+                </div>
+                <p class="coverage-card-description">Protección esencial para tu vehículo con las coberturas más importantes.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="coverage-item">Responsabilidad civil</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="coverage-item">Gastos médicos</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="coverage-item">Defensa legal</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="coverage-item">Asistencia vial</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Cobertura estándar -->
+              <div class="border border-gray-200 rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="coverage-card-title">Cobertura Estándar</h3>
+                  <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">Popular</span>
+                </div>
+                <p class="coverage-card-description">Protección completa que incluye daños a terceros y robo total.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="coverage-item">Todo lo de la básica</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="coverage-item">Robo total</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="coverage-item">Incendio</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="coverage-item">Fenómenos hidrometeorológicos</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Cobertura premium -->
+              <div class="border border-gray-200 rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="coverage-card-title">Cobertura Premium</h3>
+                  <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">Completa</span>
+                </div>
+                <p class="coverage-card-description">La máxima protección para tu vehículo con cobertura amplia.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="coverage-item">Todo lo de la estándar</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="coverage-item">Daños materiales</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="coverage-item">Cristales</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span class="coverage-item">Equipaje</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Beneficios adicionales -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm">
+            <h2 class="section-title">Beneficios Adicionales</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="benefit-title">Asistencia 24/7</h3>
+                  <p class="benefit-description">Servicio de grúa, paso de corriente, cambio de llanta y más, disponible las 24 horas.</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="benefit-title">Reparación en red</h3>
+                  <p class="benefit-description">Más de 1,500 talleres en toda la república para reparaciones sin costo adicional.</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="benefit-title">Vehículo de reemplazo</h3>
+                  <p class="benefit-description">Auto de reemplazo mientras tu vehículo está en reparación por siniestro.</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="benefit-title">Descuentos por no siniestro</h3>
+                  <p class="benefit-description">Hasta 50% de descuento en tu renovación si no tienes siniestros.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+          
+          <!-- Formulario de cotización -->
+          <div class="bg-white rounded-3xl p-6 shadow-sm sticky top-8">
+            <h3 class="form-request-title">Solicitar Cotización</h3>
+            
+            <form [formGroup]="insuranceForm" (ngSubmit)="onSubmitInsurance()" class="space-y-4">
+              <div>
+                <label class="form-request-label">Nombre *</label>
+                <input 
+                  type="text" 
+                  formControlName="name"
+                  [ngClass]="(insuranceForm.get('name')?.invalid && insuranceForm.get('name')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="Tu nombre"
+                >
+                <p *ngIf="insuranceForm.get('name')?.invalid && insuranceForm.get('name')?.touched" class="form-error-message">
+                  El nombre es requerido
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Apellidos *</label>
+                <input 
+                  type="text" 
+                  formControlName="last_name"
+                  [ngClass]="(insuranceForm.get('last_name')?.invalid && insuranceForm.get('last_name')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="Tus apellidos"
+                >
+                <p *ngIf="insuranceForm.get('last_name')?.invalid && insuranceForm.get('last_name')?.touched" class="form-error-message">
+                  Los apellidos son requeridos
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Teléfono *</label>
+                <input 
+                  type="tel" 
+                  formControlName="phone"
+                  maxlength="10"
+                  pattern="[0-9]{10}"
+                  inputmode="numeric"
+                  [ngClass]="(insuranceForm.get('phone')?.invalid && insuranceForm.get('phone')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="10 dígitos"
+                >
+                <p *ngIf="insuranceForm.get('phone')?.invalid && insuranceForm.get('phone')?.touched" class="form-error-message">
+                  <span *ngIf="insuranceForm.get('phone')?.errors?.['required']">El teléfono es requerido</span>
+                  <span *ngIf="insuranceForm.get('phone')?.errors?.['pattern'] && !insuranceForm.get('phone')?.errors?.['required']">El teléfono debe tener exactamente 10 dígitos</span>
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Email *</label>
+                <input 
+                  type="email" 
+                  formControlName="email"
+                  [ngClass]="(insuranceForm.get('email')?.invalid && insuranceForm.get('email')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="tu@email.com"
+                >
+                <p *ngIf="insuranceForm.get('email')?.invalid && insuranceForm.get('email')?.touched" class="form-error-message">
+                  <span *ngIf="insuranceForm.get('email')?.errors?.['required']">El email es requerido</span>
+                  <span *ngIf="insuranceForm.get('email')?.errors?.['email'] && !insuranceForm.get('email')?.errors?.['required']">El email no es válido</span>
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Tipo de cobertura *</label>
+                <select 
+                  formControlName="coverageType"
+                  [ngClass]="(insuranceForm.get('coverageType')?.invalid && insuranceForm.get('coverageType')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                >
+                  <option value="">Selecciona cobertura</option>
+                  <option value="basica">Básica</option>
+                  <option value="estandar">Estándar</option>
+                  <option value="premium">Premium</option>
+                </select>
+                <p *ngIf="insuranceForm.get('coverageType')?.invalid && insuranceForm.get('coverageType')?.touched" class="form-error-message">
+                  El tipo de cobertura es requerido
+                </p>
+              </div>
+              
+              <button 
+                type="submit"
+                [disabled]="isSubmitting"
+                class="form-submit-btn"
+              >
+                <span *ngIf="!isSubmitting">Solicitar Cotización</span>
+                <span *ngIf="isSubmitting">Enviando...</span>
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <app-modern-footer></app-modern-footer>
+</div>
+

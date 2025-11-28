@@ -1,0 +1,246 @@
+/* ============================================
+   ESTILOS PROTEGIDOS PARA TECHNICAL SERVICE
+   Evita conflictos con ViewEncapsulation.None
+   ============================================ */
+
+/* Título principal del hero "Servicio Técnico" */
+.service-hero-title {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 2rem !important; /* 32px - móvil */
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em !important;
+  color: #ffffff !important;
+  margin-bottom: 1rem !important; /* 16px */
+}
+
+@media (min-width: 1024px) {
+  .service-hero-title {
+    font-size: 3rem !important; /* 48px - desktop */
+  }
+}
+
+/* Texto descriptivo del hero */
+.service-hero-description {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1.25rem !important; /* 20px */
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  color: #fecaca !important; /* red-100 */
+  margin-bottom: 2rem !important; /* 32px */
+}
+
+/* Badges de características */
+.hero-feature-badge {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  color: #ffffff !important;
+}
+
+/* Título de sección */
+.section-title {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1.5rem !important; /* 24px */
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.01em !important;
+  color: #111827 !important; /* gray-900 */
+  margin-bottom: 1.5rem !important; /* 24px */
+}
+
+/* ============================================
+   ESTILOS DE TARJETAS DE SERVICIOS
+   ============================================ */
+
+/* Títulos de las tarjetas de servicios */
+.service-card-title {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1.125rem !important; /* 18px */
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  color: #111827 !important; /* gray-900 */
+  margin-bottom: 0.5rem !important; /* 8px */
+}
+
+/* Descripciones de las tarjetas de servicios */
+.service-card-description {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  color: #4b5563 !important; /* gray-600 */
+}
+
+/* ============================================
+   ESTILOS DE MANTENIMIENTO PREVENTIVO
+   ============================================ */
+
+/* Títulos de mantenimiento */
+.maintenance-title {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1.125rem !important; /* 18px */
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  color: #111827 !important; /* gray-900 */
+  margin-bottom: 0.5rem !important; /* 8px */
+}
+
+/* Descripciones de mantenimiento */
+.maintenance-description {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1rem !important; /* 16px */
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  color: #4b5563 !important; /* gray-600 */
+  margin-bottom: 0.75rem !important; /* 12px */
+}
+
+/* Items de mantenimiento */
+.maintenance-item {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  color: #4b5563 !important; /* gray-600 */
+  white-space: nowrap !important;
+}
+
+/* ============================================
+   ESTILOS DE DIAGNÓSTICO COMPUTARIZADO
+   ============================================ */
+
+/* Títulos de las tarjetas de diagnóstico */
+.diagnostic-card-title {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1.125rem !important; /* 18px */
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  color: #111827 !important; /* gray-900 */
+  margin-bottom: 0.125rem !important; /* 2px */
+}
+
+/* Subtítulos de las tarjetas de diagnóstico */
+.diagnostic-card-subtitle {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  color: #4b5563 !important; /* gray-600 */
+  margin-bottom: 0.25rem !important; /* 4px */
+}
+
+/* Descripciones de las tarjetas de diagnóstico */
+.diagnostic-card-description {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  color: #4b5563 !important; /* gray-600 */
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* ============================================
+   ESTILOS DEL FORMULARIO DE SOLICITUD
+   ============================================ */
+
+/* Título del formulario de solicitud */
+.form-request-title {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1.25rem !important; /* 20px */
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+  color: #111827 !important; /* gray-900 */
+  margin-bottom: 1rem !important; /* 16px */
+}
+
+/* Labels del formulario de solicitud */
+.form-request-label {
+  display: block !important;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  color: #374151 !important; /* gray-700 */
+  margin-bottom: 0.5rem !important; /* 8px */
+}
+
+/* Inputs del formulario de solicitud */
+.form-request-input {
+  width: 100% !important;
+  padding: 0.75rem 1rem !important; /* 12px 16px */
+  border: 1px solid #d1d5db !important; /* gray-300 */
+  border-radius: 0.5rem !important; /* 8px */
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1rem !important; /* 16px */
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  color: #111827 !important; /* gray-900 */
+  background-color: #ffffff !important;
+  transition: all 0.2s ease !important;
+}
+
+.form-request-input:focus {
+  outline: none !important;
+  border-color: #dc2626 !important; /* red-600 */
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2) !important;
+}
+
+/* Input con error */
+.form-request-input-error {
+  width: 100% !important;
+  padding: 0.75rem 1rem !important; /* 12px 16px */
+  border: 1px solid #ef4444 !important; /* red-500 */
+  border-radius: 0.5rem !important; /* 8px */
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1rem !important; /* 16px */
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  color: #111827 !important; /* gray-900 */
+  background-color: #ffffff !important;
+  transition: all 0.2s ease !important;
+}
+
+.form-request-input-error:focus {
+  outline: none !important;
+  border-color: #ef4444 !important; /* red-500 */
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Mensaje de error */
+.form-error-message {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 0.75rem !important; /* 12px */
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  color: #ef4444 !important; /* red-500 */
+  margin-top: 0.25rem !important; /* 4px */
+}
+
+/* Botón de envío */
+.form-submit-btn {
+  width: 100% !important;
+  padding: 0.75rem 1.5rem !important; /* 12px 24px */
+  border-radius: 0.75rem !important; /* 12px */
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 1rem !important; /* 16px */
+  font-weight: 700 !important;
+  line-height: 1.5 !important;
+  color: #ffffff !important;
+  background-color: #ef4444 !important; /* red-500 */
+  border: none !important;
+  cursor: pointer !important;
+  transition: background-color 0.3s ease !important;
+}
+
+.form-submit-btn:hover:not(:disabled) {
+  background-color: #dc2626 !important; /* red-600 */
+}
+
+.form-submit-btn:disabled {
+  background-color: #9ca3af !important; /* gray-400 */
+  cursor: not-allowed !important;
+}
+

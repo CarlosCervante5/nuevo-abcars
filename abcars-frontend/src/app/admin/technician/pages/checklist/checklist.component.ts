@@ -349,8 +349,8 @@ export class ChecklistComponent implements OnInit {
         this.uuidTechnician = this.customerInformationForm.controls['appraiserTechnician'].value;
     }
 
-    public onSelectChange(event: MatSelectChange, uuid_check: string){
-        const valorSeleccionado = event.value;
+    public onSelectChange(event: any, uuid_check: string){
+        const valorSeleccionado = event.value || (event.target as HTMLSelectElement).value;
         console.log('Opción seleccionada:', valorSeleccionado, ' Uuid del check:', uuid_check);
         this.attachCheck(this.valuation_uuid, uuid_check, valorSeleccionado);
     }
@@ -427,24 +427,19 @@ export class ChecklistComponent implements OnInit {
         this.inputdate.nativeElement.value = inputValue;
     }
 
-    public lastMaintenanceEmmitter(event: MatDatepickerInputEvent<Date>, check_uuid: string) {
-        let d = new Date(`${event.value}`);
-        let month = '' + (d.getMonth() + 1);
-        let day = '' + d.getDate();
-        let year = d.getFullYear();
-
-        if (month.length < 2) {
-            month = '0' + month;
+    public lastMaintenanceEmmitter(event: any, check_uuid: string) {
+        // HTML5 date input ya maneja el formato YYYY-MM-DD automáticamente
+        const dateValue = (event.target as HTMLInputElement).value;
+        
+        if (dateValue) {
+            // Actualizar el formulario reactivo
+            this.vehicleCertificationForm.patchValue({
+                [check_uuid]: dateValue
+            });
+            
+            // Guardar en el backend
+            this.attachCheck(this.valuation_uuid, check_uuid, dateValue);
         }
-        if (day.length < 2) {
-            day = '0' + day;
-        }
-
-        let date = [year, month, day].join('-');
-        //this.vehicleCertificationForm.controls['dateLastMaintenance'].setValue(date);
-        let inputValue = date.split("-").reverse().join("-");
-        this.dateLastMaintenance.nativeElement.value = inputValue;
-        this.attachCheck(this.valuation_uuid, check_uuid, inputValue);
     }
 
     public convertMayus(event: any): string {
@@ -536,12 +531,13 @@ export class ChecklistComponent implements OnInit {
 
                         const valuationDate = detailValuation.data.appointment?.scheduled_date;
                         if (valuationDate) {
-                            const valDate = valuationDate.slice(0, -6);
+                            const valDate = valuationDate.slice(0, -6); // YYYY-MM-DD formato requerido por input type="date"
                             this.customerInformationForm.controls['scheduled_date']?.setValue(valDate);
-                            const vd = valDate.split("-").reverse().join("-");
-                            if (this.inputdate) {
-                                this.inputdate.nativeElement.value = vd;
-                            }
+                            // No es necesario manipular nativeElement con input type="date" - formControlName lo sincroniza automáticamente
+                            // const vd = valDate.split("-").reverse().join("-");
+                            // if (this.inputdate) {
+                            //     this.inputdate.nativeElement.value = vd;
+                            // }
                         }
 
                         this.btn_save = true; // Mantener en true si es un nuevo registro o no se ha guardado
@@ -556,6 +552,7 @@ export class ChecklistComponent implements OnInit {
                         if (this.customerInformationForm.controls['model']) this.customerInformationForm.controls['model'].disable();
                         if (this.customerInformationForm.controls['year']) this.customerInformationForm.controls['year'].disable();
                         if (this.customerInformationForm.controls['mileage']) this.customerInformationForm.controls['mileage'].disable();
+                        // appraiserTechnician se mantiene HABILITADO cuando vehicle === null (usuario debe seleccionar)
                     } else {
                         // Validar que appointment y vehicle existen
                         if (!detailValuation.data.appointment || !detailValuation.data.vehicle) {
@@ -606,12 +603,13 @@ export class ChecklistComponent implements OnInit {
 
                         const valuationDate = detailValuation.data.appointment?.scheduled_date;
                         if (valuationDate) {
-                            const valDate = valuationDate.slice(0, -6);
+                            const valDate = valuationDate.slice(0, -6); // YYYY-MM-DD formato requerido por input type="date"
                             this.customerInformationForm.controls['scheduled_date']?.setValue(valDate);
-                            const vd = valDate.split("-").reverse().join("-");
-                            if (this.inputdate) {
-                                this.inputdate.nativeElement.value = vd;
-                            }
+                            // No es necesario manipular nativeElement con input type="date" - formControlName lo sincroniza automáticamente
+                            // const vd = valDate.split("-").reverse().join("-");
+                            // if (this.inputdate) {
+                            //     this.inputdate.nativeElement.value = vd;
+                            // }
                         }
 
                         this.btn_save = false;
@@ -636,9 +634,8 @@ export class ChecklistComponent implements OnInit {
                         if (this.customerInformationForm.controls['exterior_color']) this.customerInformationForm.controls['exterior_color'].disable();
                         if (this.customerInformationForm.controls['plates']) this.customerInformationForm.controls['plates'].disable();
                         if (this.customerInformationForm.controls['cylinders']) this.customerInformationForm.controls['cylinders'].disable();
-                        if (this.customerInformationForm.controls['engine_type']) this.customerInformationForm.controls['engine_type'].disable();
-                        // appraiserTechnician se mantiene habilitado para permitir edición
-                        // if (this.customerInformationForm.controls['appraiserTechnician']) this.customerInformationForm.controls['appraiserTechnician'].disable();
+                        if (this.customerInformationForm.controls['engine_type'])                         this.customerInformationForm.controls['engine_type'].disable();
+                        this.customerInformationForm.controls['appraiserTechnician'].disable();
                     }
                 },
                 error: (error: any) => {
@@ -693,9 +690,8 @@ export class ChecklistComponent implements OnInit {
                 );
             }
             if (check.section_name === 'Certificación de Vehículo') {
-                const selectedValueCertVeh = check.value_type === 'date' && check.selected_value
-                    ? this.parseDate(check.selected_value)
-                    : check.selected_value || '';
+                // Para campos de tipo date, el backend ya devuelve el formato correcto YYYY-MM-DD
+                const selectedValueCertVeh = check.selected_value || '';
                 const validators = check.value_type === 'date' ? [] : [Validators.required];
                 const control = this._formBuilder.control(selectedValueCertVeh, validators);
 
@@ -705,12 +701,24 @@ export class ChecklistComponent implements OnInit {
                 );
             }
         });
+        
+        // Marcar todos los campos como "touched" para mostrar validaciones inmediatamente
+        this.mechanicElectricForm.markAllAsTouched();
+        this.externalReviewForm.markAllAsTouched();
+        this.internalReviewForm.markAllAsTouched();
+        this.vehicleCertificationForm.markAllAsTouched();
     }
 
     private parseDate(dateString: string): Date | null {
         if (!dateString) return null;
         const [day, month, year] = dateString.split('-').map(Number);
         return new Date(year, month - 1, day); // Mes -1 porque los meses en JavaScript empiezan desde 0
+    }
+
+    private parseDateToHTML5(dateString: string): string {
+        // Esta función ya no es necesaria porque el backend devuelve YYYY-MM-DD
+        // Mantenida por compatibilidad, pero simplemente devuelve el valor original
+        return dateString || '';
     }
 
     //función que permite detectar si todos los formularios han sido llenados y mandar un alert

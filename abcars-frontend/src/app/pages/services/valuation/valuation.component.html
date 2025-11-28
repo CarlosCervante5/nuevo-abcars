@@ -1,0 +1,343 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Navbar -->
+  <app-home-nav></app-home-nav>
+  
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-teal-600 to-teal-800 text-white py-16 pt-32">
+    <div class="container mx-auto px-4">
+      <div class="max-w-4xl mx-auto text-center">
+        <h1 class="valuation-hero-title">Valuación Gratuita</h1>
+        <p class="valuation-hero-description">Obtén una valuación profesional y gratuita de tu vehículo en menos de 24 horas</p>
+        <div class="flex flex-wrap justify-center gap-4 text-sm">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-teal-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            <span class="hero-feature-badge">100% gratuita</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-teal-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            <span class="hero-feature-badge">Respuesta en 24 horas</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-teal-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            <span class="hero-feature-badge">Sin compromiso</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="container mx-auto px-4 py-16">
+    <div class="max-w-6xl mx-auto">
+      <form [formGroup]="valuationForm" (ngSubmit)="submitValuation($event)">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Columna principal -->
+        <div class="lg:col-span-2 space-y-8">
+          
+          <!-- Formulario de valuación -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm">
+            <h2 class="section-title">Solicitar Valuación</h2>
+            
+            <div class="space-y-6">
+              <!-- Información del vehículo -->
+              <div>
+                <h3 class="subsection-title">Información del Vehículo</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="form-label">Marca *</label>
+                    <input 
+                      type="text"
+                      formControlName="brand"
+                      list="brands-list"
+                      (input)="onBrandInput(valuationForm.get('brand')?.value || '')"
+                      [ngClass]="valuationForm.get('brand')?.invalid && valuationForm.get('brand')?.touched ? 'form-input-error' : 'form-input'"
+                      placeholder="Escribe o selecciona una marca"
+                    >
+                    <datalist id="brands-list">
+                      <option *ngFor="let brand of brands" [value]="brand.name">
+                    </datalist>
+                    <p *ngIf="valuationForm.get('brand')?.invalid && valuationForm.get('brand')?.touched" class="form-error-message">
+                      La marca es requerida
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label class="form-label">Modelo *</label>
+                    <input 
+                      type="text" 
+                      formControlName="model"
+                      [attr.list]="models.length > 0 ? 'models-list' : null"
+                      autocomplete="off"
+                      [ngClass]="valuationForm.get('model')?.invalid && valuationForm.get('model')?.touched ? 'form-input-error' : 'form-input'"
+                      placeholder="Escribe o selecciona un modelo"
+                    >
+                    <datalist *ngIf="models.length > 0" id="models-list">
+                      <option *ngFor="let model of models" [value]="model.name">
+                    </datalist>
+                    <p *ngIf="valuationForm.get('model')?.invalid && valuationForm.get('model')?.touched" class="form-error-message">
+                      El modelo es requerido
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label class="form-label">Año *</label>
+                    <select 
+                      formControlName="year"
+                      [ngClass]="valuationForm.get('year')?.invalid && valuationForm.get('year')?.touched ? 'form-input-error' : 'form-input'"
+                    >
+                      <option value="">Selecciona año</option>
+                      <option *ngFor="let year of getYears()" [value]="year">{{ year }}</option>
+                    </select>
+                    <p *ngIf="valuationForm.get('year')?.invalid && valuationForm.get('year')?.touched" class="form-error-message">
+                      El año es requerido
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label class="form-label">Kilometraje *</label>
+                    <input 
+                      type="number" 
+                      formControlName="mileage"
+                      [ngClass]="valuationForm.get('mileage')?.invalid && valuationForm.get('mileage')?.touched ? 'form-input-error' : 'form-input'"
+                      placeholder="Ej: 50000"
+                    >
+                    <p *ngIf="valuationForm.get('mileage')?.invalid && valuationForm.get('mileage')?.touched" class="form-error-message">
+                      <span *ngIf="valuationForm.get('mileage')?.errors?.['required']">El kilometraje es requerido</span>
+                      <span *ngIf="valuationForm.get('mileage')?.errors?.['pattern']">El kilometraje debe ser un número válido</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              </div>
+          </div>
+
+          <!-- Proceso de valuación -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm">
+            <h2 class="section-title">¿Cómo funciona nuestro proceso?</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="text-center">
+                <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span class="text-2xl font-bold text-teal-600">1</span>
+                </div>
+                <h3 class="process-step-title">Completa el formulario</h3>
+                <p class="process-step-description">Proporciona la información detallada de tu vehículo para una valuación precisa.</p>
+              </div>
+              
+              <div class="text-center">
+                <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span class="text-2xl font-bold text-teal-600">2</span>
+                </div>
+                <h3 class="process-step-title">Evaluación profesional</h3>
+                <p class="process-step-description">Nuestros expertos analizan tu vehículo usando las últimas herramientas del mercado.</p>
+              </div>
+              
+              <div class="text-center">
+                <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span class="text-2xl font-bold text-teal-600">3</span>
+                </div>
+                <h3 class="process-step-title">Recibe tu valuación</h3>
+                <p class="process-step-description">Obtén tu valuación detallada en menos de 24 horas, sin compromiso.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Beneficios -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm">
+            <h2 class="section-title">¿Por qué elegir nuestra valuación?</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="flex items-start gap-3">
+                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="benefit-title">100% Gratuita</h3>
+                  <p class="benefit-description">No hay costo alguno por la valuación, es completamente gratuita.</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-3">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="benefit-title">Evaluación profesional</h3>
+                  <p class="benefit-description">Utilizamos las mejores herramientas y experiencia del mercado.</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-3">
+                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="benefit-title">Respuesta rápida</h3>
+                  <p class="benefit-description">Recibe tu valuación en menos de 24 horas hábiles.</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-3">
+                <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="benefit-title">Sin compromiso</h3>
+                  <p class="benefit-description">No estás obligado a vender tu vehículo con nosotros.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+          
+          <!-- Formulario de contacto -->
+          <div class="bg-white rounded-3xl p-6 shadow-sm sticky top-8">
+            <h3 class="form-request-title">Información de Contacto</h3>
+            
+            <div class="space-y-4">
+              <div>
+                <label class="form-request-label">Nombre *</label>
+                <input 
+                  type="text" 
+                  formControlName="fullName"
+                  [ngClass]="valuationForm.get('fullName')?.invalid && valuationForm.get('fullName')?.touched ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="Tu nombre"
+                >
+                <p *ngIf="valuationForm.get('fullName')?.invalid && valuationForm.get('fullName')?.touched" class="form-error-message">
+                  El nombre es requerido
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Apellidos *</label>
+                <input 
+                  type="text" 
+                  formControlName="lastName"
+                  [ngClass]="valuationForm.get('lastName')?.invalid && valuationForm.get('lastName')?.touched ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="Tus apellidos"
+                >
+                <p *ngIf="valuationForm.get('lastName')?.invalid && valuationForm.get('lastName')?.touched" class="form-error-message">
+                  Los apellidos son requeridos
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Teléfono *</label>
+                <input 
+                  type="tel" 
+                  formControlName="phone"
+                  maxlength="10"
+                  (keypress)="onPhoneKeyPress($event)"
+                  (input)="onPhoneInput($event)"
+                  [ngClass]="valuationForm.get('phone')?.invalid && valuationForm.get('phone')?.touched ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="Tu número de teléfono"
+                >
+                <p *ngIf="valuationForm.get('phone')?.invalid && valuationForm.get('phone')?.touched" class="form-error-message">
+                  <span *ngIf="valuationForm.get('phone')?.errors?.['required']">El teléfono es requerido</span>
+                  <span *ngIf="valuationForm.get('phone')?.errors?.['pattern']">El teléfono debe tener 10 dígitos</span>
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Email *</label>
+                <input 
+                  type="email" 
+                  formControlName="email"
+                  [ngClass]="valuationForm.get('email')?.invalid && valuationForm.get('email')?.touched ? 'form-request-input-error' : 'form-request-input'"
+                  placeholder="tu@email.com"
+                >
+                <p *ngIf="valuationForm.get('email')?.invalid && valuationForm.get('email')?.touched" class="form-error-message">
+                  <span *ngIf="valuationForm.get('email')?.errors?.['required']">El email es requerido</span>
+                  <span *ngIf="valuationForm.get('email')?.errors?.['email']">El email no es válido</span>
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Sucursal *</label>
+                <select 
+                  formControlName="city"
+                  [ngClass]="valuationForm.get('city')?.invalid && valuationForm.get('city')?.touched ? 'form-request-input-error' : 'form-request-input'"
+                >
+                  <option value="">Selecciona sucursal</option>
+                  <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+                </select>
+                <p *ngIf="valuationForm.get('city')?.invalid && valuationForm.get('city')?.touched" class="form-error-message">
+                  La sucursal es requerida
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Fecha de cita *</label>
+                <input 
+                  type="date" 
+                  formControlName="preferredDate"
+                  [ngClass]="valuationForm.get('preferredDate')?.invalid && valuationForm.get('preferredDate')?.touched ? 'form-request-input-error' : 'form-request-input'"
+                >
+                <p *ngIf="valuationForm.get('preferredDate')?.invalid && valuationForm.get('preferredDate')?.touched" class="form-error-message">
+                  La fecha de cita es requerida
+                </p>
+              </div>
+              
+              <div>
+                <label class="form-request-label">Hora de cita *</label>
+                <select 
+                  formControlName="preferredTime"
+                  [ngClass]="valuationForm.get('preferredTime')?.invalid && valuationForm.get('preferredTime')?.touched ? 'form-request-input-error' : 'form-request-input'"
+                >
+                  <option value="">Selecciona hora</option>
+                  <option value="09:00">9:00 AM</option>
+                  <option value="10:00">10:00 AM</option>
+                  <option value="11:00">11:00 AM</option>
+                  <option value="12:00">12:00 PM</option>
+                  <option value="13:00">1:00 PM</option>
+                  <option value="14:00">2:00 PM</option>
+                  <option value="15:00">3:00 PM</option>
+                  <option value="16:00">4:00 PM</option>
+                  <option value="17:00">5:00 PM</option>
+                  <option value="18:00">6:00 PM</option>
+                </select>
+                <p *ngIf="valuationForm.get('preferredTime')?.invalid && valuationForm.get('preferredTime')?.touched" class="form-error-message">
+                  La hora de cita es requerida
+                </p>
+              </div>
+              
+              <button 
+                type="submit"
+                [disabled]="isSubmitting"
+                class="form-submit-btn"
+              >
+                <span *ngIf="!isSubmitting">Solicitar Valuación Gratuita</span>
+                <span *ngIf="isSubmitting">Enviando...</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <app-modern-footer></app-modern-footer>
+</div>
+

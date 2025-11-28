@@ -15,6 +15,7 @@ import { PasswordResetComponent } from './pages/password-reset/password-reset.co
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HomeNavComponent } from '../shared/components/home-nav/home-nav.component';
+import { DarkNavComponent } from '../shared/components/dark-nav/dark-nav.component';
 import { ModernFooterComponent } from '../shared/components/modern-footer/modern-footer.component';
 @NgModule({ declarations: [
         RegisterComponent,
@@ -29,6 +30,7 @@ import { ModernFooterComponent } from '../shared/components/modern-footer/modern
         ReactiveFormsModule,
         RouterModule,
         HomeNavComponent,
+        DarkNavComponent,
         ModernFooterComponent], providers: [provideHttpClient(withInterceptorsFromDi())] })
 
 export class AuthModule { }
