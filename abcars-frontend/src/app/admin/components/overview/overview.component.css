@@ -1,26 +1,57 @@
-.card {  
+/* Card Module Styles */
+.card-module {
+    border: 1px dashed #939393 !important;
+    background-color: rgba(248, 246, 242, 0.3) !important;
     border-radius: 30px !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
 .card-module:hover {
-    cursor: pointer;
-    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.39);
+    cursor: pointer !important;
+    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.39) !important;
+    transform: translateY(-2px) !important;
 }
 
-.card-module {
-    border: 1px dashed #939393 !important;
-    background-color: rgba(248,246,242,.3) !important;    
+.card-module.disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+.card-module-body {
+    padding: 0.75rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 1 !important;
+    min-height: 120px !important;
+}
+
+.card-module-body h4 {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    margin-top: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+    text-align: center !important;
 }
 
 .link-module {
-    cursor: pointer;
-    text-decoration: none;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    color: #6b7280 !important;
+    font-size: 0.875rem !important;
+    margin-top: 0.5rem !important;
+    transition: color 0.2s ease !important;
 }
 
 .link-module:hover {
-    text-decoration-line: underline;
-    text-decoration-style: solid;
-    text-decoration-color: var(--abcars-color);
+    text-decoration-line: underline !important;
+    text-decoration-style: solid !important;
+    text-decoration-color: var(--abcars-primary, #f59e0b) !important;
+    color: var(--abcars-primary, #f59e0b) !important;
 }
 
 .avatar-preview {
@@ -173,12 +204,18 @@
 .admin-dashboard-title {
     font-weight: 700 !important;
     margin-bottom: 0 !important;
-    font-size: x-large !important;
+    font-size: 1.5rem !important;
+    line-height: 1.75rem !important;
+    color: #111827 !important;
 }
 
 .admin-modules-title {
     text-align: start !important;
     font-weight: 700 !important;
+    font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+    color: #111827 !important;
+    margin-bottom: 1rem !important;
 }
 
 /* Mobile Menu Styles */

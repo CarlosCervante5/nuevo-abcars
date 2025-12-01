@@ -93,76 +93,55 @@
     </div>
 </nav>
 
-<div class="container pt-24">
-    <div class="row">
-        <div class="col-12 mt-5 mb-5">
-            <!-- Role Information -->
-            <div class="row">
+<div class="container mx-auto px-4 pt-24">
+    <div class="w-full mt-5 mb-5">
+        <!-- Role Information -->
+        <div class="flex items-center">
+            <div class="w-1/12"></div>
+    
+            <div class="flex-auto">
+                <h3 class="admin-dashboard-title">ABCars Dashboard</h3>
+                <br>
+                <h6 class="font-light text-lg text-justify"></h6>
+            </div>
+    
+            <div class="flex-auto"></div>
+        </div>
+        
+        <hr class="my-4 border-gray-300">
 
-                <div class="row align-items-center">
-                    <div class="col-1"></div>
-            
-                    <div class="col-auto" >
-                        <h3 class="admin-dashboard-title">ABCars Dashboard</h3>
-                        <br>
-                        <h6 class="fw-light" style="font-size: large; text-align: justify;"></h6>
-                    </div>
-            
-                    <div class="col-auto"></div>
-                </div>
-                
-                <hr>
-
-                <div class="col-12 col-sm-12 col-md-8 col-lg-9">
-                    <app-valuation-statistics-overview *ngIf="overview?.user?.role === 'valuation_manager' "></app-valuation-statistics-overview>
-                    <div class="row mt-5">
-                        <div class="col-12">
-                            <h3 class="admin-modules-title">Mis Modulos</h3>
-                            <div class="row">                                
-                                <!-- <div class="col-6 col-sm-4 col-md-6 col-lg-3 mb-3" *ngFor="let page of overview?.pages">
-                                    <div class="card text-center card-module h-100" [routerLink]="[page.permalink]">
-                                        <div class="card-body m-3">
-
-                                            <h4 class="fw-bold mt-3">{{ page.title }}</h4>
-                                            
-                                            <a class="link-module text-muted" [routerLink]="[page.permalink]">
-                                                Ver más 
-                                                <i class="fas fa-chevron-right"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div> -->
-
-                                <div class="col-6 col-sm-4 col-md-6 col-lg-3 mb-3" *ngFor="let page of overview?.pages">
-                                    <div 
-                                      class="card text-center card-module h-100" 
-                                      [routerLink]="page.permalink" 
-                                      (click)="page.action ? page.action() : null"
-                                      [class.cursor-pointer]="page.action"
-                                      [class.disabled]="!page.permalink && !page.action">
-                                        <div class="card-body m-3">
-                                            <h4 class="fw-bold mt-3">{{ page.title }}</h4>
-                                            <a 
-                                            class="link-module text-muted" 
-                                            *ngIf="page.permalink" 
-                                            [routerLink]="page.permalink"
-                                            (click)="$event.stopPropagation()"
-                                            >
-                                            Ver más 
-                                            <i class="fas fa-chevron-right"></i>
-                                            </a>
-                                            <a 
-                                            class="link-module text-muted" 
-                                            *ngIf="page.action && !page.permalink" 
-                                            (click)="page.action(); $event.stopPropagation()"
-                                            >
-                                            Ver más 
-                                            <i class="fas fa-chevron-right"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                  
+        <div class="w-full sm:w-full md:w-2/3 lg:w-3/4">
+            <app-valuation-statistics-overview *ngIf="overview?.user?.role === 'valuation_manager' "></app-valuation-statistics-overview>
+            <div class="mt-5">
+                <div class="w-full">
+                    <h3 class="admin-modules-title">Mis Modulos</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">                                
+                        <div 
+                          class="card-module text-center h-full" 
+                          [routerLink]="page.permalink" 
+                          (click)="page.action ? page.action() : null"
+                          [class.cursor-pointer]="page.action"
+                          [class.disabled]="!page.permalink && !page.action"
+                          *ngFor="let page of overview?.pages">
+                            <div class="card-module-body">
+                                <h4>{{ page.title }}</h4>
+                                <a 
+                                class="link-module" 
+                                *ngIf="page.permalink" 
+                                [routerLink]="page.permalink"
+                                (click)="$event.stopPropagation()"
+                                >
+                                Ver más 
+                                <i class="fas fa-chevron-right"></i>
+                                </a>
+                                <a 
+                                class="link-module" 
+                                *ngIf="page.action && !page.permalink" 
+                                (click)="page.action(); $event.stopPropagation()"
+                                >
+                                Ver más 
+                                <i class="fas fa-chevron-right"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
