@@ -9,3 +9,173 @@ h1 {
   margin-top: 1rem !important;
   margin-bottom: 1rem !important;
 }
+
+/* Container and layout */
+.external-revision-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.external-revision-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.external-revision-col {
+  width: 100%;
+  padding: 0;
+}
+
+/* Grid for images */
+.gridOtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin: 1rem 0;
+}
+
+/* Image container */
+.dragImaCars {
+  position: relative;
+  width: 100%;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dragImaCars:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.containerl {
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+/* Image styles */
+.img-cars {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Hidden input */
+.external-revision-input-hidden {
+  display: none !important;
+}
+
+/* Mat hint styles */
+mat-hint {
+  display: block;
+  color: #ef4444;
+  font-size: 0.8125rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+/* Mat list item spacing */
+mat-list-item {
+  margin-top: 1.25rem !important;
+}
+
+/* Text styles */
+.external-revision-text-bold {
+  font-weight: 700 !important;
+}
+
+/* Spinner styles */
+.external-revision-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  vertical-align: text-bottom;
+  border: 0.15em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-border 0.75s linear infinite;
+  margin-top: 0.25rem;
+  margin-left: 0.5rem;
+}
+
+@keyframes spinner-border {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.external-revision-spinner-sm {
+  width: 0.875rem;
+  height: 0.875rem;
+  border-width: 0.125em;
+}
+
+/* Bootstrap compatibility classes for this component */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.col-12 {
+  width: 100%;
+  padding: 0;
+}
+
+.d-block {
+  display: block !important;
+}
+
+.w-100 {
+  width: 100% !important;
+}
+
+.d-none {
+  display: none !important;
+}
+
+.fw-bold {
+  font-weight: 700 !important;
+}
+
+.mt-3 {
+  margin-top: 1rem !important;
+}
+
+.mt-5 {
+  margin-top: 3rem !important;
+}
+
+.mt-1 {
+  margin-top: 0.25rem !important;
+}
+
+.spinner-border {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  vertical-align: text-bottom;
+  border: 0.15em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-border 0.75s linear infinite;
+}
+
+.spinner-border-sm {
+  width: 0.875rem;
+  height: 0.875rem;
+  border-width: 0.125em;
+}
