@@ -11,8 +11,9 @@
 .checklist-section-title:first-of-type{margin-top:0!important}
 .checklist-section-title i{color:#EEB838!important;font-size:1.125rem!important;background:rgba(238,184,56,.1)!important;padding:.5rem!important;border-radius:8px!important;width:2.5rem!important;height:2.5rem!important;display:flex!important;align-items:center!important;justify-content:center!important}
 .checklist-btn{margin:.5rem!important;padding:10px 24px!important;border-radius:8px!important;font-weight:500!important;text-transform:none!important;transition:all .2s ease!important;box-shadow:0 1px 2px 0 rgba(0,0,0,.05)!important;border:none!important;cursor:pointer!important}
-.checklist-btn-primary{background-color:#3b82f6!important;color:#fff!important}
-.checklist-btn-primary:hover:not(:disabled){background-color:#2563eb!important;box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06)!important;transform:translateY(-1px)!important}
-.checklist-btn-primary:disabled{opacity:.5!important;cursor:not-allowed!important}
-.checklist-btn-secondary{background-color:#111827!important;color:#fff!important}
-.checklist-btn-secondary:hover:not(:disabled){background-color:#1f2937!important;box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06)!important;transform:translateY(-1px)!important}
+button.checklist-btn-primary[mat-button],button.checklist-btn-primary{background-color:#3b82f6!important;color:#ffffff!important;opacity:1!important}
+button.checklist-btn-primary[mat-button]:not([disabled]),button.checklist-btn-primary:not(:disabled){background-color:#3b82f6!important;color:#ffffff!important;opacity:1!important;box-shadow:0 1px 2px 0 rgba(0,0,0,.05)!important}
+button.checklist-btn-primary[mat-button]:hover:not([disabled]),button.checklist-btn-primary:hover:not(:disabled){background-color:#2563eb!important;color:#ffffff!important;box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06)!important;transform:translateY(-1px)!important;opacity:1!important}
+button.checklist-btn-primary[mat-button]:disabled,button.checklist-btn-primary:disabled{opacity:.5!important;cursor:not-allowed!important;color:#ffffff!important}
+button.checklist-btn-secondary[mat-button],button.checklist-btn-secondary{background-color:#111827!important;color:#ffffff!important}
+button.checklist-btn-secondary[mat-button]:hover:not([disabled]),button.checklist-btn-secondary:hover:not(:disabled){background-color:#1f2937!important;color:#ffffff!important;box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06)!important;transform:translateY(-1px)!important}
