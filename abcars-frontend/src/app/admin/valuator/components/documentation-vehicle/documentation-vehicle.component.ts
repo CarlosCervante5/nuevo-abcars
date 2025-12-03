@@ -2,8 +2,6 @@ import { Component, Inject, OnInit, inject } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
-import { MatSelectChange } from '@angular/material/select';
 
 import { AcquisitionsChecklistService } from '@services/acquisitions-checklist.service';
 
@@ -188,8 +186,9 @@ export class DocumentationVehicleComponent implements OnInit {
 
   }
 
-  public onSelectChange(event: MatSelectChange, uuid_check: string) {
-    const valorSeleccionado = event.value;
+  public onSelectChange(event: Event, uuid_check: string) {
+    const target = event.target as HTMLSelectElement;
+    const valorSeleccionado = target.value;
     this.attachCheck(this.data.valuation_uuid, uuid_check, valorSeleccionado);
   }
 
@@ -219,9 +218,11 @@ export class DocumentationVehicleComponent implements OnInit {
     }
   }
 
-  public onTenancyChange(uuidTenancy:string, yearValue: number, event: MatSlideToggleChange) {
-    console.log(uuidTenancy, yearValue, event.checked);
-    this.yearTenencia = event.checked ? yearValue : null;
+  public onTenancyChange(uuidTenancy:string, yearValue: number, event: Event) {
+    const target = event.target as HTMLInputElement;
+    const isChecked = target.checked;
+    console.log(uuidTenancy, yearValue, isChecked);
+    this.yearTenencia = isChecked ? yearValue : null;
     this.attachCheck(this.data.valuation_uuid, uuidTenancy, this.yearTenencia);
   }
 
