@@ -1,94 +1,156 @@
-<div class="container">
-    <div class="row">
-        <div class="col-12 mt-5 mb-5">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="row">
-                            <div class="col-12 text-center">
-                                <h1 class=fw-bold>Nueva Campaña</h1>
-                                <span>Por favor, ingrese los datos de la campaña.</span>
-                                <hr />
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <form [formGroup]="form" (ngSubmit)="onSubmit()">
-                                    <!--Nombre-->
-                                    <div class="row paddingInputs">
-                                        <div class="col-12 ">
-                                            <mat-form-field appearance="outline" class="example-full-width">
-                                                <mat-label>Nombre de la campaña:</mat-label>
-                                                <input matInput type="text" formControlName="name" placeholder="Nombre" minlength="1" maxlength="191" required>
-                                            </mat-form-field>
-                                        </div>
-                                    </div>
-                                    <div class="row paddingInputs">
-                                        <div class="col-6">
-                                            <mat-form-field appearance="outline" class="example-full-width">
-                                                <mat-label>Inicio de campaña:</mat-label>
-                                                <input matInput type="date" formControlName="begin_date"  required>
-                                            </mat-form-field>
-                                        </div>
-                                        <div class="col-6">
-                                            <mat-form-field appearance="outline" class="example-full-width">
-                                                <mat-label>Fin de campaña</mat-label>
-                                                <input matInput type="date" formControlName="end_date" required>
-                                            </mat-form-field>
-                                        </div>
-                                    </div>
-        
-                                    <div class="row">
-                                        <div class="col-6 paddingInputs">
-                                            <mat-form-field appearance="outline" class="example-full-width">
-                                                <mat-label>Marca:</mat-label>
-                                                <mat-select formControlName="segment_name" >
-                                                    <mat-option value="BMW">BMW</mat-option>
-                                                    <mat-option value="MINI">MINI</mat-option>
-                                                    <mat-option value="MOTORRAD">MOTORRAD</mat-option>
-                                                    <mat-option value="Chevrolet">Chevrolet</mat-option>
-                                                    <mat-option value="ABcars">ABcars</mat-option>
-                                                    <mat-option value="Seminuevos Vecsa">Seminuevos Vecsa</mat-option>
-                                                </mat-select>
-                                            </mat-form-field>
-                                        </div>
-    
-                                        <div class="col-6 paddingInputs">
-                                            <mat-form-field appearance="outline" class="example-full-width">
-                                                <mat-label>Categoria:</mat-label>
-                                                <mat-select formControlName="category" >
-                                                    <mat-option value="vehiculos nuevos">Vehiculos Nuevos</mat-option>
-                                                    <mat-option value="vehiculos seminuevos">Vehiculos Seminuevos</mat-option>
-                                                    <mat-option value="aftersales">Aftersales</mat-option>
-                                                </mat-select>
-                                            </mat-form-field>
-                                        </div>
-                                    </div>
-
-                                    <div class="row paddingInputs">
-                                        <div class="col-12 ">
-                                            <mat-form-field appearance="outline" class="example-full-width">
-                                                <mat-label>Descripción:</mat-label>
-                                                <input matInput type="text" formControlName="description" placeholder="Descripción" minlength="1" maxlength="191">
-                                            </mat-form-field>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-12 text-end">
-                                            <button mat-raised-button type="submit" class="marginButtons btn abcars-background-color-blue  mx-3 px-3" >                                    
-                                                <span >Ingresar</span>
-                                            </button>                                            
-    
-                                            <button mat-raised-button type="button"class="marginButtons btn  mx-3 px-3" (click)="close()">                                    
-                                                Cancelar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+<div class="create-campaing-container">
+    <div class="w-full py-5">
+        <div class="w-full">
+            <div class="w-full">
+                <div class="w-full text-center">
+                    <h1 class="create-campaing-title">Nueva Campaña</h1>
+                    <span class="create-campaing-subtitle">Por favor, ingrese los datos de la campaña.</span>
+                    <hr class="create-campaing-divider" />
                 </div>
+                <div class="w-full">
+                    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                        <!--Nombre-->
+                        <div class="w-full mb-4">
+                            <div class="w-full">
+                                <div class="create-campaing-form-field">
+                                    <label class="create-campaing-label">Nombre de la campaña:</label>
+                                    <input 
+                                        type="text" 
+                                        formControlName="name" 
+                                        placeholder="Nombre" 
+                                        minlength="1" 
+                                        maxlength="191" 
+                                        required
+                                        class="create-campaing-input"
+                                        [class.border-red-500]="form.get('name')?.invalid && form.get('name')?.touched"
+                                    />
+                                    <span class="create-campaing-hint" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+                                        El nombre de la campaña es requerido.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="w-full mb-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="w-full">
+                                    <div class="create-campaing-form-field">
+                                        <label class="create-campaing-label">Inicio de campaña:</label>
+                                        <input 
+                                            type="date" 
+                                            formControlName="begin_date" 
+                                            required
+                                            class="create-campaing-input"
+                                            [class.border-red-500]="form.get('begin_date')?.invalid && form.get('begin_date')?.touched"
+                                        />
+                                        <span class="create-campaing-hint" *ngIf="form.get('begin_date')?.invalid && form.get('begin_date')?.touched">
+                                            La fecha de inicio es requerida.
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="w-full">
+                                    <div class="create-campaing-form-field">
+                                        <label class="create-campaing-label">Fin de campaña:</label>
+                                        <input 
+                                            type="date" 
+                                            formControlName="end_date" 
+                                            required
+                                            class="create-campaing-input"
+                                            [class.border-red-500]="form.get('end_date')?.invalid && form.get('end_date')?.touched"
+                                        />
+                                        <span class="create-campaing-hint" *ngIf="form.get('end_date')?.invalid && form.get('end_date')?.touched">
+                                            La fecha de fin es requerida.
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full mb-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="w-full">
+                                    <div class="create-campaing-form-field">
+                                        <label class="create-campaing-label">Marca:</label>
+                                        <select 
+                                            formControlName="segment_name"
+                                            class="create-campaing-select"
+                                            [class.border-red-500]="form.get('segment_name')?.invalid && form.get('segment_name')?.touched"
+                                            required
+                                        >
+                                            <option value="" disabled selected>Seleccione una marca</option>
+                                            <option value="BMW">BMW</option>
+                                            <option value="MINI">MINI</option>
+                                            <option value="MOTORRAD">MOTORRAD</option>
+                                            <option value="Chevrolet">Chevrolet</option>
+                                            <option value="ABcars">ABcars</option>
+                                            <option value="Seminuevos Vecsa">Seminuevos Vecsa</option>
+                                        </select>
+                                        <span class="create-campaing-hint" *ngIf="form.get('segment_name')?.invalid && form.get('segment_name')?.touched">
+                                            La marca es requerida.
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="w-full">
+                                    <div class="create-campaing-form-field">
+                                        <label class="create-campaing-label">Categoria:</label>
+                                        <select 
+                                            formControlName="category"
+                                            class="create-campaing-select"
+                                            [class.border-red-500]="form.get('category')?.invalid && form.get('category')?.touched"
+                                            required
+                                        >
+                                            <option value="" disabled selected>Seleccione una categoría</option>
+                                            <option value="vehiculos nuevos">Vehiculos Nuevos</option>
+                                            <option value="vehiculos seminuevos">Vehiculos Seminuevos</option>
+                                            <option value="aftersales">Aftersales</option>
+                                        </select>
+                                        <span class="create-campaing-hint" *ngIf="form.get('category')?.invalid && form.get('category')?.touched">
+                                            La categoría es requerida.
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full mb-4">
+                            <div class="w-full">
+                                <div class="create-campaing-form-field">
+                                    <label class="create-campaing-label">Descripción:</label>
+                                    <input 
+                                        type="text" 
+                                        formControlName="description" 
+                                        placeholder="Descripción" 
+                                        minlength="1" 
+                                        maxlength="191"
+                                        class="create-campaing-input"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full">
+                            <div class="w-full flex justify-end gap-3">
+                                <button 
+                                    type="submit" 
+                                    class="create-campaing-btn create-campaing-btn-primary"
+                                    [disabled]="form.invalid"
+                                >                                    
+                                    <span>Ingresar</span>
+                                </button>                                            
+
+                                <button 
+                                    type="button"
+                                    class="create-campaing-btn create-campaing-btn-secondary"
+                                    (click)="close()"
+                                >                                    
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
