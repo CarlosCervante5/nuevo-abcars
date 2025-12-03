@@ -1,31 +1,202 @@
-
-
-.mat-title {
-    height: 60px;
-    text-align: start;
+:host {
+  display: block;
 }
 
-.mat-subtitle{
-    height: 30px;
-    font-size: 18px;
+/* Page Title */
+.promotions-page-title {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  margin-bottom: 0.5rem !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
 }
 
-.card-image {
-    object-fit: scale-down;
-    height: 23rem;        
-    width:auto;
+/* Breadcrumb */
+.promotions-breadcrumb {
+  margin-bottom: 2rem !important;
 }
 
-@media screen and (max-width: 990px) and (min-width: 770px)  {
-    .mat-title {
-        height: 90px;
-    }
+.promotions-breadcrumb-list {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 0.875rem !important;
 }
 
-@media screen and (max-width: 767px) and (min-width: 0px)  {
-    .card-image {
-        object-fit: scale-down;
-        height: 35rem;        
-        width:auto;
-    }
+.promotions-breadcrumb-item {
+  display: flex !important;
+  align-items: center !important;
+  color: #6b7280 !important;
+  cursor: pointer !important;
+  transition: color 0.2s ease !important;
+}
+
+.promotions-breadcrumb-item:hover {
+  color: var(--abcars-primary, #f59e0b) !important;
+}
+
+.promotions-breadcrumb-item:not(:last-child)::after {
+  content: '' !important;
+  display: inline-block !important;
+  width: 8px !important;
+  height: 8px !important;
+  margin: 0 0.5rem !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.promotions-breadcrumb-item-active {
+  color: #111827 !important;
+  font-weight: 600 !important;
+  cursor: default !important;
+}
+
+.promotions-breadcrumb-item-active:hover {
+  color: #111827 !important;
+}
+
+/* Add Button */
+a.promotions-add-btn[mat-button],
+.promotions-add-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.5rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  flex-wrap: nowrap !important;
+}
+
+a.promotions-add-btn[mat-button] img,
+.promotions-add-btn img {
+  display: inline-block !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+
+a.promotions-add-btn[mat-button]:hover,
+.promotions-add-btn:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* Card Styles */
+.promotions-card {
+  width: 100% !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+  transition: all 0.2s ease !important;
+  overflow: hidden !important;
+}
+
+.promotions-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  transform: translateY(-2px) !important;
+}
+
+.promotions-card-header {
+  padding: 1rem !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 0.5rem !important;
+}
+
+.promotions-card-title {
+  height: 60px !important;
+  text-align: start !important;
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  line-height: 1.5 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.promotions-card-subtitle {
+  height: 30px !important;
+  font-size: 0.875rem !important;
+  color: #6b7280 !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+}
+
+.promotions-category {
+  font-style: italic !important;
+  font-size: 0.875rem !important;
+}
+
+.promotions-card-image {
+  object-fit: scale-down !important;
+  height: 23rem !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.promotions-card-actions {
+  padding: 0.75rem 1rem !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.5rem !important;
+}
+
+.promotions-action-btn {
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.5rem !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.promotions-action-btn:hover {
+  background-color: #f3f4f6 !important;
+}
+
+.promotions-delete-btn {
+  padding: 0.25rem !important;
+  min-width: auto !important;
+  border-radius: 0.375rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.promotions-delete-btn:hover {
+  background-color: #fee2e2 !important;
+}
+
+/* Fade in animation */
+.fade-in-image {
+  animation: fadeIn 0.5s ease-in !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media screen and (max-width: 990px) and (min-width: 770px) {
+  .promotions-card-title {
+    height: 90px !important;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .promotions-card-image {
+    object-fit: scale-down !important;
+    height: 35rem !important;
+    width: 100% !important;
+  }
 }
