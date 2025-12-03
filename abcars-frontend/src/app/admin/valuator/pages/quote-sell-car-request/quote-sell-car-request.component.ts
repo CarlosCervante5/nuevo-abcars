@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, type OnInit } from '@angular/core';
+import { Component, ElementRef, ViewChild, ViewEncapsulation, type OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserTechnicians } from '@interfaces/admin.interfaces';
@@ -11,7 +11,8 @@ import Swal from 'sweetalert2';
     selector: 'app-quote-sell-car-request',
     templateUrl: './quote-sell-car-request.component.html',
     styleUrls: ['./quote-sell-car-request.component.css'],
-    standalone: false
+    standalone: false,
+    encapsulation: ViewEncapsulation.None
 })
 export class QuoteSellCarRequestComponent implements OnInit {
 
