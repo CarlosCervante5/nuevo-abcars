@@ -1,6 +1,7 @@
 import { Component, DoCheck, ElementRef, ViewChild } from '@angular/core';
 import { AuthService } from './auth/services/auth.service';
 import { Router } from '@angular/router';
+import { SessionExpirationService } from './shared/services/session-expiration.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -23,6 +24,7 @@ export class AppComponent implements DoCheck{
     constructor(
         private _router: Router,
         private _authService: AuthService,
+        private _sessionExpirationService: SessionExpirationService // Inyectar servicio para inicializarlo
     ) {
         this._router.routeReuseStrategy.shouldReuseRoute = () => false;    
      }

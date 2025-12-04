@@ -56,6 +56,10 @@ export class AuthStateService {
     localStorage.setItem('user_token', token);
     localStorage.setItem('user', JSON.stringify(user));
     localStorage.setItem('role', role);
+    
+    // Guardar timestamp de inicio de sesión para calcular expiración
+    const sessionStartTime = Date.now();
+    localStorage.setItem('session_start_time', sessionStartTime.toString());
 
     this.authStateSubject.next({
       isAuthenticated: true,
@@ -70,6 +74,7 @@ export class AuthStateService {
     localStorage.removeItem('user');
     localStorage.removeItem('role');
     localStorage.removeItem('profile');
+    localStorage.removeItem('session_start_time');
 
     this.authStateSubject.next({
       isAuthenticated: false,
@@ -97,6 +102,11 @@ export class AuthStateService {
 
   public getToken(): string | null {
     return this.authStateSubject.value.token;
+  }
+
+  public getSessionStartTime(): number | null {
+    const startTime = localStorage.getItem('session_start_time');
+    return startTime ? parseInt(startTime, 10) : null;
   }
 }
 

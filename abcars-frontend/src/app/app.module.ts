@@ -6,6 +6,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { authInterceptorProvider } from './shared/interceptors/auth.interceptor';
 
 // Componentes standalone principales (no necesitan declaración)
 // import { ModernNavComponent } from './shared/components/modern-nav/modern-nav.component';
@@ -23,7 +24,8 @@ import { AppComponent } from './app.component';
     RouterModule,     // Provee la directiva routerLink
   ],
   providers: [
-    provideHttpClient(withInterceptorsFromDi())
+    provideHttpClient(withInterceptorsFromDi()),
+    authInterceptorProvider
   ],
   bootstrap: [AppComponent]
 })
