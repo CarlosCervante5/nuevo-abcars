@@ -25,6 +25,7 @@ export class OverviewComponent implements OnInit {
     // Input get information overview
     @Input() overview?: Overview;
     @Input() url_index?: String;
+    @Input() hideModules: boolean = false; // Para ocultar la sección "Mis Modulos"
 
     // References    
     public image_path: string = '';
