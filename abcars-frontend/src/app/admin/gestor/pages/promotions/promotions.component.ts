@@ -9,7 +9,7 @@ import { CampaingService } from '../../services/campaing.service';
 import { UpdateImagesComponent } from '../../components/update-images/update-images.component';
 
 //pruebas
-import {GetcampaingResponse, Campaign} from '@interfaces/admin.interfaces';
+import {GetcampaingResponse, Campaign, Overview} from '@interfaces/admin.interfaces';
 import Swal from 'sweetalert2';
 
 import {reload} from '@helpers/session.helper';
@@ -32,19 +32,59 @@ export class PromotionsComponent {
   @Output() reload = new EventEmitter<Boolean>();
   public img_campaign_path!:string;
 
-
-  public campaigns: Campaign[] = [];
-  public length: number = 0;
+  // References Overview para el encabezado
+  public itemOverview: Overview;
 
   constructor(
     private _bottomSheet: MatBottomSheet,
     private _campaingService: CampaingService,
     private _router: Router
   ) {
+    // Inicializar itemOverview
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      this.itemOverview = {
+        user: {
+          name: user.name || user.nickname || 'Usuario',
+          surname: user.surname || '',
+          role: 'Gestor de marketing',
+          email: user.email || '',
+          picturepath: ''
+        },
+        pages: [
+          {
+            title: 'Promociones',
+            icon: 'fi fi-rr-car',
+            permalink: '/admin/gestor/promotions'
+          }
+        ]
+      };
+    } catch (error) {
+      // Fallback si hay error al parsear
+      this.itemOverview = {
+        user: {
+          name: 'Usuario',
+          surname: '',
+          role: 'Gestor de marketing',
+          email: '',
+          picturepath: ''
+        },
+        pages: [
+          {
+            title: 'Promociones',
+            icon: 'fi fi-rr-car',
+            permalink: '/admin/gestor/promotions'
+          }
+        ]
+      };
+    }
+    
     // this.promotionsByBrand(this.brands);
     this.showcampaing();
-  }  
+  }
 
+  public campaigns: Campaign[] = [];
+  public length: number = 0;
 
   //abre el modal para agregar promociones
   public openBottomSheet(campaign: string): void{
