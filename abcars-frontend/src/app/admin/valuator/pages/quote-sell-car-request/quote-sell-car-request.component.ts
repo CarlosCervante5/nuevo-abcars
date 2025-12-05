@@ -1,7 +1,7 @@
 import { Component, ElementRef, ViewChild, ViewEncapsulation, type OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { UserTechnicians } from '@interfaces/admin.interfaces';
+import { UserTechnicians, Overview } from '@interfaces/admin.interfaces';
 
 import { SparePartsService } from '@services/spare-parts.service';
 import { UpdateQuoteValuationService } from '@services/update-quote-valuation.service';
@@ -31,6 +31,9 @@ export class QuoteSellCarRequestComponent implements OnInit {
 
     public sellers: UserTechnicians[] = [];
 
+    // References Overview para el encabezado
+    public itemOverview: Overview;
+
     constructor(
         private _formBuilder: UntypedFormBuilder,
         private _activatedRoute: ActivatedRoute,
@@ -38,6 +41,45 @@ export class QuoteSellCarRequestComponent implements OnInit {
         private _updateQuoteValuationService: UpdateQuoteValuationService,
         private _router: Router
     ) {
+        // Inicializar itemOverview
+        try {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            this.itemOverview = {
+                user: {
+                    name: user.name || user.nickname || 'Usuario',
+                    surname: user.surname || '',
+                    role: 'Valuator',
+                    email: user.email || '',
+                    picturepath: ''
+                },
+                pages: [
+                    {
+                        title: 'Citas valuación',
+                        icon: 'fi fi-rr-car',
+                        permalink: '/admin/valuator/appointment'
+                    }
+                ]
+            };
+        } catch (error) {
+            // Fallback si hay error al parsear
+            this.itemOverview = {
+                user: {
+                    name: 'Usuario',
+                    surname: '',
+                    role: 'Valuator',
+                    email: '',
+                    picturepath: ''
+                },
+                pages: [
+                    {
+                        title: 'Citas valuación',
+                        icon: 'fi fi-rr-car',
+                        permalink: '/admin/valuator/appointment'
+                    }
+                ]
+            };
+        }
+
         this.quotationFormInit();
     }
 
