@@ -1,130 +1,133 @@
 <!-- <app-new-nav></app-new-nav> -->
-<div class="container">
-    <div class="row">
-        <div class="col-12 mt-5 mb-5">
-            <div class="row">
-                <div class="col-12">
-                    <h4 class="fs-4 fw-bold text-truncate">Administrar Refacciones</h4>
-                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item" [routerLink]="['/admin/spare_parts']">Overview</li>
-                            <li class="breadcrumb-item active" aria-current="page">Refacciones</li>
-                        </ol>
-                    </nav>
-                </div>
+<app-overview [overview]="itemOverview" [url_index]="'/admin/spare_parts'" [hideModules]="true"></app-overview>
+<div class="container mx-auto px-4 pt-24">
+    <div class="w-full mt-5 mb-5">
+        <!-- Header -->
+        <div class="mb-3">
+            <div class="w-full">
+                <h4 class="spare-parts-page-title">Administrar Refacciones</h4>
+                <nav class="spare-parts-breadcrumb" aria-label="breadcrumb">
+                    <ol class="spare-parts-breadcrumb-list">
+                        <li class="spare-parts-breadcrumb-item" [routerLink]="['/admin/spare_parts']">Overview</li>
+                        <li class="spare-parts-breadcrumb-item spare-parts-breadcrumb-item-active" aria-current="page">Refacciones</li>
+                    </ol>
+                </nav>
             </div>
-
-            <div class="row">
-                <div class="col-12">
-                    <mat-form-field appearance="outline">
-                        <mat-label>Buscar...</mat-label>
-                        <input matInput  placeholder="Teclea tu búsqueda" #input> <!--(keyup)="applyFilter($event)"-->
-                    </mat-form-field>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-12">
-                    <section class="example-container mat-elevation-z8" tabindex="0">
-                        <table mat-table [dataSource]="dataSource" matSort>
-                            <ng-container matColumnDef="id" sticky>
-                                <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>#</th>
-                                <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
-                            </ng-container>
-                            
-                            <ng-container matColumnDef="technicianName">
-                                <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Nombre técnico</th>
-                                <td mat-cell *matCellDef="let row"> {{ row.technician[0].user_profile.name }} </td>
-                                <!-- <td data-titulo="nombre" class="td__table" mat-cell *matCellDef="let row">{{ row.check_list?.tech_user?.name || 'Sin técnico asignado' }}</td> -->
-                            </ng-container>
-
-                            <ng-container matColumnDef="technicianSurname">
-                                <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Apellidos técnico</th>
-                                <td mat-cell *matCellDef="let row"> {{ row.technician[0].user_profile.last_name }} </td>
-                            </ng-container>
-                            
-                            <ng-container matColumnDef="brandName">
-                                <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Marca</th>
-                                <!-- <td mat-cell *matCellDef="let row"> {{ row.appointment.vehicle.brand_name }} </td> -->
-                                <td mat-cell *matCellDef="let row"> {{ row.vehicle.brand.name }} </td>
-                            </ng-container>
-
-                            <ng-container matColumnDef="modelName">
-                                <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Modelo</th>
-                                <!-- <td mat-cell *matCellDef="let row"> {{ row.appointment.vehicle.model_name }} </td> -->
-                                <td mat-cell *matCellDef="let row"> {{ row.vehicle.model.name }} </td>
-                            </ng-container>
-
-                            <ng-container matColumnDef="vin">
-                                <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>VIN</th>
-                                <td mat-cell *matCellDef="let row"> {{ row.vehicle.vin }} </td>
-                            </ng-container>
-
-                            <ng-container matColumnDef="year">
-                                <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Año</th>
-                                <!-- <td mat-cell *matCellDef="let row"> {{ row.appointment.vehicle.year }} </td> -->
-                                <td mat-cell *matCellDef="let row"> {{ row.vehicle.model.year }} </td>
-                            </ng-container>
-
-                            <ng-container matColumnDef="status">
-                                <th class="th__table" mat-header-cell *matHeaderCellDef>Estatus Cita</th>
-                                <td mat-cell *matCellDef="let row">
-                                    <span class="badge rounded-pill" [ngClass]="{
-                                        'bg-secondary' : row.status === 'to_appraise',
-                                        'bg-primary' : row.status === 'on_progress' || row.status === 'checklist_ready'
-                                    }">
-                                        {{
-                                            (row.status === 'to_appraise') ? 'Por valuar' :
-                                            (row.status === 'on_progress') ? 'En progreso' :
-                                            (row.status === 'checklist_ready') ? 'Listo p/valuar' : 'L.P. Venta'
-                                        }}
-                                    </span>
-                                </td>
-                            </ng-container>
-
-                            <ng-container matColumnDef="statusRefac">
-                                <th class="th__table" mat-header-cell *matHeaderCellDef>Estatus Refacciones</th>
-                                <td mat-cell *matCellDef="let row">
-                                    <span class="badge rounded-pill" [ngClass]="{
-                                        'bg-success': row.repairs && row.repairs.length === 0,
-                                        'bg-primary': row.repairs && row.repairs.length > 0
-                                    }">
-                                        {{
-                                            (row.repairs && row.repairs.length === 0) ? 'Cotizadas' : 'Pendientes'
-                                        }}
-                                    </span>
-                                </td>
-                            </ng-container>
-                            
-                            <ng-container matColumnDef="actions">
-                                <th class="th__table" mat-header-cell *matHeaderCellDef>Acciones</th>
-                                <td mat-cell *matCellDef="let row">
-                                    <button *ngIf="row.status === 'to_appraise' || row.status === 'on_progress' || row.status === 'checklist_ready' || row.status_parts === 'pending_review' " mat-button type="button" class="btn text-dark mx-2" [matMenuTriggerFor]="menu">
-                                        Opciones
-                                    </button>
-                                    <mat-menu #menu="matMenu">
-                                        <a mat-menu-item [routerLink]="['/admin/spare_parts/administration/view/', row.uuid]">
-                                            Administrar Refacciones
-                                        </a>
-                                    </mat-menu>
-                                </td>
-                            </ng-container>
-                            
-
-                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-
-                            <tr class="mat-row" *matNoDataRow>
-                                <td class="mat-cell" colspan="4">No hay datos que coincidan con la busqueda: "{{ input.value }}"</td>
-                            </tr>
-                        </table>
-
-                        <mat-paginator [pageSize]="10" [length]="length" [pageIndex]="pageIndex - 1" ></mat-paginator> <!--(page)="paginationChange($event)"-->
-
-                    </section>
-                </div>
-            </div>
-
         </div>
+
+        <!-- Search Input -->
+        <div class="flex flex-wrap mb-3 spare-parts-search-bar">
+            <div class="w-full mb-2">
+                <input 
+                    type="text"
+                    [(ngModel)]="palabra_busqueda" 
+                    placeholder="Buscar por nombre técnico, marca, modelo, vin, año"
+                    class="spare-parts-search-input"
+                    #input
+                >
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="spare-parts-table-container">
+            <section class="example-container mat-elevation-z8" tabindex="0">
+                <table mat-table [dataSource]="dataSource" matSort>
+                    <ng-container matColumnDef="id" sticky>
+                        <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>#</th>
+                        <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
+                    </ng-container>
+                    
+                    <ng-container matColumnDef="technicianName">
+                        <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Nombre técnico</th>
+                        <td mat-cell *matCellDef="let row"> {{ row.technician[0].user_profile.name }} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="technicianSurname">
+                        <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Apellidos técnico</th>
+                        <td mat-cell *matCellDef="let row"> {{ row.technician[0].user_profile.last_name }} </td>
+                    </ng-container>
+                    
+                    <ng-container matColumnDef="brandName">
+                        <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Marca</th>
+                        <td mat-cell *matCellDef="let row"> {{ row.vehicle.brand.name }} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="modelName">
+                        <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Modelo</th>
+                        <td mat-cell *matCellDef="let row"> {{ row.vehicle.model.name }} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="vin">
+                        <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>VIN</th>
+                        <td mat-cell *matCellDef="let row"> {{ row.vehicle.vin }} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="year">
+                        <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Año</th>
+                        <td mat-cell *matCellDef="let row"> {{ row.vehicle.model.year }} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="status">
+                        <th class="th__table" mat-header-cell *matHeaderCellDef>Estatus Cita</th>
+                        <td mat-cell *matCellDef="let row">
+                            <span class="spare-parts-status-badge" [ngClass]="{
+                                'spare-parts-status-secondary' : row.status === 'to_appraise',
+                                'spare-parts-status-primary' : row.status === 'on_progress' || row.status === 'checklist_ready'
+                            }">
+                                {{
+                                    (row.status === 'to_appraise') ? 'Por valuar' :
+                                    (row.status === 'on_progress') ? 'En progreso' :
+                                    (row.status === 'checklist_ready') ? 'Listo p/valuar' : 'L.P. Venta'
+                                }}
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="statusRefac">
+                        <th class="th__table" mat-header-cell *matHeaderCellDef>Estatus Refacciones</th>
+                        <td mat-cell *matCellDef="let row">
+                            <span class="spare-parts-status-badge" [ngClass]="{
+                                'spare-parts-status-success': row.repairs && row.repairs.length === 0,
+                                'spare-parts-status-primary': row.repairs && row.repairs.length > 0
+                            }">
+                                {{
+                                    (row.repairs && row.repairs.length === 0) ? 'Cotizadas' : 'Pendientes'
+                                }}
+                            </span>
+                        </td>
+                    </ng-container>
+                    
+                    <ng-container matColumnDef="actions">
+                        <th class="th__table" mat-header-cell *matHeaderCellDef>Acciones</th>
+                        <td mat-cell *matCellDef="let row">
+                            <button *ngIf="row.status === 'to_appraise' || row.status === 'on_progress' || row.status === 'checklist_ready' || row.status_parts === 'pending_review' " 
+                                    mat-button 
+                                    type="button" 
+                                    class="spare-parts-action-btn" 
+                                    [matMenuTriggerFor]="menu">
+                                Opciones
+                            </button>
+                            <mat-menu #menu="matMenu">
+                                <a mat-menu-item [routerLink]="['/admin/spare_parts/administration/view/', row.uuid]">
+                                    Administrar Refacciones
+                                </a>
+                            </mat-menu>
+                        </td>
+                    </ng-container>
+                    
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+                    <tr class="mat-row" *matNoDataRow>
+                        <td class="mat-cell" colspan="4">No hay datos que coincidan con la busqueda: "{{ input.value }}"</td>
+                    </tr>
+                </table>
+
+                <mat-paginator [pageSize]="10" [length]="length" [pageIndex]="pageIndex - 1" ></mat-paginator>
+
+            </section>
+        </div>
+
     </div>
 </div>
