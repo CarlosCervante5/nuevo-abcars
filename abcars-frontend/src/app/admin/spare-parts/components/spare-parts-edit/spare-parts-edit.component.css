@@ -1,3 +1,183 @@
 :host {
   display: block;
+  background-color: white;
+}
+
+/* Bottom Sheet Container */
+::ng-deep .mat-bottom-sheet-container {
+  background-color: white !important;
+  padding: 0 !important;
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Page Title */
+.spare-parts-edit-title {
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  text-align: center !important;
+  margin-bottom: 1rem !important;
+  line-height: 1.2 !important;
+}
+
+/* Section Title */
+.spare-parts-edit-section-title {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Form Field Container */
+.spare-parts-edit-form-field {
+  display: block;
+  width: 100%;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+/* Label Styles */
+.spare-parts-edit-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+/* Input Styles */
+.spare-parts-edit-input {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #1a1a1a;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  min-height: 48px;
+}
+
+.spare-parts-edit-input:hover:not(:disabled):not([readonly]) {
+  border-color: #9ca3af;
+}
+
+.spare-parts-edit-input:focus {
+  outline: none;
+  border-color: #EEB838;
+  box-shadow: 0 0 0 2px rgba(238, 184, 56, 0.2);
+}
+
+.spare-parts-edit-input:disabled,
+.spare-parts-edit-input[readonly] {
+  background-color: #f9fafb;
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.spare-parts-edit-input::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
+.spare-parts-edit-input-error {
+  border-color: #ef4444 !important;
+}
+
+.spare-parts-edit-input-error:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Date Field Styles (Material) */
+.spare-parts-edit-date-field {
+  display: block !important;
+  width: 100% !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Hint/Error Message */
+.spare-parts-edit-hint {
+  display: block;
+  color: #ef4444;
+  font-size: 0.8125rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+/* Buttons */
+.spare-parts-edit-btn {
+  margin: 0.5rem !important;
+  padding: 0.625rem 1.5rem !important;
+  border-radius: 0.5rem !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  border: none !important;
+  cursor: pointer !important;
+  font-size: 1rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.spare-parts-edit-btn-primary {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+.spare-parts-edit-btn-primary:hover:not(:disabled) {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  transform: translateY(-1px) !important;
+}
+
+.spare-parts-edit-btn-primary:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+.spare-parts-edit-btn-secondary {
+  background-color: #6b7280 !important;
+  color: #ffffff !important;
+}
+
+.spare-parts-edit-btn-secondary:hover {
+  background-color: #4b5563 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Spinner */
+.spare-parts-edit-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #ffffff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spare-parts-edit-spin 0.6s linear infinite;
+}
+
+@keyframes spare-parts-edit-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
