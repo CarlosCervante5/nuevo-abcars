@@ -18,7 +18,7 @@ import { reload } from '@helpers/session.helper';
 // Interfaces
 import { Checklist, GetChecklist, GralResponse } from '@interfaces/getChecklist.interface';
 import { GetDetailValuation } from '@interfaces/getDetailValuation.interface';
-import { GetUsersByRol, UserTechnicians } from '@interfaces/admin.interfaces';
+import { GetUsersByRol, UserTechnicians, Overview } from '@interfaces/admin.interfaces';
 
 
 import { ExternalRevisionPictureComponent } from '../../components/external-revision-picture/external-revision-picture.component';
@@ -71,6 +71,9 @@ export class ChecklistComponent implements OnInit {
     public btn_follow:boolean = false;
     public btn_save:boolean = true;
 
+    // References Overview para el encabezado
+    public itemOverview: Overview;
+
     constructor(
         private _formBuilder: UntypedFormBuilder,
         private _activatedRoute: ActivatedRoute,
@@ -79,6 +82,45 @@ export class ChecklistComponent implements OnInit {
         private _detailValuationService: DetailValuationService,
         private _router: Router
     ) {
+        // Inicializar itemOverview
+        try {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            this.itemOverview = {
+                user: {
+                    name: user.name || user.nickname || 'Usuario',
+                    surname: user.surname || '',
+                    role: 'Technician',
+                    email: user.email || '',
+                    picturepath: ''
+                },
+                pages: [
+                    {
+                        title: 'Citas valuación',
+                        icon: 'fi fi-rr-car',
+                        permalink: '/admin/technician/appointment'
+                    }
+                ]
+            };
+        } catch (error) {
+            // Fallback si hay error al parsear
+            this.itemOverview = {
+                user: {
+                    name: 'Usuario',
+                    surname: '',
+                    role: 'Technician',
+                    email: '',
+                    picturepath: ''
+                },
+                pages: [
+                    {
+                        title: 'Citas valuación',
+                        icon: 'fi fi-rr-car',
+                        permalink: '/admin/technician/appointment'
+                    }
+                ]
+            };
+        }
+
         this.customerInformationFormInit();
         this.mechanicElectricForm = this._formBuilder.group({});
         this.externalReviewForm = this._formBuilder.group({});

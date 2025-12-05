@@ -16,6 +16,7 @@ import { Router } from '@angular/router';
 import {reload} from '../../../../shared/helpers/session.helper';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
+import { Overview } from '@interfaces/admin.interfaces';
 
 const THUMBUP_ICON =
   `
@@ -40,6 +41,9 @@ export class AppointmentsComponent implements OnInit {
   public palabra_busqueda: string = '';
   private timer: any;
 
+  // References Overview para el encabezado
+  public itemOverview: Overview;
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
@@ -50,6 +54,45 @@ export class AppointmentsComponent implements OnInit {
     const iconRegistry = inject(MatIconRegistry);
     const sanitizer = inject(DomSanitizer)
     iconRegistry.addSvgIconLiteral('thumbs-up', sanitizer.bypassSecurityTrustHtml(THUMBUP_ICON));
+
+    // Inicializar itemOverview
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      this.itemOverview = {
+        user: {
+          name: user.name || user.nickname || 'Usuario',
+          surname: user.surname || '',
+          role: 'Technician',
+          email: user.email || '',
+          picturepath: ''
+        },
+        pages: [
+          {
+            title: 'Citas valuación',
+            icon: 'fi fi-rr-car',
+            permalink: '/admin/technician/appointment'
+          }
+        ]
+      };
+    } catch (error) {
+      // Fallback si hay error al parsear
+      this.itemOverview = {
+        user: {
+          name: 'Usuario',
+          surname: '',
+          role: 'Technician',
+          email: '',
+          picturepath: ''
+        },
+        pages: [
+          {
+            title: 'Citas valuación',
+            icon: 'fi fi-rr-car',
+            permalink: '/admin/technician/appointment'
+          }
+        ]
+      };
+    }
   }
 
   ngOnInit(): void {
