@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ViewEncapsulation, HostListener } from '@angular/core';
 
 // Angular Material
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
@@ -40,6 +40,7 @@ export class AppointmentsComponent implements OnInit {
 
   public palabra_busqueda: string = '';
   private timer: any;
+  public openMenus: { [key: string]: boolean } = {};
 
   // References Overview para el encabezado
   public itemOverview: Overview;
@@ -177,6 +178,32 @@ export class AppointmentsComponent implements OnInit {
               console.error('Error al descargar la valuación', err);
           }
       });
+  }
+
+  public toggleMenu(uuid: string) {
+    // Cerrar todos los demás menús
+    Object.keys(this.openMenus).forEach(key => {
+      if (key !== uuid) {
+        this.openMenus[key] = false;
+      }
+    });
+    // Toggle del menú actual
+    this.openMenus[uuid] = !this.openMenus[uuid];
+  }
+
+  public closeMenu(uuid: string) {
+    this.openMenus[uuid] = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    // Cerrar todos los menús si se hace click fuera
+    const target = event.target as HTMLElement;
+    if (!target.closest('.relative.inline-block')) {
+      Object.keys(this.openMenus).forEach(key => {
+        this.openMenus[key] = false;
+      });
+    }
   }
   
 }

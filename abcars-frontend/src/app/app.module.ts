@@ -2,11 +2,11 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { authInterceptorProvider } from './shared/interceptors/auth.interceptor';
+import { AuthInterceptor } from './shared/interceptors/auth.interceptor';
 
 // Componentes standalone principales (no necesitan declaración)
 // import { ModernNavComponent } from './shared/components/modern-nav/modern-nav.component';
@@ -25,7 +25,11 @@ import { authInterceptorProvider } from './shared/interceptors/auth.interceptor'
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
-    authInterceptorProvider
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Route, UrlSegment, UrlTree, Router } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
+import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 import { AccountService } from '../../../auth/pages/account/services/account.service';
+import { validateRoleGuard } from '@helpers/guard.helper';
 
 @Injectable({
   providedIn: 'root'
@@ -14,40 +15,10 @@ export class GestorGuard  {
   ) { }
 
   canActivate(): Observable<boolean> | boolean {
-    console.log('GestorGuard: Checking permissions...');
-    
-    const user_token = localStorage.getItem('user_token');
-    const role = localStorage.getItem('role');
-    
-    console.log('GestorGuard: user_token exists:', !!user_token);
-    console.log('GestorGuard: role:', role);
-    
-    if (!user_token || role !== 'gestor') {
-      console.log('GestorGuard: Access denied, redirecting to login');
-      this._router.navigateByUrl('/auth/iniciar-sesion');
-      return false;
-    }
-    
-    console.log('GestorGuard: Access granted');
-    return true;
+    return validateRoleGuard('gestor', this._accountService, this._router);
   }
 
   canLoad(): Observable<boolean> | boolean {
-    console.log('GestorGuard: Checking load permissions...');
-    
-    const user_token = localStorage.getItem('user_token');
-    const role = localStorage.getItem('role');
-    
-    console.log('GestorGuard: user_token exists:', !!user_token);
-    console.log('GestorGuard: role:', role);
-    
-    if (!user_token || role !== 'gestor') {
-      console.log('GestorGuard: Load access denied, redirecting to login');
-      this._router.navigateByUrl('/auth/iniciar-sesion');
-      return false;
-    }
-    
-    console.log('GestorGuard: Load access granted');
-    return true;
+    return validateRoleGuard('gestor', this._accountService, this._router);
   }
 }

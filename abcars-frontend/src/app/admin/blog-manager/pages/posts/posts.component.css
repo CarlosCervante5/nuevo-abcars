@@ -99,3 +99,68 @@ input[type="file"] {
     border: 1px solid #e0e0e0;
     color: #b0b0b0;
 }
+
+/* Estilos para la barra de búsqueda */
+.barra {
+  width: 100%;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.barra .w-100 {
+  width: 100% !important;
+}
+
+.barra mat-form-field {
+  width: 100%;
+  display: block;
+}
+
+.barra .mat-form-field {
+  width: 100% !important;
+}
+
+/* Estilos para mat-form-field generales */
+mat-form-field {
+  width: 100%;
+}
+
+mat-form-field.w-100 {
+  width: 100% !important;
+}
+
+/* Estilos para tablas */
+.mat-table-container {
+  width: 100%;
+  overflow: visible !important;
+}
+
+.mat-elevation-z8 {
+  overflow: visible !important;
+}
+
+table[mat-table] {
+  width: 100%;
+  overflow: visible !important;
+}
+
+/* Estilos para el menú de acciones - Evitar que se encime */
+.mat-menu-panel {
+  z-index: 1000 !important;
+}
+
+.cdk-overlay-pane.mat-menu-panel {
+  z-index: 1000 !important;
+}
+
+td[mat-cell] {
+  position: relative;
+  overflow: visible !important;
+}
+
+button[matMenuTriggerFor] {
+  position: relative;
+  z-index: 1;
+}

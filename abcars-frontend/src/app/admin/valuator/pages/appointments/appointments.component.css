@@ -1,193 +1,180 @@
 :host {
     display: block;
-}
-
-.spacetop {
+  }
+  
+  .spacetop {
     margin-top: 70px;
+  }
+
+/* Estilos para la barra de búsqueda */
+.barra {
+  width: 100%;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
-/* Page Title */
-.appointments-page-title {
-    font-size: 1.5rem !important;
-    font-weight: 700 !important;
-    color: #111827 !important;
-    margin-bottom: 0.5rem !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
+.barra .w-100 {
+  width: 100% !important;
 }
 
-/* Breadcrumb Styles */
-.appointments-breadcrumb {
-    margin-bottom: 1rem !important;
+/* Estilos para mat-form-field en la barra de búsqueda - Usando ::ng-deep para penetrar en Angular Material */
+.barra ::ng-deep mat-form-field {
+  width: 100% !important;
+  display: block !important;
 }
 
-.appointments-breadcrumb-list {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    list-style: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    font-size: 0.875rem !important;
+.barra ::ng-deep .mat-form-field {
+  width: 100% !important;
 }
 
-.appointments-breadcrumb-item {
-    display: flex !important;
-    align-items: center !important;
-    color: #6b7280 !important;
-    cursor: pointer !important;
-    transition: color 0.2s ease !important;
+.barra ::ng-deep .mat-mdc-form-field {
+  width: 100% !important;
+  display: block !important;
 }
 
-.appointments-breadcrumb-item:hover {
-    color: var(--abcars-primary, #f59e0b) !important;
+.barra ::ng-deep .mdc-text-field {
+  width: 100% !important;
 }
 
-.appointments-breadcrumb-item:not(:last-child)::after {
-    content: '' !important;
-    display: inline-block !important;
-    width: 8px !important;
-    height: 8px !important;
-    margin: 0 0.5rem !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat !important;
-    background-position: center !important;
+.barra ::ng-deep .mat-mdc-form-field-flex {
+  width: 100% !important;
+  position: relative !important;
 }
 
-.appointments-breadcrumb-item-active {
-    color: #111827 !important;
-    font-weight: 600 !important;
-    cursor: default !important;
+.barra ::ng-deep .mat-form-field-wrapper {
+  padding-bottom: 0;
+  width: 100% !important;
 }
 
-.appointments-breadcrumb-item-active:hover {
-    color: #111827 !important;
+.barra ::ng-deep .mat-form-field-infix {
+  border-top: 0;
+  width: 100% !important;
 }
 
-/* Add Button */
-.appointments-add-btn {
-    color: #374151 !important;
-    font-weight: 500 !important;
-    transition: color 0.2s ease !important;
+.barra ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+  top: 0;
 }
 
-.appointments-add-btn:hover {
-    color: var(--abcars-primary, #f59e0b) !important;
+.barra ::ng-deep .mat-form-field-flex {
+  width: 100% !important;
 }
 
-/* Search Bar */
-.appointments-search-bar {
-    margin-bottom: 1rem !important;
+.barra ::ng-deep .mat-form-field-infix {
+  width: 100% !important;
 }
 
-.appointments-search-input {
-    width: 100% !important;
-    padding: 0.75rem 1rem !important;
-    border: 1px solid #d1d5db !important;
-    border-radius: 0.5rem !important;
-    font-size: 0.875rem !important;
-    transition: all 0.2s ease !important;
+/* CORREGIR: Estilos específicos para MDC Notched Outline */
+.barra ::ng-deep .mdc-notched-outline {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
-.appointments-search-input:focus {
-    outline: none !important;
-    ring: 2px !important;
-    ring-color: #f59e0b !important;
-    border-color: #f59e0b !important;
+.barra ::ng-deep .mdc-notched-outline__leading,
+.barra ::ng-deep .mdc-notched-outline__notch,
+.barra ::ng-deep .mdc-notched-outline__trailing {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
 }
 
-/* Table Container */
-.appointments-table-container {
-    margin-top: 1.25rem !important;
+/* Asegurar que el input tenga el ancho completo */
+.barra ::ng-deep input {
+  width: 100% !important;
 }
 
-/* Status Badges */
-.appointments-status-badge {
-    display: inline-block !important;
-    padding: 0.25rem 0.75rem !important;
-    border-radius: 9999px !important;
-    font-size: 0.75rem !important;
-    font-weight: 500 !important;
-    text-align: center !important;
-    white-space: nowrap !important;
+.barra ::ng-deep .mdc-text-field__input {
+  width: 100% !important;
 }
 
-.appointments-status-secondary {
-    background-color: #6b7280 !important;
-    color: #ffffff !important;
-}
-
-.appointments-status-primary {
-    background-color: #3b82f6 !important;
-    color: #ffffff !important;
-}
-
-.appointments-status-warning {
-    background-color: #f59e0b !important;
-    color: #111827 !important;
-}
-
-/* Action Button */
-.appointments-action-btn {
-    color: #111827 !important;
-    margin-left: 0.5rem !important;
-    margin-right: 0.5rem !important;
-    font-weight: 500 !important;
-    transition: color 0.2s ease !important;
-}
-
-.appointments-action-btn:hover {
-    color: var(--abcars-primary, #f59e0b) !important;
-}
-
-/* Thumb Icons */
 mat-icon.thumbup-gray path {
-    fill: #B0BEC5 !important; /* Gris */
+  fill: #B0BEC5; /* Gris */
 }
 
 mat-icon.thumbup-red path {
-    fill: #db0606 !important; /* Rojo */
+  fill: #db0606; /* Rojo */
 }
 
 mat-icon.thumbup-green path {
-    fill: #26a680 !important; /* Verde */
+  fill: #26a680; /* Verde */
 }
 
 .status-item {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    margin-bottom: 10px !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .status-item mat-icon {
-    display: flex !important;
-    align-items: center !important;
+  display: flex;
+  align-items: center;
 }
 
 .status-item span {
-    font-size: 12px !important;
+  font-size: 12px;
 }
 
 .custom-panel {
-    display: inline-block !important;
+  display: inline-block;
 }
 
 .mat-expansion-panel {
-    width: fit-content !important;
+  width: fit-content !important;
 }
 
 .mat-expansion-panel-header {
-    font-weight: bold !important;
+  font-weight: bold;
 }
 
 .panel-content {
-    padding: 8px !important;
-    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2) !important;
+  padding: 8px;
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 mat-icon {
-    display: inline-block !important;
-    text-align: center !important;
-    vertical-align: middle !important;
+  display: inline-block; 
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Estilos para el menú de acciones - Evitar que se encime */
+::ng-deep .mat-menu-panel {
+  z-index: 1000 !important;
+}
+
+::ng-deep .cdk-overlay-pane.mat-menu-panel {
+  z-index: 1000 !important;
+}
+
+/* Asegurar que la tabla y las celdas permitan que el menú se muestre */
+.mat-table-container {
+  overflow: visible !important;
+}
+
+.mat-elevation-z8 {
+  overflow: visible !important;
+}
+
+table[mat-table] {
+  overflow: visible !important;
+}
+
+/* Asegurar que los botones de acciones no se encimen */
+td[mat-cell] {
+  position: relative;
+  overflow: visible !important;
+}
+
+button[matMenuTriggerFor] {
+  position: relative;
+  z-index: 1;
 }

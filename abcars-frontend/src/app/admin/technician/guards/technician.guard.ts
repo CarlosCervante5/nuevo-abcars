@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { AccountService } from 'src/app/auth/pages/account/services/account.service';
+import { validateRoleGuard } from '@helpers/guard.helper';
 
 @Injectable({
   providedIn: 'root'
@@ -15,40 +16,10 @@ export class TechnicianGuard  {
   }
 
   canActivate(): Observable<boolean> | Promise<boolean> | boolean {
-    
-    var subject = new Subject<boolean>();
-    
-    this._accountService.validateRole('technician')
-    .subscribe({
-      next: () => {
-        subject.next(true);
-      },
-      error: () => {
-        this._router.navigateByUrl('/auth/iniciar-sesion');
-        subject.next(false);
-      }
-    });
-
-    return subject.asObservable();
+    return validateRoleGuard('technician', this._accountService, this._router);
   }
 
   canLoad(): Observable<boolean> | Promise<boolean> | boolean {
-    
-
-    var subject = new Subject<boolean>();
-    
-    this._accountService.validateRole('technician')
-    .subscribe({
-      next: () => {
-        subject.next(true);
-      },
-      error: () => {
-        this._router.navigateByUrl('/auth/iniciar-sesion');
-        subject.next(false);
-      }
-    });
-
-    return subject.asObservable();
-
+    return validateRoleGuard('technician', this._accountService, this._router);
   }
 }

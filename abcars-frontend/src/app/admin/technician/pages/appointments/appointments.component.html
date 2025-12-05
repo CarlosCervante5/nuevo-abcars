@@ -1,32 +1,35 @@
 <!-- <app-new-nav></app-new-nav> -->
-<app-overview [overview]="itemOverview" [url_index]="'/admin/technician'" [hideModules]="true"></app-overview>
-<div class="container mx-auto px-4 pt-24">
-    <div class="w-full mt-5 mb-5">
-        <!-- Header -->
-        <div class="mb-3">
-            <div class="w-full">
-                <h4 class="appointments-page-title">Solicitudes Citas de valuación</h4>
-                <nav class="appointments-breadcrumb" aria-label="breadcrumb">
-                    <ol class="appointments-breadcrumb-list">
-                        <li class="appointments-breadcrumb-item" [routerLink]="['/admin/technician']">Overview</li>
-                        <li class="appointments-breadcrumb-item appointments-breadcrumb-item-active" aria-current="page">Citas de valuación</li>
-                    </ol>
-                </nav>
-            </div>
-        </div>
+<div class="container">
+    <div class="row">
+        <div class="col-12 mt-5 mb-5">
+            <!-- Header -->
+             <div class="row mb-3">
+                <div class="col-12">
+                    <h4 class="fs-4 fw-bold text-truncate">Solicitudes Citas de valuación</h4>
+                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item" [routerLink]="['/admin/technician']">Overview</li>
+                            <li class="breadcrumb-item active" aria-current="page">Citas de valuación</li>
+                        </ol>
+                    </nav>
+                </div>
+             </div>
 
-        <!-- Search Input -->
-        <div class="flex flex-wrap mb-3 appointments-search-bar">
-            <div class="w-full mb-2">
-                <input 
-                    type="text"
-                    [(ngModel)]="palabra_busqueda" 
-                    (keyup)="searchKeyboard()" 
-                    placeholder="Buscar por nombre, apellidos, marca, modelo, vin, año"
-                    class="appointments-search-input"
-                >
-            </div>
-        </div>
+             <!-- Search Input -->
+             <div class="d-flex flex-wrap mb-3 barra">
+                <div class="col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Buscar...</label>
+                        <input 
+                            type="text" 
+                            [(ngModel)]="palabra_busqueda" 
+                            (keyup)="searchKeyboard()" 
+                            placeholder="Buscar por nombre, apellidos, marca, modelo, vin, año"
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all bg-white text-sm shadow-sm"
+                        >
+                    </div>
+                </div>
+             </div>
 
              <mat-accordion class="custom-panel">
               <mat-expansion-panel>
@@ -74,10 +77,10 @@
              </mat-accordion>
 
 
-        <!-- Table -->
-        <div class="flex justify-center appointments-table-container mt-5">
-            <div class="mat-elevation-z8 w-full">
-                <table mat-table [dataSource]="dataSource" class="w-full">
+             <!-- Table -->
+              <div class="dflex justify-content-center mat-table-container mt-5">
+                <div class="mat-elevation-z8 w-100">
+                    <table mat-table [dataSource]="dataSource" class="w-100">
                         
                          <ng-container matColumnDef="id">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header>#</th>
@@ -86,42 +89,41 @@
 
                          <ng-container matColumnDef="name">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre cliente</th>
-                            <td mat-cell *matCellDef="let row">{{row.appointment.customer.name}}</td>
+                            <td mat-cell *matCellDef="let row">{{row.appointment?.customer?.name || 'N/A'}}</td>
                           </ng-container>
                          
                           <ng-container matColumnDef="lastName">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header>Apellidos cliente</th>
-                            <td mat-cell *matCellDef="let row">{{row.appointment.customer.last_name}}</td>
+                            <td mat-cell *matCellDef="let row">{{row.appointment?.customer?.last_name || 'N/A'}}</td>
                           </ng-container>
                           
                           <ng-container matColumnDef="brand">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header>Marca auto</th>
-                            <td mat-cell *matCellDef="let row">{{row.appointment.vehicle.brand_name}}</td>
+                            <td mat-cell *matCellDef="let row">{{row.appointment?.vehicle?.brand_name || 'N/A'}}</td>
                           </ng-container>
                           
                           <ng-container matColumnDef="model">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header>Modelo auto</th>
-                            <td mat-cell *matCellDef="let row">{{row.appointment.vehicle.model_name}}</td>
+                            <td mat-cell *matCellDef="let row">{{row.appointment?.vehicle?.model_name || 'N/A'}}</td>
                           </ng-container>
                           
                           <ng-container matColumnDef="vin">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header>VIN</th>
-                            <!-- <td mat-cell *matCellDef="let row">{{row.appointment.vehicle.vin === null ? '00000000000000000' : row.appointment.vehicle.vin}}</td> -->
-                            <td mat-cell *matCellDef="let row">{{row.vehicle === null ? '00000000000000000' : row.vehicle.vin}}</td>
+                            <td mat-cell *matCellDef="let row">{{row.appointment?.vehicle?.vin || row.vehicle?.vin || '00000000000000000'}}</td>
                           </ng-container>
                           
                           <ng-container matColumnDef="year">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header>Año</th>
-                            <td mat-cell *matCellDef="let row">{{row.appointment.vehicle.year}}</td> 
+                            <td mat-cell *matCellDef="let row">{{row.appointment?.vehicle?.year || 'N/A'}}</td> 
                           </ng-container>
                           
                           <ng-container matColumnDef="status">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header>Estatus Valuación</th>
                             <td mat-cell *matCellDef="let row">
-                              <span class="appointments-status-badge" [ngClass]="{
-                                'appointments-status-secondary' : row.status === 'to_appraise',
-                                'appointments-status-primary' : row.status === 'on_progress' || row.status === 'checklist_ready',
-                                'appointments-status-warning' : row.status === 'valuated' || row.status === 'complete_file'
+                              <span class="badge rounded-pill" [ngClass]="{
+                                'bg-secondary' : row.status === 'to_appraise',
+                                'bg-primary' : row.status === 'on_progress' || row.status === 'checklist_ready',
+                                'bg-warning text-dark' : row.status === 'valuated' || row.status === 'complete_file'
                               }">
                                 {{
                                   (row.status === 'to_appraise') ? 'Por valuar' : 
@@ -168,23 +170,43 @@
                           <ng-container matColumnDef="actions">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header>Acciones</th>
                             <td mat-cell *matCellDef="let row">
-                              <!-- <span [ngClass]="{ 'bg-primary': row.status === 'to_appraise' }" [matMenuTriggerFor]="menu">Acciones</span> -->
-                               <button *ngIf=" row.status === 'to_appraise' || row.status === 'on_progress' || row.status === 'checklist_ready' || row.status === 'valuated' || row.status === 'complete_file' " mat-button type="button" class="appointments-action-btn" [matMenuTriggerFor]="menu">
+                              <div class="relative inline-block" *ngIf="row.status === 'to_appraise' || row.status === 'on_progress' || row.status === 'checklist_ready' || row.status === 'valuated' || row.status === 'complete_file'">
+                                <button 
+                                  type="button" 
+                                  class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
+                                  (click)="toggleMenu(row.uuid)"
+                                  [attr.aria-expanded]="openMenus[row.uuid]"
+                                >
                                   Opciones
-                               </button>
-                              <mat-menu #menu="matMenu">
-                                <a mat-menu-item [routerLink]="['/admin/technician/checklist/', row.uuid]">
-                                  Comenzar
-                                </a>
-                              </mat-menu>
+                                  <svg class="inline-block w-4 h-4 ml-1 -mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                  </svg>
+                                </button>
+                                <div 
+                                  *ngIf="openMenus[row.uuid]"
+                                  class="absolute right-0 z-50 mt-2 w-56 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                                >
+                                  <div class="py-1" role="menu">
+                                    <a 
+                                      [routerLink]="['/admin/technician/checklist/', row.uuid]"
+                                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                      role="menuitem"
+                                      (click)="closeMenu(row.uuid)"
+                                    >
+                                      Comenzar
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
                             </td>
                           </ng-container>
                          
                          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
                     </table>
-                <mat-paginator [pageSize]="10" [length]="length" [pageIndex]="page - 1" (page)="paginationChange($event)"></mat-paginator>
-            </div>
+                    <mat-paginator [pageSize]="10" [length]="length" [pageIndex]="page - 1" (page)="paginationChange($event)"></mat-paginator>
+                </div>
+              </div>
         </div>
     </div>
 </div>

@@ -436,11 +436,22 @@ class ValuationController extends Controller
 
             $valuation = VehicleValuation::findByUuid($data['valuation_uuid']);
 
+            if (!$valuation) {
+                return ApiResponseHelper::apiError('Valuación no encontrada', 'No se encontró la valuación con el UUID proporcionado', 404, 'VALUATION_NOT_FOUND');
+            }
+
+            // Verificar si la valuación tiene checkpoints asociados
+            $checkpointsCount = $valuation->checkpoints()->count();
+            
+            \Log::info('Valuation ID: ' . $valuation->id . ', Checkpoints count: ' . $checkpointsCount);
+
             $checklist = $valuation->checkpoints()
                 ->when(!empty($data['section_name']), function ($query) use ($data) {
                     return $query->where('section_name', $data['section_name']);
                 })
                 ->get();
+
+            \Log::info('Checklist retrieved: ' . $checklist->count() . ' items');
 
             $response = $checklist->map(function($checkpoint) {
                 return [
@@ -459,6 +470,7 @@ class ValuationController extends Controller
             return ApiResponseHelper::apiSuccess(200, 'Checklist obtenida exitosamente', $response);
 
         } catch (\Exception $e) {
+            \Log::error('Error al obtener el checklist: ' . $e->getMessage());
             return ApiResponseHelper::apiError('Error al obtener el checklist', $e->getMessage(), 500, 'GET_CHECKLIST_ERROR');
         }
     }

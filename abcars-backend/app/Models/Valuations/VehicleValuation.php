@@ -125,7 +125,10 @@ class VehicleValuation extends Model
 
     public function checkpoints()
     {
-        return $this->belongsToMany(ValuationCheckpoint::class, env('DB_TABLE_PREFIX', '') . 'valuation_checkpoint', 'valuation_id', 'checkpoint_id')->withPivot('selected_value')->orderBy('sort_id');
+        $tablePrefix = env('DB_TABLE_PREFIX', '');
+        return $this->belongsToMany(ValuationCheckpoint::class, $tablePrefix . 'valuation_checkpoint', 'valuation_id', 'checkpoint_id')
+            ->withPivot('selected_value')
+            ->orderBy($tablePrefix . 'valuation_checkpoints.sort_id', 'asc');
     }
 
     public function acquisition_checkpoints()
