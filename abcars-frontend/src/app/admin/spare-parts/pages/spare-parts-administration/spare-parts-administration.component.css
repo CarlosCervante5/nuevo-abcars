@@ -1,3 +1,127 @@
 :host {
   display: block;
 }
+
+/* Page Title */
+.spare-parts-page-title {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    margin-bottom: 0.5rem !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+/* Breadcrumb Styles */
+.spare-parts-breadcrumb {
+    margin-bottom: 1rem !important;
+}
+
+.spare-parts-breadcrumb-list {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 0.875rem !important;
+}
+
+.spare-parts-breadcrumb-item {
+    display: flex !important;
+    align-items: center !important;
+    color: #6b7280 !important;
+    cursor: pointer !important;
+    transition: color 0.2s ease !important;
+}
+
+.spare-parts-breadcrumb-item:hover {
+    color: var(--abcars-primary, #f59e0b) !important;
+}
+
+.spare-parts-breadcrumb-item:not(:last-child)::after {
+    content: '' !important;
+    display: inline-block !important;
+    width: 8px !important;
+    height: 8px !important;
+    margin: 0 0.5rem !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+}
+
+.spare-parts-breadcrumb-item-active {
+    color: #111827 !important;
+    font-weight: 600 !important;
+    cursor: default !important;
+}
+
+.spare-parts-breadcrumb-item-active:hover {
+    color: #111827 !important;
+}
+
+/* Search Bar */
+.spare-parts-search-bar {
+    margin-bottom: 1rem !important;
+}
+
+.spare-parts-search-input {
+    width: 100% !important;
+    padding: 0.75rem 1rem !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.875rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.spare-parts-search-input:focus {
+    outline: none !important;
+    ring: 2px !important;
+    ring-color: #f59e0b !important;
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* Table Container */
+.spare-parts-table-container {
+    margin-top: 1.25rem !important;
+}
+
+/* Status Badges */
+.spare-parts-status-badge {
+    display: inline-block !important;
+    padding: 0.25rem 0.75rem !important;
+    border-radius: 9999px !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+}
+
+.spare-parts-status-secondary {
+    background-color: #6b7280 !important;
+    color: #ffffff !important;
+}
+
+.spare-parts-status-primary {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+.spare-parts-status-success {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+}
+
+/* Action Button */
+.spare-parts-action-btn {
+    color: #111827 !important;
+    margin-left: 0.5rem !important;
+    margin-right: 0.5rem !important;
+    font-weight: 500 !important;
+    transition: color 0.2s ease !important;
+}
+
+.spare-parts-action-btn:hover {
+    color: var(--abcars-primary, #f59e0b) !important;
+}

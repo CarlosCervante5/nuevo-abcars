@@ -1,3 +1,79 @@
 :host {
   display: block;
 }
+
+/* Page Title */
+.spare-parts-view-page-title {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    margin-bottom: 0.5rem !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+/* Breadcrumb Styles */
+.spare-parts-view-breadcrumb {
+    margin-bottom: 1rem !important;
+}
+
+.spare-parts-view-breadcrumb-list {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 0.875rem !important;
+}
+
+.spare-parts-view-breadcrumb-item {
+    display: flex !important;
+    align-items: center !important;
+    color: #6b7280 !important;
+    cursor: pointer !important;
+    transition: color 0.2s ease !important;
+}
+
+.spare-parts-view-breadcrumb-item:hover {
+    color: var(--abcars-primary, #f59e0b) !important;
+}
+
+.spare-parts-view-breadcrumb-item:not(:last-child)::after {
+    content: '' !important;
+    display: inline-block !important;
+    width: 8px !important;
+    height: 8px !important;
+    margin: 0 0.5rem !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+}
+
+.spare-parts-view-breadcrumb-item-active {
+    color: #111827 !important;
+    font-weight: 600 !important;
+    cursor: default !important;
+}
+
+.spare-parts-view-breadcrumb-item-active:hover {
+    color: #111827 !important;
+}
+
+/* Table Container */
+.spare-parts-view-table-container {
+    margin-top: 1.25rem !important;
+}
+
+/* Action Button */
+.spare-parts-view-action-btn {
+    color: #111827 !important;
+    margin-left: 0.5rem !important;
+    margin-right: 0.5rem !important;
+    font-weight: 500 !important;
+    transition: color 0.2s ease !important;
+}
+
+.spare-parts-view-action-btn:hover {
+    color: var(--abcars-primary, #f59e0b) !important;
+}

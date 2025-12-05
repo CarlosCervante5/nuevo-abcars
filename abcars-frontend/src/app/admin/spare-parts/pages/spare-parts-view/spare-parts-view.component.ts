@@ -5,6 +5,7 @@ import { SparePartsEditComponent } from '../../components/spare-parts-edit/spare
 import { ActivatedRoute } from '@angular/router';
 import { SparePartsService } from '@services/spare-parts.service';
 import { GetVehicleDetailParts, Vehicle } from '@interfaces/getVehicleDetailParts.interface';
+import { Overview } from '@interfaces/admin.interfaces';
 
 @Component({
     selector: 'app-spare-parts-view',
@@ -18,11 +19,53 @@ export class SparePartsViewComponent implements OnInit {
     public dataSource!: MatTableDataSource<any>;
     public dataVehicle!: Vehicle
 
+    // References Overview para el encabezado
+    public itemOverview: Overview;
+
     constructor(
         private _bottomSheet: MatBottomSheet,
         private _router: ActivatedRoute,
         private _spareParsService: SparePartsService
-    ) {}
+    ) {
+        // Inicializar itemOverview
+        try {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            this.itemOverview = {
+                user: {
+                    name: user.name || user.nickname || 'Usuario',
+                    surname: user.surname || '',
+                    role: 'Spare Parts',
+                    email: user.email || '',
+                    picturepath: ''
+                },
+                pages: [
+                    {
+                        title: 'Refacciones Vehículos',
+                        icon: 'fi fi-rr-car',
+                        permalink: '/admin/spare_parts/administration'
+                    }
+                ]
+            };
+        } catch (error) {
+            // Fallback si hay error al parsear
+            this.itemOverview = {
+                user: {
+                    name: 'Usuario',
+                    surname: '',
+                    role: 'Spare Parts',
+                    email: '',
+                    picturepath: ''
+                },
+                pages: [
+                    {
+                        title: 'Refacciones Vehículos',
+                        icon: 'fi fi-rr-car',
+                        permalink: '/admin/spare_parts/administration'
+                    }
+                ]
+            };
+        }
+    }
 
     ngOnInit(): void { 
         const valuation_uuid = this._router.snapshot.params.uuid;
