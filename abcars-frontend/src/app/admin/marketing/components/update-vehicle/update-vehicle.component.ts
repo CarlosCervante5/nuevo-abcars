@@ -125,6 +125,14 @@ export class UpdateVehicleComponent implements OnInit {
     }
     
   }
+
+  public addCampaign(): void {
+    const value = this.form.get('campaign_2')?.value?.trim();
+    if (value && !this.camps.includes(value)) {
+      this.camps.push(value);
+      this.form.patchValue({ campaign_2: '' });
+    }
+  }
   public remove( event: string): void{
     let index = this.camps.indexOf(event);
     this.camps.splice(index, 1);
@@ -140,8 +148,12 @@ export class UpdateVehicleComponent implements OnInit {
   }
   
   onCampaignSelected(event: MatAutocompleteSelectedEvent): void{
-    this.camps.push(event.option.value);
-    this.id_camp.push(event.option.id);
+    const campaignName = event.option.value;
+    if (!this.camps.includes(campaignName)) {
+      this.camps.push(campaignName);
+      this.id_camp.push(event.option.id);
+    }
+    this.form.patchValue({ campaign_2: '' });
   }
 
   // onLineSelected(event: MatAutocompleteSelectedEvent): void {
@@ -411,79 +423,98 @@ export class UpdateVehicleComponent implements OnInit {
   }
 
   get nameInvalid() {
-    return this.form.get('name')!.invalid && (this.form.get('name')!.dirty);
+    const control = this.form.get('name')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get descriptionInvalid() {
-    return this.form.get('description')!.invalid && (this.form.get('description')!.dirty);
+    const control = this.form.get('description')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get locationInvalid() {
-    return this.form.get('location')!.invalid && (this.form.get('location')!.dirty);
+    const control = this.form.get('location')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get yearModelInvalid() {
-    return this.form.get('year')!.invalid && (this.form.get('year')!.dirty);
+    const control = this.form.get('year')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get purchaseDateInvalid() {
-    return this.form.get('purchase_date')!.invalid && (this.form.get('purchase_date')!.dirty);
+    const control = this.form.get('purchase_date')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get listPriceInvalid() {
-    return this.form.get('list_price')!.invalid && (this.form.get('list_price')!.dirty);
+    const control = this.form.get('list_price')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get salePriceInvalid() {
-    return this.form.get('sale_price')!.invalid && (this.form.get('sale_price')!.dirty);
+    const control = this.form.get('sale_price')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get cylindersInvalid(){
-    return this.form.get('cylinders')!.invalid && (this.form.get('cylinders')!.dirty);
+    const control = this.form.get('cylinders')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get colorIntInvalid(){
-    return this.form.get('interior_color')!.invalid && (this.form.get('interior_color')!.dirty);
+    const control = this.form.get('interior_color')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get colorExtInvalid(){
-    return this.form.get('exterior_color')!.invalid && (this.form.get('exterior_color')!.dirty);
+    const control = this.form.get('exterior_color')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get kmInvalid(){
-    return this.form.get('mileage')!.invalid && (this.form.get('mileage')!.dirty);
+    const control = this.form.get('mileage')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get priceOfferInvalid(){
-    return this.form.get('offer_price')!.invalid && (this.form.get('offer_price')!.dirty);
+    const control = this.form.get('offer_price')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get vinInvalid(){
-    return this.form.get('vin')!.invalid && (this.form.get('vin')!.dirty);
+    const control = this.form.get('vin')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get brandInvalid(){
-    return this.form.get('brand')!.invalid && (this.form.get('brand')!.dirty);
+    const control = this.form.get('brand')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   // get lineInvalid(){
-  //   return this.form.get('line')!.invalid && (this.form.get('line')!.dirty);
+  //   const control = this.form.get('line')!;
+  //   return control.invalid && (control.dirty || control.touched);
   // }
 
   get modelInvalid(){
-    return this.form.get('model')!.invalid && (this.form.get('model')!.dirty);
+    const control = this.form.get('model')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get versionInvalid(){
-    return this.form.get('version')!.invalid && (this.form.get('version')!.dirty);
+    const control = this.form.get('version')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get bodyInvalid(){
-    return this.form.get('body')!.invalid && (this.form.get('body')!.dirty);
+    const control = this.form.get('body')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   get dealershipInvalid(){
-    return this.form.get('dealership_name')!.invalid && (this.form.get('dealership_name')!.dirty);
+    const control = this.form.get('dealership_name')!;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   public close():void {
