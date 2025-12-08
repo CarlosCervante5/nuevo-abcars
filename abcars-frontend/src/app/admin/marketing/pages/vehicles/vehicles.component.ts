@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import {reload} from '@helpers/session.helper';
 // Services
@@ -12,7 +13,8 @@ import Swal from 'sweetalert2';
 import { VehicleService, } from '@services/vehicle.service';
 
 import { Vehicle, SearchResponse, LoadVehiclesResponse} from '@interfaces/vehicle_data.interface';
-import { StoreVehicleComponent } from '../../components/store-vehicle/store-vehicle.component'; 
+import { StoreVehicleComponent } from '../../components/store-vehicle/store-vehicle.component';
+import { Overview } from '@interfaces/admin.interfaces'; 
 
 
 
@@ -48,6 +50,13 @@ export class VehiclesComponent {
 
   public vehicle_uuids: string[] = [];
 
+  // References Overview para el encabezado
+  public itemOverview: Overview;
+
+  // Table
+  public dataSource!: MatTableDataSource<Vehicle>;
+  public displayedColumns: string[] = ['status', 'nameVehicle', 'vin', 'km', 'price', 'actions', 'image'];
+
   constructor(
     private _vehicleService: VehicleService,
     private _compraTuAutoService: CompraTuAutoService,
@@ -55,6 +64,46 @@ export class VehiclesComponent {
     private _snackBar: MatSnackBar,
     private _router: Router
   ) {
+    // Inicializar itemOverview
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      this.itemOverview = {
+        user: {
+          name: user.name || user.nickname || 'Usuario',
+          surname: user.surname || '',
+          role: 'Marketing',
+          email: user.email || '',
+          picturepath: ''
+        },
+        pages: [
+          {
+            title: 'Vehículos',
+            icon: 'fi fi-rr-car',
+            permalink: '/admin/marketing/vehicles'
+          }
+        ]
+      };
+    } catch (error) {
+      // Fallback si hay error al parsear
+      this.itemOverview = {
+        user: {
+          name: 'Usuario',
+          surname: '',
+          role: 'Marketing',
+          email: '',
+          picturepath: ''
+        },
+        pages: [
+          {
+            title: 'Vehículos',
+            icon: 'fi fi-rr-car',
+            permalink: '/admin/marketing/vehicles'
+          }
+        ]
+      };
+    }
+    // Inicializar dataSource
+    this.dataSource = new MatTableDataSource<Vehicle>([]);
     this.getVehicles(1);
   }    
 
@@ -67,7 +116,8 @@ export class VehiclesComponent {
         this._vehicleService.getVehicles( page , this.palabra_busqueda, this.pageSize, this.relationship_names)
         .subscribe({
             next: (response: SearchResponse) => {
-                this.vehicles = response.data.data;                                                
+                this.vehicles = response.data.data;
+                this.dataSource = new MatTableDataSource(this.vehicles);                                                
                 this.length = response.data.total;
 
             },
@@ -280,6 +330,13 @@ export class VehiclesComponent {
           this.getVehicles( this.pageIndex );
         }      
       });
+    }
+
+    /**
+     * Image helper method
+     */
+    public image(primera_imagen: any): string {
+      return primera_imagen || 'assets/images/demo_image.png';
     }
 }
 
