@@ -1,10 +1,10 @@
-<mat-card class="example-card">
+<!-- <mat-card class="example-card">
       
   <div class="row title-row">
     <div class="col-2 d-flex justify-content-center">
           <img *ngIf="vehicle.page_status == 'active'" src="assets/icons-fontawesome/power-off-solid-green.svg" alt="flecha" width="24px" height="24px">
           <img *ngIf="vehicle.page_status != 'active'" src="assets/icons-fontawesome/power-off-solid-red.svg" alt="flecha" width="24px" height="24px">
-          <!-- <i class="fas fa-solid fa-power-off" [ngClass]="{'green': vehicle.page_status == 'active', 'red': vehicle.page_status != 'active'}"></i> -->
+          <i class="fas fa-solid fa-power-off" [ngClass]="{'green': vehicle.page_status == 'active', 'red': vehicle.page_status != 'active'}"></i>
     </div>
     <div class="col-10">
       <mat-card-title class="mat-title text-responsive text-center">{{ vehicle.name }}</mat-card-title>
@@ -40,5 +40,12 @@
     <button class='custom-button' mat-button (click)="openUpdateVehicleSheet( vehicle.uuid )">Actualizar vehículo</button>
   </mat-card-actions>
   
-</mat-card>   
+</mat-card> -->
 
+<mat-card-actions>
+  <button class='custom-button' mat-button (click)="openBottomSheet( vehicle.uuid )"><mat-icon>add_a_photo</mat-icon></button>
+  <button class='custom-button' mat-button *ngIf="vehicle.images.length > 0" (click)="openUpdateOrder( vehicle.uuid, vehicle.images )"><mat-icon>flip_camera_ios</mat-icon></button>
+  <button class='custom-button' mat-button (click)="eliminar( vehicle.uuid )"><mat-icon>delete</mat-icon></button>
+  <button class='custom-button' mat-button (click)="openUpdateVehicleSheet( vehicle.uuid )"><mat-icon>edit</mat-icon></button>
+  <mat-checkbox [(ngModel)]="checked" (change)="cardChecked()"> Seleccionar </mat-checkbox>
+</mat-card-actions>
