@@ -1,34 +1,55 @@
-<div cdkDropList class="list" (cdkDropListDropped)="drop($event)">
-    <div class="box" *ngFor="let image of imagesForSlider; let i = index" cdkDrag>
-        <div class="row">
-            <div class="col-1">
-                <input type="checkbox" [(ngModel)]="image.selected" />
-            </div>
-            <div class="col-2">
-                posición {{ i + 1 }}
-            </div>
-            <div class="col-6">
-                <div>
-                    <b>Es de un sitio externo:</b> {{ image.external_website }}
+<div class="container mx-auto px-4 py-4">
+    <div cdkDropList class="update-images-list" (cdkDropListDropped)="drop($event)">
+        <div class="update-images-box" *ngFor="let image of imagesForSlider; let i = index" cdkDrag>
+            <div class="flex items-center gap-4 w-full">
+                <!-- Checkbox -->
+                <div class="flex-shrink-0">
+                    <input type="checkbox" [(ngModel)]="image.selected" class="update-images-checkbox" />
                 </div>
-                <div>
-                    <b>Url:</b> {{ image.path_public }}
+                
+                <!-- Posición -->
+                <div class="flex-shrink-0 w-20">
+                    <span class="update-images-position">Posición {{ i + 1 }}</span>
                 </div>
-                <div class="trash-content">
-                    <i class="fas fa-solid fa-trash trash" (click)="deleteimage(image.id, i)"></i>
+                
+                <!-- Información -->
+                <div class="flex-1 min-w-0">
+                    <div class="update-images-info">
+                        <div class="update-images-info-item">
+                            <span class="update-images-info-label">Es de un sitio externo:</span>
+                            <span class="update-images-info-value">{{ image.external_website }}</span>
+                        </div>
+                        <div class="update-images-info-item">
+                            <span class="update-images-info-label">Url:</span>
+                            <span class="update-images-info-value update-images-url">{{ image.path_public }}</span>
+                        </div>
+                        <div class="update-images-trash-content">
+                            <button type="button" class="update-images-trash" (click)="deleteimage(image.id, i)" [attr.aria-label]="'Eliminar imagen ' + (i + 1)">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-3">
-                <img class="card-img-top img-fluid img-size-sm" [src]="image.path" alt="{{ image.id }}">
+                
+                <!-- Imagen -->
+                <div class="flex-shrink-0">
+                    <img class="update-images-img" [src]="image.path" alt="Imagen {{ i + 1 }}">
+                </div>
             </div>
         </div>
     </div>
-</div>
   
-<div class="row mt-2">
-    <div class="col-12 text-center">                       
-        <button type="button" aria-label="Borrar imagenes" class="marginButtons btn abcars-background-color-blue  mx-3 px-3" (click)="changeOrder()">
-            Actualizar orden  
-        </button> 
+    <div class="w-full mt-4 text-center">
+        <button 
+            type="button" 
+            class="update-images-btn update-images-btn-primary" 
+            (click)="changeOrder()"
+            [disabled]="spinner"
+        >
+            <span *ngIf="!spinner">Actualizar orden</span>
+            <span *ngIf="spinner" class="update-images-spinner"></span>
+        </button>
     </div>
 </div>
