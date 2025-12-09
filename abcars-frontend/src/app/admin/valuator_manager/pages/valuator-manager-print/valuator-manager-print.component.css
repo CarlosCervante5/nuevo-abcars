@@ -1,28 +1,214 @@
 :host {
   display: block;
+  background-color: white;
 }
 
-.drop-container {
-  position: relative;
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Page Title */
+.valuator-print-title {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  margin-bottom: 0.5rem !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Breadcrumb Styles */
+.valuator-print-breadcrumb {
+  margin-bottom: 1.5rem !important;
+}
+
+.valuator-print-breadcrumb-list {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 0.875rem !important;
+}
+
+.valuator-print-breadcrumb-item {
+  display: flex !important;
+  align-items: center !important;
+  color: #6b7280 !important;
+  cursor: pointer !important;
+  transition: color 0.2s ease !important;
+}
+
+.valuator-print-breadcrumb-item:hover {
+  color: var(--abcars-primary, #f59e0b) !important;
+}
+
+.valuator-print-breadcrumb-item:not(:last-child)::after {
+  content: '' !important;
+  display: inline-block !important;
+  width: 8px !important;
+  height: 8px !important;
+  margin: 0 0.5rem !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.valuator-print-breadcrumb-item-active {
+  color: #111827 !important;
+  font-weight: 600 !important;
+  cursor: default !important;
+}
+
+.valuator-print-breadcrumb-item-active:hover {
+  color: #111827 !important;
+}
+
+/* Card Container */
+.valuator-print-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.valuator-print-content {
+  padding: 2rem;
+}
+
+/* Drop Container */
+.valuator-print-drop-container {
   display: flex;
-  gap: 10px;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 280px;
-  padding: 20px;
-  border-radius: 10px;
-  color: #444;
-  transition: background .2s ease-in-out, border .2s ease-in-out;
+  gap: 1.5rem;
+  width: 100%;
 }
 
-.drop-container:hover .drop-title {
-  color: #222;
-}
-
-.drop-title {
-  color: #444;
-  font-size: 15px;
+/* Instructions */
+.valuator-print-instructions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   text-align: center;
-  transition: color .2s ease-in-out;
+}
+
+.valuator-print-instruction-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Form Field */
+.valuator-print-form-field {
+  display: block;
+  width: 100%;
+}
+
+/* Label */
+.valuator-print-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+/* Input Styles */
+.valuator-print-input {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #1a1a1a;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  min-height: 48px;
+}
+
+.valuator-print-input:hover:not(:disabled):not([readonly]) {
+  border-color: #9ca3af;
+}
+
+.valuator-print-input:focus {
+  outline: none;
+  border-color: #EEB838;
+  box-shadow: 0 0 0 2px rgba(238, 184, 56, 0.2);
+}
+
+.valuator-print-input:disabled,
+.valuator-print-input[readonly] {
+  background-color: #f9fafb;
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.valuator-print-input::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
+/* Select Styles */
+.valuator-print-input select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+  padding-right: 2.5rem;
+}
+
+/* Button */
+.valuator-print-btn {
+  padding: 0.625rem 1.5rem !important;
+  border-radius: 0.5rem !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  border: none !important;
+  cursor: pointer !important;
+  font-size: 1rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-decoration: none !important;
+}
+
+.valuator-print-btn-primary {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+.valuator-print-btn-primary:hover {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .valuator-print-title {
+    font-size: 1.25rem !important;
+  }
+  
+  .valuator-print-content {
+    padding: 1.5rem;
+  }
+  
+  .valuator-print-instruction-text {
+    font-size: 0.8125rem;
+  }
 }
