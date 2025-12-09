@@ -1,0 +1,125 @@
+import { Injectable } from '@angular/core';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
+import Swal from 'sweetalert2';
+
+@Injectable()
+export class AuthInterceptor implements HttpInterceptor {
+  constructor(private router: Router) {
+    // Inicializar la bandera global si no existe
+    if (!(window as any).__isRedirecting401) {
+      (window as any).__isRedirecting401 = false;
+    }
+  }
+
+  intercept(req: HttpRequest<any>, next: HttpHandler) {
+    // Si ya estamos redirigiendo, cancelar todas las peticiones para evitar el loop
+    if ((window as any).__isRedirecting401) {
+      return throwError(() => new HttpErrorResponse({
+        error: 'Redirecting to login',
+        status: 401,
+        statusText: 'Unauthorized'
+      }));
+    }
+
+    // Obtener el token del localStorage
+    const token = localStorage.getItem('user_token');
+
+    // Si no hay token y la petición requiere autenticación, no hacer la petición
+    // (excepto para rutas de login/registro)
+    if (!token && !this.isPublicRoute(req.url)) {
+      // Si no hay token, redirigir inmediatamente sin hacer la petición
+      this.handle401Error();
+      return throwError(() => new HttpErrorResponse({
+        error: 'No token available',
+        status: 401,
+        statusText: 'Unauthorized'
+      }));
+    }
+
+    // Clonar la petición y agregar el header de autorización si existe el token
+    // Solo si la petición no tiene ya el header de Authorization
+    let authReq = req;
+    if (token && !req.headers.has('Authorization')) {
+      authReq = req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    }
+
+    // Procesar la petición y manejar errores
+    return next.handle(authReq).pipe(
+      catchError((error: HttpErrorResponse) => {
+        // Solo manejar errores 401 (Unauthorized) si NO es una petición de login
+        // Un 401 en el login es un error esperado (credenciales incorrectas) y no debe redirigir
+        if (error.status === 401 && !this.isLoginRoute(req.url)) {
+          this.handle401Error();
+        }
+
+        // Retornar el error para que los componentes puedan manejarlo si es necesario
+        return throwError(() => error);
+      })
+    );
+  }
+
+  private isPublicRoute(url: string): boolean {
+    // Rutas públicas que no requieren autenticación
+    const publicRoutes = ['/auth/login', '/auth/register', '/auth/recover', '/auth/reset'];
+    return publicRoutes.some(route => url.includes(route));
+  }
+
+  private isLoginRoute(url: string): boolean {
+    // Verificar si la URL es el endpoint de login
+    return url.includes('/api/auth/login') || url.includes('/auth/login');
+  }
+
+  private handle401Error(): void {
+    // Evitar múltiples redirecciones simultáneas usando bandera global
+    if ((window as any).__isRedirecting401) {
+      return;
+    }
+
+    (window as any).__isRedirecting401 = true;
+
+    // Limpiar el estado de autenticación
+    localStorage.removeItem('user_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('role');
+    localStorage.removeItem('profile');
+
+    // Redirigir al login
+    this.router.navigate(['/auth/iniciar-sesion'], { replaceUrl: true }).then(() => {
+      // Solo mostrar el mensaje si no se ha mostrado ya
+      if (!(window as any).__swalShown401) {
+        (window as any).__swalShown401 = true;
+        Swal.fire({
+          icon: 'warning',
+          title: 'Sesión expirada',
+          text: 'Su sesión ha expirado, por favor inicie sesión nuevamente.',
+          confirmButtonText: 'Aceptar',
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        }).finally(() => {
+          (window as any).__swalShown401 = false;
+          // Resetear la bandera después de un tiempo
+          setTimeout(() => {
+            (window as any).__isRedirecting401 = false;
+          }, 3000);
+        });
+      } else {
+        // Si ya se mostró el mensaje, solo resetear la bandera
+        setTimeout(() => {
+          (window as any).__isRedirecting401 = false;
+        }, 3000);
+      }
+    }).catch(() => {
+      // Si la navegación falla, resetear la bandera
+      setTimeout(() => {
+        (window as any).__isRedirecting401 = false;
+      }, 2000);
+    });
+  }
+}
+

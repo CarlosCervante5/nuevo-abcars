@@ -1,0 +1,1193 @@
+:host {
+  display: block;
+}
+
+/* Contenedor principal */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Título y breadcrumb */
+h4 {
+  color: #1a1a1a;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.breadcrumb {
+  background: transparent;
+  padding: 0;
+  margin-bottom: 2rem;
+}
+
+.breadcrumb-item {
+  color: #6b7280;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-item:hover {
+  color: #EEB838;
+}
+
+.breadcrumb-item.active {
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+/* Secciones del formulario */
+h3 {
+  color: #1a1a1a;
+  font-size: 1.375rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  margin-top: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 3px solid #EEB838;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+h3:first-of-type {
+  margin-top: 0;
+}
+
+h3 i {
+  color: #EEB838;
+  font-size: 1.125rem;
+  background: rgba(238, 184, 56, 0.1);
+  padding: 0.5rem;
+  border-radius: 8px;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+hr {
+  margin: 2rem 0;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Estilos para mat-form-field */
+mat-form-field {
+  width: 100%;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+::ng-deep .mat-mdc-form-field {
+  width: 100% !important;
+  display: block !important;
+  pointer-events: auto !important;
+  overflow: visible !important;
+  /* Eliminar todas las variables CSS de Material que afectan padding y height */
+  --mat-form-field-container-vertical-padding: 0 !important;
+  --mat-form-field-container-height: auto !important;
+  --mat-form-field-container-text-field-height: auto !important;
+  padding-top: 32px !important;
+  padding-bottom: 4px !important;
+}
+
+::ng-deep .mat-mdc-form-field-flex {
+  width: 100% !important;
+  position: relative !important;
+  align-items: center !important;
+  min-height: 43px !important;
+  height: auto !important;
+  max-height: none !important;
+  pointer-events: auto !important;
+  z-index: 1 !important;
+  display: flex !important;
+  box-sizing: border-box !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  overflow: visible !important;
+  padding-top: 0px !important;
+}
+
+::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  position: relative !important;
+  margin-top: 4px !important;
+  overflow: visible !important;
+}
+
+/* Asegurar que el contenedor del form-field no corte el label */
+::ng-deep .mat-mdc-form-field-wrapper {
+  overflow: visible !important;
+}
+
+::ng-deep .mat-mdc-form-field-infix {
+  overflow: visible !important;
+  min-height: auto !important;
+}
+
+::ng-deep .mdc-text-field {
+  width: 100% !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border-radius: 0.5rem !important; /* rounded-lg equivalente */
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+  position: relative !important;
+  pointer-events: auto !important;
+  z-index: 1 !important;
+  height: auto !important;
+  min-height: 48px !important;
+  max-height: none !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  overflow: visible !important;
+  /* NO usar border aquí, solo el outline tendrá borde */
+  border: none !important;
+}
+
+::ng-deep .mdc-text-field:hover {
+  border-color: #9ca3af !important; /* border-gray-400 */
+  box-shadow: none !important;
+}
+
+::ng-deep .mdc-text-field--focused {
+  border-color: #EEB838 !important; /* focus:border-yellow-500 */
+  box-shadow: 0 0 0 2px rgba(238, 184, 56, 0.2) !important; /* focus:ring-2 focus:ring-yellow-500 */
+  outline: none !important;
+}
+
+/* Forzar fondo blanco en todos los estados */
+::ng-deep .mdc-text-field,
+::ng-deep .mdc-text-field--filled,
+::ng-deep .mdc-text-field--outlined,
+::ng-deep .mdc-text-field--focused,
+::ng-deep .mdc-text-field--invalid {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+::ng-deep .mdc-text-field:hover {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+::ng-deep .mdc-text-field--focused {
+  box-shadow: 0 0 0 4px rgba(238, 184, 56, 0.08), 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+::ng-deep .mdc-text-field--filled {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+::ng-deep .mdc-text-field__input {
+  width: 100% !important;
+  padding: 0.875rem 1rem !important; /* Más padding vertical */
+  font-size: 1rem !important;
+  color: #1a1a1a !important;
+  line-height: 1.5 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  position: relative !important;
+  z-index: 2 !important;
+  pointer-events: auto !important;
+  cursor: text !important;
+  height: auto !important;
+  min-height: 100% !important;
+  box-sizing: border-box !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.01em !important;
+  border-radius: 0.5rem !important;
+  /* Eliminar cualquier borde interno o decoración */
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+::ng-deep .mdc-text-field__input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+::ng-deep .mdc-text-field__input::placeholder {
+  color: #9ca3af !important;
+  font-weight: 400 !important;
+  opacity: 0.8 !important;
+}
+  min-height: 28px !important;
+  box-sizing: border-box !important;
+}
+
+::ng-deep .mdc-text-field__input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+::ng-deep .mdc-text-field__input::placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+/* Labels visibles y bien posicionados - Sobrescribir Material */
+::ng-deep .mat-mdc-form-field-label {
+  color: #6b7280 !important;
+  font-weight: 600 !important;
+  position: absolute !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+  display: inline-block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  -webkit-text-fill-color: #6b7280 !important;
+  overflow: visible !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  word-wrap: normal !important;
+  word-break: normal !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  clip: unset !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  height: auto !important;
+  max-height: none !important;
+  top: -24px !important;
+  left: 0 !important;
+  transform: none !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  line-height: 1.4 !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  direction: ltr !important;
+  unicode-bidi: normal !important;
+  text-align: left !important;
+}
+
+::ng-deep .mat-mdc-form-field-label.mdc-floating-label--float-above {
+  color: #EEB838 !important;
+  -webkit-text-fill-color: #EEB838 !important;
+  z-index: 3 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+::ng-deep .mdc-floating-label {
+  position: absolute !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: #6b7280 !important;
+  -webkit-text-fill-color: #6b7280 !important;
+  overflow: visible !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  word-wrap: normal !important;
+  word-break: normal !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+  line-height: 1.4 !important;
+  top: -24px !important;
+  left: 0 !important;
+  transform: none !important;
+  clip: unset !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  direction: ltr !important;
+  unicode-bidi: normal !important;
+  text-align: left !important;
+  display: inline-block !important;
+}
+
+::ng-deep .mdc-floating-label--float-above {
+  color: #EEB838 !important;
+  -webkit-text-fill-color: #EEB838 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+}
+
+/* Prevenir que Material oculte el placeholder cuando el label flota */
+::ng-deep .mat-mdc-form-field.mat-form-field-hide-placeholder .mat-mdc-select-placeholder,
+::ng-deep .mat-mdc-form-field.mat-form-field-hide-placeholder .mdc-text-field__input::placeholder {
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: #9ca3af !important;
+  -webkit-text-fill-color: #9ca3af !important;
+}
+
+/* Outline simplificado - Diseño más simple y funcional */
+::ng-deep .mdc-notched-outline {
+  pointer-events: none !important;
+  z-index: 0 !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Asegurar que el outline tenga la misma altura que el input */
+::ng-deep .mdc-text-field .mdc-notched-outline {
+  height: 100% !important;
+  max-height: 56px !important;
+  overflow: visible !important;
+}
+
+/* Asegurar que el label-wrapper tenga espacio suficiente arriba */
+::ng-deep .mat-mdc-form-field-label-wrapper {
+  overflow: visible !important;
+  position: absolute !important;
+  top: -36px !important; /* Ajustado para el nuevo padding-top de 44px */
+  left: 0 !important;
+  z-index: 10 !important;
+  height: auto !important;
+  max-height: none !important;
+  width: 100% !important;
+  clip: unset !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  pointer-events: none !important;
+  padding-bottom: 8px !important; /* Espacio entre label e input */
+}
+
+/* Contenedor del form-field con padding-top para el label - Más espacio */
+::ng-deep .mat-mdc-form-field {
+  padding-top: 44px !important; /* Más espacio para labels largos */
+  padding-bottom: 4px !important;
+  overflow: visible !important;
+  margin-bottom: 1.5rem !important; /* Más espacio entre campos */
+}
+
+/* SOBRESCRIBIR ESTILOS DE MATERIAL QUE CAUSAN CONFLICTOS */
+/* El infix de Material tiene restricciones de altura que cortan el label */
+::ng-deep .mat-mdc-form-field-infix {
+  overflow: visible !important;
+  min-height: auto !important;
+  height: auto !important;
+  max-height: none !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border-top: none !important;
+  /* ELIMINAR VARIABLES CSS DE MATERIAL QUE AFECTAN EL PADDING */
+  --mat-form-field-container-vertical-padding: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Eliminar padding que Material aplica mediante variables CSS */
+::ng-deep .mdc-text-field--outlined .mat-mdc-form-field-infix,
+::ng-deep .mdc-text-field--no-label .mat-mdc-form-field-infix,
+::ng-deep .mdc-text-field--disabled .mat-mdc-form-field-infix {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  --mat-form-field-container-vertical-padding: 0 !important;
+}
+
+/* El text-field de Material también tiene restricciones */
+::ng-deep .mdc-text-field__input {
+  overflow: visible !important;
+}
+
+/* El label-wrapper de Material puede tener overflow hidden */
+::ng-deep .mat-mdc-form-field-label-wrapper {
+  overflow: visible !important;
+  position: absolute !important;
+  top: -20px !important;
+  left: 0 !important;
+  z-index: 4 !important;
+  height: auto !important;
+  max-height: none !important;
+  width: 100% !important;
+  clip: unset !important;
+  clip-path: none !important;
+}
+
+/* El form-field-subscript-wrapper también puede cortar */
+::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  overflow: visible !important;
+  position: relative !important;
+  margin-top: 4px !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* Asegurar que el contenedor principal no corte nada */
+::ng-deep .mat-mdc-form-field-wrapper {
+  overflow: visible !important;
+  position: relative !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* RESET AGRESIVO - ELIMINAR TODOS LOS ESTILOS DE MATERIAL DEL OUTLINE */
+::ng-deep .mdc-notched-outline,
+::ng-deep .mdc-notched-outline__leading,
+::ng-deep .mdc-notched-outline__notch,
+::ng-deep .mdc-notched-outline__trailing {
+  all: unset !important;
+  box-sizing: border-box !important;
+}
+
+/* Borde principal - SOLO el leading tiene borde visible (borde completo) - Estilo home */
+::ng-deep .mdc-notched-outline__leading {
+  border: 1px solid #d1d5db !important; /* border-gray-300 */
+  border-radius: 0.5rem !important; /* rounded-lg */
+  transition: all 0.2s ease !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Notch completamente oculto - eliminar estilos de Material */
+::ng-deep .mdc-notched-outline__notch {
+  border: none !important;
+  border-width: 0 !important;
+  border-color: transparent !important;
+  border-style: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Trailing completamente oculto - eliminar estilos de Material */
+::ng-deep .mdc-notched-outline__trailing {
+  border: none !important;
+  border-width: 0 !important;
+  border-color: transparent !important;
+  border-style: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Asegurar que los elementos hijos también estén ocultos */
+::ng-deep .mdc-notched-outline__notch *,
+::ng-deep .mdc-notched-outline__trailing * {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  border: none !important;
+}
+
+/* Hover - borde más oscuro - solo leading */
+::ng-deep .mdc-text-field:hover .mdc-notched-outline__leading {
+  border-color: #9ca3af !important; /* border-gray-400 */
+}
+
+::ng-deep .mdc-text-field:hover .mdc-notched-outline__notch,
+::ng-deep .mdc-text-field:hover .mdc-notched-outline__trailing {
+  border: none !important;
+  display: none !important;
+}
+
+/* Focus - borde amarillo estilo home - solo leading */
+::ng-deep .mdc-text-field--focused .mdc-notched-outline__leading {
+  border-color: #EEB838 !important; /* focus:border-yellow-500 */
+  border-width: 1px !important;
+  border-radius: 0.5rem !important; /* rounded-lg */
+  box-shadow: 0 0 0 2px rgba(238, 184, 56, 0.2) !important; /* focus:ring-2 focus:ring-yellow-500 */
+}
+
+::ng-deep .mdc-text-field--focused .mdc-notched-outline__notch,
+::ng-deep .mdc-text-field--focused .mdc-notched-outline__trailing {
+  border: none !important;
+  display: none !important;
+}
+
+/* Invalid - borde rojo - solo leading */
+::ng-deep .mdc-text-field--invalid .mdc-notched-outline__leading {
+  border-color: #ef4444 !important;
+}
+
+::ng-deep .mdc-text-field--invalid .mdc-notched-outline__notch,
+::ng-deep .mdc-text-field--invalid .mdc-notched-outline__trailing {
+  border: none !important;
+  display: none !important;
+}
+
+/* Estilos para mat-select */
+::ng-deep .mat-mdc-select {
+  width: 100% !important;
+  background-color: #ffffff !important;
+}
+
+::ng-deep .mat-mdc-select-trigger {
+  width: 100% !important;
+  padding: 14px 16px !important;
+  font-size: 0.9375rem !important;
+  color: #1a1a1a !important;
+  min-height: 28px !important;
+  height: 28px !important;
+  max-height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  background-color: #ffffff !important;
+  position: relative !important;
+  z-index: 2 !important;
+  box-sizing: border-box !important;
+}
+
+/* Asegurar que el contenedor del select tenga fondo blanco */
+::ng-deep .mat-mdc-form-field .mat-mdc-select-trigger {
+  background-color: #ffffff !important;
+}
+
+/* Asegurar que el form-field que contiene el select tenga fondo blanco */
+::ng-deep .mat-mdc-form-field:has(.mat-mdc-select) .mdc-text-field {
+  background-color: #ffffff !important;
+}
+
+/* Asegurar que el select value tenga fondo blanco */
+::ng-deep .mat-mdc-select-value {
+  background-color: transparent !important;
+  color: #1a1a1a !important;
+}
+
+::ng-deep .mat-mdc-select-value-text {
+  color: #1a1a1a !important;
+}
+
+/* Placeholder visible para selects - Sobrescribir clases de Material */
+::ng-deep .mat-mdc-select-placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+  position: relative !important;
+  z-index: 2 !important;
+  -webkit-text-fill-color: #9ca3af !important;
+}
+
+/* Sobrescribir la clase que oculta el placeholder - Prioridad máxima */
+::ng-deep .mat-form-field-hide-placeholder .mat-mdc-select-placeholder,
+::ng-deep .mat-mdc-form-field.mat-form-field-hide-placeholder .mat-mdc-select-placeholder,
+::ng-deep .mat-mdc-form-field-hide-placeholder .mat-mdc-select-placeholder {
+  color: #9ca3af !important;
+  -webkit-text-fill-color: #9ca3af !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+  transition: color 0.2s ease !important;
+}
+
+/* Asegurar que el placeholder siempre sea visible incluso cuando el label está flotando */
+::ng-deep .mat-mdc-form-field:not(.mat-form-field-hide-placeholder) .mat-mdc-select-placeholder,
+::ng-deep .mat-mdc-form-field .mat-mdc-select-placeholder {
+  color: #9ca3af !important;
+  -webkit-text-fill-color: #9ca3af !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+::ng-deep .mat-mdc-select-value-text {
+  color: #1a1a1a !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  -webkit-text-fill-color: #1a1a1a !important;
+}
+
+::ng-deep .mat-mdc-select-arrow {
+  color: #6b7280 !important;
+}
+
+::ng-deep .mat-mdc-select-panel {
+  border-radius: 8px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #e5e7eb !important;
+  background-color: #ffffff !important;
+  padding: 4px 0 !important;
+  margin-top: 4px !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+}
+
+::ng-deep .mat-mdc-option {
+  padding: 12px 16px !important;
+  font-size: 0.9375rem !important;
+  transition: all 0.15s ease !important;
+  background-color: #ffffff !important;
+  color: #1a1a1a !important;
+  min-height: 48px !important;
+  line-height: 1.5 !important;
+  border-bottom: 1px solid transparent !important;
+}
+
+::ng-deep .mat-mdc-option:last-child {
+  border-bottom: none !important;
+}
+
+::ng-deep .mat-mdc-option:hover:not(.mdc-list-item--disabled) {
+  background-color: #f9fafb !important;
+  color: #1a1a1a !important;
+}
+
+::ng-deep .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+  font-weight: 500 !important;
+}
+
+::ng-deep .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled):hover {
+  background-color: #fde68a !important;
+}
+
+::ng-deep .mat-mdc-option.mdc-list-item--disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* Mejorar el contenedor de las opciones */
+::ng-deep .mat-mdc-select-panel .mat-mdc-option {
+  margin: 0 4px !important;
+  border-radius: 4px !important;
+}
+
+::ng-deep .mat-mdc-select-panel .mat-mdc-option:first-child {
+  margin-top: 4px !important;
+}
+
+::ng-deep .mat-mdc-select-panel .mat-mdc-option:last-child {
+  margin-bottom: 4px !important;
+}
+
+/* Estilos para mat-stepper */
+::ng-deep .mat-stepper-horizontal {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+::ng-deep .mat-step-header {
+  pointer-events: none;
+  padding: 1rem 0.5rem;
+}
+
+::ng-deep .mat-step-header .mat-step-icon {
+  background-color: #e5e7eb !important;
+  color: #6b7280 !important;
+  border: 2px solid #d1d5db !important;
+  width: 40px !important;
+  height: 40px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+::ng-deep .mat-step-header .mat-step-icon-selected {
+  background-color: #EEB838 !important;
+  color: #ffffff !important;
+  border-color: #EEB838 !important;
+  box-shadow: 0 4px 6px -1px rgba(238, 184, 56, 0.3) !important;
+}
+
+::ng-deep .mat-step-header .mat-step-icon-state-done {
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+  border-color: #10b981 !important;
+}
+
+::ng-deep .mat-step-label {
+  color: #6b7280 !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+}
+
+::ng-deep .mat-step-header .mat-step-icon-selected + .mat-step-label {
+  color: #1a1a1a !important;
+  font-weight: 600 !important;
+}
+
+::ng-deep .mat-step-header .mat-step-icon-state-done + .mat-step-label {
+  color: #10b981 !important;
+}
+
+::ng-deep .mat-stepper-horizontal-line {
+  border-top-color: #e5e7eb !important;
+  border-top-width: 2px !important;
+  margin: 0 1rem !important;
+}
+
+/* Estilos para botones */
+button[mat-button],
+button[mat-raised-button] {
+  margin: 0.5rem;
+  padding: 10px 24px !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+button[mat-raised-button] {
+  background-color: #EEB838 !important;
+  color: #ffffff !important;
+}
+
+button[mat-raised-button]:hover:not(:disabled) {
+  background-color: #d4a030 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  transform: translateY(-1px);
+}
+
+button[mat-button]:not([disabled]) {
+  color: #6b7280 !important;
+}
+
+button[mat-button]:hover:not([disabled]) {
+  background-color: #f9fafb !important;
+  color: #1a1a1a !important;
+}
+
+/* Mat-hint mejorado */
+::ng-deep .mat-mdc-form-field-hint {
+  color: #ef4444 !important;
+  font-size: 0.8125rem !important;
+  margin-top: 0.25rem !important;
+  font-weight: 500 !important;
+}
+
+/* Filas del formulario */
+.row {
+  margin-bottom: 1rem;
+}
+
+.row:last-child {
+  margin-bottom: 0;
+}
+
+/* Asegurar que los campos no se desborden */
+.col-12 .mat-form-field,
+.col-sm-12 .mat-form-field,
+.col-md-6 .mat-form-field,
+.col-lg-3 .mat-form-field,
+.col-xl-3 .mat-form-field {
+  width: 100% !important;
+}
+
+/* Mejoras adicionales para campos deshabilitados - Asegurar que labels sean visibles */
+::ng-deep .mat-mdc-form-field-disabled .mdc-text-field {
+  background-color: #f9fafb !important;
+  opacity: 0.7 !important;
+}
+
+::ng-deep .mat-mdc-form-field-disabled .mdc-text-field__input {
+  color: #6b7280 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
+/* Asegurar que los labels en campos deshabilitados sean completamente visibles */
+::ng-deep .mat-mdc-form-field-disabled .mat-mdc-form-field-label,
+::ng-deep .mat-mdc-form-field-disabled .mdc-floating-label,
+::ng-deep .mdc-text-field--disabled .mat-mdc-form-field-label,
+::ng-deep .mdc-text-field--disabled .mdc-floating-label {
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: #6b7280 !important;
+  -webkit-text-fill-color: #6b7280 !important;
+  overflow: visible !important;
+  clip: unset !important;
+  clip-path: none !important;
+  position: absolute !important;
+  top: -24px !important;
+  left: 0 !important;
+  z-index: 10 !important;
+  display: block !important;
+}
+
+/* Eliminar variables CSS de Material que afectan campos deshabilitados */
+::ng-deep .mat-mdc-form-field-disabled,
+::ng-deep .mdc-text-field--disabled {
+  --mdc-filled-text-field-disabled-container-opacity: 1 !important;
+  --mdc-outlined-text-field-disabled-outline-opacity: 1 !important;
+  --mat-form-field-container-vertical-padding: 0 !important;
+  --mat-form-field-container-height: auto !important;
+}
+
+/* Asegurar que los inputs sean completamente funcionales */
+::ng-deep .mat-mdc-form-field input,
+::ng-deep .mat-mdc-form-field textarea {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+}
+
+/* Mejorar el diseño del textarea */
+::ng-deep textarea.mdc-text-field__input {
+  min-height: 80px !important;
+  resize: vertical !important;
+  padding: 14px 16px !important;
+}
+
+/* Mejorar el diseño del datepicker */
+::ng-deep .mat-datepicker-toggle {
+  color: #6b7280 !important;
+}
+
+::ng-deep .mat-datepicker-toggle:hover {
+  color: #EEB838 !important;
+}
+
+/* Asegurar que ningún elemento bloquee los inputs - SOLUCIÓN CRÍTICA */
+::ng-deep .mat-mdc-form-field {
+  pointer-events: auto !important;
+}
+
+::ng-deep .mat-mdc-form-field-wrapper {
+  pointer-events: auto !important;
+  overflow: visible !important;
+}
+
+::ng-deep .mat-mdc-form-field-flex {
+  pointer-events: auto !important;
+}
+
+::ng-deep .mdc-text-field {
+  pointer-events: auto !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+::ng-deep .mdc-text-field__input {
+  pointer-events: auto !important;
+  cursor: text !important;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Forzar fondo blanco en el contenedor completo del form-field */
+::ng-deep .mat-mdc-form-field .mat-mdc-form-field-flex {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+::ng-deep .mat-mdc-form-field .mdc-text-field {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+::ng-deep .mdc-text-field__input:focus {
+  pointer-events: auto !important;
+}
+
+::ng-deep input[matInput],
+::ng-deep textarea[matInput] {
+  pointer-events: auto !important;
+  cursor: text !important;
+}
+
+::ng-deep .mat-mdc-select {
+  pointer-events: auto !important;
+  background-color: #ffffff !important;
+}
+
+::ng-deep .mat-mdc-select-trigger {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  background-color: #ffffff !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* Asegurar fondo blanco en el contenedor del select dentro del form-field */
+::ng-deep .mat-mdc-form-field:has(.mat-mdc-select) .mdc-text-field {
+  background-color: #ffffff !important;
+}
+
+::ng-deep .mat-mdc-form-field:has(.mat-mdc-select) .mat-mdc-select-trigger {
+  background-color: #ffffff !important;
+}
+
+/* Animaciones suaves */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+mat-step {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Responsive mejoras */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem 0.5rem;
+  }
+
+  ::ng-deep .mat-stepper-horizontal {
+    padding: 1rem;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+  }
+}
+
+/* ============================================
+   OVERRIDE FINAL - MÁXIMA ESPECIFICIDAD PARA ELIMINAR ESTILOS DE MATERIAL
+   ============================================ */
+
+/* Reset completo de todas las clases de Material con máxima especificidad */
+::ng-deep .mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field,
+::ng-deep .mat-mdc-form-field.mat-form-field-disabled,
+::ng-deep .mat-mdc-form-field.mat-form-field-hide-placeholder,
+::ng-deep .mat-mdc-form-field.mat-form-field-appearance-outline {
+  /* Eliminar todas las variables CSS de Material */
+  --mat-form-field-container-height: auto !important;
+  --mat-form-field-container-vertical-padding: 0 !important;
+  --mat-form-field-focus-state-layer-opacity: 0 !important;
+  --mdc-filled-text-field-container-color: transparent !important;
+  --mdc-outlined-text-field-outline-color: transparent !important;
+  --mdc-outlined-text-field-focus-outline-color: transparent !important;
+  --mdc-outlined-text-field-hover-outline-color: transparent !important;
+  --mdc-filled-text-field-active-indicator-color: transparent !important;
+  --mdc-filled-text-field-focus-active-indicator-color: transparent !important;
+  --mdc-outlined-text-field-disabled-outline-color: transparent !important;
+  /* Resetear propiedades de Material */
+  width: 100% !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Reset completo de mdc-text-field con máxima especificidad */
+::ng-deep .mdc-text-field.mdc-text-field.mdc-text-field,
+::ng-deep .mdc-text-field.mdc-text-field--outlined,
+::ng-deep .mdc-text-field.mdc-text-field--filled,
+::ng-deep .mdc-text-field.mdc-text-field--disabled,
+::ng-deep .mdc-text-field.mdc-text-field--focused {
+  /* Eliminar todas las variables CSS de MDC */
+  --mdc-filled-text-field-container-color: transparent !important;
+  --mdc-outlined-text-field-outline-color: transparent !important;
+  --mdc-outlined-text-field-focus-outline-color: transparent !important;
+  --mdc-outlined-text-field-hover-outline-color: transparent !important;
+  --mdc-filled-text-field-active-indicator-color: transparent !important;
+  --mdc-filled-text-field-focus-active-indicator-color: transparent !important;
+  /* Asegurar que nuestros estilos se apliquen */
+  all: unset !important;
+  display: flex !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  width: 100% !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+/* Reset completo del outline */
+::ng-deep .mdc-notched-outline.mdc-notched-outline,
+::ng-deep .mdc-notched-outline.mdc-notched-outline * {
+  all: unset !important;
+  box-sizing: border-box !important;
+  position: absolute !important;
+  pointer-events: none !important;
+}
+
+/* Reset completo del form-field-wrapper */
+::ng-deep .mat-mdc-form-field-wrapper.mat-mdc-form-field-wrapper {
+  all: unset !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  width: 100% !important;
+  overflow: visible !important;
+}
+
+/* Reset completo del form-field-flex */
+::ng-deep .mat-mdc-form-field-flex.mat-mdc-form-field-flex {
+  all: unset !important;
+  display: flex !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  width: 100% !important;
+  align-items: center !important;
+  min-height: 43px !important;
+  height: auto !important;
+  max-height: none !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  overflow: visible !important;
+  padding-top: 0px !important;
+  pointer-events: auto !important;
+  z-index: 1 !important;
+}
+
+/* ============================================
+   ESTILOS FORZADOS FINALES PARA LABELS
+   ============================================ */
+
+/* Forzar visibilidad de labels - Máxima especificidad */
+app-checklist .mat-mdc-form-field-label-wrapper,
+app-checklist .mat-mdc-form-field-label,
+app-checklist .mdc-floating-label,
+app-checklist .mat-mdc-form-field-label-wrapper *,
+app-checklist .mat-mdc-form-field-label *,
+app-checklist .mdc-floating-label * {
+  display: inline-block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  overflow: visible !important;
+  clip: unset !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  position: absolute !important;
+  top: -24px !important;
+  left: 0 !important;
+  z-index: 999 !important;
+  color: #6b7280 !important;
+  -webkit-text-fill-color: #6b7280 !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  line-height: 1.4 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  white-space: nowrap !important;
+  word-wrap: normal !important;
+  word-break: normal !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  direction: ltr !important;
+  unicode-bidi: normal !important;
+  transform: none !important;
+  pointer-events: none !important;
+  text-overflow: ellipsis !important;
+  text-align: left !important;
+}
+
+/* Label wrapper específico */
+app-checklist .mat-mdc-form-field-label-wrapper {
+  top: -28px !important;
+  height: auto !important;
+  max-height: none !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Eliminar cualquier padding que Material pueda estar aplicando */
+app-checklist .mat-mdc-form-field-infix,
+app-checklist .mdc-text-field--outlined .mat-mdc-form-field-infix,
+app-checklist .mdc-text-field--disabled .mat-mdc-form-field-infix,
+app-checklist .mat-mdc-form-field-disabled .mat-mdc-form-field-infix {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  --mat-form-field-container-vertical-padding: 0 !important;
+  min-height: auto !important;
+  height: auto !important;
+}
+
+/* Padding del form-field - Más espacio para labels */
+app-checklist .mat-mdc-form-field {
+  padding-top: 44px !important; /* Más espacio para labels largos */
+  padding-bottom: 4px !important;
+  margin-bottom: 1.5rem !important; /* Más espacio entre campos */
+  --mat-form-field-container-vertical-padding: 0 !important;
+  --mat-form-field-container-height: auto !important;
+}
+
+/* ============================================
+   ESTILOS FINALES FORZADOS - ESTILO HOME/LOGIN
+   Máxima especificidad para sobrescribir Material
+   ============================================ */
+
+/* Forzar estilos del home en todos los text-fields */
+app-checklist .mdc-text-field,
+app-checklist .mat-mdc-form-field .mdc-text-field,
+app-checklist .mdc-text-field--outlined,
+app-checklist .mdc-text-field--filled {
+  border-radius: 0.5rem !important; /* rounded-lg */
+  border: none !important; /* Sin borde aquí, solo el outline */
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+app-checklist .mdc-text-field:hover {
+  border-color: #9ca3af !important; /* border-gray-400 */
+  box-shadow: none !important;
+}
+
+app-checklist .mdc-text-field--focused,
+app-checklist .mdc-text-field.mdc-text-field--focused {
+  border-color: #EEB838 !important; /* focus:border-yellow-500 */
+  box-shadow: 0 0 0 2px rgba(238, 184, 56, 0.2) !important; /* focus:ring-2 */
+  outline: none !important;
+}
+
+/* Outline con estilo home */
+app-checklist .mdc-notched-outline__leading {
+  border: 1px solid #d1d5db !important; /* border-gray-300 */
+  border-radius: 0.5rem !important; /* rounded-lg */
+  transition: all 0.2s ease !important;
+}
+
+app-checklist .mdc-text-field:hover .mdc-notched-outline__leading {
+  border-color: #9ca3af !important; /* border-gray-400 */
+}
+
+app-checklist .mdc-text-field--focused .mdc-notched-outline__leading {
+  border-color: #EEB838 !important; /* focus:border-yellow-500 */
+  border-width: 1px !important;
+  border-radius: 0.5rem !important; /* rounded-lg */
+  box-shadow: 0 0 0 2px rgba(238, 184, 56, 0.2) !important; /* focus:ring-2 */
+}
+
+/* Asegurar que los labels tengan suficiente espacio - evitar que se encimen */
+app-checklist .mat-mdc-form-field-label-wrapper {
+  top: -36px !important;
+  padding-bottom: 8px !important;
+}
+
+app-checklist .mat-mdc-form-field-label,
+app-checklist .mdc-floating-label {
+  top: -32px !important;
+  margin-bottom: 4px !important;
+}
