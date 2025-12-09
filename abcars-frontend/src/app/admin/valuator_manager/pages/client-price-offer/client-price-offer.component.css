@@ -1,3 +1,162 @@
 :host {
   display: block;
+  background-color: white;
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Page Title */
+.client-price-offer-title {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  margin-bottom: 0.5rem !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Breadcrumb Styles */
+.client-price-offer-breadcrumb {
+  margin-bottom: 1.5rem !important;
+}
+
+.client-price-offer-breadcrumb-list {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 0.875rem !important;
+}
+
+.client-price-offer-breadcrumb-item {
+  display: flex !important;
+  align-items: center !important;
+  color: #6b7280 !important;
+  cursor: pointer !important;
+  transition: color 0.2s ease !important;
+}
+
+.client-price-offer-breadcrumb-item:hover {
+  color: var(--abcars-primary, #f59e0b) !important;
+}
+
+.client-price-offer-breadcrumb-item:not(:last-child)::after {
+  content: '' !important;
+  display: inline-block !important;
+  width: 8px !important;
+  height: 8px !important;
+  margin: 0 0.5rem !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.client-price-offer-breadcrumb-item-active {
+  color: #111827 !important;
+  font-weight: 600 !important;
+  cursor: default !important;
+}
+
+.client-price-offer-breadcrumb-item-active:hover {
+  color: #111827 !important;
+}
+
+/* Form Field */
+.client-price-offer-form-field {
+  display: block;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+/* Label */
+.client-price-offer-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+/* Input Styles */
+.client-price-offer-input {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #1a1a1a;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  min-height: 48px;
+}
+
+.client-price-offer-input:hover:not(:disabled):not([readonly]) {
+  border-color: #9ca3af;
+}
+
+.client-price-offer-input:focus {
+  outline: none;
+  border-color: #EEB838;
+  box-shadow: 0 0 0 2px rgba(238, 184, 56, 0.2);
+}
+
+.client-price-offer-input::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
+/* Table Container */
+.client-price-offer-table-container {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+/* Table Styles */
+.client-price-offer-table {
+  width: 100%;
+}
+
+.client-price-offer-th {
+  background-color: #f9fafb !important;
+  color: #111827 !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  padding: 0.75rem 1rem !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.client-price-offer-td {
+  padding: 0.75rem 1rem !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+  color: #374151 !important;
+  font-size: 0.875rem !important;
+}
+
+.client-price-offer-table tr:hover {
+  background-color: #f9fafb !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .client-price-offer-title {
+    font-size: 1.25rem !important;
+  }
 }
