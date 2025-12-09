@@ -1,6 +1,8 @@
 import { Component, type OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { PageEvent } from '@angular/material/paginator';
 import { ClientPriceOfferService } from '@services/client-price-offer.service';
+import { Overview } from '@interfaces/admin.interfaces';
 
 @Component({
   selector: 'app-client-price-offer',
@@ -17,7 +19,49 @@ export class ClientPriceOfferComponent implements OnInit {
   public length: number = 0;
   public pageIndex: number = 1;
 
-  constructor( private _clientPriceOfferService: ClientPriceOfferService ){}
+  // References Overview para el encabezado
+  public itemOverview: Overview;
+
+  constructor( private _clientPriceOfferService: ClientPriceOfferService ){
+    // Inicializar itemOverview
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      this.itemOverview = {
+        user: {
+          name: user.name || user.nickname || 'Usuario',
+          surname: user.surname || '',
+          role: 'Valuation Manager',
+          email: user.email || '',
+          picturepath: ''
+        },
+        pages: [
+          {
+            title: 'Reporte Ofertas de autos',
+            icon: 'fi fi-rr-chart-line-up',
+            permalink: '/admin/valuation_manager/client-price-offer'
+          }
+        ]
+      };
+    } catch (error) {
+      // Fallback si hay error al parsear
+      this.itemOverview = {
+        user: {
+          name: 'Usuario',
+          surname: '',
+          role: 'Valuation Manager',
+          email: '',
+          picturepath: ''
+        },
+        pages: [
+          {
+            title: 'Reporte Ofertas de autos',
+            icon: 'fi fi-rr-chart-line-up',
+            permalink: '/admin/valuation_manager/client-price-offer'
+          }
+        ]
+      };
+    }
+  }
 
   ngOnInit(): void { 
     this.getPriceOfferClient();
@@ -29,8 +73,17 @@ export class ClientPriceOfferComponent implements OnInit {
       next: (resp) => {
         console.log(resp.data.data);
         this.dataSource = new MatTableDataSource(resp.data.data);
+        this.length = resp.data.total;
+        if (page) {
+          this.pageIndex = page;
+        }
       }
     });
+  }
+
+  public paginationChange(pageEvent: PageEvent): void {
+    this.pageIndex = pageEvent.pageIndex + 1;
+    this.getPriceOfferClient(this.pageIndex);
   }
 
 }
