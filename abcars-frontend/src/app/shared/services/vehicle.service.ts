@@ -26,7 +26,7 @@ constructor(
 
         let data = { 
             uuid: uuid,
-            relationship_names: ['brand', 'line', 'model', 'body', 'version', 'dealership', 'campaigns.promotions', 'images'],
+            relationship_names: ['brand', 'line', 'model', 'body', 'version', 'dealership', 'specification', 'campaigns.promotions', 'images'],
         }
 
         return this._http.post<FullDetailResponse>(`${ this.baseUrl }/api/vehicles/detail`, data, { headers });
