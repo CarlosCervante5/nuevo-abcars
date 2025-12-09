@@ -1,8 +1,7 @@
 import { Component, ElementRef, ViewChild, type OnInit } from '@angular/core';
-import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 
 import { environment } from '@environments/environment';
-import { GetUsersByRol, UserTechnicians } from '@interfaces/admin.interfaces';
+import { GetUsersByRol, UserTechnicians, Overview } from '@interfaces/admin.interfaces';
 
 import { ValuatorManagerPrintService } from '@services/valuator-manager-print.service';
 
@@ -23,9 +22,51 @@ export class ValuatorManagerPrintComponent implements OnInit {
   public valuators: UserTechnicians[] = [];
   public iduservaluator: string | null = '';
 
+  // References Overview para el encabezado
+  public itemOverview: Overview;
+
   constructor(
     private _valuatorManagerPrintService: ValuatorManagerPrintService
-  ){}
+  ){
+    // Inicializar itemOverview
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      this.itemOverview = {
+        user: {
+          name: user.name || user.nickname || 'Usuario',
+          surname: user.surname || '',
+          role: 'Valuation Manager',
+          email: user.email || '',
+          picturepath: ''
+        },
+        pages: [
+          {
+            title: 'Imprimir valuación',
+            icon: 'fi fi-rr-print',
+            permalink: '/admin/valuation_manager/print'
+          }
+        ]
+      };
+    } catch (error) {
+      // Fallback si hay error al parsear
+      this.itemOverview = {
+        user: {
+          name: 'Usuario',
+          surname: '',
+          role: 'Valuation Manager',
+          email: '',
+          picturepath: ''
+        },
+        pages: [
+          {
+            title: 'Imprimir valuación',
+            icon: 'fi fi-rr-print',
+            permalink: '/admin/valuation_manager/print'
+          }
+        ]
+      };
+    }
+  }
 
   ngOnInit(): void {
     this.getValuators();
@@ -46,32 +87,16 @@ export class ValuatorManagerPrintComponent implements OnInit {
     this.iduservaluator = valuatorId ? valuatorId : null;
   }
 
-  public getDateValuation(event: MatDatepickerInputEvent<Date>){
-    let date = new Date(`${event.value}`);
-    let month = '' + (date.getMonth() + 1);
-    let day = '' + date.getDate();
-    let year = date.getFullYear();
-    if(month.length < 2) month = '0' + month;
-    if(day.length < 2) day = '0' + day;
-
-    let dateV = [year, month, day].join('-');
-    this.dateValuation.nativeElement.value = dateV;
-    this.inputDateValuation = dateV;
+  public getDateValuation(event: Event){
+    const target = event.target as HTMLInputElement;
+    const dateValue = target.value;
+    this.inputDateValuation = dateValue;
   }
 
-  public getDateEndValuation(event: MatDatepickerInputEvent<Date>){
-    let date = new Date(`${event.value}`);
-    let month = '' + (date.getMonth() + 1);
-    let day = '' + date.getDate();
-    let year = date.getFullYear();
-    if(month.length < 2) month = '0' + month;
-    if(day.length < 2) day = '0' + day;
-
-    let dateV = [year, month, day].join('-');
-
-    this.dateEndValuation.nativeElement.value = dateV;
-    this.inputDateEndValuation = dateV;
-
+  public getDateEndValuation(event: Event){
+    const target = event.target as HTMLInputElement;
+    const dateValue = target.value;
+    this.inputDateEndValuation = dateValue;
   }
 
   public generateDownloadUrl(): string {
