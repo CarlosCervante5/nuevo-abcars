@@ -1,109 +1,112 @@
-<!-- <app-new-nav></app-new-nav> -->
-<div class="container">
-    <div class="row">
-        <div class="col-12 mt-5 mb-5">
+<app-overview [overview]="itemOverview" [url_index]="'/admin/appointment_manager'" [hideModules]="true"></app-overview>
+<div class="container mx-auto px-4 pt-24">
+    <div class="w-full mb-6">
+        <h4 class="appointment-manager-title">Citas externas de valuación</h4>
+        <nav class="appointment-manager-breadcrumb" aria-label="breadcrumb">
+            <ol class="appointment-manager-breadcrumb-list">
+                <li class="appointment-manager-breadcrumb-item" [routerLink]="['/admin/appointment_manager']">Overview</li>
+                <li class="appointment-manager-breadcrumb-item appointment-manager-breadcrumb-item-active" aria-current="page">Citas externas de valuación</li>
+            </ol>
+        </nav>
+    </div>
 
-            <div class="row">
-                <div class="col-12">
-                    <h4 class="fs-4 fw-bold text-truncate">Citas externas de valuación</h4>
-                    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item" [routerLink]="['/admin/appointment_manager']">Overview</li>
-                            <li class="breadcrumb-item active" aria-current="page">Citas externas de valuación</li>
-                        </ol>
-                    </nav>
-                </div>
-            </div>
+    <!-- Search Input -->
+    <div class="w-full mb-4">
+        <div class="appointment-manager-form-field">
+            <label class="appointment-manager-label">Buscar...</label>
+            <input 
+                type="text" 
+                placeholder="Teclea tu búsqueda..."
+                class="appointment-manager-input"
+            >
+        </div>
+    </div>
+    
+    <!-- Update Button -->
+    <div class="w-full mb-4">
+        <button 
+            type="button" 
+            class="appointment-manager-btn appointment-manager-btn-secondary"
+        >
+            Actualizar cambios en la vista
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block ml-2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+        </button>
+    </div>
 
-            <div class="row">
-                <div class="col-12">
-                    <mat-form-field appearance="outline">
-                        <mat-label>Buscar...</mat-label>
-                        <input matInput  placeholder="Teclea tu búsqueda..."> <!--(keyup)="applyFilter($event)"-->
-                    </mat-form-field>
-                </div>
-            </div>
-            
-            <div class="row mb-3">
-                <div class="col-12">
-                    <button mat-button type="button" > <!--(click)="viewRefresh()"-->
-                        Actualizar cambios en la vista
-                        <i class="fi fi-rr-refresh"></i>
-                    </button>
-                </div>
-            </div>
+    <!-- Table -->
+    <div class="w-full">
+        <div class="appointment-manager-table-container">
+            <table mat-table [dataSource]="dataSource" matSort class="appointment-manager-table">
+                <ng-container matColumnDef="id">
+                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+                    <td class="appointment-manager-td appointment-manager-td-bold" mat-cell *matCellDef="let row">{{row.index}}</td>
+                </ng-container>
+                
+                <ng-container matColumnDef="brand">
+                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Marca</th>
+                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">{{row.brand}}</td>
+                </ng-container>
 
-            <div class="row">
-                <div class="col-12">
-                    <section class="example-container mat-elevation-z8" tabindex="0">
-                        <table mat-table [dataSource]="dataSource" matSort>
-                            <div>
-                                <div class="fl__date">
-                                    <ng-container matColumnDef="id">
-                                        <div style="width: 50px;">
-                                            <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
-                                            <td data-titulo="id" class="fw-bold td__table" mat-cell *matCellDef="let row">{{row.index}}</td>
-                                        </div>
-                                    </ng-container>
-                                    
-                                    <ng-container matColumnDef="brand">
-                                            <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Marca</th>
-                                            <td data-titulo="marca" class="td__table" mat-cell *matCellDef="let row">{{row.brand}}</td>
-                                    </ng-container>
+                <ng-container matColumnDef="model">
+                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Modelo</th>
+                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">{{row.model}}</td>
+                </ng-container>
 
-                                    <ng-container matColumnDef="model">
-                                        <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Modelo</th>
-                                        <td data-titulo="modelo" class="td__table" mat-cell *matCellDef="let row">{{row.model}}</td>
-                                    </ng-container>
+                <ng-container matColumnDef="name">
+                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Nombre Cliente</th>
+                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">{{row.name}}</td>
+                </ng-container>
 
-                                    <ng-container matColumnDef="name">
-                                        <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Nombre Cliente</th>
-                                        <td data-titulo="nombre" class="td__table" mat-cell *matCellDef="let row">{{row.name}}</td>
-                                    </ng-container>
+                <ng-container matColumnDef="last_name">
+                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Apellidos</th>
+                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">{{row.last_name}}</td>
+                </ng-container>
 
-                                    <ng-container matColumnDef="last_name">
-                                        <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Apellidos</th>
-                                        <td data-titulo="apellidos" class="td__table" mat-cell *matCellDef="let row">{{row.last_name}}</td>
-                                    </ng-container>
+                <ng-container matColumnDef="phone1">
+                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Teléfono</th>
+                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">{{row.phone1}}</td>
+                </ng-container>
 
-                                    <ng-container matColumnDef="phone1">
-                                        <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Teléfono</th>
-                                        <td data-titulo="telefono" class="td__table" mat-cell *matCellDef="let row">{{row.phone1}}</td>
-                                    </ng-container>
+                <ng-container matColumnDef="date">
+                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Cita</th>
+                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">{{ row.appointment_type}}</td>
+                </ng-container>
 
-                                    <ng-container matColumnDef="date">
-                                        <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Cita</th>
-                                        <td data-titulo="cita" class="td__table" mat-cell *matCellDef="let row">{{ row.appointment_type}} </td>
-                                    </ng-container>
+                <ng-container matColumnDef="subsidiary">
+                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Sucursal</th>
+                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">{{row.dealership_name}}</td>
+                </ng-container>
 
-                                    <ng-container matColumnDef="subsidiary">
-                                        <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Sucursal</th>
-                                        <td data-titulo="sucursal" class="td__table" mat-cell *matCellDef="let row">{{row.dealership_name}}</td>
-                                    </ng-container>
-
-                                    <ng-container matColumnDef="valuator">
-                                        <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Valuador</th>
-                                        <td data-titulo="valuador" class="td__table" mat-cell *matCellDef="let row;">
-                                            <mat-select class="custom-mat-select" [value]="row.id" placeholder="Seleccione al valuador" (selectionChange)="onValuatorChange($event, row.appointment_uuid)">
-                                                <mat-option *ngFor="let valuator of valuators" [value]="valuator.uuid">
-                                                    {{valuator.user_profile.name}} {{valuator.user_profile.last_name}}
-                                                </mat-option>
-                                            </mat-select>
-                                        </td>
-                                    </ng-container>
-                                </div>
-                            </div>
-                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-                            <tr class="mat-row" *matNoDataRow>
-                                <td class="mat-cell" colspan="4">No hay datos que coincidan con el filtro: </td> 
-                            </tr>
-                        </table>
-                        <mat-paginator [pageSize]="paginate" [length]="length" [pageIndex]="pageIndex - 1" (page)="paginationChange($event)"   aria-label="Select page of riders"></mat-paginator>
-                    </section>
-                </div>
-            </div>
-
+                <ng-container matColumnDef="valuator">
+                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Valuador</th>
+                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">
+                        <select 
+                            class="appointment-manager-select"
+                            (change)="onValuatorChange($event, row.appointment_uuid)"
+                        >
+                            <option value="" [selected]="!row.id">Seleccione al valuador</option>
+                            <option *ngFor="let valuator of valuators" [value]="valuator.uuid" [selected]="row.id === valuator.uuid">
+                                {{valuator.user_profile.name}} {{valuator.user_profile.last_name}}
+                            </option>
+                        </select>
+                    </td>
+                </ng-container>
+                
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+                <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="9">No hay datos que coincidan con el filtro</td>
+                </tr>
+            </table>
+            <mat-paginator 
+                [pageSize]="paginate" 
+                [length]="length" 
+                [pageIndex]="pageIndex - 1" 
+                (page)="paginationChange($event)"
+                aria-label="Select page of riders"
+            ></mat-paginator>
         </div>
     </div>
 </div>

@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { PageEvent } from '@angular/material/paginator';
-import { MatSelectChange } from '@angular/material/select';
 import { MatTableDataSource } from '@angular/material/table';
-import { GralResponse } from '@interfaces/admin.interfaces';
+import { GralResponse, Overview } from '@interfaces/admin.interfaces';
 import { AppointmentResponse,DatDates, DatoTables, ValuatorsResponse, User } from '@interfaces/getAppointments.interface';
 import { AppointmentService } from '@services/appointment.service';
 import Swal from 'sweetalert2';
@@ -29,10 +28,51 @@ export class AppointmentManagerComponent {
 
   public valuators: User[] = [];
 
+  // References Overview para el encabezado
+  public itemOverview: Overview;
 
   constructor (
     private _appointmentService: AppointmentService,
   ){
+    // Inicializar itemOverview
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      this.itemOverview = {
+        user: {
+          name: user.name || user.nickname || 'Usuario',
+          surname: user.surname || '',
+          role: 'Valuation Manager',
+          email: user.email || '',
+          picturepath: ''
+        },
+        pages: [
+          {
+            title: 'Citas externas de valuación',
+            icon: 'fi fi-rr-calendar',
+            permalink: '/admin/appointment_manager/assing-valuations'
+          }
+        ]
+      };
+    } catch (error) {
+      // Fallback si hay error al parsear
+      this.itemOverview = {
+        user: {
+          name: 'Usuario',
+          surname: '',
+          role: 'Valuation Manager',
+          email: '',
+          picturepath: ''
+        },
+        pages: [
+          {
+            title: 'Citas externas de valuación',
+            icon: 'fi fi-rr-calendar',
+            permalink: '/admin/appointment_manager/assing-valuations'
+          }
+        ]
+      };
+    }
+
     this.getData(this.page);
     this.getValuators();
   }
@@ -80,8 +120,15 @@ export class AppointmentManagerComponent {
     })
   }
 
-  onValuatorChange(event: MatSelectChange, uuid:string) {
-    this._appointmentService.attatchValuator(event.value, uuid)
+  onValuatorChange(event: Event, uuid:string) {
+    const target = event.target as HTMLSelectElement;
+    const valuatorUuid = target.value;
+    
+    if (!valuatorUuid) {
+      return;
+    }
+
+    this._appointmentService.attatchValuator(valuatorUuid, uuid)
     .subscribe({
       next:(response: GralResponse) => {
         const Toast = Swal.mixin({
