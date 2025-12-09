@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { RouterModule } from '@angular/router';
 import { HomeNavComponent } from '../../../shared/components/home-nav/home-nav.component';
 import { ModernFooterComponent } from '../../../shared/components/modern-footer/modern-footer.component';
-import { StregaService } from '../../../shared/services/strega.service';
+import { LeadService } from '../../../shared/services/lead.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -27,7 +27,7 @@ export class FinancingComponent {
 
   constructor(
     private fb: FormBuilder,
-    private stregaService: StregaService
+    private leadService: LeadService
   ) {
     this.financingForm = this.fb.group({
       name: ['', Validators.required],
@@ -86,28 +86,22 @@ export class FinancingComponent {
     const monthlyPayment = this.getMonthlyPayment();
     const totalAmount = this.getTotalAmount();
 
-    // Formatear valores con formato de moneda y concatenar en q_comments
-    const qComments = `El enganche 10%: $${downPayment.toLocaleString()} MXN Mensualidad: $${monthlyPayment.toLocaleString()} MXN Total a pagar: $${totalAmount.toLocaleString()} MXN`;
-
-    // Preparar datos con campos adicionales para enviar
+    // Preparar datos para enviar
     const formData = {
-      ...this.financingForm.value,
-      q_model_interest: '',
-      q_brand_interest: '',
-      q_initial_investment: this.financingForm.value.offer_price ? String(this.financingForm.value.offer_price) : '',
-      q_time_to_buy: '',
-      q_comments: qComments,
-      opportunity_type: 'lead',
-      dealership_name: 'Chevrolet Serdán',
-      campaign_name: 'Página ABCars',
-      campaign_channel: 'WEB ABCars',
-      campaign_source: 'Solicitud de financiamiento'
+      name: this.financingForm.value.name,
+      last_name: this.financingForm.value.last_name || '',
+      phone: this.financingForm.value.phone,
+      email: this.financingForm.value.email,
+      comments: `El enganche 10%: $${downPayment.toLocaleString()} MXN Mensualidad: $${monthlyPayment.toLocaleString()} MXN Total a pagar: $${totalAmount.toLocaleString()} MXN`,
+      vehicle_price: this.calculatorData.vehiclePrice,
+      down_payment: downPayment,
+      down_payment_percentage: this.calculatorData.downPaymentPercentage,
+      monthly_payment: monthlyPayment,
+      term_months: this.calculatorData.termMonths,
+      finance_amount: this.getFinancedAmount()
     };
 
-    // Crear FormGroup temporal solo para cumplir con la firma del servicio
-    const formToSend = this.fb.group(formData);
-
-    this.stregaService.createLead(formToSend).subscribe({
+    this.leadService.sendFinancingRequest(formData).subscribe({
       next: (response) => {
         this.isSubmitting = false;
         

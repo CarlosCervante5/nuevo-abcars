@@ -6,7 +6,9 @@ import { Location } from '@angular/common';
 import { DarkNavComponent } from '../../shared/components/dark-nav/dark-nav.component';
 import { ModernFooterComponent } from '../../shared/components/modern-footer/modern-footer.component';
 import { VehicleService } from '../../shared/services/vehicle.service';
+import { LeadService } from '../../shared/services/lead.service';
 import { Vehicle as ApiVehicle } from '../../shared/interfaces/vehicle_data.interface';
+import Swal from 'sweetalert2';
 
 interface Vehicle {
   uuid: string;
@@ -744,49 +746,80 @@ interface MediaItem {
         
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
-            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="testDriveFormData.name"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              required
+            >
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-            <input type="tel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
+            <input 
+              type="tel" 
+              [(ngModel)]="testDriveFormData.phone"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              required
+            >
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+            <input 
+              type="email" 
+              [(ngModel)]="testDriveFormData.email"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              required
+            >
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Fecha preferida</label>
-            <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+            <input 
+              type="date" 
+              [(ngModel)]="testDriveFormData.preferred_date"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            >
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Hora preferida</label>
-            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
-              <option>9:00 AM</option>
-              <option>10:00 AM</option>
-              <option>11:00 AM</option>
-              <option>12:00 PM</option>
-              <option>1:00 PM</option>
-              <option>2:00 PM</option>
-              <option>3:00 PM</option>
-              <option>4:00 PM</option>
-              <option>5:00 PM</option>
+            <select 
+              [(ngModel)]="testDriveFormData.preferred_time"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            >
+              <option value="">Selecciona una hora</option>
+              <option value="9:00 AM">9:00 AM</option>
+              <option value="10:00 AM">10:00 AM</option>
+              <option value="11:00 AM">11:00 AM</option>
+              <option value="12:00 PM">12:00 PM</option>
+              <option value="1:00 PM">1:00 PM</option>
+              <option value="2:00 PM">2:00 PM</option>
+              <option value="3:00 PM">3:00 PM</option>
+              <option value="4:00 PM">4:00 PM</option>
+              <option value="5:00 PM">5:00 PM</option>
             </select>
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Comentarios adicionales</label>
-            <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent" rows="2" placeholder="Algún comentario especial..."></textarea>
+            <textarea 
+              [(ngModel)]="testDriveFormData.comments"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent" 
+              rows="2" 
+              placeholder="Algún comentario especial..."
+            ></textarea>
           </div>
           
           <button 
-            class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-xl text-base transition-colors"
+            (click)="submitTestDrive()"
+            [disabled]="isSubmitting"
+            class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-xl text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Agendar prueba de manejo
+            <span *ngIf="!isSubmitting">Agendar prueba de manejo</span>
+            <span *ngIf="isSubmitting">Enviando...</span>
           </button>
         </div>
       </div>
@@ -813,43 +846,76 @@ interface MediaItem {
         
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
-            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="offerFormData.name"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              required
+            >
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-            <input type="tel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
+            <input 
+              type="tel" 
+              [(ngModel)]="offerFormData.phone"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              required
+            >
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+            <input 
+              type="email" 
+              [(ngModel)]="offerFormData.email"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              required
+            >
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Monto ofrecido (MXN)</label>
-            <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Ej: 850000">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Monto ofrecido (MXN) *</label>
+            <input 
+              type="number" 
+              [(ngModel)]="offerFormData.offer_amount"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+              placeholder="Ej: 850000"
+              required
+            >
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Condiciones de pago</label>
-            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-              <option>Contado</option>
-              <option>Financiamiento</option>
-              <option>Leasing</option>
+            <select 
+              [(ngModel)]="offerFormData.payment_conditions"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            >
+              <option value="">Selecciona condiciones</option>
+              <option value="Contado">Contado</option>
+              <option value="Financiamiento">Financiamiento</option>
+              <option value="Leasing">Leasing</option>
             </select>
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Comentarios</label>
-            <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" rows="2" placeholder="Condiciones especiales, plazo de respuesta..."></textarea>
+            <textarea 
+              [(ngModel)]="offerFormData.comments"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+              rows="2" 
+              placeholder="Condiciones especiales, plazo de respuesta..."
+            ></textarea>
           </div>
           
           <button 
-            class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl text-base transition-colors"
+            (click)="submitOffer()"
+            [disabled]="isSubmitting"
+            class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Enviar oferta
+            <span *ngIf="!isSubmitting">Enviar oferta</span>
+            <span *ngIf="isSubmitting">Enviando...</span>
           </button>
         </div>
       </div>
@@ -1223,6 +1289,7 @@ interface MediaItem {
               <label class="block text-sm font-medium text-gray-700 mb-2">Nombre completo *</label>
               <input 
                 type="text" 
+                [(ngModel)]="financingFormData.name"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Tu nombre completo"
                 required
@@ -1232,6 +1299,7 @@ interface MediaItem {
               <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
               <input 
                 type="tel" 
+                [(ngModel)]="financingFormData.phone"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Tu número de teléfono"
                 required
@@ -1243,6 +1311,7 @@ interface MediaItem {
             <label class="block text-sm font-medium text-gray-700 mb-2">Correo electrónico *</label>
             <input 
               type="email" 
+              [(ngModel)]="financingFormData.email"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="tu@email.com"
               required
@@ -1252,6 +1321,7 @@ interface MediaItem {
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Dirección *</label>
             <textarea 
+              [(ngModel)]="financingFormData.address"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows="3"
               placeholder="Tu dirección completa"
@@ -1267,7 +1337,7 @@ interface MediaItem {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Ocupación *</label>
-              <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+              <select [(ngModel)]="financingFormData.occupation" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
                 <option value="">Selecciona tu ocupación</option>
                 <option value="empleado">Empleado</option>
                 <option value="empresario">Empresario</option>
@@ -1278,7 +1348,7 @@ interface MediaItem {
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Ingresos mensuales *</label>
-              <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+              <select [(ngModel)]="financingFormData.monthly_income" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
                 <option value="">Selecciona tu rango de ingresos</option>
                 <option value="0-15000">$0 - $15,000</option>
                 <option value="15000-25000">$15,000 - $25,000</option>
@@ -1294,13 +1364,14 @@ interface MediaItem {
               <label class="block text-sm font-medium text-gray-700 mb-2">Empresa donde trabajas</label>
               <input 
                 type="text" 
+                [(ngModel)]="financingFormData.company"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Nombre de la empresa"
               >
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Antigüedad en el trabajo</label>
-              <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <select [(ngModel)]="financingFormData.job_tenure" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <option value="">Selecciona antigüedad</option>
                 <option value="0-6">0 - 6 meses</option>
                 <option value="6-12">6 - 12 meses</option>
@@ -1314,6 +1385,7 @@ interface MediaItem {
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Comentarios adicionales</label>
             <textarea 
+              [(ngModel)]="financingFormData.comments"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows="4"
               placeholder="Cuéntanos más sobre tu situación financiera o cualquier pregunta que tengas..."
@@ -1706,11 +1778,18 @@ export class VehicleDetailComponent implements OnInit {
     }
   ];
 
+  // Datos de formularios
+  financingFormData: any = {};
+  testDriveFormData: any = {};
+  offerFormData: any = {};
+  isSubmitting = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private location: Location,
-    private vehicleService: VehicleService
+    private vehicleService: VehicleService,
+    private leadService: LeadService
   ) {}
 
   ngOnInit() {
@@ -1926,92 +2005,86 @@ export class VehicleDetailComponent implements OnInit {
   }
 
   getHighlights(): string[] {
-    const highlights: { [key: string]: string[] } = {
-      'BMW': [
-        'BMW ConnectedDrive', 'Apple CarPlay & Android Auto', 'Sensores de estacionamiento delanteros y traseros',
-        'Cámara 360°', 'Asistente de carril', 'Cockpit virtual', 'Enganche giratorio',
-        'Climatización de 4 zonas', 'Sistema multimedia iDrive', 'Volante multifunción en cuero',
-        'Interior en cuero negro', 'Paquete de asistencia', 'Asientos eléctricos con memoria',
-        'Control de crucero adaptativo', 'Paquete dinámico plus', 'Head-up display',
-        'Llantas BMW M de 22"', 'Faros LED Matrix con tecnología láser', 'Techo panorámico eléctrico',
-        'Sistema de sonido Harman Kardon', 'Escape deportivo con válvulas', 'Calefacción de asientos delanteros y traseros'
-      ],
-      'Mercedes-Benz': [
-        'Mercedes me connect', 'Apple CarPlay & Android Auto', 'Sensores de estacionamiento',
-        'Cámara de reversa', 'Asistente de mantenimiento de carril', 'Cockpit digital MBUX',
-        'Climatización automática', 'Sistema multimedia MBUX', 'Volante deportivo AMG',
-        'Tapicería en cuero ARTICO', 'Paquete AMG Line', 'Asientos deportivos',
-        'DISTRONIC PLUS', 'Suspensión deportiva', 'Faros LED High Performance',
-        'Llantas AMG de 19"', 'Techo corredizo eléctrico', 'Sistema de sonido Burmester'
-      ],
-      'Mercedes': [
-        'Mercedes me connect', 'Apple CarPlay & Android Auto', 'Sensores de estacionamiento',
-        'Cámara de reversa', 'Asistente de mantenimiento de carril', 'Cockpit digital MBUX',
-        'Climatización automática', 'Sistema multimedia MBUX', 'Volante deportivo AMG',
-        'Tapicería en cuero ARTICO', 'Paquete AMG Line', 'Asientos deportivos',
-        'DISTRONIC PLUS', 'Suspensión deportiva', 'Faros LED High Performance',
-        'Llantas AMG de 19"', 'Techo corredizo eléctrico', 'Sistema de sonido Burmester'
-      ],
-      'Audi': [
-        'Audi connect', 'Audi drive select', 'Apple CarPlay & Android Auto',
-        'Sensores de estacionamiento delanteros y traseros', 'Cámara 360°', 'Asistente de carril',
-        'Cockpit virtual', 'Enganche giratorio', 'Climatización de 4 zonas',
-        'Sistema multimedia MMI', 'Volante multifunción en alcántara', 'Interior en cuero negro',
-        'Paquete de asistencia', 'Asientos eléctricos con memoria', 'Control de crucero adaptativo',
-        'Paquete dinámico plus', 'Head-up display', 'Llantas Audi RS de 22"',
-        'Faros Matrix LED con láser', 'Techo panorámico eléctrico', 'Sistema Bang & Olufsen',
-        'Escape deportivo con válvulas', 'Calefacción de asientos', 'Suspensión adaptativa'
-      ],
-      'Porsche': [
-        'Porsche Communication Management', 'Apple CarPlay', 'Sensores de estacionamiento',
-        'Cámara de reversa', 'Asistente de carril', 'Cockpit deportivo',
-        'Climatización automática de 2 zonas', 'Sistema de navegación', 'Volante deportivo GT',
-        'Asientos deportivos', 'Paquete Sport Chrono', 'Suspensión deportiva PASM',
-        'Faros LED con PDLS+', 'Llantas de 20"', 'Sistema de sonido BOSE',
-        'Escape deportivo', 'Frenos cerámicos PCCB', 'Jaula antivuelco'
-      ],
-      'Toyota': [
-        'Toyota Safety Sense 2.0', 'Apple CarPlay & Android Auto', 'Sensores de estacionamiento',
-        'Cámara de reversa con guías dinámicas', 'Asistente de mantenimiento de carril', 'Pantalla táctil de 9"',
-        'Climatización automática dual', 'Sistema de navegación', 'Volante multifunción en cuero',
-        'Tapicería en cuero sintético', 'Asientos eléctricos', 'Sistema híbrido Toyota',
-        'Control de crucero dinámico', 'Faros LED automáticos', 'Llantas de aleación de 18"',
-        'Techo corredizo eléctrico', 'Sistema de sonido JBL', 'Cargador inalámbrico',
-        'Arranque por botón', 'Monitoreo de punto ciego', 'Alerta de tráfico cruzado'
-      ],
-      'Ford': [
-        'Ford SYNC 4A', 'Apple CarPlay & Android Auto', 'Sensores de estacionamiento',
-        'Cámara de reversa', 'Asistente de mantenimiento de carril', 'Pantalla táctil de 12"',
-        'Climatización automática dual', 'Sistema de navegación', 'Volante deportivo Alcántara',
-        'Asientos Recaro deportivos', 'Paquete Performance', 'Suspensión deportiva MagneRide',
-        'Control de crucero adaptativo', 'Faros LED con DRL', 'Llantas Brembo de 19"',
-        'Techo panorámico', 'Sistema de sonido B&O', 'Modos de manejo seleccionables',
-        'Launch Control', 'Frenos Brembo', 'Escape deportivo activo'
-      ]
-    };
+    // NOTA: Campo 'highlights' no existe en la base de datos actualmente
+    // TODO: Si se agrega el campo 'highlights' como JSON a la tabla vehicles, descomentar:
+    // return this.vehicle?.apiData?.highlights || [];
     
-    return highlights[this.vehicle?.brand || ''] || [
-      'Sistema de navegación GPS', 'Bluetooth y USB', 'Control de crucero',
-      'Sensores de estacionamiento', 'Cámara de reversa', 'Climatización automática',
-      'Faros LED', 'Llantas de aleación', 'Sistema de sonido premium'
-    ];
+    // Retornar array vacío ya que no existe en BD
+    return [];
+    
+    /* CÓDIGO HARDCODEADO COMENTADO - NO EXISTE EN BD
+    const highlights: { [key: string]: string[] } = {
+      'BMW': [...],
+      'Mercedes-Benz': [...],
+      // ... más marcas
+    };
+    return highlights[this.vehicle?.brand || ''] || [...];
+    */
   }
 
   getSpecifications() {
-    return [
-      { label: 'Año', value: this.vehicle?.year?.toString() || '-' },
-      { label: 'Kilometraje', value: `${this.vehicle?.mileage?.toLocaleString() || '-'} km` },
-      { label: 'Combustible', value: this.getFuelType() },
-      { label: 'Transmisión', value: this.vehicle?.transmission || '-' },
-      { label: 'Cilindros', value: this.vehicle?.cylinders?.toString() || '-' },
-      { label: 'Color exterior', value: this.formatColor(this.vehicle?.exterior_color) || '-' },
-      { label: 'Color interior', value: this.formatColor(this.vehicle?.interior_color) || '-' },
-      { label: 'Tipo de vehículo', value: this.formatVehicleType() },
-      { label: 'Carrocería', value: this.formatBodyType() },
-      { label: 'Peso', value: this.getWeight() },
-      { label: 'Color', value: this.getColor() },
-      { label: 'Airbags', value: this.getAirbags() }
-    ];
+    const specs = [];
+    const apiVehicle = this.vehicle?.apiData;
+    const spec = apiVehicle?.specification;
+
+    // Campos existentes en la tabla vehicles
+    if (this.vehicle?.year) {
+      specs.push({ label: 'Año', value: this.vehicle.year.toString() });
+    }
+    if (this.vehicle?.mileage !== undefined) {
+      specs.push({ label: 'Kilometraje', value: `${this.vehicle.mileage.toLocaleString()} km` });
+    }
+    if (this.vehicle?.fuel) {
+      specs.push({ label: 'Combustible', value: this.getFuelType() });
+    }
+    if (this.vehicle?.transmission) {
+      specs.push({ label: 'Transmisión', value: this.vehicle.transmission });
+    }
+    if (this.vehicle?.cylinders !== undefined && this.vehicle.cylinders !== null) {
+      specs.push({ label: 'Cilindros', value: this.vehicle.cylinders.toString() });
+    }
+    if (this.vehicle?.exterior_color) {
+      specs.push({ label: 'Color exterior', value: this.formatColor(this.vehicle.exterior_color) });
+    }
+    if (this.vehicle?.interior_color) {
+      specs.push({ label: 'Color interior', value: this.formatColor(this.vehicle.interior_color) });
+    }
+    if (this.vehicle?.apiData?.type || this.vehicle?.apiData?.category) {
+      specs.push({ label: 'Tipo de vehículo', value: this.formatVehicleType() });
+    }
+    if (apiVehicle?.body) {
+      specs.push({ label: 'Carrocería', value: this.formatBodyType() });
+    }
+    if (apiVehicle?.drive_train) {
+      specs.push({ label: 'Tipo de tracción', value: this.formatColor(apiVehicle.drive_train) });
+    }
+
+    // Campos existentes en vehicle_specifications
+    if (spec?.engine_type) {
+      specs.push({ label: 'Tipo de motor', value: this.formatColor(spec.engine_type) });
+    }
+    if (spec?.country_of_origin) {
+      specs.push({ label: 'País de origen', value: this.formatColor(spec.country_of_origin) });
+    }
+    if (spec?.intake_engine) {
+      specs.push({ label: 'Aspiración del motor', value: this.formatColor(spec.intake_engine) });
+    }
+    if (spec?.auto_start_stop) {
+      specs.push({ label: 'Start-stop', value: spec.auto_start_stop === 'yes' ? 'Sí' : 'No' });
+    }
+    if (spec?.keys_number) {
+      specs.push({ label: 'Número de llaves', value: spec.keys_number.toString() });
+    }
+    if (spec?.plates) {
+      specs.push({ label: 'Placas', value: spec.plates });
+    }
+
+    // Campos hardcodeados comentados - NO EXISTEN EN BD
+    // { label: 'Peso', value: this.getWeight() },
+    // { label: 'Color', value: this.getColor() },
+    // { label: 'Airbags', value: this.getAirbags() }
+
+    return specs;
   }
 
   getFuelType(): string {
@@ -2032,98 +2105,24 @@ export class VehicleDetailComponent implements OnInit {
     return fuelTypes[fuel] || fuel || 'Gasolina';
   }
 
-  getHorsepower(): string {
+  // COMENTADO: Campo 'horsepower' no existe en la base de datos
+  /* getHorsepower(): string {
     const horsepowers: { [key: string]: string } = {
       'BMW': '625 HP',
       'Mercedes-Benz': '367 HP',
-      'Mercedes': '367 HP',
-      'Audi': '600 HP',
-      'Honda': '158 HP',
-      'Toyota': '208 HP',
-      'Chevrolet': '138 HP',
-      'Porsche': '510 HP',
-      'Ford': '460 HP'
+      // ... más marcas
     };
-    
     return horsepowers[this.vehicle?.brand || ''] || '200 HP';
-  }
+  } */
 
-  getAcceleration(): string {
-    const accelerations: { [key: string]: string } = {
-      'BMW': '3.1 seg',
-      'Mercedes-Benz': '5.7 seg',
-      'Mercedes': '5.7 seg',
-      'Audi': '3.6 seg',
-      'Honda': '8.2 seg',
-      'Toyota': '7.5 seg',
-      'Chevrolet': '9.7 seg',
-      'Porsche': '3.4 seg',
-      'Ford': '4.2 seg'
-    };
-    
-    return accelerations[this.vehicle?.brand || ''] || '7.5 seg';
-  }
-
-  getTopSpeed(): string {
-    const topSpeeds: { [key: string]: string } = {
-      'BMW': '305 km/h',
-      'Mercedes-Benz': '250 km/h',
-      'Mercedes': '250 km/h',
-      'Audi': '250 km/h',
-      'Honda': '200 km/h',
-      'Toyota': '190 km/h',
-      'Chevrolet': '185 km/h',
-      'Porsche': '318 km/h',
-      'Ford': '250 km/h'
-    };
-    
-    return topSpeeds[this.vehicle?.brand || ''] || '200 km/h';
-  }
-
-  getConsumption(): string {
-    const consumptions: { [key: string]: string } = {
-      'BMW': '11.1 L/100km',
-      'Mercedes-Benz': '6.8 L/100km',
-      'Mercedes': '6.8 L/100km',
-      'Audi': '11.7 L/100km',
-      'Honda': '6.4 L/100km',
-      'Toyota': '4.1 L/100km',
-      'Chevrolet': '7.8 L/100km',
-      'Porsche': '12.4 L/100km',
-      'Ford': '10.2 L/100km'
-    };
-    
-    return consumptions[this.vehicle?.brand || ''] || '7.0 L/100km';
-  }
-
-  getDoors(): string {
-    return this.vehicle?.brand === 'Porsche' ? '2 puertas' : '5 puertas';
-  }
-
-  getWeight(): string {
-    const weights: { [key: string]: string } = {
-      'BMW': '2,245 kg',
-      'Mercedes-Benz': '1,985 kg',
-      'Mercedes': '1,985 kg',
-      'Audi': '2,150 kg',
-      'Honda': '1,330 kg',
-      'Toyota': '1,620 kg',
-      'Chevrolet': '1,485 kg',
-      'Porsche': '1,430 kg',
-      'Ford': '1,760 kg'
-    };
-    
-    return weights[this.vehicle?.brand || ''] || '1,500 kg';
-  }
-
-  getColor(): string {
-    const colors = ['Negro Metálico', 'Blanco Perla', 'Gris Nardo', 'Azul Misano', 'Rojo Tango'];
-    return colors[Math.floor(Math.random() * colors.length)];
-  }
-
-  getAirbags(): string {
-    return this.vehicle?.brand === 'Porsche' ? '6 airbags' : '8 airbags';
-  }
+  // COMENTADO: Campos no existen en la base de datos
+  /* getAcceleration(): string { ... } */
+  /* getTopSpeed(): string { ... } */
+  /* getConsumption(): string { ... } */
+  /* getDoors(): string { ... } */
+  /* getWeight(): string { ... } */
+  /* getColor(): string { ... } */
+  /* getAirbags(): string { ... } */
 
   // Métodos para venta de contado
   getCashPrice(): number {
@@ -2317,24 +2316,39 @@ export class VehicleDetailComponent implements OnInit {
 
   // Métodos para las nuevas secciones
   getEquipment(): string[] {
+    // NOTA: Campo 'equipment' no existe en la base de datos actualmente
+    // TODO: Si se agrega el campo 'equipment' como JSON a la tabla vehicles, descomentar:
+    // return this.vehicle?.apiData?.equipment || [];
+    
+    // Construir equipamiento desde vehicle_specifications si es posible
+    const equipment: string[] = [];
+    const spec = this.vehicle?.apiData?.specification;
+    
+    if (spec) {
+      // Agregar equipamiento basado en campos booleanos de specification
+      if (spec.wheel_locks === 'yes') equipment.push('Seguros de ruedas');
+      if (spec.spare_wheel === 'yes') equipment.push('Llanta de refacción');
+      if (spec.hydraulic_jack === 'yes') equipment.push('Gato hidráulico');
+      if (spec.fire_extinguisher === 'yes') equipment.push('Extintor');
+      if (spec.reflectors === 'yes') equipment.push('Reflectores');
+      if (spec.jumper_cables === 'yes') equipment.push('Cables para pasar corriente');
+      if (spec.tools === 'yes') equipment.push('Herramientas');
+      if (spec.antenna === 'yes') equipment.push('Antena');
+      if (spec.stud_wrench === 'yes') equipment.push('Desarmador');
+      if (spec.security_film === 'yes') equipment.push('Película de seguridad');
+      if (spec.warranty_policy === 'yes') equipment.push('Póliza de garantía');
+      if (spec.warranty_manual === 'yes') equipment.push('Manual de garantía');
+    }
+    
+    return equipment;
+    
+    /* CÓDIGO HARDCODEADO COMENTADO - NO EXISTE EN BD
     return [
       'Aire acondicionado automático',
       'Sistema de navegación GPS',
-      'Cámara de reversa',
-      'Sensores de estacionamiento',
-      'Sistema de sonido premium',
-      'Asientos de cuero',
-      'Asientos eléctricos con memoria',
-      'Volante multifuncional',
-      'Control de crucero adaptativo',
-      'Sistema de frenos ABS',
-      'Airbags frontales y laterales',
-      'Sistema de estabilidad electrónica',
-      'Faros LED',
-      'Llantas de aleación',
-      'Techo panorámico',
-      'Sistema de arranque sin llave'
+      // ... más equipamiento hardcodeado
     ];
+    */
   }
 
   getInspectionDate(): string {
@@ -2516,5 +2530,136 @@ export class VehicleDetailComponent implements OnInit {
       'convertible': 'Convertible'
     };
     return bodyMap[body?.toLowerCase() || ''] || body || '-';
+  }
+
+  // Métodos para enviar formularios
+  submitFinancingRequest() {
+    if (this.isSubmitting) return;
+
+    // Recopilar datos del formulario (los inputs necesitan ngModel o formControlName)
+    const formData = {
+      name: this.financingFormData.name || '',
+      last_name: this.financingFormData.last_name || '',
+      phone: this.financingFormData.phone || '',
+      email: this.financingFormData.email || '',
+      address: this.financingFormData.address || '',
+      occupation: this.financingFormData.occupation || '',
+      monthly_income: this.financingFormData.monthly_income || '',
+      company: this.financingFormData.company || '',
+      job_tenure: this.financingFormData.job_tenure || '',
+      comments: this.financingFormData.comments || '',
+      vehicle_brand: this.vehicle?.brand || '',
+      vehicle_model: this.vehicle?.model || '',
+      vehicle_year: this.vehicle?.year,
+      vehicle_price: this.vehicle?.price,
+      down_payment: this.getDownPayment(),
+      down_payment_percentage: 30,
+      monthly_payment: this.getMonthlyFinancing(),
+      term_months: 48,
+      finance_amount: this.vehicle?.price ? this.vehicle.price - this.getDownPayment() : 0
+    };
+
+    this.isSubmitting = true;
+    this.leadService.sendFinancingRequest(formData).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+        Swal.fire({
+          icon: 'success',
+          title: '¡Solicitud enviada!',
+          text: 'Tu solicitud de financiamiento ha sido enviada exitosamente.',
+          timer: 3000,
+          showConfirmButton: false
+        });
+        this.closeFinancingRequestModal();
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un problema al enviar tu solicitud. Por favor, intenta de nuevo.',
+        });
+      }
+    });
+  }
+
+  submitTestDrive() {
+    if (this.isSubmitting) return;
+
+    const formData = {
+      name: this.testDriveFormData.name || '',
+      phone: this.testDriveFormData.phone || '',
+      email: this.testDriveFormData.email || '',
+      preferred_date: this.testDriveFormData.preferred_date || '',
+      preferred_time: this.testDriveFormData.preferred_time || '',
+      comments: this.testDriveFormData.comments || '',
+      vehicle_brand: this.vehicle?.brand || '',
+      vehicle_model: this.vehicle?.model || '',
+      vehicle_year: this.vehicle?.year,
+      vehicle_uuid: this.vehicle?.uuid
+    };
+
+    this.isSubmitting = true;
+    this.leadService.sendTestDriveRequest(formData).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+        Swal.fire({
+          icon: 'success',
+          title: '¡Solicitud enviada!',
+          text: 'Tu solicitud de prueba de manejo ha sido enviada exitosamente.',
+          timer: 3000,
+          showConfirmButton: false
+        });
+        this.closeTestDriveModal();
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un problema al enviar tu solicitud. Por favor, intenta de nuevo.',
+        });
+      }
+    });
+  }
+
+  submitOffer() {
+    if (this.isSubmitting) return;
+
+    const formData = {
+      name: this.offerFormData.name || '',
+      phone: this.offerFormData.phone || '',
+      email: this.offerFormData.email || '',
+      offer_amount: this.offerFormData.offer_amount || 0,
+      payment_conditions: this.offerFormData.payment_conditions || '',
+      comments: this.offerFormData.comments || '',
+      vehicle_brand: this.vehicle?.brand || '',
+      vehicle_model: this.vehicle?.model || '',
+      vehicle_year: this.vehicle?.year,
+      vehicle_uuid: this.vehicle?.uuid
+    };
+
+    this.isSubmitting = true;
+    this.leadService.sendOfferRequest(formData).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+        Swal.fire({
+          icon: 'success',
+          title: '¡Oferta enviada!',
+          text: 'Tu oferta ha sido enviada exitosamente. Nos pondremos en contacto contigo pronto.',
+          timer: 3000,
+          showConfirmButton: false
+        });
+        this.closeOfferModal();
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un problema al enviar tu oferta. Por favor, intenta de nuevo.',
+        });
+      }
+    });
   }
 }

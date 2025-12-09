@@ -249,6 +249,10 @@ Route::prefix('leads')->middleware('bandwidth_usage')->group(function () {
     Route::post('/reception_form',  [LeadController::class, 'receptionForm']);
     Route::post('/riders_quiz',  [LeadController::class, 'ridersQuiz']);
     Route::post('/car_care',  [LeadController::class, 'carCare']);
+    Route::post('/financing',  [LeadController::class, 'financing']);
+    Route::post('/test_drive',  [LeadController::class, 'testDrive']);
+    Route::post('/offer',  [LeadController::class, 'offer']);
+    Route::post('/valuation',  [LeadController::class, 'valuation']);
 
 });
 

@@ -5,10 +5,15 @@ namespace App\Http\Controllers\Leads;
 use App\Helpers\ApiResponseHelper;
 use App\Helpers\GoogleSheetHelper;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Http;
 use App\Http\Requests\Leads\StoreAskInfomationRequest;
 use App\Http\Requests\Leads\StoreCarCareRequest;
 use App\Http\Requests\Leads\StoreReceptionRequest;
 use App\Http\Requests\Leads\StoreRidersQuiz;
+use App\Http\Requests\Leads\StoreFinancingRequest;
+use App\Http\Requests\Leads\StoreTestDriveRequest;
+use App\Http\Requests\Leads\StoreOfferRequest;
+use App\Http\Requests\Leads\StoreValuationRequest;
 use App\Mail\ReceptionNotification;
 use App\Models\Leads\ReceptionForm;
 use App\Models\Leads\RidersQuiz;
@@ -286,5 +291,223 @@ class LeadController extends Controller
 
         return ApiResponseHelper::apiSuccess(201, 'Notificación enviada.');
 
+    }
+
+    /**
+     * Procesar solicitud de financiamiento
+     */
+    public function financing(StoreFinancingRequest $request)
+    {
+        try {
+            $data = $request->validated();
+
+            // Construir comentarios con información adicional que no tiene campo específico
+            $comments = [];
+            if (!empty($data['address'])) {
+                $comments[] = "Dirección: " . $data['address'];
+            }
+            if (!empty($data['occupation'])) {
+                $comments[] = "Ocupación: " . $data['occupation'];
+            }
+            if (!empty($data['monthly_income'])) {
+                $comments[] = "Ingresos mensuales: " . $data['monthly_income'];
+            }
+            if (!empty($data['company'])) {
+                $comments[] = "Empresa: " . $data['company'];
+            }
+            if (!empty($data['job_tenure'])) {
+                $comments[] = "Antigüedad en el trabajo: " . $data['job_tenure'];
+            }
+            if (!empty($data['down_payment_percentage'])) {
+                $comments[] = "Porcentaje de enganche: " . $data['down_payment_percentage'] . "%";
+            }
+            if (!empty($data['finance_amount'])) {
+                $comments[] = "Monto a financiar: $" . number_format($data['finance_amount'], 2);
+            }
+            if (!empty($data['comments'])) {
+                $comments[] = $data['comments'];
+            }
+            $fullComments = implode(" | ", $comments);
+
+            // Preparar datos para enviar a Zapier
+            $zapierData = [
+                'formType' => 'financing',
+                'fecha' => now()->format('Y-m-d H:i:s'),
+                'nombre' => $data['name'],
+                'apellido' => $data['last_name'] ?? '',
+                'telefono' => $data['phone'],
+                'correo' => $data['email'],
+                'marca' => $data['vehicle_brand'] ?? '',
+                'modelo' => $data['vehicle_model'] ?? '',
+                'año' => $data['vehicle_year'] ?? '',
+                'precio_vehiculo' => $data['vehicle_price'] ?? '',
+                'enganche' => $data['down_payment'] ?? '',
+                'mensualidad' => $data['monthly_payment'] ?? '',
+                'plazo_meses' => $data['term_months'] ?? '',
+                'comentarios' => $fullComments,
+            ];
+
+            $webhookUrl = env('ZAPIER_WEBHOOK_FINANCING');
+            
+            if ($webhookUrl) {
+                Http::post($webhookUrl, $zapierData);
+            }
+
+            return ApiResponseHelper::apiSuccess(201, 'Solicitud de financiamiento almacenada correctamente.');
+
+        } catch (ValidationException $e) {
+            return ApiResponseHelper::validationError($e);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al crear la solicitud de financiamiento', $e->getMessage(), 500, 'CREATE_FINANCING_ERROR');
+        }
+    }
+
+    /**
+     * Procesar solicitud de prueba de manejo
+     */
+    public function testDrive(StoreTestDriveRequest $request)
+    {
+        try {
+            $data = $request->validated();
+
+            // Construir comentarios con información adicional
+            $comments = [];
+            if (!empty($data['comments'])) {
+                $comments[] = $data['comments'];
+            }
+            if (!empty($data['vehicle_uuid'])) {
+                $comments[] = "UUID del vehículo: " . $data['vehicle_uuid'];
+            }
+            $fullComments = implode(" | ", $comments);
+
+            // Preparar datos para enviar a Zapier
+            $zapierData = [
+                'formType' => 'testDrive',
+                'fecha' => now()->format('Y-m-d H:i:s'),
+                'nombre' => $data['name'],
+                'telefono' => $data['phone'],
+                'correo' => $data['email'],
+                'fecha_preferida' => $data['preferred_date'] ?? '',
+                'hora_preferida' => $data['preferred_time'] ?? '',
+                'marca' => $data['vehicle_brand'] ?? '',
+                'modelo' => $data['vehicle_model'] ?? '',
+                'año' => $data['vehicle_year'] ?? '',
+                'comentarios' => $fullComments,
+            ];
+
+            $webhookUrl = env('ZAPIER_WEBHOOK_TEST_DRIVE');
+            
+            if ($webhookUrl) {
+                Http::post($webhookUrl, $zapierData);
+            }
+
+            return ApiResponseHelper::apiSuccess(201, 'Solicitud de prueba de manejo almacenada correctamente.');
+
+        } catch (ValidationException $e) {
+            return ApiResponseHelper::validationError($e);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al crear la solicitud de prueba de manejo', $e->getMessage(), 500, 'CREATE_TEST_DRIVE_ERROR');
+        }
+    }
+
+    /**
+     * Procesar oferta de monto
+     */
+    public function offer(StoreOfferRequest $request)
+    {
+        try {
+            $data = $request->validated();
+
+            // Construir comentarios con información adicional
+            $comments = [];
+            if (!empty($data['payment_conditions'])) {
+                $comments[] = "Condiciones de pago: " . $data['payment_conditions'];
+            }
+            if (!empty($data['vehicle_uuid'])) {
+                $comments[] = "UUID del vehículo: " . $data['vehicle_uuid'];
+            }
+            if (!empty($data['comments'])) {
+                $comments[] = $data['comments'];
+            }
+            $fullComments = implode(" | ", $comments);
+
+            // Preparar datos para enviar a Zapier
+            $zapierData = [
+                'formType' => 'offer',
+                'fecha' => now()->format('Y-m-d H:i:s'),
+                'nombre' => $data['name'],
+                'telefono' => $data['phone'],
+                'correo' => $data['email'],
+                'monto_ofrecido' => $data['offer_amount'],
+                'marca' => $data['vehicle_brand'] ?? '',
+                'modelo' => $data['vehicle_model'] ?? '',
+                'año' => $data['vehicle_year'] ?? '',
+                'comentarios' => $fullComments,
+            ];
+
+            $webhookUrl = env('ZAPIER_WEBHOOK_OFFER');
+            
+            if ($webhookUrl) {
+                Http::post($webhookUrl, $zapierData);
+            }
+
+            return ApiResponseHelper::apiSuccess(201, 'Oferta almacenada correctamente.');
+
+        } catch (ValidationException $e) {
+            return ApiResponseHelper::validationError($e);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al crear la oferta', $e->getMessage(), 500, 'CREATE_OFFER_ERROR');
+        }
+    }
+
+    /**
+     * Procesar solicitud de valuación
+     */
+    public function valuation(StoreValuationRequest $request)
+    {
+        try {
+            $data = $request->validated();
+
+            // Construir comentarios con información adicional
+            $comments = [];
+            if (!empty($data['city'])) {
+                $comments[] = "Ciudad/Sucursal: " . $data['city'];
+            }
+            if (!empty($data['preferredDate'])) {
+                $comments[] = "Fecha preferida: " . $data['preferredDate'];
+            }
+            if (!empty($data['preferredTime'])) {
+                $comments[] = "Hora preferida: " . $data['preferredTime'];
+            }
+            $fullComments = implode(" | ", $comments);
+
+            // Preparar datos para enviar a Zapier
+            $zapierData = [
+                'formType' => 'valuation',
+                'fecha' => now()->format('Y-m-d H:i:s'),
+                'nombre' => $data['fullName'],
+                'apellido' => $data['lastName'] ?? '',
+                'telefono' => $data['phone'],
+                'correo' => $data['email'],
+                'marca' => $data['brand'],
+                'modelo' => $data['model'],
+                'año' => $data['year'],
+                'kilometraje' => $data['mileage'],
+                'comentarios' => $fullComments,
+            ];
+
+            $webhookUrl = env('ZAPIER_WEBHOOK_VALUATION');
+            
+            if ($webhookUrl) {
+                Http::post($webhookUrl, $zapierData);
+            }
+
+            return ApiResponseHelper::apiSuccess(201, 'Solicitud de valuación almacenada correctamente.');
+
+        } catch (ValidationException $e) {
+            return ApiResponseHelper::validationError($e);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al crear la solicitud de valuación', $e->getMessage(), 500, 'CREATE_VALUATION_ERROR');
+        }
     }
 }
