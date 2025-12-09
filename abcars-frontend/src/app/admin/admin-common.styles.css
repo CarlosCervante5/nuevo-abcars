@@ -1,0 +1,126 @@
+/* ============================================
+   ESTILOS COMUNES PARA TODOS LOS MÓDULOS ADMIN
+   ============================================ */
+
+/* Estilos para la barra de búsqueda */
+.barra {
+  width: 100%;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.barra .w-100 {
+  width: 100% !important;
+}
+
+/* Estilos para mat-form-field en la barra de búsqueda */
+.barra mat-form-field {
+  width: 100%;
+  display: block;
+}
+
+.barra .mat-form-field-wrapper {
+  padding-bottom: 0;
+}
+
+.barra .mat-form-field-infix {
+  border-top: 0;
+}
+
+.barra .mat-form-field-appearance-outline .mat-form-field-outline {
+  top: 0;
+}
+
+/* Asegurar que el input tenga el ancho completo */
+.barra .mat-form-field {
+  width: 100% !important;
+}
+
+/* Estilos para mat-form-field generales */
+mat-form-field {
+  width: 100%;
+}
+
+mat-form-field.w-100 {
+  width: 100% !important;
+}
+
+/* Estilos para tablas */
+.mat-table-container {
+  width: 100%;
+  overflow: visible !important;
+}
+
+.mat-elevation-z8 {
+  overflow: visible !important;
+}
+
+table[mat-table] {
+  width: 100%;
+  overflow: visible !important;
+}
+
+.mat-table {
+  width: 100%;
+}
+
+/* Ajusta las celdas de la tabla para evitar el desbordamiento */
+.mat-cell, .mat-header-cell {
+  white-space: nowrap;
+  padding: 8px;
+  margin: 0;
+}
+
+/* Asegurar que los botones de acciones no se encimen */
+td[mat-cell] {
+  position: relative;
+  overflow: visible !important;
+}
+
+button[matMenuTriggerFor] {
+  position: relative;
+  z-index: 1;
+}
+
+/* Estilos para el menú de acciones - Evitar que se encime */
+.mat-menu-panel {
+  z-index: 1000 !important;
+}
+
+.cdk-overlay-pane.mat-menu-panel {
+  z-index: 1000 !important;
+}
+
+/* Utilidades comunes */
+.w-100 {
+  width: 100%;
+}
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Responsive para tablas */
+@media (min-width: 300px) and (max-width: 991px) {
+  .mat-table-container {
+    overflow-x: auto;
+    display: block;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1320px) {
+  .mat-table-container {
+    overflow-x: visible;
+  }
+}
+
+@media (max-width: 576px) {
+  .mat-elevation-z8 {
+    box-shadow: none;
+  }
+}
+

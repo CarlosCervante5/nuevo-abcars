@@ -288,6 +288,12 @@ export interface Specification {
     country_of_origin: string;
     auto_start_stop:   string;
     intake_engine:     string;
+    tools:             string | null;
+    antenna:           string | null;
+    stud_wrench:       string | null;
+    security_film:     string | null;
+    warranty_policy:   string | null;
+    warranty_manual:   string | null;
     vehicle_id:        number;
     created_at:        Date;
 }
