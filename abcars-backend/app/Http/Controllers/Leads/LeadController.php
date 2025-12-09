@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Leads;
 use App\Helpers\ApiResponseHelper;
 use App\Helpers\GoogleSheetHelper;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Http;
 use App\Http\Requests\Leads\StoreAskInfomationRequest;
 use App\Http\Requests\Leads\StoreCarCareRequest;
 use App\Http\Requests\Leads\StoreReceptionRequest;
@@ -329,8 +328,8 @@ class LeadController extends Controller
             }
             $fullComments = implode(" | ", $comments);
 
-            // Preparar datos para enviar a Zapier
-            $zapierData = [
+            // Preparar datos para enviar a Google Sheets
+            $googleSheetData = [
                 'formType' => 'financing',
                 'fecha' => now()->format('Y-m-d H:i:s'),
                 'nombre' => $data['name'],
@@ -347,10 +346,10 @@ class LeadController extends Controller
                 'comentarios' => $fullComments,
             ];
 
-            $webhookUrl = env('ZAPIER_WEBHOOK_FINANCING');
+            $webhookUrl = GoogleSheetHelper::getWebhookUrl('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER');
             
             if ($webhookUrl) {
-                Http::post($webhookUrl, $zapierData);
+                GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
             }
 
             return ApiResponseHelper::apiSuccess(201, 'Solicitud de financiamiento almacenada correctamente.');
@@ -380,8 +379,8 @@ class LeadController extends Controller
             }
             $fullComments = implode(" | ", $comments);
 
-            // Preparar datos para enviar a Zapier
-            $zapierData = [
+            // Preparar datos para enviar a Google Sheets
+            $googleSheetData = [
                 'formType' => 'testDrive',
                 'fecha' => now()->format('Y-m-d H:i:s'),
                 'nombre' => $data['name'],
@@ -395,10 +394,10 @@ class LeadController extends Controller
                 'comentarios' => $fullComments,
             ];
 
-            $webhookUrl = env('ZAPIER_WEBHOOK_TEST_DRIVE');
+            $webhookUrl = GoogleSheetHelper::getWebhookUrl('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER');
             
             if ($webhookUrl) {
-                Http::post($webhookUrl, $zapierData);
+                GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
             }
 
             return ApiResponseHelper::apiSuccess(201, 'Solicitud de prueba de manejo almacenada correctamente.');
@@ -431,8 +430,8 @@ class LeadController extends Controller
             }
             $fullComments = implode(" | ", $comments);
 
-            // Preparar datos para enviar a Zapier
-            $zapierData = [
+            // Preparar datos para enviar a Google Sheets
+            $googleSheetData = [
                 'formType' => 'offer',
                 'fecha' => now()->format('Y-m-d H:i:s'),
                 'nombre' => $data['name'],
@@ -445,10 +444,10 @@ class LeadController extends Controller
                 'comentarios' => $fullComments,
             ];
 
-            $webhookUrl = env('ZAPIER_WEBHOOK_OFFER');
+            $webhookUrl = GoogleSheetHelper::getWebhookUrl('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER');
             
             if ($webhookUrl) {
-                Http::post($webhookUrl, $zapierData);
+                GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
             }
 
             return ApiResponseHelper::apiSuccess(201, 'Oferta almacenada correctamente.');
@@ -481,8 +480,8 @@ class LeadController extends Controller
             }
             $fullComments = implode(" | ", $comments);
 
-            // Preparar datos para enviar a Zapier
-            $zapierData = [
+            // Preparar datos para enviar a Google Sheets
+            $googleSheetData = [
                 'formType' => 'valuation',
                 'fecha' => now()->format('Y-m-d H:i:s'),
                 'nombre' => $data['fullName'],
@@ -496,10 +495,10 @@ class LeadController extends Controller
                 'comentarios' => $fullComments,
             ];
 
-            $webhookUrl = env('ZAPIER_WEBHOOK_VALUATION');
+            $webhookUrl = GoogleSheetHelper::getWebhookUrl('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER');
             
             if ($webhookUrl) {
-                Http::post($webhookUrl, $zapierData);
+                GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
             }
 
             return ApiResponseHelper::apiSuccess(201, 'Solicitud de valuación almacenada correctamente.');
