@@ -9,6 +9,7 @@ import { Brand, BrandsResponse, Model, ModelsResponse } from '../../../shared/in
 import { AdminService } from '../../../shared/services/admin.service';
 import { Dealership, DealerShipResponse } from '../../../shared/interfaces/admin.interfaces';
 import { AppointmentService } from '../../../shared/services/appointment.service';
+import { LeadService } from '../../../shared/services/lead.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -29,6 +30,7 @@ export class ValuationComponent implements OnInit {
     private vehicleService: VehicleService,
     private adminService: AdminService,
     private appointmentService: AppointmentService,
+    private leadService: LeadService,
     private fb: FormBuilder
   ) {
     this.valuationForm = this.fb.group({
@@ -209,6 +211,31 @@ export class ValuationComponent implements OnInit {
           // Paso 2: Crear la cita de valuación
           this.appointmentService.setExternalAppointmentValuation(appointmentForm).subscribe({
             next: (appointmentResponse) => {
+              // Paso 3: Enviar datos a Google Sheet mediante la API de leads
+              const valuationLeadData = {
+                fullName: formValue.fullName || '',
+                lastName: formValue.lastName || '',
+                phone: formValue.phone || '',
+                email: formValue.email || '',
+                city: formValue.city || '',
+                preferredDate: formValue.preferredDate || '',
+                preferredTime: formValue.preferredTime || '',
+                brand: formValue.brand || '',
+                model: formValue.model || '',
+                year: formValue.year ? Number(formValue.year) : 0,
+                mileage: formValue.mileage ? Number(formValue.mileage) : 0
+              };
+
+              this.leadService.sendValuationRequest(valuationLeadData).subscribe({
+                next: (leadResponse) => {
+                  console.log('Datos enviados a Google Sheet exitosamente:', leadResponse);
+                },
+                error: (leadError) => {
+                  // No afectar el flujo principal si falla el envío a Google Sheet
+                  console.error('Error al enviar datos a Google Sheet (no crítico):', leadError);
+                }
+              });
+
               this.isSubmitting = false;
               
               // Mostrar mensaje de éxito
