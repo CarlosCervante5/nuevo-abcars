@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Leads;
 use App\Helpers\ApiResponseHelper;
 use App\Helpers\GoogleSheetHelper;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\Leads\StoreAskInfomationRequest;
 use App\Http\Requests\Leads\StoreCarCareRequest;
 use App\Http\Requests\Leads\StoreReceptionRequest;
@@ -330,8 +331,10 @@ class LeadController extends Controller
 
             // Preparar datos para enviar a Google Sheets
             $googleSheetData = [
+                'sucursal' => '', // A: Sucursal (vacío por defecto, ajustar si es necesario)
                 'formType' => 'financing',
                 'fecha' => now()->format('Y-m-d H:i:s'),
+                'canal' => 'abcars.mx',
                 'nombre' => $data['name'],
                 'apellido' => $data['last_name'] ?? '',
                 'telefono' => $data['phone'],
@@ -349,7 +352,14 @@ class LeadController extends Controller
             $webhookUrl = GoogleSheetHelper::getWebhookUrl('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER');
             
             if ($webhookUrl) {
-                GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
+                $result = GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
+                Log::info('Financing form sent to Google Sheets', [
+                    'url' => $webhookUrl,
+                    'success' => $result,
+                    'data' => $googleSheetData
+                ]);
+            } else {
+                Log::warning('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER not configured');
             }
 
             return ApiResponseHelper::apiSuccess(201, 'Solicitud de financiamiento almacenada correctamente.');
@@ -381,8 +391,10 @@ class LeadController extends Controller
 
             // Preparar datos para enviar a Google Sheets
             $googleSheetData = [
+                'sucursal' => '', // A: Sucursal (vacío por defecto, ajustar si es necesario)
                 'formType' => 'testDrive',
                 'fecha' => now()->format('Y-m-d H:i:s'),
+                'canal' => 'abcars.mx',
                 'nombre' => $data['name'],
                 'telefono' => $data['phone'],
                 'correo' => $data['email'],
@@ -397,7 +409,14 @@ class LeadController extends Controller
             $webhookUrl = GoogleSheetHelper::getWebhookUrl('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER');
             
             if ($webhookUrl) {
-                GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
+                $result = GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
+                Log::info('Test Drive form sent to Google Sheets', [
+                    'url' => $webhookUrl,
+                    'success' => $result,
+                    'data' => $googleSheetData
+                ]);
+            } else {
+                Log::warning('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER not configured');
             }
 
             return ApiResponseHelper::apiSuccess(201, 'Solicitud de prueba de manejo almacenada correctamente.');
@@ -432,8 +451,10 @@ class LeadController extends Controller
 
             // Preparar datos para enviar a Google Sheets
             $googleSheetData = [
+                'sucursal' => '', // A: Sucursal (vacío por defecto, ajustar si es necesario)
                 'formType' => 'offer',
                 'fecha' => now()->format('Y-m-d H:i:s'),
+                'canal' => 'abcars.mx',
                 'nombre' => $data['name'],
                 'telefono' => $data['phone'],
                 'correo' => $data['email'],
@@ -447,7 +468,14 @@ class LeadController extends Controller
             $webhookUrl = GoogleSheetHelper::getWebhookUrl('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER');
             
             if ($webhookUrl) {
-                GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
+                $result = GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
+                Log::info('Offer form sent to Google Sheets', [
+                    'url' => $webhookUrl,
+                    'success' => $result,
+                    'data' => $googleSheetData
+                ]);
+            } else {
+                Log::warning('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER not configured');
             }
 
             return ApiResponseHelper::apiSuccess(201, 'Oferta almacenada correctamente.');
@@ -482,8 +510,10 @@ class LeadController extends Controller
 
             // Preparar datos para enviar a Google Sheets
             $googleSheetData = [
+                'sucursal' => '', // A: Sucursal (vacío por defecto, ajustar si es necesario)
                 'formType' => 'valuation',
                 'fecha' => now()->format('Y-m-d H:i:s'),
+                'canal' => 'abcars.mx',
                 'nombre' => $data['fullName'],
                 'apellido' => $data['lastName'] ?? '',
                 'telefono' => $data['phone'],
@@ -498,7 +528,14 @@ class LeadController extends Controller
             $webhookUrl = GoogleSheetHelper::getWebhookUrl('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER');
             
             if ($webhookUrl) {
-                GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
+                $result = GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
+                Log::info('Valuation form sent to Google Sheets', [
+                    'url' => $webhookUrl,
+                    'success' => $result,
+                    'data' => $googleSheetData
+                ]);
+            } else {
+                Log::warning('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER not configured');
             }
 
             return ApiResponseHelper::apiSuccess(201, 'Solicitud de valuación almacenada correctamente.');

@@ -15,14 +15,39 @@ class GoogleSheetHelper
      */
     public static function sendToGoogleSheet(string $webhookUrl, array ...$dataArrays)
     {
-        // Combina todos los arreglos de datos en uno solo
-        $row = array_merge(...$dataArrays);
+        try {
+            // Combina todos los arreglos de datos en uno solo
+            $row = array_merge(...$dataArrays);
 
-        // Enviar los datos a Zappier mediante HTTP POST
-        $response = Http::asForm()->post($webhookUrl, $row);
+            // Enviar los datos a Google Sheets mediante HTTP POST
+            // Google Apps Script acepta redirects (302), así que seguimos redirects
+            $response = Http::asForm()
+                ->withOptions(['allow_redirects' => true])
+                ->timeout(30)
+                ->post($webhookUrl, $row);
 
-        // Devolver true si la solicitud fue exitosa, de lo contrario false
-        return $response->successful();
+            // Log del resultado completo
+            $responseBody = $response->body();
+            $decodedBody = json_decode($responseBody, true);
+            
+            \Log::info('Google Sheets webhook response', [
+                'url' => $webhookUrl,
+                'status' => $response->status(),
+                'success' => $response->successful(),
+                'body' => $responseBody,
+                'decoded' => $decodedBody
+            ]);
+
+            // Google Apps Script puede devolver 200 o 302, ambos son válidos
+            return $response->status() === 200 || $response->status() === 302;
+        } catch (\Exception $e) {
+            \Log::error('Error sending to Google Sheets', [
+                'url' => $webhookUrl,
+                'error' => $e->getMessage(),
+                'data' => $dataArrays
+            ]);
+            return false;
+        }
     }
 
     /**
