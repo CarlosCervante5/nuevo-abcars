@@ -1,333 +1,428 @@
 <!-- <app-new-nav></app-new-nav> -->
-<div class="container">
-    <div class="row mt-5">
-        <div class="col-12">
-            <h4 class="fs-4 fw-bold text-truncate">Checklist de Valuación</h4>
-            <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item" [routerLink]="['/admin/valuator']">Overview</li>
-                    <li class="breadcrumb-item" [routerLink]="['/admin/valuator/appointment']">Citas de valuación</li>
-                    <li class="breadcrumb-item active" aria-current="page">Checklist de valuación</li>
+<app-overview [overview]="itemOverview" [url_index]="'/admin/valuator'" [hideModules]="true"></app-overview>
+<div class="container mx-auto px-4 pt-24">
+    <div class="w-full mt-5">
+        <div class="w-full">
+            <h4 class="checklist-page-title">Checklist de Valuación</h4>
+            <nav class="checklist-breadcrumb" aria-label="breadcrumb">
+                <ol class="checklist-breadcrumb-list">
+                    <li class="checklist-breadcrumb-item" [routerLink]="['/admin/valuator']">Overview</li>
+                    <li class="checklist-breadcrumb-item" [routerLink]="['/admin/valuator/appointment']">Citas de valuación</li>
+                    <li class="checklist-breadcrumb-item checklist-breadcrumb-item-active" aria-current="page">Checklist de valuación</li>
                 </ol>
             </nav>
         </div>
     </div>
 
-    <div class="row mb-5">
+    <div class="w-full mb-5">
         <mat-stepper #stepper (selectionChange)="onStepChange($event)">
             <mat-step [stepControl]="customerInformationForm" errorMessage="customerInformationForm">
                 <form [formGroup]="customerInformationForm">
                     <ng-template matStepLabel>Información Cliente</ng-template>
-                    <div class="col-12">
+                    <div class="w-full">
 
-                        <h3 class="fw-light text-truncate">
+                        <h3 class="checklist-section-title">
                             Información del cliente y Distribuidor.
                             <i class="fas fa-level-down-alt"></i>
                         </h3>
 
-                        <div class="row">
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Nombre del cliente</mat-label>
-                                    <input matInput type="text" placeholder="Nombre del cliente" formControlName="name" required>
-                                    <mat-hint *ngIf="nameInvalid">Complete su(s) nombre(s).</mat-hint>
-                                </mat-form-field>
+                        <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del cliente</label>
+                                    <input 
+                                        type="text"
+                                        formControlName="name"
+                                        placeholder="Nombre del cliente"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="nameInvalid"
+                                    />
+                                    <p *ngIf="nameInvalid" class="mt-2 text-sm text-red-600">Complete su(s) nombre(s).</p>
+                                </div>
                             </div>
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Apellidos del cliente</mat-label>
-                                    <!-- <input matInput type="text" placeholder="Apellidos del cliente" formControlName="surname" required> -->
-                                    <input matInput type="text" placeholder="Apellidos del cliente" formControlName="last_name" required>
-                                    <mat-hint *ngIf="lastNameInvalid">Complete sus apellidos.</mat-hint>
-                                </mat-form-field>
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Apellidos del cliente</label>
+                                    <input 
+                                        type="text"
+                                        formControlName="last_name"
+                                        placeholder="Apellidos del cliente"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="lastNameInvalid"
+                                    />
+                                    <p *ngIf="lastNameInvalid" class="mt-2 text-sm text-red-600">Complete sus apellidos.</p>
+                                </div>
                             </div>
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Número de Teléfono</mat-label>
-                                    <input matInput type="tel" placeholder="1234567890" formControlName="phone_1" #phone_1 (keyup)="maxLengthCheck(phone_1)" maxlength="10" required>
-                                    <mat-hint *ngIf="phoneLength">Su número debe ser de 10 dígitos, verifique.</mat-hint>
-                                </mat-form-field>
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Número de Teléfono</label>
+                                    <input 
+                                        type="tel"
+                                        formControlName="phone_1"
+                                        placeholder="1234567890"
+                                        #phone_1
+                                        (keyup)="maxLengthCheck(phone_1)"
+                                        maxlength="10"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="phoneLength"
+                                    />
+                                    <p *ngIf="phoneLength" class="mt-2 text-sm text-red-600">Su número debe ser de 10 dígitos, verifique.</p>
+                                </div>
                             </div>
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <!-- Car dealer -->
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Distribuidor</mat-label>
-                                    <input matInput type="text" placeholder="Nombre del distribuidor" formControlName="dealership_name" required>
-                                    <!-- <mat-select placeholder="Seleccione el distribuidor" formControlName="distributor" required>
-                                        <mat-option value="ABP">ABP</mat-option>
-                                        <mat-option value="ABP Zacatelco">ABP zacatelco</mat-option>
-                                        <mat-option value="Vecsa pachuca">Vecsa pachuca</mat-option>
-                                        <mat-option value="ABCars">ABCars</mat-option>
-                                    </mat-select> -->
-                                    <mat-hint *ngIf="distributorInvalid">Complete el nombre del distribuidor.</mat-hint>
-                                </mat-form-field>
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Distribuidor</label>
+                                    <input 
+                                        type="text"
+                                        formControlName="dealership_name"
+                                        placeholder="Nombre del distribuidor"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="distributorInvalid"
+                                    />
+                                    <p *ngIf="distributorInvalid" class="mt-2 text-sm text-red-600">Complete el nombre del distribuidor.</p>
+                                </div>
                             </div>
                         </div>
 
-                        <hr>
+                        <hr class="my-4 border-gray-300">
 
-                        <div class="row">
-                            <h3 class="fw-light text-truncate">
+                        <div class="w-full">
+                            <h3 class="checklist-section-title">
                                 Valuación e información del auto.
                                 <i class="fas fa-level-down-alt"></i>
                             </h3>
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>País de origen</mat-label>
-                                    <!-- <mat-select placeholder="Seleccione país de origen" formControlName="origin_country" required> -->
-                                    <mat-select placeholder="Seleccione país de origen" formControlName="country_of_origin" required>
-                                        <mat-option value="china">China</mat-option>
-                                        <mat-option value="estados_unidos">Estados Unidos</mat-option>
-                                        <mat-option value="japon">Japón</mat-option>
-                                        <mat-option value="india">India</mat-option>
-                                        <mat-option value="alemania">Alemania</mat-option>
-                                        <mat-option value="mexico">México</mat-option>
-                                        <mat-option value="corea_del_sur">Corea del Sur</mat-option>
-                                        <mat-option value="brasil">Brasil</mat-option>
-                                        <mat-option value="espana">España</mat-option>
-                                        <mat-option value="francia">Francia</mat-option>
-                                        <mat-option value="canada">Canadá</mat-option>
-                                        <mat-option value="rusia">Rusia</mat-option>
-                                        <mat-option value="tailandia">Tailandia</mat-option>
-                                        <mat-option value="reino_unido">Reino Unido</mat-option>
-                                        <mat-option value="indonesia">Indonesia</mat-option>
-                                        <mat-option value="republica_checa">República Checa</mat-option>
-                                        <mat-option value="turquia">Turquía</mat-option>
-                                        <mat-option value="eslovaquia">Eslovaquia</mat-option>
-                                        <mat-option value="iran">Irán</mat-option>
-                                        <mat-option value="italia">Italia</mat-option>
-                                        <mat-option value="polonia">Polonia</mat-option>
-                                        <mat-option value="malasia">Malasia</mat-option>
-                                        <mat-option value="belgica">Bélgica</mat-option>
-                                        <mat-option value="sudafrica">Sudáfrica</mat-option>
-                                        <mat-option value="argentina">Argentina</mat-option>
-                                        <mat-option value="taiwan">Taiwán</mat-option>
-                                        <mat-option value="rumania">Rumania</mat-option>
-                                        <mat-option value="hungria">Hungría</mat-option>
-                                        <mat-option value="australia">Australia</mat-option>
-                                        <mat-option value="uzbekistan">Uzbekistán</mat-option>
-                                        <mat-option value="portugal">Portugal</mat-option>
-                                        <mat-option value="suecia">Suecia</mat-option>
-                                        <mat-option value="austria">Austria</mat-option>
-                                        <mat-option value="eslovenia">Eslovenia</mat-option>
-                                        <mat-option value="colombia">Colombia</mat-option>
-                                        <mat-option value="ucrania">Ucrania</mat-option>
-                                        <mat-option value="paises_bajos">Países Bajos</mat-option>
-                                        <mat-option value="pakistan">Pakistán</mat-option>
-                                        <mat-option value="egipto">Egipto</mat-option>
-                                        <mat-option value="filipinas">Filipinas</mat-option>
-                                        <mat-option value="marruecos">Marruecos</mat-option>
-                                        <mat-option value="venezuela">Venezuela</mat-option>
-                                        <mat-option value="vietnam">Vietnam</mat-option>
-                                        <mat-option value="ecuador">Ecuador</mat-option>
-                                        <mat-option value="bielorrusia">Bielorrusia</mat-option>
-                                        <mat-option value="serbia">Serbia</mat-option>
-                                        <mat-option value="finlandia">Finlandia</mat-option>
-                                        <mat-option value="nigeria">Nigeria</mat-option>
-                                        <mat-option value="chile">Chile</mat-option>
-                                    </mat-select>
-                                    <mat-hint *ngIf="origincountryInvalid">Escriba el país de orígen del vehículo.</mat-hint>
-                                </mat-form-field>
+                            <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">País de origen</label>
+                                    <select 
+                                        formControlName="country_of_origin"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="origincountryInvalid"
+                                    >
+                                        <option value="">Seleccione país de origen</option>
+                                        <option value="china">China</option>
+                                        <option value="estados_unidos">Estados Unidos</option>
+                                        <option value="japon">Japón</option>
+                                        <option value="india">India</option>
+                                        <option value="alemania">Alemania</option>
+                                        <option value="mexico">México</option>
+                                        <option value="corea_del_sur">Corea del Sur</option>
+                                        <option value="brasil">Brasil</option>
+                                        <option value="espana">España</option>
+                                        <option value="francia">Francia</option>
+                                        <option value="canada">Canadá</option>
+                                        <option value="rusia">Rusia</option>
+                                        <option value="tailandia">Tailandia</option>
+                                        <option value="reino_unido">Reino Unido</option>
+                                        <option value="indonesia">Indonesia</option>
+                                        <option value="republica_checa">República Checa</option>
+                                        <option value="turquia">Turquía</option>
+                                        <option value="eslovaquia">Eslovaquia</option>
+                                        <option value="iran">Irán</option>
+                                        <option value="italia">Italia</option>
+                                        <option value="polonia">Polonia</option>
+                                        <option value="malasia">Malasia</option>
+                                        <option value="belgica">Bélgica</option>
+                                        <option value="sudafrica">Sudáfrica</option>
+                                        <option value="argentina">Argentina</option>
+                                        <option value="taiwan">Taiwán</option>
+                                        <option value="rumania">Rumania</option>
+                                        <option value="hungria">Hungría</option>
+                                        <option value="australia">Australia</option>
+                                        <option value="uzbekistan">Uzbekistán</option>
+                                        <option value="portugal">Portugal</option>
+                                        <option value="suecia">Suecia</option>
+                                        <option value="austria">Austria</option>
+                                        <option value="eslovenia">Eslovenia</option>
+                                        <option value="colombia">Colombia</option>
+                                        <option value="ucrania">Ucrania</option>
+                                        <option value="paises_bajos">Países Bajos</option>
+                                        <option value="pakistan">Pakistán</option>
+                                        <option value="egipto">Egipto</option>
+                                        <option value="filipinas">Filipinas</option>
+                                        <option value="marruecos">Marruecos</option>
+                                        <option value="venezuela">Venezuela</option>
+                                        <option value="vietnam">Vietnam</option>
+                                        <option value="ecuador">Ecuador</option>
+                                        <option value="bielorrusia">Bielorrusia</option>
+                                        <option value="serbia">Serbia</option>
+                                        <option value="finlandia">Finlandia</option>
+                                        <option value="nigeria">Nigeria</option>
+                                        <option value="chile">Chile</option>
+                                    </select>
+                                    <p *ngIf="origincountryInvalid" class="mt-2 text-sm text-red-600">Escriba el país de orígen del vehículo.</p>
+                                </div>
                             </div>
 
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Transmisión</mat-label>
-                                    <mat-select placeholder="Seleccionar una transmision" formControlName="transmission" required>
-                                        <mat-option value="automatic">Automática</mat-option>
-                                        <mat-option value="manual">Manual</mat-option>
-                                        <mat-option value="semiautomatic">Semi Automática</mat-option>
-                                        <mat-option value="cvt">CVT</mat-option>
-                                        <mat-option value="dual-clutch">DSG</mat-option>
-                                        <mat-option value="others">Otros</mat-option>
-                                    </mat-select>
-                                    <mat-hint *ngIf="transmissionInvalid">Seleccione la transmisión.</mat-hint>
-                                </mat-form-field>
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Transmisión</label>
+                                    <select 
+                                        formControlName="transmission"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="transmissionInvalid"
+                                    >
+                                        <option value="">Seleccionar una transmision</option>
+                                        <option value="automatic">Automática</option>
+                                        <option value="manual">Manual</option>
+                                        <option value="semiautomatic">Semi Automática</option>
+                                        <option value="cvt">CVT</option>
+                                        <option value="dual-clutch">DSG</option>
+                                        <option value="others">Otros</option>
+                                    </select>
+                                    <p *ngIf="transmissionInvalid" class="mt-2 text-sm text-red-600">Seleccione la transmisión.</p>
+                                </div>
                             </div>
 
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <!-- Engine Suction -->
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Aspiración del Motor</mat-label>
-                                    <!-- <mat-select placeholder="Seleccionar tipo de aspiración" formControlName="engine_suction" required> -->
-                                    <mat-select placeholder="Seleccionar tipo de aspiración" formControlName="intake_engine" required>
-                                        <mat-option value="normal">Normal</mat-option>
-                                        <mat-option value="turbo">Turbo</mat-option>
-                                    </mat-select>
-                                    <mat-hint *ngIf="enginesuctionInvalid">Seleccione el tipo de aspiración.</mat-hint>
-                                </mat-form-field>
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Aspiración del Motor</label>
+                                    <select 
+                                        formControlName="intake_engine"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="enginesuctionInvalid"
+                                    >
+                                        <option value="">Seleccionar tipo de aspiración</option>
+                                        <option value="normal">Normal</option>
+                                        <option value="turbo">Turbo</option>
+                                    </select>
+                                    <p *ngIf="enginesuctionInvalid" class="mt-2 text-sm text-red-600">Seleccione el tipo de aspiración.</p>
+                                </div>
                             </div>
 
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <!-- Start Stop -->
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Start-stop</mat-label>
-                                    <!-- <mat-select placeholder="¿Tiene start-stop?" formControlName="start_stop" required> -->
-                                    <mat-select placeholder="¿Tiene start-stop?" formControlName="auto_start_stop" required>
-                                        <mat-option value="yes">Si</mat-option>
-                                        <mat-option value="no">No</mat-option>
-                                    </mat-select>
-                                    <mat-hint *ngIf="startstopInvalid">¿Tecnología Start-Stop?</mat-hint>
-                                </mat-form-field>
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Start-stop</label>
+                                    <select 
+                                        formControlName="auto_start_stop"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="startstopInvalid"
+                                    >
+                                        <option value="">¿Tiene start-stop?</option>
+                                        <option value="yes">Si</option>
+                                        <option value="no">No</option>
+                                    </select>
+                                    <p *ngIf="startstopInvalid" class="mt-2 text-sm text-red-600">¿Tecnología Start-Stop?</p>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <!-- Valuation date -->
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Fecha de valuación</mat-label>
-                                    <!-- <input matInput [matDatepicker]="datepicker" formControlName="valuation_date" #inputdate (dateChange)="dateChangeEmitter($event)" required> -->
-                                    <input matInput [matDatepicker]="datepicker" formControlName="scheduled_date" #inputdate (dateChange)="dateChangeEmitter($event)" required>
-                                    <mat-datepicker-toggle matSuffix [for]="datepicker"></mat-datepicker-toggle>
-                                    <mat-datepicker #datepicker></mat-datepicker>
-
-                                    <mat-hint *ngIf="dateInvalid">Especifique la fecha de la valuación.</mat-hint>
-                                </mat-form-field>
-                            </div>
-
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>VIN</mat-label>
-                                    <input matInput type="text" placeholder="00000000000000000" formControlName="vin" #vin (keyup)="maxLengthCheck(vin)" maxlength="17" (keyup)="convertMayus($event)" required>
-                                    <mat-hint *ngIf="vinInvalid">Escriba el vin de su vehículo.</mat-hint>
-                                </mat-form-field>
-                            </div>
-
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Marca</mat-label>
-                                    <input matInput type="text" formControlName="brand" required>
-                                    <!-- <mat-select placeholder="Seleccionar una Marca" formControlName="brand" required>
-                                        <mat-option  value="valor1">Acura</mat-option>
-                                        <mat-option  value="valor2">Baic</mat-option>
-                                        <mat-option  value="valor3">Bmw</mat-option>
-                                    </mat-select> -->
-                                    <mat-hint *ngIf="brandInvalid">Seleccione una marca.</mat-hint>
-                                </mat-form-field>
-                            </div>
-
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Modelo</mat-label>
-                                    <input matInput type="text" formControlName="model" required>
-                                    <!-- <mat-select placeholder="Seleccionar un Modelo" formControlName="model" required>
-                                        <mat-option value="valorn1">10</mat-option>
-                                        <mat-option value="valorn2">11</mat-option>
-                                        <mat-option value="valorn3">12</mat-option>
-                                    </mat-select> -->
-                                    <mat-hint *ngIf="modelInvalid">Seleccione un modelo.</mat-hint>
-                                </mat-form-field>
                             </div>
                         </div>
 
-                        <div class="row">
-                            <!-- <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Linea</mat-label>
-                                    <input matInput type="text" placeholder="Linea" formControlName="line" required>
-                                    <mat-hint *ngIf="lineInvalid">Proporcione la linea del vehículo.</mat-hint>
-                                </mat-form-field>
-                            </div> -->
-
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Versión</mat-label>
-                                    <input matInput type="text" placeholder="LTZ" formControlName="version" required>
-                                    <mat-hint *ngIf="versionInvalid">Escriba la versión de su vehículo.</mat-hint>
-                                </mat-form-field>
+                        <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-4">
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de valuación</label>
+                                    <input 
+                                        type="date"
+                                        formControlName="scheduled_date"
+                                        #inputdate
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="dateInvalid"
+                                    />
+                                    <p *ngIf="dateInvalid" class="mt-2 text-sm text-red-600">Especifique la fecha de la valuación.</p>
+                                </div>
                             </div>
 
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Año</mat-label>
-                                    <mat-select placeholder="Seleccione el año del vehículo" formControlName="year" required>
-                                        <mat-option *ngFor="let year of years" value="{{ year }}">{{ year }}</mat-option>
-                                    </mat-select>
-                                    <mat-hint *ngIf="yearInvalid">Seleccione un año.</mat-hint>
-                                </mat-form-field>
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">VIN</label>
+                                    <input 
+                                        type="text"
+                                        formControlName="vin"
+                                        placeholder="00000000000000000"
+                                        #vin
+                                        (keyup)="maxLengthCheck(vin)"
+                                        maxlength="17"
+                                        (keyup)="convertMayus($event)"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="vinInvalid"
+                                    />
+                                    <p *ngIf="vinInvalid" class="mt-2 text-sm text-red-600">Escriba el vin de su vehículo.</p>
+                                </div>
                             </div>
 
-                            
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Carrocería</mat-label>
-                                    <input matInput type="text" placeholder="Carroceria" formControlName="body" required>
-                                    <mat-hint *ngIf="bodyInvalid">Proporcione el tipo de carrocería del vehículo.</mat-hint>
-                                </mat-form-field>
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Marca</label>
+                                    <input 
+                                        type="text"
+                                        formControlName="brand"
+                                        placeholder="Marca"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="brandInvalid"
+                                    />
+                                    <p *ngIf="brandInvalid" class="mt-2 text-sm text-red-600">Seleccione una marca.</p>
+                                </div>
                             </div>
 
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Kilometraje</mat-label>
-                                    <input matInput type="number" placeholder="0000000" min="1" max="9999999999" formControlName="mileage" #mileage (keyup)="maxLengthCheck(mileage)" maxlength="10" required>
-                                    <mat-hint *ngIf="mileageInvalid">Escriba el kilometraje de su vehículo.</mat-hint>
-                                </mat-form-field>
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Modelo</label>
+                                    <input 
+                                        type="text"
+                                        formControlName="model"
+                                        placeholder="Modelo"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="modelInvalid"
+                                    />
+                                    <p *ngIf="modelInvalid" class="mt-2 text-sm text-red-600">Seleccione un modelo.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-4">
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Versión</label>
+                                    <input 
+                                        type="text"
+                                        formControlName="version"
+                                        placeholder="LTZ"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="versionInvalid"
+                                    />
+                                    <p *ngIf="versionInvalid" class="mt-2 text-sm text-red-600">Escriba la versión de su vehículo.</p>
+                                </div>
                             </div>
 
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Color</mat-label>
-                                    <!-- <input matInput type="text" placeholder="Color" formControlName="color" required> -->
-                                    <input matInput type="text" placeholder="Color" formControlName="exterior_color" required>
-                                    <mat-hint *ngIf="colorInvalid">Proporcione el color del vehículo.</mat-hint>
-                                </mat-form-field>
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Año</label>
+                                    <select 
+                                        formControlName="year"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="yearInvalid"
+                                    >
+                                        <option value="">Seleccione el año del vehículo</option>
+                                        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+                                    </select>
+                                    <p *ngIf="yearInvalid" class="mt-2 text-sm text-red-600">Seleccione un año.</p>
+                                </div>
                             </div>
 
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Placa</mat-label>
-                                    <input matInput type="text" placeholder="0000000" formControlName="plates" #plate (keyup)="maxLengthCheck(plate)" maxlength="7" (keyup)="convertMayus($event)">
-                                </mat-form-field>
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Carrocería</label>
+                                    <input 
+                                        type="text"
+                                        formControlName="body"
+                                        placeholder="Carroceria"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="bodyInvalid"
+                                    />
+                                    <p *ngIf="bodyInvalid" class="mt-2 text-sm text-red-600">Proporcione el tipo de carrocería del vehículo.</p>
+                                </div>
                             </div>
 
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Cilindros</mat-label>
-                                    <!-- <mat-select placeholder="Selecciona el número de cilindros" formControlName="cilindres" required> -->
-                                    <mat-select placeholder="Selecciona el número de cilindros" formControlName="cylinders" required>
-                                        <mat-option value="3">3</mat-option>
-                                        <mat-option value="4">4</mat-option>
-                                        <mat-option value="5">5</mat-option>
-                                        <mat-option value="6">6</mat-option>
-                                        <mat-option value="8">8</mat-option>
-                                        <mat-option value="12">12</mat-option>
-                                    </mat-select>
-                                    <mat-hint *ngIf="cylinderInvalid">Proporcione el número de cilindros del vehículo</mat-hint>
-                                </mat-form-field>
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Kilometraje</label>
+                                    <input 
+                                        type="number"
+                                        formControlName="mileage"
+                                        placeholder="0000000"
+                                        min="1"
+                                        max="9999999999"
+                                        #mileage
+                                        (keyup)="maxLengthCheck(mileage)"
+                                        maxlength="10"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="mileageInvalid"
+                                    />
+                                    <p *ngIf="mileageInvalid" class="mt-2 text-sm text-red-600">Escriba el kilometraje de su vehículo.</p>
+                                </div>
                             </div>
 
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <!-- <mat-form-field appearance="outline">
-                                    <mat-label>Tipo de motor</mat-label>
-                                    <input matInput type="number" placeholder="1.0 o 2.5" formControlName="engine_type" min="0" required>
-                                    <mat-hint *ngIf="engineInvalid">Complete el tipo de motor.</mat-hint>
-                                </mat-form-field> -->
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Tipo de motor</mat-label>
-                                    <input matInput type="text" placeholder="1.0 o 2.5" formControlName="engine_type" min="0" required>
-                                    <mat-hint *ngIf="engineInvalid">Complete el tipo de motor.</mat-hint>
-                                </mat-form-field>
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                                    <input 
+                                        type="text"
+                                        formControlName="exterior_color"
+                                        placeholder="Color"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="colorInvalid"
+                                    />
+                                    <p *ngIf="colorInvalid" class="mt-2 text-sm text-red-600">Proporcione el color del vehículo.</p>
+                                </div>
                             </div>
 
-                            <div class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <mat-form-field appearance="outline">
-                                    <mat-label>Nombre del Tecnico</mat-label>
-                                    <mat-select placeholder="Seleccione el tecnico" formControlName="appraiserTechnician" (selectionChange)="onMyChange()" required>
-                                        <mat-option *ngFor="let technician of technicians" value="{{ technician.uuid }}">{{ technician?.user_profile?.name || 'N/A' }} {{ technician?.user_profile?.last_name || '' }}</mat-option>
-                                    </mat-select>
-                                    <mat-hint *ngIf="appraiserTechnicianInvalid">Seleccione un tecnico.</mat-hint>
-                                </mat-form-field>
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Placa</label>
+                                    <input 
+                                        type="text"
+                                        formControlName="plates"
+                                        placeholder="0000000"
+                                        #plate
+                                        (keyup)="maxLengthCheck(plate)"
+                                        maxlength="7"
+                                        (keyup)="convertMayus($event)"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Cilindros</label>
+                                    <select 
+                                        formControlName="cylinders"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="cylinderInvalid"
+                                    >
+                                        <option value="">Selecciona el número de cilindros</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="8">8</option>
+                                        <option value="12">12</option>
+                                    </select>
+                                    <p *ngIf="cylinderInvalid" class="mt-2 text-sm text-red-600">Proporcione el número de cilindros del vehículo</p>
+                                </div>
+                            </div>
+
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de motor</label>
+                                    <input 
+                                        type="text"
+                                        formControlName="engine_type"
+                                        placeholder="1.0 o 2.5"
+                                        min="0"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="engineInvalid"
+                                    />
+                                    <p *ngIf="engineInvalid" class="mt-2 text-sm text-red-600">Complete el tipo de motor.</p>
+                                </div>
+                            </div>
+
+                            <div class="w-full">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Tecnico</label>
+                                    <select 
+                                        formControlName="appraiserTechnician"
+                                        (change)="onMyChange()"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        [class.border-red-500]="appraiserTechnicianInvalid"
+                                    >
+                                        <option value="">Seleccione el tecnico</option>
+                                        <option *ngFor="let technician of technicians" [value]="technician.uuid">{{ technician.user_profile.name }} {{ technician.user_profile.last_name }}</option>
+                                    </select>
+                                    <p *ngIf="appraiserTechnicianInvalid" class="mt-2 text-sm text-red-600">Seleccione un tecnico.</p>
+                                </div>
                             </div>
                         </div>
 
                     </div>
 
                     <div class="mt-3">
-                        <button *ngIf="btn_save" mat-button type="button" matStepperNext class="btn abcars-background-color-blue mt-3 mx-2 px-3" (click)="onCustomerInformation()"  [disabled]="customerInformationForm.invalid">
+                        <button *ngIf="btn_save" mat-button type="button" matStepperNext class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3" (click)="onCustomerInformation()"  [disabled]="customerInformationForm.invalid">
                             Guardar
                         </button>
-                        <button *ngIf="btn_follow" mat-button type="button" matStepperNext class="btn abcars-background-color-blue mt-3 mx-2 px-3"> <!--  -->
+                        <button *ngIf="btn_follow" mat-button type="button" matStepperNext class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3">
                             Siguiente
                         </button>
                     </div>
@@ -337,33 +432,61 @@
             <mat-step [stepControl]="mechanicElectricForm" errorMessage="mechanicElectricForm">
                 <form [formGroup]="mechanicElectricForm"> <!--(ngSubmit)="onMechanicalElectronic()"-->
                     <ng-template matStepLabel>Mecánica y Eléctrica</ng-template>
-                    <div class="col-12">
-                        <div class="row" *ngIf="checklistMechanicElectric.length > 0">
-                            <div *ngFor="let check of checklistMechanicElectric" class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <div class="row">
-                                    <div class="col">
-                                        <mat-form-field appearance="outline" *ngIf="check.value_type === 'select'">
-                                            <mat-label>{{check.name}}</mat-label>
-                                            <mat-select [formControlName]="check.uuid" placeholder="Seleccione una opción" (selectionChange)="onSelectChange($event, check.uuid)" required> 
-                                                <mat-option *ngFor="let value of check.values" [value]="value">{{ value }}</mat-option> <!--check.selected_value != null ? check.selected_value : value-->
-                                            </mat-select>
-                                            <mat-hint *ngIf="mechanicElectricForm.get(check.uuid)?.invalid && mechanicElectricForm.get(check.uuid)?.touched">
+                    <div class="w-full">
+                        <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+                            <div *ngFor="let check of checklistMechanicElectric" class="w-full">
+                                <div *ngIf="check.section_name === 'Mecánica y Eléctrica' " class="w-full">
+                                    <div class="w-full">
+                                        <!-- Select dinámico -->
+                                        <div *ngIf="check.value_type === 'select'">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">{{check.name}}</label>
+                                            <select 
+                                                [formControlName]="check.uuid"
+                                                (change)="onSelectChange($event, check.uuid)"
+                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                [class.border-red-500]="mechanicElectricForm.get(check.uuid)?.invalid && mechanicElectricForm.get(check.uuid)?.touched"
+                                            >
+                                                <option value="">Seleccione una opción</option>
+                                                <option *ngFor="let value of check.values" [value]="value">{{ value }}</option>
+                                            </select>
+                                            <p *ngIf="mechanicElectricForm.get(check.uuid)?.invalid && mechanicElectricForm.get(check.uuid)?.touched" class="mt-2 text-sm text-red-600">
                                                 Por favor seleccione una opción.
-                                            </mat-hint>
-                                        </mat-form-field>
+                                            </p>
+                                        </div>
 
-                                        <mat-form-field appearance="outline" *ngIf="check.value_type === 'number'">
-                                            <mat-label>{{ check.name }}</mat-label>
-                                            <input matInput type="number" [formControlName]="check.uuid" (input)="onInputChange($event, check.uuid)" (focus)="inputFocus = true" (blur)="onInputBlur( check.uuid)" required>
-                                            <mat-hint *ngIf="mechanicElectricForm.get(check.uuid)?.invalid && mechanicElectricForm.get(check.uuid)?.touched">
+                                        <!-- Input numérico dinámico -->
+                                        <div *ngIf="check.value_type === 'number'">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ check.name }}</label>
+                                            <input 
+                                                type="number"
+                                                [formControlName]="check.uuid"
+                                                (input)="onInputChange($event, check.uuid)"
+                                                (focus)="inputFocus = true"
+                                                (blur)="onInputBlur(check.uuid)"
+                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                [class.border-red-500]="mechanicElectricForm.get(check.uuid)?.invalid && mechanicElectricForm.get(check.uuid)?.touched"
+                                            />
+                                            <p *ngIf="mechanicElectricForm.get(check.uuid)?.invalid && mechanicElectricForm.get(check.uuid)?.touched" class="mt-2 text-sm text-red-600">
                                                 Por favor ingrese el valor.
-                                            </mat-hint>
-                                          </mat-form-field>
+                                            </p>
+                                        </div>
                               
-                                          <mat-form-field appearance="outline" *ngIf="check.value_type === 'textArea'">
-                                            <mat-label>{{ check.name }}</mat-label>
-                                            <textarea matInput (input)="onInputChange($event, check.uuid)" (focus)="inputFocus = true" (blur)="onInputBlur( check.uuid)">{{check.selected_value}}</textarea>
-                                          </mat-form-field>
+                                        <!-- Textarea dinámico -->
+                                        <div *ngIf="check.value_type === 'textArea'">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ check.name }}</label>
+                                            <textarea 
+                                                [formControlName]="check.uuid"
+                                                (input)="onInputChange($event, check.uuid)"
+                                                (focus)="inputFocus = true"
+                                                (blur)="onInputBlur(check.uuid)"
+                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                [class.border-red-500]="mechanicElectricForm.get(check.uuid)?.invalid && mechanicElectricForm.get(check.uuid)?.touched"
+                                                rows="3"
+                                            >{{check.selected_value}}</textarea>
+                                            <p *ngIf="mechanicElectricForm.get(check.uuid)?.invalid && mechanicElectricForm.get(check.uuid)?.touched" class="mt-2 text-sm text-red-600">
+                                                Por favor complete este campo.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -371,17 +494,13 @@
                     </div>
 
                     <div class="mt-3">
-                        <button mat-button type="button" matStepperPrevious class="btn  abcars-background-color-black mt-3 mx-2 px-3">
+                        <button mat-button type="button" matStepperPrevious class="checklist-btn checklist-btn-secondary mt-3 mx-2 px-3">
                             Regresar
                         </button>
-                        <!-- <button mat-button type="submit" class="btn abcars-background-color-blue mt-3 mx-2 px-3" [disabled]="mechanicElectricForm.invalid || spinner">
-                            <span *ngIf="!spinner">{{ saveUpdateMechanic ? 'Actualizar' : 'Guardar' }}</span>
-                            <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        </button> -->
-                        <button mat-button type="button" matStepperNext class="btn abcars-background-color-blue mt-3 mx-2 px-3">
+                        <button mat-button type="button" matStepperNext class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3">
                             Siguiente
                         </button>
-                        <button mat-button type="button" (click)="openSparePartsForm()" class="btn abcars-background-color-blue mt-3 mx-2 px-3"> <!--(click)="openSparePartsForm()"-->
+                        <button mat-button type="button" (click)="openSparePartsForm()" class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3">
                             Agregar Refacciones
                         </button>
                     </div>
@@ -392,46 +511,61 @@
             <mat-step [stepControl]="externalReviewForm" errorMessage="externalReviewForm">
                 <form [formGroup]="externalReviewForm">
                     <ng-template matStepLabel>Revisión Exterior</ng-template>
-                    <div class="col-12">
-                        <div class="row" *ngIf="checklistExternalReview.length > 0">
-                            <div *ngFor="let checkExternalReview of checklistExternalReview" class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <div class="row">
-                                    <div class="col">
-                                        <mat-form-field appearance="outline" *ngIf="checkExternalReview.value_type === 'select' ">
-                                            <mat-label>{{ checkExternalReview.name }}</mat-label>
-                                            <mat-select [formControlName]="checkExternalReview.uuid" placeholder="Seleccione una opción" required (selectionChange)="onSelectChange($event, checkExternalReview.uuid)">
-                                                <mat-option *ngFor="let valueExternalReview of checkExternalReview.values" [value]="valueExternalReview">{{valueExternalReview }}</mat-option>
-                                            </mat-select>
-                                            <mat-hint *ngIf="externalReviewForm.get(checkExternalReview.uuid)?.invalid && externalReviewForm.get(checkExternalReview.uuid)?.touched">
+                    <div class="w-full">
+                        <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+                            <div *ngFor="let checkExternalReview of checklistExternalReview" class="w-full">
+                                <div *ngIf="checkExternalReview.section_name === 'Revisión Exterior' " class="w-full">
+                                    <div class="w-full">
+                                        <!-- Select dinámico -->
+                                        <div *ngIf="checkExternalReview.value_type === 'select'">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ checkExternalReview.name }}</label>
+                                            <select 
+                                                [formControlName]="checkExternalReview.uuid"
+                                                (change)="onSelectChange($event, checkExternalReview.uuid)"
+                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                [class.border-red-500]="externalReviewForm.get(checkExternalReview.uuid)?.invalid && externalReviewForm.get(checkExternalReview.uuid)?.touched"
+                                            >
+                                                <option value="">Seleccione una opción</option>
+                                                <option *ngFor="let valueExternalReview of checkExternalReview.values" [value]="valueExternalReview">{{valueExternalReview}}</option>
+                                            </select>
+                                            <p *ngIf="externalReviewForm.get(checkExternalReview.uuid)?.invalid && externalReviewForm.get(checkExternalReview.uuid)?.touched" class="mt-2 text-sm text-red-600">
                                                 Por favor seleccione una opción.
-                                            </mat-hint>
-                                        </mat-form-field>
+                                            </p>
+                                        </div>
 
-                                        <mat-form-field appearance="outline" *ngIf="checkExternalReview.value_type === 'textArea' ">
-                                            <mat-label>{{ checkExternalReview.name }}</mat-label>
-                                            <textarea matInput (input)="onInputChange($event, checkExternalReview.uuid)" (focus)="inputFocus = true" (blur)="onInputBlur( checkExternalReview.uuid)">{{checkExternalReview.selected_value}}</textarea>
-                                        </mat-form-field>
+                                        <!-- Textarea dinámico -->
+                                        <div *ngIf="checkExternalReview.value_type === 'textArea'">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ checkExternalReview.name }}</label>
+                                            <textarea 
+                                                [formControlName]="checkExternalReview.uuid"
+                                                (input)="onInputChange($event, checkExternalReview.uuid)"
+                                                (focus)="inputFocus = true"
+                                                (blur)="onInputBlur(checkExternalReview.uuid)"
+                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                [class.border-red-500]="externalReviewForm.get(checkExternalReview.uuid)?.invalid && externalReviewForm.get(checkExternalReview.uuid)?.touched"
+                                                rows="3"
+                                            >{{checkExternalReview.selected_value}}</textarea>
+                                            <p *ngIf="externalReviewForm.get(checkExternalReview.uuid)?.invalid && externalReviewForm.get(checkExternalReview.uuid)?.touched" class="mt-2 text-sm text-red-600">
+                                                Por favor complete este campo.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mat-3">
-                        <button mat-button type="button" matStepperPrevious class="btn abcars-background-color-black mt-3 mx-2 px-3">
+                    <div class="mt-3">
+                        <button mat-button type="button" matStepperPrevious class="checklist-btn checklist-btn-secondary mt-3 mx-2 px-3">
                             Regresar
                         </button>
-                        <!-- <button mat-button type="submit" class="btn abcars-background-color-blue mt-3 mx-2 px-3" [disabled]="externalReviewForm.invalid || extReviewSpinner">
-                            <span *ngIf="!extReviewSpinner">{{ dataExt ? 'Actualizar' : 'Guardar' }}</span>
-                            <span *ngIf="extReviewSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        </button> -->
-                        <button mat-button type="button" matStepperNext class="btn abcars-background-color-blue mt-3 mx-2 px-3">
+                        <button mat-button type="button" matStepperNext class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3">
                             Siguiente
                         </button>
-                        <button mat-button type="button" class="btn abcars-background-color-blue mt-3 mx-2 px-3" (click)="openExternalPicture()">
+                        <button mat-button type="button" class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3" (click)="openExternalPicture()">
                             Foto Exterior
                         </button>
-                        <button mat-button type="button" class="btn abcars-background-color-blue mt-3 mx-2 px-3" (click)="openBodyworkValuatorForm()">
+                        <button mat-button type="button" class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3" (click)="openBodyworkValuatorForm()">
                             Verifica HyP
                         </button>
                     </div>
@@ -442,20 +576,27 @@
             <mat-step [stepControl]="internalReviewForm" errorMessage="internalReviewForm">
                 <form [formGroup]="internalReviewForm">
                     <ng-template matStepLabel>Revisión Interior</ng-template>
-                    <div class="col-12">
-                        <div class="row" *ngIf="checklistInternalReview.length > 0">
-                            <div *ngFor="let checkInternalReview of checklistInternalReview" class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <div class="row">
-                                    <div class="col">
-                                        <mat-form-field appearance="outline" *ngIf="checkInternalReview.value_type === 'select' ">
-                                            <mat-label>{{ checkInternalReview.name }}</mat-label>
-                                            <mat-select [formControlName]="checkInternalReview.uuid" placeholder="Seleccione una opción" (selectionChange)="onSelectChange($event, checkInternalReview.uuid)" required>
-                                                <mat-option *ngFor="let valueInternalReview of checkInternalReview.values" [value]="valueInternalReview">{{ valueInternalReview }}</mat-option>
-                                            </mat-select>
-                                            <mat-hint *ngIf="internalReviewForm.get(checkInternalReview.uuid)?.invalid && internalReviewForm.get(checkInternalReview.uuid)?.touched">
+                    <div class="w-full">
+                        <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+                            <div *ngFor="let checkInternalReview of checklistInternalReview" class="w-full">
+                                <div *ngIf="checkInternalReview.section_name === 'Revisión Interior' " class="w-full">
+                                    <div class="w-full">
+                                        <!-- Select dinámico -->
+                                        <div *ngIf="checkInternalReview.value_type === 'select'">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ checkInternalReview.name }}</label>
+                                            <select 
+                                                [formControlName]="checkInternalReview.uuid"
+                                                (change)="onSelectChange($event, checkInternalReview.uuid)"
+                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                [class.border-red-500]="internalReviewForm.get(checkInternalReview.uuid)?.invalid && internalReviewForm.get(checkInternalReview.uuid)?.touched"
+                                            >
+                                                <option value="">Seleccione una opción</option>
+                                                <option *ngFor="let valueInternalReview of checkInternalReview.values" [value]="valueInternalReview">{{ valueInternalReview }}</option>
+                                            </select>
+                                            <p *ngIf="internalReviewForm.get(checkInternalReview.uuid)?.invalid && internalReviewForm.get(checkInternalReview.uuid)?.touched" class="mt-2 text-sm text-red-600">
                                                 Por favor seleccione una opción.
-                                            </mat-hint>
-                                        </mat-form-field>
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -463,17 +604,13 @@
                     </div>
 
                     <div class="mt-3">
-                        <button mat-button type="button" matStepperPrevious class="btn abcars-background-color-black mt-3 mx-2 px-3">
+                        <button mat-button type="button" matStepperPrevious class="checklist-btn checklist-btn-secondary mt-3 mx-2 px-3">
                             Regresar
                         </button>
-                        <!-- <button mat-button type="submit" class="btn abcars-background-color-blue mt-3 mx-2 px-3" [disabled]="internalReviewForm.invalid || spinner">
-                            <span *ngIf="!spinner">{{ save_update ? 'Actualizar' : 'Guardar' }}</span>
-                            <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        </button> -->
-                        <button mat-button type="button" matStepperNext class="btn abcars-background-color-blue mt-3 mx-2 px-3">
+                        <button mat-button type="button" matStepperNext class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3">
                             Siguiente
                         </button>
-                        <button mat-button type="button" class="btn abcars-background-color-blue mt-3 mx-2 px-3" (click)="openInternalPicture()"> <!---->
+                        <button mat-button type="button" class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3" (click)="openInternalPicture()">
                             Foto Interior
                         </button>
                     </div>
@@ -484,27 +621,43 @@
             <mat-step [stepControl]="vehicleCertificationForm" errorMessage="vehicleCertificationForm">
                 <form [formGroup]="vehicleCertificationForm">
                     <ng-template matStepLabel>Certificación de Vehículo</ng-template>
-                    <div class="col-12">
-                        <div class="row" *ngIf="checklistCertification.length > 0">
-                            <div *ngFor="let checkCertificationForm of checklistCertification" class="col-12 col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                                <div class="row">
-                                    <div class="col">
-                                        <mat-form-field appearance="outline" *ngIf="checkCertificationForm.value_type === 'select' ">
-                                            <mat-label>{{ checkCertificationForm.name }}</mat-label>
-                                            <mat-select [formControlName]="checkCertificationForm.uuid" placeholder="Seleccione una opción" (selectionChange)="onSelectChange($event, checkCertificationForm.uuid)" required >
-                                                <mat-option *ngFor="let valueCertificationForm of checkCertificationForm.values" [value]="valueCertificationForm" >{{valueCertificationForm }}</mat-option>
-                                            </mat-select>
-                                            <mat-hint *ngIf="vehicleCertificationForm.get(checkCertificationForm.uuid)?.invalid && vehicleCertificationForm.get(checkCertificationForm.uuid)?.touched">
+                    <div class="w-full">
+                        <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+                            <div *ngFor="let checkCertificationForm of checklistCertification" class="w-full">
+                                <div *ngIf="checkCertificationForm.section_name === 'Certificación de Vehículo' " class="w-full">
+                                    <div class="w-full">
+                                        <!-- Select dinámico -->
+                                        <div *ngIf="checkCertificationForm.value_type === 'select'">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ checkCertificationForm.name }}</label>
+                                            <select 
+                                                [formControlName]="checkCertificationForm.uuid"
+                                                (change)="onSelectChange($event, checkCertificationForm.uuid)"
+                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                [class.border-red-500]="vehicleCertificationForm.get(checkCertificationForm.uuid)?.invalid && vehicleCertificationForm.get(checkCertificationForm.uuid)?.touched"
+                                            >
+                                                <option value="">Seleccione una opción</option>
+                                                <option *ngFor="let valueCertificationForm of checkCertificationForm.values" [value]="valueCertificationForm">{{valueCertificationForm}}</option>
+                                            </select>
+                                            <p *ngIf="vehicleCertificationForm.get(checkCertificationForm.uuid)?.invalid && vehicleCertificationForm.get(checkCertificationForm.uuid)?.touched" class="mt-2 text-sm text-red-600">
                                                 Por favor seleccione una opción.
-                                            </mat-hint>
-                                        </mat-form-field>
+                                            </p>
+                                        </div>
 
-                                        <mat-form-field appearance="outline" *ngIf="checkCertificationForm.value_type === 'date'">
-                                            <mat-label>{{ checkCertificationForm.name }}</mat-label>
-                                            <input matInput [matDatepicker]="pickerLastMaintenance" placeholder="dd/mm/yyyy" [formControlName]="checkCertificationForm.uuid" #dateLastMaintenance (dateChange)="lastMaintenanceEmmitter($event,checkCertificationForm.uuid )"> <!--required-->
-                                            <mat-datepicker-toggle matSuffix [for]="pickerLastMaintenance"></mat-datepicker-toggle>
-                                            <mat-datepicker touchUi #pickerLastMaintenance></mat-datepicker>
-                                        </mat-form-field>
+                                        <!-- Campo de fecha dinámico -->
+                                        <div *ngIf="checkCertificationForm.value_type === 'date'">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ checkCertificationForm.name }}</label>
+                                            <input 
+                                                type="date"
+                                                [formControlName]="checkCertificationForm.uuid"
+                                                (change)="lastMaintenanceEmmitter($event, checkCertificationForm.uuid)"
+                                                #dateLastMaintenance
+                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                [class.border-red-500]="vehicleCertificationForm.get(checkCertificationForm.uuid)?.invalid && vehicleCertificationForm.get(checkCertificationForm.uuid)?.touched"
+                                            />
+                                            <p *ngIf="vehicleCertificationForm.get(checkCertificationForm.uuid)?.invalid && vehicleCertificationForm.get(checkCertificationForm.uuid)?.touched" class="mt-2 text-sm text-red-600">
+                                                Por favor seleccione una fecha.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -512,13 +665,9 @@
                     </div>
 
                     <div class="mt-3">
-                        <button mat-button type="button" matStepperPrevious class="btn abcars-background-color-black mt-3 mx-2 px-3">
+                        <button mat-button type="button" matStepperPrevious class="checklist-btn checklist-btn-secondary mt-3 mx-2 px-3">
                             Regresar
                         </button>
-                        <!-- <button mat-button type="submit" matStepperNext class="btn abcars-background-color-blue mt-3 mx-2 px-3" [disabled]="vehicleCertificationForm.invalid || spinner">
-                            <span *ngIf="!spinner">{{ saveUpdateCert ? 'Actualizar' : 'Guardar' }}</span>
-                            <span *ngIf="spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        </button> -->
                     </div>
                 </form>
             </mat-step>
