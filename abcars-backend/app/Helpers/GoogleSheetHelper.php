@@ -21,9 +21,10 @@ class GoogleSheetHelper
 
             // Enviar los datos a Google Sheets mediante HTTP POST
             // Google Apps Script acepta redirects (302), así que seguimos redirects
+            // Reducido timeout a 10 segundos para respuesta más rápida
             $response = Http::asForm()
                 ->withOptions(['allow_redirects' => true])
-                ->timeout(30)
+                ->timeout(10)
                 ->post($webhookUrl, $row);
 
             // Log del resultado completo

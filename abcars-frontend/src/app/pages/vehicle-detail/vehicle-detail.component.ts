@@ -633,17 +633,32 @@ interface MediaItem {
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
-            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <input 
+              type="text" 
+              [(ngModel)]="financingFormData.name"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            >
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-            <input type="tel" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <input 
+              type="tel" 
+              [(ngModel)]="financingFormData.phone"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            >
           </div>
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <input 
+              type="email" 
+              [(ngModel)]="financingFormData.email"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            >
           </div>
           
           <div>
@@ -667,9 +682,12 @@ interface MediaItem {
           </div>
           
           <button 
-            class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-xl text-base transition-colors"
+            (click)="submitFinancingRequest()"
+            [disabled]="isSubmitting"
+            class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-xl text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Solicitar financiamiento
+            <span *ngIf="!isSubmitting">Solicitar financiamiento</span>
+            <span *ngIf="isSubmitting">Enviando...</span>
           </button>
         </div>
       </div>
@@ -1470,10 +1488,12 @@ interface MediaItem {
           <button 
             *ngIf="financingRequestStep === totalFinancingSteps"
             type="button"
-            (click)="closeFinancingRequestModal()"
-            class="ml-auto px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition-colors"
+            (click)="submitFinancingRequest()"
+            [disabled]="isSubmitting"
+            class="ml-auto px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Enviar Solicitud
+            <span *ngIf="!isSubmitting">Enviar Solicitud</span>
+            <span *ngIf="isSubmitting">Enviando...</span>
           </button>
         </div>
       </div>
@@ -2292,7 +2312,12 @@ export class VehicleDetailComponent implements OnInit {
 
   closeFinancingRequestModal() {
     this.showFinancingRequestModal = false;
+    this.showFinancingModal = false; // También cerrar el modal simple si está abierto
     this.financingRequestStep = 1; // Resetear al paso 1
+  }
+
+  closeFinancingModal() {
+    this.showFinancingModal = false;
   }
 
   // Métodos para manejar los pasos del formulario
@@ -2426,9 +2451,6 @@ export class VehicleDetailComponent implements OnInit {
   }
 
   // Métodos para cerrar modales
-  closeFinancingModal() {
-    this.showFinancingModal = false;
-  }
 
   closeWhatsAppModal() {
     this.showWhatsAppModal = false;
@@ -2534,9 +2556,24 @@ export class VehicleDetailComponent implements OnInit {
 
   // Métodos para enviar formularios
   submitFinancingRequest() {
-    if (this.isSubmitting) return;
+    console.log('submitFinancingRequest llamado', this.financingFormData);
+    
+    if (this.isSubmitting) {
+      console.log('Ya se está enviando, ignorando...');
+      return;
+    }
 
-    // Recopilar datos del formulario (los inputs necesitan ngModel o formControlName)
+    // Validar campos requeridos básicos
+    if (!this.financingFormData.name || !this.financingFormData.phone || !this.financingFormData.email) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos requeridos',
+        text: 'Por favor, completa al menos nombre, teléfono y email.',
+      });
+      return;
+    }
+
+    // Recopilar datos del formulario
     const formData = {
       name: this.financingFormData.name || '',
       last_name: this.financingFormData.last_name || '',
@@ -2559,9 +2596,12 @@ export class VehicleDetailComponent implements OnInit {
       finance_amount: this.vehicle?.price ? this.vehicle.price - this.getDownPayment() : 0
     };
 
+    console.log('Enviando datos:', formData);
+
     this.isSubmitting = true;
     this.leadService.sendFinancingRequest(formData).subscribe({
       next: (response) => {
+        console.log('Respuesta exitosa:', response);
         this.isSubmitting = false;
         Swal.fire({
           icon: 'success',
@@ -2570,9 +2610,15 @@ export class VehicleDetailComponent implements OnInit {
           timer: 3000,
           showConfirmButton: false
         });
-        this.closeFinancingRequestModal();
+        // Cerrar ambos modales si están abiertos
+        this.showFinancingModal = false;
+        this.showFinancingRequestModal = false;
+        this.financingRequestStep = 1;
+        // Limpiar formulario
+        this.financingFormData = {};
       },
       error: (error) => {
+        console.error('Error al enviar:', error);
         this.isSubmitting = false;
         Swal.fire({
           icon: 'error',

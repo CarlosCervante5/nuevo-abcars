@@ -351,13 +351,25 @@ class LeadController extends Controller
 
             $webhookUrl = GoogleSheetHelper::getWebhookUrl('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER');
             
+            // Enviar al webhook de forma asíncrona para no bloquear la respuesta
             if ($webhookUrl) {
-                $result = GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
-                Log::info('Financing form sent to Google Sheets', [
-                    'url' => $webhookUrl,
-                    'success' => $result,
-                    'data' => $googleSheetData
-                ]);
+                // Usar dispatch para ejecutar en background sin esperar
+                dispatch(function () use ($webhookUrl, $googleSheetData) {
+                    try {
+                        $result = GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
+                        Log::info('Financing form sent to Google Sheets', [
+                            'url' => $webhookUrl,
+                            'success' => $result,
+                            'data' => $googleSheetData
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Error sending financing form to Google Sheets', [
+                            'url' => $webhookUrl,
+                            'error' => $e->getMessage(),
+                            'data' => $googleSheetData
+                        ]);
+                    }
+                })->afterResponse();
             } else {
                 Log::warning('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER not configured');
             }
@@ -408,13 +420,24 @@ class LeadController extends Controller
 
             $webhookUrl = GoogleSheetHelper::getWebhookUrl('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER');
             
+            // Enviar al webhook de forma asíncrona para no bloquear la respuesta
             if ($webhookUrl) {
-                $result = GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
-                Log::info('Test Drive form sent to Google Sheets', [
-                    'url' => $webhookUrl,
-                    'success' => $result,
-                    'data' => $googleSheetData
-                ]);
+                dispatch(function () use ($webhookUrl, $googleSheetData) {
+                    try {
+                        $result = GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
+                        Log::info('Test Drive form sent to Google Sheets', [
+                            'url' => $webhookUrl,
+                            'success' => $result,
+                            'data' => $googleSheetData
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Error sending test drive form to Google Sheets', [
+                            'url' => $webhookUrl,
+                            'error' => $e->getMessage(),
+                            'data' => $googleSheetData
+                        ]);
+                    }
+                })->afterResponse();
             } else {
                 Log::warning('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER not configured');
             }
@@ -467,13 +490,24 @@ class LeadController extends Controller
 
             $webhookUrl = GoogleSheetHelper::getWebhookUrl('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER');
             
+            // Enviar al webhook de forma asíncrona para no bloquear la respuesta
             if ($webhookUrl) {
-                $result = GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
-                Log::info('Offer form sent to Google Sheets', [
-                    'url' => $webhookUrl,
-                    'success' => $result,
-                    'data' => $googleSheetData
-                ]);
+                dispatch(function () use ($webhookUrl, $googleSheetData) {
+                    try {
+                        $result = GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
+                        Log::info('Offer form sent to Google Sheets', [
+                            'url' => $webhookUrl,
+                            'success' => $result,
+                            'data' => $googleSheetData
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Error sending offer form to Google Sheets', [
+                            'url' => $webhookUrl,
+                            'error' => $e->getMessage(),
+                            'data' => $googleSheetData
+                        ]);
+                    }
+                })->afterResponse();
             } else {
                 Log::warning('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER not configured');
             }
@@ -527,13 +561,24 @@ class LeadController extends Controller
 
             $webhookUrl = GoogleSheetHelper::getWebhookUrl('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER');
             
+            // Enviar al webhook de forma asíncrona para no bloquear la respuesta
             if ($webhookUrl) {
-                $result = GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
-                Log::info('Valuation form sent to Google Sheets', [
-                    'url' => $webhookUrl,
-                    'success' => $result,
-                    'data' => $googleSheetData
-                ]);
+                dispatch(function () use ($webhookUrl, $googleSheetData) {
+                    try {
+                        $result = GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $googleSheetData);
+                        Log::info('Valuation form sent to Google Sheets', [
+                            'url' => $webhookUrl,
+                            'success' => $result,
+                            'data' => $googleSheetData
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Error sending valuation form to Google Sheets', [
+                            'url' => $webhookUrl,
+                            'error' => $e->getMessage(),
+                            'data' => $googleSheetData
+                        ]);
+                    }
+                })->afterResponse();
             } else {
                 Log::warning('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER not configured');
             }
