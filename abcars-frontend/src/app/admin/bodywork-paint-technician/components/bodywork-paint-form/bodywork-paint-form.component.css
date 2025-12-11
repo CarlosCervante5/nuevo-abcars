@@ -1,3 +1,251 @@
 :host {
-  display: block;
+    display: block !important;
+}
+
+/* Container */
+.bodywork-paint-form-container {
+    width: 100% !important;
+    padding: 1rem !important;
+}
+
+/* Title */
+.bodywork-paint-form-title {
+    font-size: 1.875rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    color: #111827 !important;
+    margin-bottom: 1.25rem !important;
+}
+
+/* Section Title */
+.bodywork-paint-form-section-title {
+    display: flex !important;
+    align-items: center !important;
+    font-size: 1.25rem !important;
+    color: #111827 !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.bodywork-paint-form-bold {
+    font-weight: 700 !important;
+}
+
+/* Divider */
+.bodywork-paint-form-divider {
+    border: 0 !important;
+    border-top: 1px solid #e5e7eb !important;
+    margin: 1rem 0 !important;
+}
+
+/* List Container */
+.bodywork-paint-form-list-container {
+    max-height: 250px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* List */
+.bodywork-paint-form-list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    counter-reset: list-counter !important;
+}
+
+/* List Item */
+.bodywork-paint-form-list-item {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    padding: 1rem !important;
+    padding-left: 2.5rem !important;
+    margin-bottom: 0.5rem !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 0.5rem !important;
+    background-color: #ffffff !important;
+    counter-increment: list-counter !important;
+    position: relative !important;
+    flex-wrap: nowrap !important;
+    gap: 0.5rem !important;
+    overflow: hidden !important;
+}
+
+.bodywork-paint-form-list-item::before {
+    content: counter(list-counter) "." !important;
+    position: absolute !important;
+    left: 0.5rem !important;
+    font-weight: 700 !important;
+    color: #6b7280 !important;
+}
+
+/* Item Description */
+.bodywork-paint-form-item-description {
+    font-weight: 700 !important;
+    flex: 0 0 20% !important;
+    min-width: 150px !important;
+    color: #111827 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Item Image */
+.bodywork-paint-form-item-image {
+    flex: 0 0 25% !important;
+    min-width: 150px !important;
+    max-width: 200px !important;
+    cursor: pointer !important;
+    transition: opacity 0.2s ease !important;
+}
+
+.bodywork-paint-form-item-image:hover {
+    opacity: 0.8 !important;
+}
+
+.bodywork-paint-form-image {
+    width: 100% !important;
+    max-width: 200px !important;
+    height: auto !important;
+    object-fit: cover !important;
+    border-radius: 0.5rem !important;
+}
+
+/* Item Input */
+.bodywork-paint-form-item-input {
+    flex: 0 0 25% !important;
+    min-width: 180px !important;
+}
+
+.bodywork-paint-form-input-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.25rem !important;
+}
+
+.bodywork-paint-form-input-label {
+    font-size: 0.75rem !important;
+    color: #6b7280 !important;
+    font-weight: 500 !important;
+    margin-bottom: 0.25rem !important;
+}
+
+.bodywork-paint-form-cost-display {
+    color: #111827 !important;
+    font-weight: 600 !important;
+}
+
+.bodywork-paint-form-input {
+    width: 100% !important;
+    padding: 0.5rem 0.75rem !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 0.375rem !important;
+    font-size: 0.875rem !important;
+    color: #111827 !important;
+    background-color: #ffffff !important;
+    transition: all 0.2s ease !important;
+}
+
+.bodywork-paint-form-input:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    ring: 2px !important;
+    ring-color: #3b82f6 !important;
+    ring-opacity: 0.2 !important;
+}
+
+.bodywork-paint-form-input:hover:not(:disabled) {
+    border-color: #9ca3af !important;
+}
+
+.bodywork-paint-form-input:disabled {
+    background-color: #f3f4f6 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
+
+/* Item Actions */
+.bodywork-paint-form-item-actions {
+    flex: 0 0 30% !important;
+    min-width: 200px !important;
+    display: flex !important;
+    justify-content: space-evenly !important;
+    gap: 0.5rem !important;
+    flex-shrink: 1 !important;
+    overflow: hidden !important;
+}
+
+/* Buttons */
+.bodywork-paint-form-btn {
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 0.375rem !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+    border: none !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    flex-shrink: 1 !important;
+}
+
+.bodywork-paint-form-btn:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+}
+
+.bodywork-paint-form-btn-primary {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+.bodywork-paint-form-btn-primary:hover:not(:disabled) {
+    background-color: #2563eb !important;
+}
+
+.bodywork-paint-form-btn-danger {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+.bodywork-paint-form-btn-danger:hover:not(:disabled) {
+    background-color: #dc2626 !important;
+}
+
+/* Spinner */
+.bodywork-paint-form-spinner {
+    display: inline-block !important;
+    width: 1rem !important;
+    height: 1rem !important;
+    border: 2px solid currentColor !important;
+    border-right-color: transparent !important;
+    border-radius: 50% !important;
+    animation: bodywork-paint-form-spin 0.6s linear infinite !important;
+}
+
+@keyframes bodywork-paint-form-spin {
+    to {
+        transform: rotate(360deg) !important;
+    }
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .bodywork-paint-form-list-item {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+
+    .bodywork-paint-form-item-description,
+    .bodywork-paint-form-item-image,
+    .bodywork-paint-form-item-input,
+    .bodywork-paint-form-item-actions {
+        flex: 0 0 100% !important;
+        width: 100% !important;
+    }
+
+    .bodywork-paint-form-item-actions {
+        justify-content: flex-start !important;
+    }
 }
