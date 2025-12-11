@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Inject, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Inject, Output, OnInit, ViewEncapsulation } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
@@ -13,6 +13,7 @@ import Swal from 'sweetalert2';
     selector: 'app-bodywork-paint-form',
     templateUrl: './bodywork-paint-form.component.html',
     styleUrls: ['./bodywork-paint-form.component.css'],
+    encapsulation: ViewEncapsulation.None,
     standalone: false
 })
 export class BodyworkPaintFormComponent implements OnInit {

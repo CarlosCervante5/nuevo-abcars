@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { reload } from 'src/app/shared/helpers/session.helper';
@@ -11,6 +11,7 @@ import { AppointmentService } from '@services/appointment.service';
 
 import { ValuationAppointments, VehicleValuations } from '@interfaces/getAppointments.interface';
 import { Repair } from '@interfaces/getOnHoldBodyworkPaint.interface';
+import { Overview } from '@interfaces/admin.interfaces';
 
 import { BodyworkPaintFormComponent } from '../../components/bodywork-paint-form/bodywork-paint-form.component';
 
@@ -19,6 +20,7 @@ import { BodyworkPaintFormComponent } from '../../components/bodywork-paint-form
     selector: 'app-bodywork-paint-technician',
     templateUrl: './bodywork-paint-technician.component.html',
     styleUrls: ['./bodywork-paint-technician.component.css'],
+    encapsulation: ViewEncapsulation.None,
     standalone: false
 })
 export class BodyworkPaintTechnicianComponent implements OnInit {
@@ -37,11 +39,53 @@ export class BodyworkPaintTechnicianComponent implements OnInit {
 
   selectedImageUrl: string | null = null;
 
+  // References Overview para el encabezado
+  public itemOverview: Overview;
+
   constructor(
     private _appointmentService: AppointmentService,
     private _bottomSheet: MatBottomSheet,
     private _router: Router
-  ){}
+  ){
+    // Inicializar itemOverview
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      this.itemOverview = {
+        user: {
+          name: user.name || user.nickname || 'Usuario',
+          surname: user.surname || '',
+          role: 'Bodywork Paint Technician',
+          email: user.email || '',
+          picturepath: ''
+        },
+        pages: [
+          {
+            title: 'Citas de valuación HyP',
+            icon: 'fi fi-rr-car',
+            permalink: '/admin/bodywork_paint_technician/bodywork-paint'
+          }
+        ]
+      };
+    } catch (error) {
+      // Fallback si hay error al parsear
+      this.itemOverview = {
+        user: {
+          name: 'Usuario',
+          surname: '',
+          role: 'Bodywork Paint Technician',
+          email: '',
+          picturepath: ''
+        },
+        pages: [
+          {
+            title: 'Citas de valuación HyP',
+            icon: 'fi fi-rr-car',
+            permalink: '/admin/bodywork_paint_technician/bodywork-paint'
+          }
+        ]
+      };
+    }
+  }
 
   ngOnInit(): void {
     this.getAppointmentsHyP(this.page);
