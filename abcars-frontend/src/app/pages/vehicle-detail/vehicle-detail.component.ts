@@ -414,7 +414,6 @@ interface MediaItem {
                     </div>
                     <div>
                       <h3 class="font-semibold text-gray-900 mb-1">Inspección técnica completa</h3>
-                      <p class="text-sm text-gray-600 mb-2">Realizada el {{ getInspectionDate() }}</p>
                       <p class="text-sm text-gray-700">El vehículo ha pasado todas las verificaciones técnicas y está en excelente estado.</p>
                     </div>
                   </div>
@@ -427,12 +426,14 @@ interface MediaItem {
                     </div>
                     <div>
                       <h3 class="font-semibold text-gray-900 mb-1">Mantenimiento al día</h3>
-                      <p class="text-sm text-gray-600 mb-2">Último servicio: {{ getLastServiceDate() }}</p>
                       <p class="text-sm text-gray-700">Todos los servicios de mantenimiento están al corriente según el programa del fabricante.</p>
                     </div>
                   </div>
                   
-                  <div class="flex items-start space-x-4 p-6 bg-yellow-50 rounded-2xl border-l-4 border-yellow-500">
+                  <div 
+                    *ngIf="hasWarranty()"
+                    class="flex items-start space-x-4 p-6 bg-yellow-50 rounded-2xl border-l-4 border-yellow-500"
+                  >
                     <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
                       <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -440,8 +441,7 @@ interface MediaItem {
                     </div>
                     <div>
                       <h3 class="font-semibold text-gray-900 mb-1">Garantía extendida</h3>
-                      <p class="text-sm text-gray-600 mb-2">Válida hasta: {{ getWarrantyDate() }}</p>
-                      <p class="text-sm text-gray-700">El vehículo cuenta con garantía extendida que cubre componentes principales.</p>
+                      <p class="text-sm text-gray-700">{{ getWarrantyDescription() }}</p>
                     </div>
                   </div>
                 </div>
@@ -495,38 +495,6 @@ interface MediaItem {
                 </div>
               </div>
 
-              <!-- Opciones de pago -->
-              <div class="bg-white rounded-3xl p-8 shadow-sm">
-                <h3 class="text-xl font-bold text-gray-900 mb-6">Opciones de Pago</h3>
-                
-                <!-- Venta de Contado -->
-                <div class="mb-6 p-6 bg-green-50 rounded-2xl border-2 border-green-200">
-                  <h4 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                    </svg>
-                    Venta de Contado
-                  </h4>
-                  <div class="text-sm text-green-600 mb-3">(Precio especial por pago inmediato)</div>
-                  <div class="space-y-2 text-sm">
-                    <div class="flex justify-between">
-                      <span>Precio original</span>
-                      <span class="line-through text-gray-500">MXN {{ vehicle.price | number }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="font-bold">Precio de contado</span>
-                      <span class="font-bold text-green-700">MXN {{ getCashPrice() | number }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-green-600">Descuento</span>
-                      <span class="font-semibold text-green-600">MXN {{ getCashDiscount() | number }}</span>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-
-
               <!-- Botones de acción -->
               <div class="bg-white rounded-3xl p-6 shadow-sm">
                 <div class="space-y-4">
@@ -576,21 +544,11 @@ interface MediaItem {
               <div class="bg-white rounded-3xl p-6 shadow-sm">
                 <h4 class="font-bold text-gray-900 mb-4">Showroom ABCars</h4>
                 <div class="space-y-3 text-sm text-gray-600">
-                  <div class="flex items-center space-x-2">
+                  <div class="flex items-center space-x-2" *ngIf="vehicle?.location || vehicle?.apiData?.dealership?.location">
                     <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                     </svg>
-                    <span>Cuernavaca, Morelos</span>
-                  </div>
-                  <div class="flex items-center space-x-2">
-                    <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
-                    </svg>
-                    <span>+52 777 123-4567</span>
-                  </div>
-                  <div class="text-xs text-gray-500">
-                    Lun-Vie: 9:00-19:00<br>
-                    Sáb: 9:00-17:00
+                    <span>{{ capitalizeFirst(vehicle?.location || vehicle?.apiData?.dealership?.location || '') }}</span>
                   </div>
                 </div>
               </div>
@@ -1882,7 +1840,10 @@ export class VehicleDetailComponent implements OnInit {
 
   capitalizeFirst(text: string): string {
     if (!text) return '';
-    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+    // Capitalizar cada palabra de la ubicación
+    return text.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    ).join(' ');
   }
 
   initializeMediaItems() {
@@ -2366,6 +2327,30 @@ export class VehicleDetailComponent implements OnInit {
     }
     
     return equipment;
+  }
+
+  hasWarranty(): boolean {
+    const spec = this.vehicle?.apiData?.specification;
+    if (!spec) return false;
+    return spec.warranty_policy === 'yes' || spec.warranty_manual === 'yes';
+  }
+
+  getWarrantyDescription(): string {
+    const spec = this.vehicle?.apiData?.specification;
+    if (!spec) return '';
+    
+    const hasPolicy = spec.warranty_policy === 'yes';
+    const hasManual = spec.warranty_manual === 'yes';
+    
+    if (hasPolicy && hasManual) {
+      return 'El vehículo cuenta con póliza de garantía y manual de garantía que cubren componentes principales.';
+    } else if (hasPolicy) {
+      return 'El vehículo cuenta con póliza de garantía que cubre componentes principales.';
+    } else if (hasManual) {
+      return 'El vehículo cuenta con manual de garantía que cubre componentes principales.';
+    }
+    
+    return 'El vehículo cuenta con garantía extendida que cubre componentes principales.';
     
     /* CÓDIGO HARDCODEADO COMENTADO - NO EXISTE EN BD
     return [
@@ -2376,35 +2361,6 @@ export class VehicleDetailComponent implements OnInit {
     */
   }
 
-  getInspectionDate(): string {
-    const date = new Date();
-    date.setDate(date.getDate() - 15); // 15 días atrás
-    return date.toLocaleDateString('es-MX', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-  }
-
-  getLastServiceDate(): string {
-    const date = new Date();
-    date.setDate(date.getDate() - 30); // 30 días atrás
-    return date.toLocaleDateString('es-MX', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-  }
-
-  getWarrantyDate(): string {
-    const date = new Date();
-    date.setFullYear(date.getFullYear() + 2); // 2 años en el futuro
-    return date.toLocaleDateString('es-MX', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-  }
 
   requestFinancing() {
     console.log('Solicitar financiamiento para:', this.vehicle);

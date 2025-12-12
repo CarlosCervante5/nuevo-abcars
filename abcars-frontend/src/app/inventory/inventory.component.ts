@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { VehicleCardTailwindComponent, Vehicle } from '../shared/components/vehicle-card-tailwind/vehicle-card-tailwind.component';
 import { DarkNavComponent } from 'src/app/shared/components/dark-nav/dark-nav.component';
 import { ModernFooterComponent } from 'src/app/shared/components/modern-footer/modern-footer.component';
@@ -577,7 +577,8 @@ export class InventoryComponent implements OnInit {
 
   constructor(
     private vehicleService: VehicleService,
-    private campaingService: CampaingService
+    private campaingService: CampaingService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -1041,6 +1042,17 @@ export class InventoryComponent implements OnInit {
     this.availableColors.forEach(color => {
       this.filters.selectedColors[color] = false;
     });
+    
+    // Aplicar filtro de marca desde query params si existe
+    this.route.queryParams.subscribe(params => {
+      if (params['brand']) {
+        const brandName = params['brand'];
+        if (this.availableBrands.includes(brandName)) {
+          this.filters.selectedBrands[brandName] = true;
+          this.applyFilters();
+        }
+      }
+    }).unsubscribe(); // Solo necesitamos leerlo una vez
 
     // Calcular rangos
     if (this.sampleVehicles.length > 0) {

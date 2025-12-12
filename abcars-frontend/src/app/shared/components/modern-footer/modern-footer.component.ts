@@ -75,7 +75,7 @@ import { Brand, BrandsResponse } from '@interfaces/vehicle_data.interface';
             <ng-container *ngIf="availableBrands.length; else noBrands">
             <ul class="space-y-2">
                 <li *ngFor="let brand of availableBrands | slice:0:maxBrandsToShow; trackBy: trackByBrand">
-                  <a href="#" class="text-gray-300 hover:text-white transition-colors text-sm">
+                  <a [routerLink]="['/inventario']" [queryParams]="{ brand: brand.name }" class="text-gray-300 hover:text-white transition-colors text-sm">
                     {{ brand.name }}
                   </a>
                 </li>
@@ -84,7 +84,7 @@ import { Brand, BrandsResponse } from '@interfaces/vehicle_data.interface';
             <ng-template #noBrands>
               <p class="text-gray-400 text-sm">Cargando marcas...</p>
             </ng-template>
-            <a href="#" class="text-white hover:text-yellow-400 transition-colors text-sm font-medium flex items-center">
+            <a [routerLink]="['/inventario']" class="text-white hover:text-yellow-400 transition-colors text-sm font-medium flex items-center">
               Ver todas las marcas
               <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
