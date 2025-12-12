@@ -8,6 +8,7 @@ import { HomeNavComponent } from '../shared/components/home-nav/home-nav.compone
 import { ModernFooterComponent } from '../shared/components/modern-footer/modern-footer.component';
 import { VehicleService } from '../shared/services/vehicle.service';
 import { CampaingService } from '../shared/services/campaing.service';
+import { CompraTuAutoService } from '@services/compra-tu-auto.service';
 import { Vehicle as ApiVehicle } from '../shared/interfaces/vehicle_data.interface';
 
 interface Vehicle {
@@ -76,6 +77,10 @@ export class ModernHomeComponent implements OnInit {
   loadError: string = '';
   activePromotionImages: string[] = [];
 
+  // Imagen del banner principal del Hero
+  heroImagePath: string = 'assets/images/bg_hero.jpg';
+  showHeroText: boolean = true; // Mostrar texto solo cuando se usa imagen por defecto
+
   // Filtros rápidos
   quickFilters: QuickFilter[] = [
     { key: 'premium', label: 'Premium', icon: 'star' },
@@ -120,12 +125,32 @@ export class ModernHomeComponent implements OnInit {
   constructor(
     private router: Router,
     private vehicleService: VehicleService,
-    private campaingService: CampaingService
+    private campaingService: CampaingService,
+    private compraTuAutoService: CompraTuAutoService
   ) {}
 
   ngOnInit() {
+    // Cargar banner principal del Hero
+    this.loadMainBanner();
     // Cargar promociones primero, los vehículos se cargarán cuando las promociones estén listas
     this.loadActivePromotions();
+  }
+
+  loadMainBanner() {
+    this.compraTuAutoService.loadMainBanner('Imagen banner principal')
+      .subscribe({
+        next: (resp) => {
+          if (resp && resp.data && resp.data.image_path) {
+            this.heroImagePath = resp.data.image_path;
+            this.showHeroText = false; // Ocultar texto cuando se carga imagen dinámica
+          }
+        },
+        error: (error) => {
+          // Si hay error, mantener la imagen por defecto y mostrar el texto
+          console.warn('Error al cargar el banner principal, usando imagen por defecto:', error);
+          // heroImagePath ya tiene el valor por defecto, showHeroText ya es true por defecto
+        }
+      });
   }
 
   loadActivePromotions() {
