@@ -682,6 +682,7 @@ interface MediaItem {
           
           <div class="space-y-3">
             <button 
+              (click)="openWhatsApp()"
               class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl text-base transition-colors flex items-center justify-center gap-2"
             >
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -2410,6 +2411,21 @@ export class VehicleDetailComponent implements OnInit {
 
   closeWhatsAppModal() {
     this.showWhatsAppModal = false;
+  }
+
+  openWhatsApp() {
+    // Construir mensaje con información del vehículo si está disponible
+    let message = 'Hola ABCars, tengo duda acerca de un auto...';
+    
+    if (this.vehicle) {
+      message = `Hola ABCars, me interesa el ${this.vehicle.brand} ${this.vehicle.model} ${this.vehicle.year}. ¿Podrían darme más información?`;
+    }
+    
+    const whatsappUrl = `https://wa.me/5212221263726?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    
+    // Opcional: cerrar el modal después de abrir WhatsApp
+    this.closeWhatsAppModal();
   }
 
   closeTestDriveModal() {
