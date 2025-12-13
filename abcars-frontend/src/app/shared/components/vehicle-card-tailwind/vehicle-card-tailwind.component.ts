@@ -44,54 +44,54 @@ export interface Vehicle {
       </div>
 
       <!-- Content -->
-      <div class="p-6 bg-white">
+      <div class="p-4 md:p-6 bg-white">
         <!-- Vehicle Name -->
         <h3 class="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
           {{ vehicle.name }}
         </h3>
 
         <!-- Vehicle Details -->
-        <div class="space-y-3 mb-4">
+        <div class="grid grid-cols-2 gap-3 mb-3">
           <!-- Mileage -->
           <div class="flex items-center text-gray-600">
-            <svg class="w-5 h-5 mr-2 text-abcars-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 mr-2 text-abcars-secondary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
             </svg>
-            <span class="text-sm">{{ formatMileage(vehicle.mileage) }} km</span>
+            <span class="text-sm truncate">{{ formatMileage(vehicle.mileage) }} km</span>
           </div>
 
           <!-- Year -->
           <div class="flex items-center text-gray-600">
-            <svg class="w-5 h-5 mr-2 text-abcars-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 mr-2 text-abcars-secondary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
-            <span class="text-sm">{{ vehicle.model?.year || vehicle.year }}</span>
+            <span class="text-sm truncate">{{ vehicle.model?.year || vehicle.year }}</span>
           </div>
 
           <!-- Color -->
           <div class="flex items-center text-gray-600">
-            <div class="w-4 h-4 rounded-full mr-2 border-2 border-gray-300" 
+            <div class="w-4 h-4 rounded-full mr-2 border-2 border-gray-300 flex-shrink-0" 
                  [style.background-color]="getColorCode(vehicle.exterior_color)">
             </div>
-            <span class="text-sm capitalize">{{ vehicle.exterior_color }}</span>
+            <span class="text-sm capitalize truncate">{{ vehicle.exterior_color }}</span>
           </div>
 
           <!-- Location -->
           <div class="flex items-center text-gray-600" *ngIf="vehicle.dealership">
-            <svg class="w-5 h-5 mr-2 text-abcars-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 mr-2 text-abcars-secondary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
-            <span class="text-sm capitalize">{{ vehicle.dealership.location }}</span>
+            <span class="text-sm capitalize truncate">{{ vehicle.dealership.location }}</span>
           </div>
         </div>
 
         <!-- Action Buttons -->
         <div class="flex gap-3">
-          <button class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-300" (click)="contactVehicle($event)">
+          <button class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 text-sm" (click)="contactVehicle($event)">
             Contacto
           </button>
-          <button class="btn-abcars-secondary px-4" (click)="toggleFavorite($event)">
+          <button class="btn-abcars-secondary px-3 py-2" (click)="toggleFavorite($event)">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
             </svg>

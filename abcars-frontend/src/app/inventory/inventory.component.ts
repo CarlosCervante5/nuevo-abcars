@@ -22,48 +22,17 @@ interface VehicleWithApiData extends Vehicle {
   template: `
     <app-dark-nav></app-dark-nav>
     <div class="bg-gray-50">
-      <main class="pt-24">
+      <main class="pt-40 lg:pt-24">
         <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
           
-          <!-- Barra de búsqueda superior -->
-          <div class="mb-8">
-            <div class="relative max-w-4xl mx-auto">
-              <div class="relative">
-                <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-                <input 
-                  type="text" 
-                  [(ngModel)]="searchTerm"
-                  (input)="onSearchChange()"
-                  placeholder="Busca por modelo, marca, año, características..."
-                  class="w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all bg-white shadow-sm"
-                >
-              </div>
-            </div>
-          </div>
-
-          <!-- Contador de resultados y ordenamiento -->
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <div class="flex items-center justify-between w-full sm:w-auto">
-              <h1 class="results-title">{{ filteredItems.length }} Resultados</h1>
-              <!-- Botón para abrir filtros en móvil -->
-              <button (click)="openFiltersModal()" class="lg:hidden bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded-lg transition-colors flex items-center space-x-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                </svg>
-                <span>Filtros</span>
-              </button>
-            </div>
-            <div class="flex items-center space-x-4 w-full sm:w-auto">
-              <span class="text-gray-600 hidden sm:inline">Ordenar por:</span>
-              <select [(ngModel)]="sortBy" (change)="onSortChange()" class="w-full sm:w-auto border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
-                <option value="newest">Más recientes</option>
-                <option value="price-low">Precio: Menor a mayor</option>
-                <option value="price-high">Precio: Mayor a menor</option>
-                <option value="mileage-asc">Kilometraje: menor</option>
-              </select>
-            </div>
+          <!-- Botón para abrir filtros en móvil - fijo debajo del nav -->
+          <div class="w-full mb-6 lg:hidden fixed top-24 left-0 right-0 z-40 px-4 pt-2 pb-2 bg-white border-b border-gray-200 shadow-lg lg:relative lg:bg-transparent lg:border-0 lg:shadow-none lg:px-0 lg:pb-0 lg:pt-0 lg:top-auto">
+            <button (click)="openFiltersModal()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-3 rounded-xl transition-colors flex items-center justify-center space-x-2 shadow-md">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+              </svg>
+              <span>Filtros</span>
+            </button>
           </div>
 
           <div class="flex flex-col lg:flex-row gap-8">
@@ -251,6 +220,42 @@ interface VehicleWithApiData extends Vehicle {
 
             <!-- Grid de Vehículos y Banners -->
             <div class="lg:w-3/4 xl:w-4/5">
+              <!-- Resultados, buscador y ordenamiento alineados al grid -->
+              <div class="mb-8">
+                <div class="flex flex-col md:flex-row gap-6 items-center">
+                  <!-- Buscador - ocupa toda la línea en móvil -->
+                  <div class="relative flex-1 w-full order-2 md:order-1">
+                    <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input 
+                      type="text" 
+                      [(ngModel)]="searchTerm"
+                      (input)="onSearchChange()"
+                      placeholder="Busca por modelo, marca, año, características..."
+                      class="w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all bg-white shadow-sm"
+                    >
+                  </div>
+                  <!-- Resultados y Select en la misma línea en móvil -->
+                  <div class="flex flex-row items-center gap-3 md:gap-4 w-full md:w-auto order-1 md:order-2">
+                    <!-- Conteo de resultados -->
+                    <div class="w-auto">
+                      <h1 class="results-title whitespace-nowrap">{{ filteredItems.length }} Resultados</h1>
+                    </div>
+                    <!-- Select de orden -->
+                    <div class="flex items-center space-x-2 flex-1 md:flex-initial">
+                      <span class="text-gray-600 text-sm whitespace-nowrap hidden md:inline mr-2">Ordenar:</span>
+                      <select [(ngModel)]="sortBy" (change)="onSortChange()" class="w-full md:w-64 border border-gray-300 rounded-xl px-3 py-3 md:px-4 md:py-4 text-sm md:text-base focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 bg-white shadow-sm">
+                        <option value="newest">Más recientes</option>
+                        <option value="price-low">Precio: Menor a mayor</option>
+                        <option value="price-high">Precio: Mayor a menor</option>
+                        <option value="mileage-asc">Kilometraje: menor</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div *ngIf="isLoading" class="text-center py-12">
                 <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
                 <p class="mt-4 text-gray-600">Cargando vehículos...</p>
