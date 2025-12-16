@@ -265,19 +265,6 @@ interface MediaItem {
                 <div>
                   <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{{ vehicle.brand }}</h1>
                   <p class="text-xl lg:text-2xl text-gray-600 mb-4">{{ vehicle.model }} {{ getEngineInfo() }}</p>
-                  
-                  <!-- Badges -->
-                  <div class="flex flex-wrap gap-2">
-                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                      {{ vehicle.certification || 'Certificado' }}
-                    </span>
-                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                      Garantía extendida
-                    </span>
-                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                      Financiamiento disponible
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -303,10 +290,6 @@ interface MediaItem {
                       <div class="flex justify-between items-center">
                         <span class="text-gray-600">Mensualidad (48 meses)</span>
                         <span class="font-semibold text-gray-900">MXN {{ getMonthlyFinancing() | number }}</span>
-                      </div>
-                      <div class="flex justify-between items-center">
-                        <span class="text-gray-600">Seguro incluido</span>
-                        <span class="font-semibold text-gray-900">Sí</span>
                       </div>
                     </div>
                     
@@ -385,14 +368,14 @@ interface MediaItem {
               </div>
             </div>
 
-            <!-- Highlights/Características principales -->
+            <!-- Highlights/Descripción del vehículo -->
             <div class="bg-white rounded-3xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 lg:mb-8 shadow-sm">
               <h2 class="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 md:mb-6 lg:mb-8">Highlights</h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                <div *ngFor="let feature of getHighlights()" class="flex items-center space-x-2 md:space-x-3">
-                  <div class="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0"></div>
-                  <span class="text-sm md:text-base text-gray-700">{{ feature }}</span>
-                </div>
+              <div *ngIf="vehicle?.description" class="text-gray-700 leading-relaxed">
+                <p class="text-sm md:text-base lg:text-lg whitespace-pre-line">{{ vehicle.description }}</p>
+              </div>
+              <div *ngIf="!vehicle?.description" class="text-gray-500 italic">
+                <p class="text-sm md:text-base">No hay descripción disponible para este vehículo.</p>
               </div>
             </div>
 
@@ -439,14 +422,13 @@ interface MediaItem {
             </div>
 
             <!-- Equipamiento y características -->
+            <!--
             <div class="bg-white rounded-3xl shadow-sm mb-8 overflow-hidden">
-              <!-- Header clickeable solo en móvil -->
               <div 
                 class="p-6 md:p-8 cursor-pointer md:cursor-default flex items-center justify-between"
                 (click)="toggleEquipment()"
               >
                 <h2 class="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">Equipamiento y características</h2>
-                <!-- Icono chevron solo visible en móvil -->
                 <svg 
                   class="w-6 h-6 text-gray-600 transition-transform duration-300 md:hidden"
                   [class.rotate-180]="isEquipmentOpen"
@@ -458,7 +440,6 @@ interface MediaItem {
                 </svg>
               </div>
               
-              <!-- Contenido desplegable -->
               <div 
                 class="px-6 md:px-8 transition-all duration-300 overflow-hidden"
                 [class.max-h-0]="!isEquipmentOpen"
@@ -480,6 +461,7 @@ interface MediaItem {
                 </div>
               </div>
             </div>
+            -->
 
             <!-- Historial del vehículo -->
             <div class="bg-white rounded-3xl shadow-sm mb-8 overflow-hidden">
@@ -535,21 +517,6 @@ interface MediaItem {
                       <p class="text-sm text-gray-700">Todos los servicios de mantenimiento están al corriente según el programa del fabricante.</p>
                     </div>
                   </div>
-                  
-                  <div 
-                    *ngIf="hasWarranty()"
-                    class="flex items-start space-x-4 p-6 bg-yellow-50 rounded-2xl border-l-4 border-yellow-500"
-                  >
-                    <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 class="font-semibold text-gray-900 mb-1">Garantía extendida</h3>
-                      <p class="text-sm text-gray-700">{{ getWarrantyDescription() }}</p>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -579,10 +546,6 @@ interface MediaItem {
                     <div class="flex justify-between items-center">
                       <span class="text-gray-600">Mensualidad (48 meses)</span>
                       <span class="font-semibold text-gray-900">MXN {{ getMonthlyFinancing() | number }}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                      <span class="text-gray-600">Seguro incluido</span>
-                      <span class="font-semibold text-gray-900">Sí</span>
                     </div>
                   </div>
                   
