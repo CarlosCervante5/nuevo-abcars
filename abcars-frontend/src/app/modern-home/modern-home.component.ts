@@ -108,7 +108,7 @@ export class ModernHomeComponent implements OnInit {
     },
     {
       question: 'Financiamiento',
-      answer: 'Ofrecemos las mejores opciones de financiamiento automotriz con tasas preferenciales. Créditos flexibles adaptados a tu capacidad de pago con plazos de hasta 72 meses.',
+      answer: 'Ofrecemos las mejores opciones de financiamiento automotriz con tasas preferenciales. Créditos flexibles adaptados a tu capacidad de pago con plazos de hasta 60 meses.',
       isOpen: false
     },
     {

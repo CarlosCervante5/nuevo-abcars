@@ -21,7 +21,10 @@ import Swal from 'sweetalert2';
 })
 export class ValuationComponent implements OnInit {
   brands: Brand[] = [];
-  dealerships: Dealership[] = [];
+  dealerships: Dealership[] = [
+    { name: 'Chevrolet Balderrama Serdán (puebla)', location: '', description: null, created_at: new Date() },
+    { name: 'VECSA pachuca', location: '', description: null, created_at: new Date() }
+  ];
   models: Model[] = [];
   valuationForm: FormGroup;
   isSubmitting: boolean = false;
@@ -52,7 +55,8 @@ export class ValuationComponent implements OnInit {
 
   ngOnInit() {
     this.getBrands();
-    this.getDealerships();
+    // Sucursales ahora están hardcodeadas, no se cargan dinámicamente
+    // this.getDealerships();
   }
 
   getBrands(): void {
