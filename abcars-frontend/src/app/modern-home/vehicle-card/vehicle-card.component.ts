@@ -112,7 +112,7 @@ export class VehicleCardComponent {
   getMonthlyPayment(): number {
     // Parámetros de financiamiento
     const downPaymentPercentage = 10; // 10% de enganche
-    const annualInterestRate = 12.5; // 12.5% anual
+    const annualInterestRate = 15; // 15% anual
     const termMonths = 60; // 60 meses
     
     // Calcular monto a financiar

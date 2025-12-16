@@ -85,14 +85,14 @@
               </div>
               
               <div>
-                <label class="form-label">Tasa de interés anual (%)</label>
+                <label class="form-label">Tasa de interés (%)</label>
                 <input 
                   type="number" 
                   step="0.1"
                   [(ngModel)]="calculatorData.interestRate"
                   readonly
                   class="form-input-readonly"
-                  placeholder="Ej: 12.5"
+                  placeholder="Ej: 15"
                 >
               </div>
             </div>
@@ -114,6 +114,13 @@
                   <div class="summary-label">Total a pagar</div>
                 </div>
               </div>
+            </div>
+            
+            <!-- Disclaimer -->
+            <div class="mt-6 p-4 bg-gray-50 rounded-xl border-l-4 border-yellow-400">
+              <p class="text-xs text-gray-600 leading-relaxed">
+                <strong class="text-gray-700">Importante:</strong> Los montos mostrados son una aproximación y no constituyen una oferta final ya que esta puede cambiar de acuerdo a tu historial crediticio, enganche y tasa vigente. Crédito sujeto a términos y condiciones de las instituciones financieras otorgantes.
+              </p>
             </div>
           </div>
 
@@ -142,7 +149,7 @@
                 </div>
                 <div>
                   <h3 class="benefit-title">Tasas competitivas</h3>
-                  <p class="benefit-description">Las mejores tasas del mercado desde 12% anual con historial crediticio favorable.</p>
+                  <p class="benefit-description">Las mejores tasas del mercado desde 15% anual con historial crediticio favorable.</p>
                 </div>
               </div>
               

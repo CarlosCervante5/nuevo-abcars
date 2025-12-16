@@ -19,7 +19,7 @@ export class FinancingComponent {
     vehiclePrice: 500000,
     downPaymentPercentage: 10,
     termMonths: 60,
-    interestRate: 12.5
+    interestRate: 15
   };
 
   financingForm: FormGroup;
