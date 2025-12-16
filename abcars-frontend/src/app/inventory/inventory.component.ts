@@ -240,7 +240,7 @@ interface VehicleWithApiData extends Vehicle {
                   <div class="flex flex-row items-center gap-3 md:gap-4 w-full md:w-auto order-1 md:order-2">
                     <!-- Conteo de resultados -->
                     <div class="w-auto">
-                      <h1 class="results-title whitespace-nowrap">{{ filteredItems.length }} Resultados</h1>
+                      <h1 class="results-title whitespace-nowrap">{{ totalVehicles }} Resultados</h1>
                     </div>
                     <!-- Select de orden -->
                     <div class="flex items-center space-x-2 flex-1 md:flex-initial">
@@ -292,6 +292,87 @@ interface VehicleWithApiData extends Vehicle {
                     />
                   </div>
                 </ng-container>
+              </div>
+
+              <!-- Controles de Paginación -->
+              <div *ngIf="!isLoading && !loadError && totalVehicles > 0" class="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <!-- Información de resultados -->
+                <div class="text-sm text-gray-600">
+                  Mostrando {{ getShowingRange().from }} - {{ getShowingRange().to }} de {{ totalVehicles }} vehículos
+                </div>
+
+                <!-- Controles de navegación -->
+                <div class="flex items-center gap-2">
+                  <!-- Botón Anterior -->
+                  <button 
+                    (click)="previousPage()" 
+                    [disabled]="currentPage === 1 || totalPages <= 1"
+                    [class.opacity-50]="currentPage === 1 || totalPages <= 1"
+                    [class.cursor-not-allowed]="currentPage === 1 || totalPages <= 1"
+                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    <span class="hidden sm:inline">Anterior</span>
+                  </button>
+
+                  <!-- Números de página -->
+                  <div class="flex items-center gap-1" *ngIf="totalPages > 1">
+                    <!-- Primera página si no está visible -->
+                    <button 
+                      *ngIf="getPageRange()[0] > 1"
+                      (click)="goToPage(1)"
+                      class="px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      1
+                    </button>
+                    <span *ngIf="getPageRange()[0] > 2" class="px-2 text-gray-400">...</span>
+
+                    <!-- Páginas visibles -->
+                    <button 
+                      *ngFor="let page of getPageRange()"
+                      (click)="goToPage(page)"
+                      [class.bg-yellow-500]="page === currentPage"
+                      [class.text-white]="page === currentPage"
+                      [class.text-gray-700]="page !== currentPage"
+                      [class.hover:bg-yellow-400]="page === currentPage"
+                      [class.hover:bg-gray-100]="page !== currentPage"
+                      class="px-3 py-2 text-sm font-medium rounded-lg transition-colors min-w-[40px]"
+                    >
+                      {{ page }}
+                    </button>
+
+                    <!-- Última página si no está visible -->
+                    <span *ngIf="getPageRange()[getPageRange().length - 1] < totalPages - 1" class="px-2 text-gray-400">...</span>
+                    <button 
+                      *ngIf="getPageRange()[getPageRange().length - 1] < totalPages"
+                      (click)="goToPage(totalPages)"
+                      class="px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      {{ totalPages }}
+                    </button>
+                  </div>
+
+                  <!-- Indicador de página única -->
+                  <div *ngIf="totalPages <= 1" class="px-3 py-2 text-sm font-medium text-gray-700">
+                    Página 1
+                  </div>
+
+                  <!-- Botón Siguiente -->
+                  <button 
+                    (click)="nextPage()" 
+                    [disabled]="currentPage === totalPages || totalPages <= 1"
+                    [class.opacity-50]="currentPage === totalPages || totalPages <= 1"
+                    [class.cursor-not-allowed]="currentPage === totalPages || totalPages <= 1"
+                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <span class="hidden sm:inline">Siguiente</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -531,6 +612,12 @@ export class InventoryComponent implements OnInit {
   searchTerm: string = '';
   sortBy: string = 'newest';
   
+  // Propiedades de paginación
+  currentPage: number = 1;
+  pageSize: number = 20;
+  totalVehicles: number = 0;
+  totalPages: number = 0;
+  
   // Datos de vehículos
   sampleVehicles: VehicleWithApiData[] = [];
   mixedItems: (VehicleWithApiData | { type: 'banner'; imageUrl?: string })[] = [];
@@ -643,14 +730,25 @@ export class InventoryComponent implements OnInit {
     });
   }
 
-  loadVehicles(): void {
+  loadVehicles(page: number = 1, useSearchTerm: boolean = false): void {
     this.isLoading = true;
     this.loadError = '';
+    this.currentPage = page;
 
-    this.vehicleService.searchVehicles({}, 1, 20).subscribe({
+    // Preparar filtros para la búsqueda
+    const filters: any = {};
+    if (useSearchTerm && this.searchTerm && this.searchTerm.trim()) {
+      filters.keyword = this.searchTerm.trim();
+    }
+
+    this.vehicleService.searchVehicles(filters, page, this.pageSize).subscribe({
       next: (response) => {
         if (response.status === 200 && response.data && response.data.data) {
           const apiVehicles = response.data.data;
+          
+          // Guardar información de paginación
+          this.totalVehicles = response.data.total || 0;
+          this.totalPages = response.data.last_page || Math.ceil(this.totalVehicles / this.pageSize);
           
           // Mapear vehículos de la API para incluir el año desde model.year y guardar apiData
           this.sampleVehicles = apiVehicles.map(v => ({
@@ -658,6 +756,19 @@ export class InventoryComponent implements OnInit {
             year: v.model?.year || new Date().getFullYear(),
             apiData: v
           }));
+          
+          // Si es búsqueda por VIN, ordenar para que el vehículo con el VIN exacto aparezca primero
+          if (this.searchTerm && this.isVin(this.searchTerm)) {
+            const vinLower = this.searchTerm.toLowerCase().trim();
+            this.sampleVehicles.sort((a, b) => {
+              const aVin = (a.apiData?.vin || '').toLowerCase();
+              const bVin = (b.apiData?.vin || '').toLowerCase();
+              // El vehículo con el VIN exacto va primero
+              if (aVin === vinLower) return -1;
+              if (bVin === vinLower) return 1;
+              return 0;
+            });
+          }
           
           // Insertar banners con promociones activas o banner por defecto
           let vehiclesWithBanners: (VehicleWithApiData | { type: 'banner'; imageUrl?: string })[];
@@ -926,8 +1037,26 @@ export class InventoryComponent implements OnInit {
     }
   }
 
+  // Método para detectar si el término de búsqueda es un VIN
+  isVin(searchTerm: string): boolean {
+    if (!searchTerm) return false;
+    // VIN típicamente tiene 17 caracteres alfanuméricos (sin I, O, Q para evitar confusión)
+    // Patrón: 17 caracteres alfanuméricos
+    const vinPattern = /^[A-HJ-NPR-Z0-9]{17}$/i;
+    return vinPattern.test(searchTerm.trim());
+  }
+
   onSearchChange() {
-    this.applyFilters();
+    // Resetear a página 1 cuando cambia la búsqueda
+    this.currentPage = 1;
+    
+    // Si hay searchTerm, recargar desde el servidor con el término
+    if (this.searchTerm && this.searchTerm.trim()) {
+      this.loadVehicles(1, true);
+    } else {
+      // Si se borró el searchTerm, recargar todos los vehículos sin filtro de búsqueda
+      this.loadVehicles(1, false);
+    }
   }
 
   onSortChange() {
@@ -987,10 +1116,23 @@ export class InventoryComponent implements OnInit {
       return matchesSearch && matchesPrice && matchesBrand && matchesYear && matchesMileage && matchesBody && matchesTransmission && matchesColor;
     });
 
-    // 4) Aplicar ordenamiento sobre vehículos filtrados
+    // 4) Si es búsqueda por VIN, priorizar el vehículo con el VIN exacto
+    if (this.searchTerm && this.isVin(this.searchTerm)) {
+      const vinLower = this.searchTerm.toLowerCase().trim();
+      filteredVehicles.sort((a, b) => {
+        const aVin = (a.apiData?.vin || '').toLowerCase();
+        const bVin = (b.apiData?.vin || '').toLowerCase();
+        // El vehículo con el VIN exacto va primero
+        if (aVin === vinLower) return -1;
+        if (bVin === vinLower) return 1;
+        return 0;
+      });
+    }
+
+    // 5) Aplicar ordenamiento sobre vehículos filtrados
     this.sortVehicles(filteredVehicles);
 
-    // 5) Reinsertar banners aleatoriamente si hay promociones activas, o banner por defecto
+    // 6) Reinsertar banners aleatoriamente si hay promociones activas, o banner por defecto
     let rebuilt: (VehicleWithApiData | { type: 'banner'; imageUrl?: string })[];
     
     if (this.activePromotionImages.length > 0) {
@@ -1124,7 +1266,9 @@ export class InventoryComponent implements OnInit {
       this.filters.selectedColors[color] = false;
     });
     
-    this.applyFilters();
+    // Resetear paginación
+    this.currentPage = 1;
+    this.loadVehicles(1);
   }
 
   formatPrice(price: number): string {
@@ -1139,5 +1283,54 @@ export class InventoryComponent implements OnInit {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(mileage);
+  }
+
+  // Métodos de paginación
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.loadVehicles(this.currentPage + 1);
+      // Scroll al inicio de la página
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.loadVehicles(this.currentPage - 1);
+      // Scroll al inicio de la página
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+      this.loadVehicles(page);
+      // Scroll al inicio de la página
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  getPageRange(): number[] {
+    const pages: number[] = [];
+    const maxVisible = 5; // Máximo de números de página visibles
+    let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+    let end = Math.min(this.totalPages, start + maxVisible - 1);
+    
+    // Ajustar el inicio si estamos cerca del final
+    if (end - start < maxVisible - 1) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  }
+
+  getShowingRange(): { from: number; to: number } {
+    const from = (this.currentPage - 1) * this.pageSize + 1;
+    const to = Math.min(this.currentPage * this.pageSize, this.totalVehicles);
+    return { from, to };
   }
 } 

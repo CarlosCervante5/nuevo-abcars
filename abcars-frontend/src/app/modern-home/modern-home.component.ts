@@ -73,6 +73,7 @@ export class ModernHomeComponent implements OnInit {
   // Datos de vehículos
   vehicles: (Vehicle | { type: 'banner'; imageUrl?: string })[] = [];
   filteredVehicles: (Vehicle | { type: 'banner'; imageUrl?: string })[] = [];
+  totalVehicles: number = 0;
   isLoading: boolean = true;
   loadError: string = '';
   activePromotionImages: string[] = [];
@@ -217,6 +218,9 @@ export class ModernHomeComponent implements OnInit {
         if (response.status === 200 && response.data && response.data.data) {
           const apiVehicles = response.data.data;
           
+          // Guardar el total de vehículos disponibles
+          this.totalVehicles = response.data.total || 0;
+          
           // Convertir vehículos de la API al formato del componente
           const mappedVehicles: Vehicle[] = apiVehicles.map((v) => {
             const imageUrl = v.first_image?.service_image_url || v.images?.[0]?.service_image_url || '';
@@ -327,6 +331,10 @@ export class ModernHomeComponent implements OnInit {
 
   isBanner(item: any): item is { type: 'banner'; imageUrl?: string } {
     return item && item.type === 'banner';
+  }
+
+  getVehicleCount(): number {
+    return this.filteredVehicles.filter(v => !this.isBanner(v)).length;
   }
 
   getBannerImageUrl(item: any): string {
