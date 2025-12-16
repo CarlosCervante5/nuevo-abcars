@@ -302,7 +302,7 @@ interface MediaItem {
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
                         </svg>
-                        Calcula tu Financiamiento
+                        Simulador de crédito
                       </button>
                     </div>
                   </div>
@@ -558,7 +558,7 @@ interface MediaItem {
                       <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
                       </svg>
-                      Calcula tu Financiamiento
+                      Simulador de crédito
                     </button>
                   </div>
                 </div>
@@ -1096,7 +1096,7 @@ interface MediaItem {
                 (click)="openFinancingFormFromCalculator()"
                 class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-xl transition-colors"
               >
-                Solicitar este Financiamiento
+                Solicitar financiamiento similar
               </button>
             </div>
           </div>
