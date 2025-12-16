@@ -2215,7 +2215,8 @@ export class VehicleDetailComponent implements OnInit {
   }
 
   getMonthlyInterestRate(): number {
-    return 1.5; // 1.5% mensual como en la captura
+    // Usar la tasa calculada dinámicamente basada en año y enganche
+    return this.getCalculatedMonthlyInterestRate();
   }
 
   // Calcular mensualidades para diferentes plazos
@@ -2279,11 +2280,51 @@ export class VehicleDetailComponent implements OnInit {
     this.calculatorData.creditOpeningFeeAmount = this.calculatorData.financeAmount * (this.calculatorData.creditOpeningFeePercentage / 100);
   }
 
+  // Calcular tasa de interés anual basada en año del vehículo y porcentaje de enganche
+  getAnnualInterestRate(): number {
+    if (!this.vehicle || !this.vehicle.year) {
+      // Tasa por defecto si no hay información del vehículo
+      return 15.99;
+    }
+
+    const year = this.vehicle.year;
+    const downPaymentPercentage = this.calculatorData.downPaymentPercentage;
+
+    // Años 2020-2026
+    if (year >= 2020 && year <= 2026) {
+      if (downPaymentPercentage > 30) {
+        return 15.99;
+      } else {
+        return 16.99;
+      }
+    }
+    
+    // Años 2016-2019
+    if (year >= 2016 && year <= 2019) {
+      if (downPaymentPercentage > 30) {
+        return 16.99;
+      } else {
+        return 17.99;
+      }
+    }
+
+    // Para otros años, usar tasa por defecto
+    return 16.99;
+  }
+
+  // Calcular tasa de interés mensual basada en el año y enganche
+  getCalculatedMonthlyInterestRate(): number {
+    const annualRate = this.getAnnualInterestRate();
+    // Convertir tasa anual a mensual
+    return annualRate / 12;
+  }
+
   // Calcular mensualidad con datos de la calculadora
   calculateInteractiveMonthlyPayment(months?: number): number {
     const term = months || this.calculatorData.selectedTerm;
     const financeAmount = this.calculatorData.financeAmount;
-    const monthlyRate = this.calculatorData.monthlyInterestRate / 100;
+    // Usar la tasa calculada dinámicamente en lugar de la tasa fija
+    const monthlyRate = this.getCalculatedMonthlyInterestRate() / 100;
     
     if (financeAmount <= 0 || monthlyRate <= 0) return 0;
     
