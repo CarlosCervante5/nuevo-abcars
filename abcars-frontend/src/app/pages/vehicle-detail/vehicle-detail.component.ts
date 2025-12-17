@@ -879,7 +879,7 @@ interface MediaItem {
     >
       <div class="bg-white rounded-3xl p-6 max-w-md w-full mx-4 my-8" (click)="$event.stopPropagation()">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-xl font-bold text-gray-900">Ofrecer un Monto</h3>
+          <h3 class="text-xl font-bold text-gray-900">Tu oferta de contado</h3>
           <button 
             (click)="closeOfferModal()"
             class="text-gray-400 hover:text-gray-600 transition-colors"
@@ -932,7 +932,7 @@ interface MediaItem {
             >
           </div>
           
-          <div>
+          <!-- <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Condiciones de pago</label>
             <select 
               [(ngModel)]="offerFormData.payment_conditions"
@@ -943,7 +943,7 @@ interface MediaItem {
               <option value="Financiamiento">Financiamiento</option>
               <option value="Leasing">Leasing</option>
             </select>
-          </div>
+          </div> -->
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Comentarios</label>
