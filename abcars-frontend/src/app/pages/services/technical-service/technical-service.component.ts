@@ -28,12 +28,26 @@ export class TechnicalServiceComponent {
       phone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       email: ['', [Validators.required, Validators.email]],
       serviceType: ['', Validators.required],
+      vehicleYear: ['', [Validators.required, Validators.min(1900), Validators.max(new Date().getFullYear())]],
+      vehicleBrand: ['', Validators.required],
+      vehicleModel: ['', Validators.required],
+      vehicleMileage: ['', [Validators.required, Validators.min(0)]],
       preferredDate: [''],
       preferredTime: ['']
     });
   }
 
-  buildQComments(serviceType: string, preferredDate: string, preferredTime: string): string {
+  getMinDate(): string {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  }
+
+  getCurrentYear(): number {
+    return new Date().getFullYear();
+  }
+
+  buildQComments(serviceType: string, preferredDate: string, preferredTime: string, vehicleYear: string, vehicleBrand: string, vehicleModel: string, vehicleMileage: string): string {
     const serviceTypeText = serviceType === 'mantenimiento' ? 'Mantenimiento preventivo' :
                             serviceType === 'diagnostico' ? 'Diagnóstico computarizado' :
                             serviceType === 'reparacion' ? 'Reparación' :
@@ -48,7 +62,12 @@ export class TechnicalServiceComponent {
 
     const timeFormatted = preferredTime || 'No especificada';
 
-    return `Tipo de servicio: ${serviceTypeText}, Fecha preferida: ${dateFormatted}, Hora preferida: ${timeFormatted}`;
+    const vehicleYearText = vehicleYear || 'No especificado';
+    const vehicleBrandText = vehicleBrand || 'No especificada';
+    const vehicleModelText = vehicleModel || 'No especificado';
+    const vehicleMileageText = vehicleMileage ? `${vehicleMileage} km` : 'No especificado';
+
+    return `Tipo de servicio: ${serviceTypeText}, Fecha preferida: ${dateFormatted}, Hora preferida: ${timeFormatted}, Año: ${vehicleYearText}, Marca: ${vehicleBrandText}, Modelo: ${vehicleModelText}, Kilometraje: ${vehicleMileageText}`;
   }
 
   onSubmitService() {
@@ -66,9 +85,13 @@ export class TechnicalServiceComponent {
     const serviceType = this.serviceForm.value.serviceType;
     const preferredDate = this.serviceForm.value.preferredDate;
     const preferredTime = this.serviceForm.value.preferredTime;
+    const vehicleYear = this.serviceForm.value.vehicleYear;
+    const vehicleBrand = this.serviceForm.value.vehicleBrand;
+    const vehicleModel = this.serviceForm.value.vehicleModel;
+    const vehicleMileage = this.serviceForm.value.vehicleMileage;
 
     // Construir q_comments
-    const qComments = this.buildQComments(serviceType, preferredDate, preferredTime);
+    const qComments = this.buildQComments(serviceType, preferredDate, preferredTime, vehicleYear, vehicleBrand, vehicleModel, vehicleMileage);
 
     // Preparar datos con campos adicionales para enviar (EXCLUYENDO serviceType, preferredDate, preferredTime)
     const formData = {

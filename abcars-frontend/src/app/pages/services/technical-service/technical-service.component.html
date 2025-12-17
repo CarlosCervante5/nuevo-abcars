@@ -303,11 +303,75 @@
                 </p>
               </div>
               
+              <!-- Datos del vehículo -->
+              <div class="border-t border-gray-200 pt-4 mt-4">
+                <h4 class="text-sm font-semibold text-gray-700 mb-4">Datos del vehículo</h4>
+                <div class="space-y-4">
+                  <div>
+                    <label class="form-request-label">Año *</label>
+                    <input 
+                      type="number" 
+                      formControlName="vehicleYear"
+                      [min]="1900"
+                      [max]="getCurrentYear()"
+                      [ngClass]="(serviceForm.get('vehicleYear')?.invalid && serviceForm.get('vehicleYear')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                      placeholder="Ej: 2020"
+                    >
+                    <p *ngIf="serviceForm.get('vehicleYear')?.invalid && serviceForm.get('vehicleYear')?.touched" class="form-error-message">
+                      <span *ngIf="serviceForm.get('vehicleYear')?.errors?.['required']">El año es requerido</span>
+                      <span *ngIf="serviceForm.get('vehicleYear')?.errors?.['min'] || serviceForm.get('vehicleYear')?.errors?.['max']">El año debe estar entre 1900 y {{ getCurrentYear() }}</span>
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label class="form-request-label">Marca *</label>
+                    <input 
+                      type="text" 
+                      formControlName="vehicleBrand"
+                      [ngClass]="(serviceForm.get('vehicleBrand')?.invalid && serviceForm.get('vehicleBrand')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                      placeholder="Ej: Chevrolet"
+                    >
+                    <p *ngIf="serviceForm.get('vehicleBrand')?.invalid && serviceForm.get('vehicleBrand')?.touched" class="form-error-message">
+                      La marca es requerida
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label class="form-request-label">Modelo *</label>
+                    <input 
+                      type="text" 
+                      formControlName="vehicleModel"
+                      [ngClass]="(serviceForm.get('vehicleModel')?.invalid && serviceForm.get('vehicleModel')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                      placeholder="Ej: Equinox"
+                    >
+                    <p *ngIf="serviceForm.get('vehicleModel')?.invalid && serviceForm.get('vehicleModel')?.touched" class="form-error-message">
+                      El modelo es requerido
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label class="form-request-label">Kilometraje *</label>
+                    <input 
+                      type="number" 
+                      formControlName="vehicleMileage"
+                      [min]="0"
+                      [ngClass]="(serviceForm.get('vehicleMileage')?.invalid && serviceForm.get('vehicleMileage')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                      placeholder="Ej: 50000"
+                    >
+                    <p *ngIf="serviceForm.get('vehicleMileage')?.invalid && serviceForm.get('vehicleMileage')?.touched" class="form-error-message">
+                      <span *ngIf="serviceForm.get('vehicleMileage')?.errors?.['required']">El kilometraje es requerido</span>
+                      <span *ngIf="serviceForm.get('vehicleMileage')?.errors?.['min'] && !serviceForm.get('vehicleMileage')?.errors?.['required']">El kilometraje debe ser mayor o igual a 0</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
               <div>
                 <label class="form-request-label">Fecha preferida</label>
                 <input 
                   type="date" 
                   formControlName="preferredDate"
+                  [min]="getMinDate()"
                   class="form-request-input"
                 >
               </div>
