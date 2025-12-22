@@ -115,3 +115,44 @@
   color: #1d4ed8 !important; /* blue-700 */
 }
 
+/* Estilo para banners de promoción */
+.promo-banner {
+  max-height: 480px !important;
+}
+
+/* Posicionar la imagen del banner para mostrar la parte inferior (donde está el texto) */
+.banner-image-position {
+  object-position: center bottom !important;
+}
+
+/* Estilo para tarjetas de vehículos - altura fija */
+:host ::ng-deep app-vehicle-card-tailwind .vehicle-card {
+  height: 480px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Asegurar que el div de contenido ocupe el espacio restante y distribuya el contenido */
+:host ::ng-deep app-vehicle-card-tailwind .vehicle-card > div.p-4,
+:host ::ng-deep app-vehicle-card-tailwind .vehicle-card > div.p-6 {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+/* Asegurar que los botones siempre queden en la parte inferior */
+:host ::ng-deep app-vehicle-card-tailwind .vehicle-card > div.p-4 > div.flex.gap-3,
+:host ::ng-deep app-vehicle-card-tailwind .vehicle-card > div.p-6 > div.flex.gap-3 {
+  margin-top: auto !important;
+}
+
+/* Hacer que el título siempre ocupe el espacio de 2 líneas, incluso cuando solo tiene 1 */
+:host ::ng-deep app-vehicle-card-tailwind .vehicle-card h3.text-xl {
+  min-height: 3.5rem !important; /* Aproximadamente 2 líneas con line-height 1.75 */
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+

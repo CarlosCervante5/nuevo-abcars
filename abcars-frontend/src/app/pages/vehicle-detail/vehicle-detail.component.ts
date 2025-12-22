@@ -373,7 +373,7 @@ interface MediaItem {
               <h2 class="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 md:mb-6 lg:mb-8">Highlights</h2>
               <div *ngIf="vehicle?.description" class="text-gray-700 leading-relaxed">
                 <p class="text-sm md:text-base lg:text-lg whitespace-pre-line">{{ vehicle.description }}</p>
-              </div>
+                </div>
               <div *ngIf="!vehicle?.description" class="text-gray-500 italic">
                 <p class="text-sm md:text-base">No hay descripción disponible para este vehículo.</p>
               </div>
