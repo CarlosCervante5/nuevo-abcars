@@ -100,7 +100,7 @@ export interface Vehicle {
       </div>
 
       <!-- Hover Effect Overlay -->
-      <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"></div>
+      <div class="hidden absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"></div>
     </div>
   `,
   styles: [`

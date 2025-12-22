@@ -283,11 +283,11 @@ interface VehicleWithApiData extends Vehicle {
                   <app-vehicle-card-tailwind *ngIf="isVehicle(item)" [vehicle]="item"></app-vehicle-card-tailwind>
                   
                   <!-- Banner de promoción -->
-                  <div *ngIf="isBanner(item)" class="relative rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 h-full">
+                  <div *ngIf="isBanner(item)" class="promo-banner relative rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 h-full">
                     <img 
                       [src]="getBannerImageUrl(item)" 
                       alt="Promoción" 
-                      class="w-full h-full object-cover"
+                      class="w-full h-full object-cover banner-image-position"
                       (error)="onBannerImageError($event)"
                     />
                   </div>
@@ -299,7 +299,7 @@ interface VehicleWithApiData extends Vehicle {
                 <!-- Información de resultados -->
                 <div class="text-sm text-gray-600">
                   Mostrando {{ getShowingRange().from }} - {{ getShowingRange().to }} de {{ totalVehicles }} vehículos
-                </div>
+            </div>
 
                 <!-- Controles de navegación -->
                 <div class="flex items-center gap-2">
@@ -614,7 +614,7 @@ export class InventoryComponent implements OnInit {
   
   // Propiedades de paginación
   currentPage: number = 1;
-  pageSize: number = 20;
+  pageSize: number = 18;
   totalVehicles: number = 0;
   totalPages: number = 0;
   
