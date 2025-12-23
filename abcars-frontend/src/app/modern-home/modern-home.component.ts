@@ -77,6 +77,9 @@ export class ModernHomeComponent implements OnInit {
   isLoading: boolean = true;
   loadError: string = '';
   activePromotionImages: string[] = [];
+  
+  // Marcas del inventario completo (no solo del Showroom)
+  availableBrandsFromInventory: string[] = [];
 
   // Imagen del banner principal del Hero
   heroImagePath: string = 'assets/images/bg_hero.jpg';
@@ -135,6 +138,8 @@ export class ModernHomeComponent implements OnInit {
     this.loadMainBanner();
     // Cargar promociones primero, los vehículos se cargarán cuando las promociones estén listas
     this.loadActivePromotions();
+    // Cargar marcas del inventario completo
+    this.loadBrandsFromInventory();
   }
 
   loadMainBanner() {
@@ -184,7 +189,8 @@ export class ModernHomeComponent implements OnInit {
             if (vehicleItems.length > 0) {
               if (this.activePromotionImages.length > 0) {
                 this.vehicles = this.insertBannersRandomly(vehicleItems, this.activePromotionImages);
-                this.filteredVehicles = [...this.vehicles];
+                // Comentado: ya no filtra en el Showroom
+                // this.filteredVehicles = [...this.vehicles];
               }
             }
           } else {
@@ -257,7 +263,8 @@ export class ModernHomeComponent implements OnInit {
           }
 
           this.vehicles = vehiclesWithBanners;
-          this.filteredVehicles = [...this.vehicles];
+          // Comentado: ya no filtra en el Showroom
+          // this.filteredVehicles = [...this.vehicles];
         } else {
           this.loadFallbackVehicles();
         }
@@ -292,7 +299,8 @@ export class ModernHomeComponent implements OnInit {
       { type: 'banner' },
       { uuid: '4', brand: 'Nissan', model: 'Versa', year: 2022, price: 280000, mileage: 15000, fuel: 'Gasolina', transmission: 'Automático', status: 'active' }
     ];
-    this.filteredVehicles = [...this.vehicles];
+    // Comentado: ya no filtra en el Showroom
+    // this.filteredVehicles = [...this.vehicles];
   }
 
   formatTransmission(transmission: string): string {
@@ -312,7 +320,8 @@ export class ModernHomeComponent implements OnInit {
 
   // Métodos de búsqueda y filtrado
   onSearchChange() {
-    this.applyFilters();
+    // Comentado: ya no filtra en el Showroom
+    // this.applyFilters();
   }
 
   toggleQuickFilter(filterKey: string) {
@@ -322,7 +331,8 @@ export class ModernHomeComponent implements OnInit {
     } else {
       this.activeFilters.push(filterKey);
     }
-    this.applyFilters();
+    // Comentado: ya no filtra en el Showroom
+    // this.applyFilters();
   }
 
   isVehicle(item: any): item is Vehicle {
@@ -334,7 +344,8 @@ export class ModernHomeComponent implements OnInit {
   }
 
   getVehicleCount(): number {
-    return this.filteredVehicles.filter(v => !this.isBanner(v)).length;
+    // Comentado: ya no filtra en el Showroom, usar vehicles directamente
+    return this.vehicles.filter(v => !this.isBanner(v)).length;
   }
 
   getBannerImageUrl(item: any): string {
@@ -443,6 +454,8 @@ export class ModernHomeComponent implements OnInit {
     return result;
   }
 
+  // Comentado: ya no filtra en el Showroom
+  /*
   applyFilters() {
     // 1) Separar vehículos y banners (preservar banners con sus imágenes)
     const banners: { type: 'banner'; imageUrl?: string }[] = this.vehicles.filter((i: any) => this.isBanner(i)) as { type: 'banner'; imageUrl?: string }[];
@@ -524,6 +537,7 @@ export class ModernHomeComponent implements OnInit {
 
     this.filteredVehicles = rebuilt;
   }
+  */
 
   sortVehicles(vehicles: Vehicle[]) {
     vehicles.sort((a, b) => {
@@ -537,7 +551,8 @@ export class ModernHomeComponent implements OnInit {
   }
 
   onSortChange() {
-    this.applyFilters();
+    // Comentado: ya no filtra en el Showroom
+    // this.applyFilters();
   }
 
   clearFilters() {
@@ -548,7 +563,8 @@ export class ModernHomeComponent implements OnInit {
     this.selectedPriceRange = '';
     this.searchLocation = '';
     this.selectedCategory = 'all';
-    this.applyFilters();
+    // Comentado: ya no filtra en el Showroom
+    // this.applyFilters();
   }
 
   // Métodos de navegación
@@ -574,7 +590,8 @@ export class ModernHomeComponent implements OnInit {
   // Métodos de categorías
   selectCategory(category: string) {
     this.selectedCategory = category;
-    this.applyFilters();
+    // Comentado: ya no filtra en el Showroom
+    // this.applyFilters();
   }
 
   getAvailableModels(): string[] {
@@ -588,11 +605,42 @@ export class ModernHomeComponent implements OnInit {
   }
 
   getAvailableBrands(): string[] {
-    const brands = this.vehicles
-      .filter(this.isVehicle)
-      .map((v: any) => (v as Vehicle).brand)
-      .filter(Boolean) as string[];
-    return Array.from(new Set(brands));
+    // Usar marcas del inventario completo, no solo del Showroom
+    if (this.availableBrandsFromInventory.length > 0) {
+      return this.availableBrandsFromInventory;
+    }
+    // Fallback: si aún no se han cargado, devolver array vacío
+    return [];
+  }
+  
+  loadBrandsFromInventory() {
+    // Cargar todos los vehículos activos del inventario para extraer las marcas
+    // Usar un número grande para obtener todos los vehículos
+    this.vehicleService.searchVehicles({}, 1, 10000).subscribe({
+      next: (response) => {
+        if (response.status === 200 && response.data && response.data.data) {
+          const apiVehicles = response.data.data;
+          
+          // Extraer marcas únicas de todos los vehículos activos
+          const brandsSet = new Set<string>();
+          
+          apiVehicles.forEach((v: any) => {
+            if (v.brand && v.brand.name) {
+              const brandName = this.capitalizeFirst(v.brand.name);
+              brandsSet.add(brandName);
+            }
+          });
+          
+          // Convertir Set a Array y ordenar alfabéticamente
+          this.availableBrandsFromInventory = Array.from(brandsSet).sort();
+        }
+      },
+      error: (error) => {
+        console.error('Error al cargar marcas del inventario:', error);
+        // En caso de error, mantener array vacío
+        this.availableBrandsFromInventory = [];
+      }
+    });
   }
 
   // Métodos de servicios
@@ -627,8 +675,31 @@ export class ModernHomeComponent implements OnInit {
   }
 
   performSearch() {
-    this.applyFilters();
-    this.scrollToResults();
+    // Navegar al inventario con los filtros seleccionados
+    const queryParams: any = {};
+    
+    if (this.selectedBrand) {
+      queryParams.brand = this.selectedBrand;
+    }
+    
+    if (this.selectedModel) {
+      queryParams.model = this.selectedModel;
+    }
+    
+    if (this.selectedPriceRange) {
+      queryParams.price = this.selectedPriceRange;
+    }
+    
+    if (this.searchLocation) {
+      queryParams.location = this.searchLocation;
+    }
+    
+    if (this.searchTerm) {
+      queryParams.search = this.searchTerm;
+    }
+    
+    // Navegar al inventario con los query params
+    this.router.navigate(['/inventario'], { queryParams });
   }
 
   scrollToResults() {
