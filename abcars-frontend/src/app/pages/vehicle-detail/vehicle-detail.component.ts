@@ -975,7 +975,7 @@ interface MediaItem {
     >
       <div class="bg-white rounded-3xl p-8 max-w-4xl w-full mx-4 my-8 max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="text-2xl font-bold text-gray-900">Calculadora de Financiamiento Interactiva</h3>
+          <h3 class="text-2xl font-bold text-gray-900">Simulador de crédito</h3>
           <button 
             (click)="closeCalculatorModal()"
             class="text-gray-400 hover:text-gray-600 transition-colors"
@@ -1038,7 +1038,6 @@ interface MediaItem {
               >
             </div>
 
-
             <!-- Plazo de financiamiento -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Plazo de Financiamiento</label>
@@ -1076,6 +1075,13 @@ interface MediaItem {
                 <span class="text-gray-600">Apertura de Crédito</span>
                 <span class="font-bold text-gray-900">MXN {{ calculatorData.creditOpeningFeeAmount | number }}</span>
               </div>
+            </div>
+
+              <!-- Aviso importante -->
+            <div class="mt-6 p-4 bg-gray-50 rounded-xl border-l-4 border-yellow-400">
+              <p class="text-xs text-gray-600 leading-relaxed">
+                <strong class="text-gray-700">Importante:</strong> Los montos mostrados son una aproximación y no constituyen una oferta final ya que esta puede cambiar de acuerdo a tu historial crediticio, enganche y tasa vigente. Crédito sujeto a términos y condiciones de las instituciones financieras otorgantes.
+              </p>
             </div>
 
             <!-- Mensualidades -->
