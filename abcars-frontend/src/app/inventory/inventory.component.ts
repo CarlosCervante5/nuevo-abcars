@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { VehicleCardTailwindComponent, Vehicle } from '../shared/components/vehicle-card-tailwind/vehicle-card-tailwind.component';
 import { DarkNavComponent } from 'src/app/shared/components/dark-nav/dark-nav.component';
 import { ModernFooterComponent } from 'src/app/shared/components/modern-footer/modern-footer.component';
@@ -612,6 +612,11 @@ export class InventoryComponent implements OnInit {
   searchTerm: string = '';
   sortBy: string = 'newest';
   
+  // Filtros desde home (query params)
+  homeBrand: string = '';
+  homeModel: string = '';
+  homeLocation: string = '';
+  
   // Propiedades de paginación
   currentPage: number = 1;
   pageSize: number = 18;
@@ -670,10 +675,41 @@ export class InventoryComponent implements OnInit {
   constructor(
     private vehicleService: VehicleService,
     private campaingService: CampaingService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
+    // Leer query params del home y establecer filtros
+    this.route.queryParams.subscribe(params => {
+      // Establecer filtros de home
+      this.homeBrand = params['brand'] || '';
+      this.homeModel = params['model'] || '';
+      this.homeLocation = params['location'] || '';
+      
+      // Establecer filtro de precio máximo si viene
+      if (params['price']) {
+        const priceMax = Number(params['price']);
+        if (!isNaN(priceMax)) {
+          this.filters.priceMax = priceMax;
+        }
+      }
+      
+      // Sincronizar searchTerm con todos los filtros de home para mostrarlo en el input
+      // (igual que funciona con búsqueda por texto)
+      if (params['search']) {
+        // Si viene search, usar ese término
+        this.searchTerm = params['search'];
+      } else {
+        // Construir searchTerm con los filtros de home
+        const parts: string[] = [];
+        if (this.homeBrand) parts.push(this.homeBrand);
+        if (this.homeModel) parts.push(this.homeModel);
+        if (this.homeLocation) parts.push(this.homeLocation);
+        this.searchTerm = parts.join(' ');
+      }
+    });
+    
     // Cargar promociones primero, los vehículos se cargarán cuando las promociones estén listas
     this.loadActivePromotions();
   }
@@ -711,12 +747,24 @@ export class InventoryComponent implements OnInit {
             }
           } else {
             // Si los vehículos aún no se han cargado, cargarlos ahora que las promociones están listas
-            this.loadVehicles();
+            // Si hay filtros desde home (brand/model) o searchTerm (pero no solo location), usarlos
+            // Si solo viene location, cargar todos y filtrar localmente
+            if (this.homeBrand || (this.searchTerm && this.searchTerm.trim() && !this.homeLocation)) {
+              this.loadVehicles(1, true);
+            } else {
+              this.loadVehicles();
+            }
           }
         } else {
           // Si no hay promociones, cargar vehículos de todas formas
           if (this.sampleVehicles.length === 0) {
-            this.loadVehicles();
+            // Si hay filtros desde home (brand/model) o searchTerm (pero no solo location), usarlos
+            // Si solo viene location, cargar todos y filtrar localmente
+            if (this.homeBrand || (this.searchTerm && this.searchTerm.trim() && !this.homeLocation)) {
+              this.loadVehicles(1, true);
+            } else {
+              this.loadVehicles();
+            }
           }
         }
       },
@@ -737,9 +785,21 @@ export class InventoryComponent implements OnInit {
 
     // Preparar filtros para la búsqueda
     const filters: any = {};
-    if (useSearchTerm && this.searchTerm && this.searchTerm.trim()) {
+    
+    // Solo aplicar filtros si NO se están limpiando (es decir, si hay filtros activos)
+    // Si vienen brand y model desde home (query params), usar parámetros específicos
+    if (this.homeBrand && this.homeModel) {
+      filters.brand = this.homeBrand;
+      filters.model = this.homeModel;
+    } else if (this.homeBrand) {
+      // Si solo viene brand, usar parámetro brand
+      filters.brand = this.homeBrand;
+    } else if (useSearchTerm && this.searchTerm && this.searchTerm.trim() && !this.homeLocation) {
+      // Si viene searchTerm (modelo solo o término de búsqueda) pero NO solo location, usar keyword
+      // Si solo viene location, no usar keyword (se filtrará localmente)
       filters.keyword = this.searchTerm.trim();
     }
+    // Si no hay ningún filtro, filters queda vacío y se cargan todos los vehículos
 
     this.vehicleService.searchVehicles(filters, page, this.pageSize).subscribe({
       next: (response) => {
@@ -1047,6 +1107,12 @@ export class InventoryComponent implements OnInit {
   }
 
   onSearchChange() {
+    // Si el usuario está buscando desde el inventario, limpiar filtros de home
+    // para que la nueva búsqueda no use los filtros persistentes (igual que con texto)
+    this.homeBrand = '';
+    this.homeModel = '';
+    this.homeLocation = '';
+    
     // Resetear a página 1 cuando cambia la búsqueda
     this.currentPage = 1;
     
@@ -1079,7 +1145,12 @@ export class InventoryComponent implements OnInit {
       const name = (item.name || '').toString();
       const uuid = (item.uuid || '').toString().toLowerCase();
       const vin = (item.apiData?.vin || '').toString().toLowerCase();
-      const textHaystack = `${uuid} ${vin} ${brand} ${model} ${item.year} ${name}`.toLowerCase();
+      
+      // Incluir ubicación del dealership en la búsqueda por texto
+      const apiDealershipName = (item.apiData as any)?.dealership?.name || '';
+      const apiDealershipLocation = (item.apiData as any)?.dealership?.location || '';
+      const locationHaystack = `${apiDealershipName} ${apiDealershipLocation}`.toLowerCase();
+      const textHaystack = `${uuid} ${vin} ${brand} ${model} ${item.year} ${name} ${locationHaystack}`.toLowerCase();
       const matchesSearch = !normalizedSearch || textHaystack.includes(normalizedSearch);
 
       // Filtro de precio
@@ -1087,7 +1158,20 @@ export class InventoryComponent implements OnInit {
 
       // Filtro de marca
       const selectedBrands = Object.keys(this.filters.selectedBrands).filter(key => this.filters.selectedBrands[key]);
-      const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(brand);
+      // Si hay homeBrand desde query params, priorizar ese filtro
+      const matchesBrand = this.homeBrand 
+        ? brand.toLowerCase() === this.homeBrand.toLowerCase()
+        : (selectedBrands.length === 0 || selectedBrands.includes(brand));
+      
+      // Filtro de modelo (si viene desde home)
+      const matchesModel = this.homeModel 
+        ? model.toLowerCase() === this.homeModel.toLowerCase()
+        : true;
+      
+      // Filtro de ubicación (si viene desde home)
+      const matchesLocation = this.homeLocation 
+        ? locationHaystack.includes(this.homeLocation.toLowerCase())
+        : true;
 
       // Filtro de año
       const itemYear = item.year || item.model?.year || new Date().getFullYear();
@@ -1113,7 +1197,7 @@ export class InventoryComponent implements OnInit {
       const itemColor = (item.exterior_color || '').toLowerCase();
       const matchesColor = selectedColors.length === 0 || selectedColors.some(color => itemColor.includes(color.toLowerCase()));
 
-      return matchesSearch && matchesPrice && matchesBrand && matchesYear && matchesMileage && matchesBody && matchesTransmission && matchesColor;
+      return matchesSearch && matchesPrice && matchesBrand && matchesModel && matchesLocation && matchesYear && matchesMileage && matchesBody && matchesTransmission && matchesColor;
     });
 
     // 4) Si es búsqueda por VIN, priorizar el vehículo con el VIN exacto
@@ -1151,6 +1235,12 @@ export class InventoryComponent implements OnInit {
     }
 
     this.filteredItems = rebuilt;
+    
+    // Actualizar totalVehicles con el número de vehículos filtrados (sin banners)
+    // Esto asegura que el número mostrado coincida con los resultados visibles
+    // (igual que funciona con búsqueda por texto)
+    const vehicleCount = this.filteredItems.filter(item => !this.isBanner(item)).length;
+    this.totalVehicles = vehicleCount;
   }
 
   sortVehicles(vehicles: VehicleWithApiData[]) {
@@ -1190,24 +1280,26 @@ export class InventoryComponent implements OnInit {
       this.filters.selectedColors[color] = false;
     });
     
-    // Aplicar filtro de marca desde query params si existe
-    this.route.queryParams.subscribe(params => {
-      if (params['brand']) {
-        const brandName = params['brand'];
-        if (this.availableBrands.includes(brandName)) {
-          this.filters.selectedBrands[brandName] = true;
-          this.applyFilters();
-        }
-      }
-    }).unsubscribe(); // Solo necesitamos leerlo una vez
-
-    // Calcular rangos
+    // Calcular rangos primero
     if (this.sampleVehicles.length > 0) {
       const prices = this.sampleVehicles.map(v => v.sale_price);
       this.priceRange.min = Math.min(...prices);
       this.priceRange.max = Math.max(...prices);
       this.filters.priceMin = this.priceRange.min;
-      this.filters.priceMax = this.priceRange.max;
+      
+      // Verificar si viene precio desde query params
+      const priceFromParams = this.route.snapshot.queryParams['price'];
+      if (priceFromParams) {
+        const priceMax = Number(priceFromParams);
+        if (!isNaN(priceMax) && priceMax > 0) {
+          // Establecer el precio máximo del query param, pero no exceder el máximo disponible
+          this.filters.priceMax = Math.min(priceMax, this.priceRange.max);
+        } else {
+          this.filters.priceMax = this.priceRange.max;
+        }
+      } else {
+        this.filters.priceMax = this.priceRange.max;
+      }
 
       const years = this.sampleVehicles.map(v => v.year || v.model?.year || new Date().getFullYear());
       this.yearRange.min = Math.min(...years);
@@ -1222,6 +1314,25 @@ export class InventoryComponent implements OnInit {
         this.filters.maxMileage = this.mileageRange.max;
       }
     }
+
+    // Aplicar filtros desde query params si existen (desde home)
+    this.route.queryParams.subscribe(params => {
+      // Filtro de marca
+      if (params['brand']) {
+        const brandName = params['brand'];
+        // Buscar la marca en availableBrands (comparación case-insensitive)
+        const matchingBrand = this.availableBrands.find(b => 
+          b.toLowerCase() === brandName.toLowerCase()
+        );
+        if (matchingBrand) {
+          this.filters.selectedBrands[matchingBrand] = true;
+        } else {
+          // Si no se encuentra exactamente, intentar agregarla de todas formas
+          // (puede ser que la marca aún no esté en availableBrands)
+          this.filters.selectedBrands[brandName] = true;
+        }
+      }
+    }).unsubscribe(); // Solo necesitamos leerlo una vez
 
     // Aplicar filtros iniciales
     this.applyFilters();
@@ -1243,7 +1354,15 @@ export class InventoryComponent implements OnInit {
 
 
   clearFilters(): void {
+    // Limpiar filtros de home (query params)
+    this.homeBrand = '';
+    this.homeModel = '';
+    this.homeLocation = '';
+    
+    // Limpiar término de búsqueda
     this.searchTerm = '';
+    
+    // Resetear filtros
     this.filters.priceMin = this.priceRange.min;
     this.filters.priceMax = this.priceRange.max;
     this.filters.yearFrom = this.yearRange.min;
@@ -1266,9 +1385,17 @@ export class InventoryComponent implements OnInit {
       this.filters.selectedColors[color] = false;
     });
     
-    // Resetear paginación
+    // Limpiar query params de la URL para evitar que se restauren los filtros
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      replaceUrl: true
+    });
+    
+    // Resetear paginación y recargar todos los vehículos desde el servidor sin filtros
+    // (igual que funciona con búsqueda por texto)
     this.currentPage = 1;
-    this.loadVehicles(1);
+    this.loadVehicles(1, false);
   }
 
   formatPrice(price: number): string {
