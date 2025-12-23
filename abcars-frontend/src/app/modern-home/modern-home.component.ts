@@ -105,8 +105,8 @@ export class ModernHomeComponent implements OnInit {
   // Servicios ABCars
   abcarsServices: FAQ[] = [
     {
-      question: 'Compramos tu auto',
-      answer: 'Realizamos la compra de tu vehículo actual al mejor precio del mercado. Evaluamos tu auto de forma gratuita y te ofrecemos una cotización competitiva en el momento.',
+      question: 'Tomamos tu auto a cuenta',
+      answer: 'Tomamos a cuenta tu vehículo actual al mejor precio del mercado. Lo evaluamos de forma gratuita y te ofrecemos una cotización competitiva en el momento.',
       isOpen: false
     },
     {
