@@ -238,11 +238,48 @@ export class AppointmentFormComponent implements OnInit {
 
     private async createValuationClient(): Promise<RegisterResponse | null> {
         try {
-            return await firstValueFrom(this._adminservice.setRiders(
-                this.form.value
-            ));
+            // Obtener valores del formulario
+            const name = this.form.get('name')?.value;
+            const last_name = this.form.get('last_name')?.value;
+            const email = this.form.get('email')?.value;
+            const phone_1 = this.form.get('phone_1')?.value;
+            
+            // Validar que los campos requeridos no estén vacíos
+            if (!name || !name.trim()) {
+                throw new Error('El campo nombre es requerido');
+            }
+            if (!last_name || !last_name.trim()) {
+                throw new Error('El campo apellidos es requerido');
+            }
+            if (!email || !email.trim()) {
+                throw new Error('El campo email es requerido');
+            }
+            if (!phone_1 || !phone_1.trim()) {
+                throw new Error('El campo teléfono es requerido');
+            }
+            
+            // Construir objeto solo con los campos del cliente necesarios
+            const clientData = {
+                name: name.trim(),
+                last_name: last_name.trim(),
+                email: email.trim(),
+                phone_1: phone_1.trim()
+            };
+            
+            // Log para debug
+            console.log('Datos del cliente a enviar:', clientData);
+            console.log('Valores del formulario completo:', this.form.value);
+            
+            // Crear FormGroup temporal solo con los datos del cliente
+            const clientForm = this._formBuilder.group(clientData);
+            
+            return await firstValueFrom(this._adminservice.setRiders(clientForm));
         } catch (error: any) {
             console.error('Error al crear el cliente de valuación:', error);
+            // Log del error completo para ver qué campos faltan
+            if (error.error && error.error.errors) {
+                console.error('Errores de validación del backend:', error.error.errors);
+            }
             throw new Error('Error en la creación del Cliente de valuación.');
         }
     }
