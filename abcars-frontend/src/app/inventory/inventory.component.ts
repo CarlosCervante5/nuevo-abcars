@@ -622,6 +622,7 @@ export class InventoryComponent implements OnInit {
   pageSize: number = 18;
   totalVehicles: number = 0;
   totalPages: number = 0;
+  totalVehiclesFromServer: number = 0; // Total de vehículos activos del servidor (sin filtros)
   
   // Datos de vehículos
   sampleVehicles: VehicleWithApiData[] = [];
@@ -809,6 +810,15 @@ export class InventoryComponent implements OnInit {
           // Guardar información de paginación
           this.totalVehicles = response.data.total || 0;
           this.totalPages = response.data.last_page || Math.ceil(this.totalVehicles / this.pageSize);
+          
+          // Si no hay filtros, guardar el total del servidor para mostrarlo cuando no hay filtros
+          const hasNoFilters = !this.searchTerm && 
+            !this.homeBrand && !this.homeModel && !this.homeLocation &&
+            Object.keys(filters).length === 0;
+          
+          if (hasNoFilters) {
+            this.totalVehiclesFromServer = response.data.total || 0;
+          }
           
           // Mapear vehículos de la API para incluir el año desde model.year y guardar apiData
           this.sampleVehicles = apiVehicles.map(v => ({
@@ -1236,11 +1246,41 @@ export class InventoryComponent implements OnInit {
 
     this.filteredItems = rebuilt;
     
-    // Actualizar totalVehicles con el número de vehículos filtrados (sin banners)
-    // Esto asegura que el número mostrado coincida con los resultados visibles
-    // (igual que funciona con búsqueda por texto)
-    const vehicleCount = this.filteredItems.filter(item => !this.isBanner(item)).length;
-    this.totalVehicles = vehicleCount;
+    // Verificar si hay filtros activos
+    const hasActiveFilters = this.hasActiveFilters();
+    
+    if (hasActiveFilters) {
+      // Si hay filtros, usar el conteo local (número de vehículos filtrados de la página actual)
+      const vehicleCount = this.filteredItems.filter(item => !this.isBanner(item)).length;
+      this.totalVehicles = vehicleCount;
+    } else {
+      // Si no hay filtros, usar el total del servidor (total de vehículos activos)
+      this.totalVehicles = this.totalVehiclesFromServer || 0;
+    }
+  }
+  
+  hasActiveFilters(): boolean {
+    // Verificar si hay algún filtro activo
+    const hasSearchTerm = !!(this.searchTerm && this.searchTerm.trim());
+    const hasHomeFilters = !!(this.homeBrand || this.homeModel || this.homeLocation);
+    
+    const selectedBrands = Object.keys(this.filters.selectedBrands).filter(key => this.filters.selectedBrands[key]);
+    const hasBrandFilters = selectedBrands.length > 0;
+    
+    const selectedBodies = Object.keys(this.filters.selectedBodies).filter(key => this.filters.selectedBodies[key]);
+    const hasBodyFilters = selectedBodies.length > 0;
+    
+    const selectedColors = Object.keys(this.filters.selectedColors).filter(key => this.filters.selectedColors[key]);
+    const hasColorFilters = selectedColors.length > 0;
+    
+    const hasTransmissionFilters = this.filters.selectedTransmissions.manual || this.filters.selectedTransmissions.automatic;
+    
+    const hasPriceFilters = this.filters.priceMin > this.priceRange.min || this.filters.priceMax < this.priceRange.max;
+    const hasYearFilters = this.filters.yearFrom > this.yearRange.min || this.filters.yearTo < this.yearRange.max;
+    const hasMileageFilters = !!(this.filters.maxMileage && this.filters.maxMileage < this.mileageRange.max);
+    
+    return hasSearchTerm || hasHomeFilters || hasBrandFilters || hasBodyFilters || 
+           hasColorFilters || hasTransmissionFilters || hasPriceFilters || hasYearFilters || hasMileageFilters;
   }
 
   sortVehicles(vehicles: VehicleWithApiData[]) {
