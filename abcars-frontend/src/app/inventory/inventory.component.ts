@@ -130,6 +130,24 @@ interface VehicleWithApiData extends Vehicle {
                     </div>
                   </div>
 
+                  <!-- Filtro Sucursal -->
+                  <div class="border-b border-gray-100">
+                    <button (click)="toggleFilter('sucursal')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                      <span class="filter-label">Sucursal</span>
+                      <svg [class.rotate-180]="openFilters.sucursal" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </button>
+                    <div *ngIf="openFilters.sucursal" class="px-4 pb-4 max-h-48 overflow-y-auto">
+                      <div class="space-y-2">
+                        <label *ngFor="let sucursal of availableSucursales" class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                          <input type="checkbox" [value]="sucursal" [(ngModel)]="filters.selectedSucursales[sucursal]" (change)="applyFilters()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                          <span class="text-sm text-gray-700 capitalize">{{ sucursal }}</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
                   <!-- Filtro Tipo de auto -->
                   <div class="border-b border-gray-100">
                     <button (click)="toggleFilter('body')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
@@ -478,6 +496,24 @@ interface VehicleWithApiData extends Vehicle {
             </div>
           </div>
 
+          <!-- Filtro Sucursal -->
+          <div class="border-b border-gray-100 pb-4">
+            <button (click)="toggleFilter('sucursal')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+              <span class="font-medium text-gray-700">Sucursal</span>
+              <svg [class.rotate-180]="openFilters.sucursal" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div *ngIf="openFilters.sucursal" class="px-4 pb-4 max-h-48 overflow-y-auto">
+              <div class="space-y-2">
+                <label *ngFor="let sucursal of availableSucursales" class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                  <input type="checkbox" [value]="sucursal" [(ngModel)]="filters.selectedSucursales[sucursal]" (change)="applyFilters()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                  <span class="text-sm text-gray-700 capitalize">{{ sucursal }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
           <!-- Filtro Tipo de auto -->
           <div class="border-b border-gray-100 pb-4">
             <button (click)="toggleFilter('body')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
@@ -649,7 +685,8 @@ export class InventoryComponent implements OnInit {
       manual: false,
       automatic: false
     },
-    selectedColors: {} as { [key: string]: boolean }
+    selectedColors: {} as { [key: string]: boolean },
+    selectedSucursales: {} as { [key: string]: boolean }
   };
 
   // Acordeones
@@ -660,13 +697,15 @@ export class InventoryComponent implements OnInit {
     mileage: false,
     body: false,
     transmission: false,
-    color: false
+    color: false,
+    sucursal: false
   };
 
   // Datos disponibles para filtros
   availableBrands: string[] = [];
   availableBodies: string[] = ['Sedán', 'SUV', 'Hatchback', 'Pickup', 'Coupe', 'Convertible', 'Minivan'];
   availableColors: string[] = ['Negro', 'Blanco', 'Gris', 'Rojo', 'Azul', 'Verde', 'Amarillo', 'Naranja', 'Beige'];
+  availableSucursales: string[] = [];
 
   // Rangos
   priceRange = { min: 0, max: 2000000 };
@@ -1160,8 +1199,13 @@ export class InventoryComponent implements OnInit {
     const selectedBrands = Object.keys(this.filters.selectedBrands).filter(key => this.filters.selectedBrands[key]);
     const hadHomeBrandButNoCheckboxBrand = this.homeBrand && selectedBrands.length === 0;
     
-    if (hadHomeBrandButNoCheckboxBrand) {
-      // Se desmarcó la marca que venía desde home, limpiar filtros de home y recargar todos los vehículos
+    // 0.1) Detectar si se desmarcó la sucursal cuando había homeLocation desde query params
+    // Si homeLocation está establecido pero ya no hay sucursales seleccionadas en checkboxes, recargar todos los vehículos
+    const selectedSucursales = Object.keys(this.filters.selectedSucursales).filter(key => this.filters.selectedSucursales[key]);
+    const hadHomeLocationButNoCheckboxSucursal = this.homeLocation && selectedSucursales.length === 0;
+    
+    if (hadHomeBrandButNoCheckboxBrand || hadHomeLocationButNoCheckboxSucursal) {
+      // Se desmarcó la marca o sucursal que venía desde home, limpiar filtros de home y recargar todos los vehículos
       this.homeBrand = '';
       this.homeModel = '';
       this.homeLocation = '';
@@ -1247,7 +1291,11 @@ export class InventoryComponent implements OnInit {
       const itemColor = (item.exterior_color || '').toLowerCase();
       const matchesColor = selectedColors.length === 0 || selectedColors.some(color => itemColor.includes(color.toLowerCase()));
 
-      return matchesSearch && matchesPrice && matchesBrand && matchesModel && matchesLocation && matchesYear && matchesMileage && matchesBody && matchesTransmission && matchesColor;
+      // Filtro de sucursal (usar apiDealershipLocation que ya está declarada arriba)
+      const selectedSucursales = Object.keys(this.filters.selectedSucursales).filter(key => this.filters.selectedSucursales[key]);
+      const matchesSucursal = selectedSucursales.length === 0 || (apiDealershipLocation && selectedSucursales.includes(apiDealershipLocation.trim()));
+
+      return matchesSearch && matchesPrice && matchesBrand && matchesModel && matchesLocation && matchesYear && matchesMileage && matchesBody && matchesTransmission && matchesColor && matchesSucursal;
     });
 
     // 4) Si es búsqueda por VIN, priorizar el vehículo con el VIN exacto
@@ -1307,6 +1355,9 @@ export class InventoryComponent implements OnInit {
     const selectedBrands = Object.keys(this.filters.selectedBrands).filter(key => this.filters.selectedBrands[key]);
     const hasBrandFilters = selectedBrands.length > 0;
     
+    const selectedSucursales = Object.keys(this.filters.selectedSucursales).filter(key => this.filters.selectedSucursales[key]);
+    const hasSucursalFilters = selectedSucursales.length > 0;
+    
     const selectedBodies = Object.keys(this.filters.selectedBodies).filter(key => this.filters.selectedBodies[key]);
     const hasBodyFilters = selectedBodies.length > 0;
     
@@ -1320,7 +1371,7 @@ export class InventoryComponent implements OnInit {
     const hasMileageFilters = !!(this.filters.maxMileage && this.filters.maxMileage < this.mileageRange.max);
     
     return hasSearchTerm || hasHomeFilters || hasBrandFilters || hasBodyFilters || 
-           hasColorFilters || hasTransmissionFilters || hasPriceFilters || hasYearFilters || hasMileageFilters;
+           hasColorFilters || hasTransmissionFilters || hasSucursalFilters || hasPriceFilters || hasYearFilters || hasMileageFilters;
   }
 
   sortVehicles(vehicles: VehicleWithApiData[]) {
@@ -1349,6 +1400,16 @@ export class InventoryComponent implements OnInit {
     this.brands = Array.from(brands).sort();
     this.availableBrands = this.brands;
     
+    // Extraer sucursales únicas de los vehículos
+    const sucursales = new Set<string>();
+    this.sampleVehicles.forEach(v => {
+      const dealershipLocation = (v.apiData as any)?.dealership?.location;
+      if (dealershipLocation && dealershipLocation.trim()) {
+        sucursales.add(dealershipLocation.trim());
+      }
+    });
+    this.availableSucursales = Array.from(sucursales).sort();
+    
     // Inicializar checkboxes
     this.availableBrands.forEach(brand => {
       this.filters.selectedBrands[brand] = false;
@@ -1359,6 +1420,23 @@ export class InventoryComponent implements OnInit {
     this.availableColors.forEach(color => {
       this.filters.selectedColors[color] = false;
     });
+    this.availableSucursales.forEach(sucursal => {
+      this.filters.selectedSucursales[sucursal] = false;
+    });
+    
+    // Si hay homeLocation desde query params, marcar la sucursal correspondiente
+    if (this.homeLocation) {
+      const matchingSucursal = this.availableSucursales.find(s => 
+        s.toLowerCase() === this.homeLocation.toLowerCase()
+      );
+      if (matchingSucursal) {
+        this.filters.selectedSucursales[matchingSucursal] = true;
+      } else {
+        // Si no se encuentra exactamente, intentar agregarla de todas formas
+        // (puede ser que la sucursal aún no esté en availableSucursales)
+        this.filters.selectedSucursales[this.homeLocation] = true;
+      }
+    }
     
     // Calcular rangos primero
     if (this.sampleVehicles.length > 0) {
@@ -1412,6 +1490,24 @@ export class InventoryComponent implements OnInit {
           this.filters.selectedBrands[brandName] = true;
         }
       }
+
+      // Filtro de sucursal (ubicación desde home)
+      // Nota: Las sucursales se extraen en populateFilters(), así que si aún no están disponibles,
+      // se marcarán cuando se llame a populateFilters() (ver lógica en populateFilters())
+      if (params['location'] && this.availableSucursales.length > 0) {
+        const locationName = params['location'];
+        // Buscar la sucursal en availableSucursales (comparación case-insensitive)
+        const matchingSucursal = this.availableSucursales.find(s => 
+          s.toLowerCase() === locationName.toLowerCase()
+        );
+        if (matchingSucursal) {
+          this.filters.selectedSucursales[matchingSucursal] = true;
+        } else {
+          // Si no se encuentra exactamente, intentar agregarla de todas formas
+          // (puede ser que la sucursal aún no esté en availableSucursales)
+          this.filters.selectedSucursales[locationName] = true;
+        }
+      }
     }).unsubscribe(); // Solo necesitamos leerlo una vez
 
     // Aplicar filtros iniciales
@@ -1452,6 +1548,7 @@ export class InventoryComponent implements OnInit {
     this.filters.selectedBodies = {};
     this.filters.selectedTransmissions = { manual: false, automatic: false };
     this.filters.selectedColors = {};
+    this.filters.selectedSucursales = {};
     this.sortBy = 'newest';
     
     // Reinicializar checkboxes
@@ -1463,6 +1560,9 @@ export class InventoryComponent implements OnInit {
     });
     this.availableColors.forEach(color => {
       this.filters.selectedColors[color] = false;
+    });
+    this.availableSucursales.forEach(sucursal => {
+      this.filters.selectedSucursales[sucursal] = false;
     });
     
     // Limpiar query params de la URL para evitar que se restauren los filtros
