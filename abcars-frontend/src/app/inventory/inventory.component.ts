@@ -787,6 +787,9 @@ export class InventoryComponent implements OnInit {
     // Preparar filtros para la búsqueda
     const filters: any = {};
     
+    // Detectar si hay filtros desde home para cargar todos los vehículos filtrados de una vez
+    const hasHomeFilters = !!(this.homeBrand || this.homeModel || this.homeLocation);
+    
     // Solo aplicar filtros si NO se están limpiando (es decir, si hay filtros activos)
     // Si vienen brand y model desde home (query params), usar parámetros específicos
     if (this.homeBrand && this.homeModel) {
@@ -802,14 +805,26 @@ export class InventoryComponent implements OnInit {
     }
     // Si no hay ningún filtro, filters queda vacío y se cargan todos los vehículos
 
-    this.vehicleService.searchVehicles(filters, page, this.pageSize).subscribe({
+    // Si hay filtros de home, cargar todos los vehículos filtrados (paginate = 100) en página 1
+    // Si no hay filtros de home, usar paginación normal del servidor
+    const paginate = hasHomeFilters ? 100 : this.pageSize;
+    const serverPage = hasHomeFilters ? 1 : page;
+
+    this.vehicleService.searchVehicles(filters, serverPage, paginate).subscribe({
       next: (response) => {
         if (response.status === 200 && response.data && response.data.data) {
           const apiVehicles = response.data.data;
           
           // Guardar información de paginación
           this.totalVehicles = response.data.total || 0;
-          this.totalPages = response.data.last_page || Math.ceil(this.totalVehicles / this.pageSize);
+          
+          // Si hay filtros de home, mostrar todos en una sola página (totalPages = 1)
+          // Si no hay filtros de home, usar paginación normal del servidor
+          if (hasHomeFilters) {
+            this.totalPages = 1; // Todos los resultados en una sola página
+          } else {
+            this.totalPages = response.data.last_page || Math.ceil(this.totalVehicles / this.pageSize);
+          }
           
           // Si no hay filtros, guardar el total del servidor para mostrarlo cuando no hay filtros
           const hasNoFilters = !this.searchTerm && 
@@ -1140,6 +1155,31 @@ export class InventoryComponent implements OnInit {
   }
 
   applyFilters() {
+    // 0) Detectar si se desmarcó la marca cuando había homeBrand desde query params
+    // Si homeBrand está establecido pero ya no hay marcas seleccionadas en checkboxes, recargar todos los vehículos
+    const selectedBrands = Object.keys(this.filters.selectedBrands).filter(key => this.filters.selectedBrands[key]);
+    const hadHomeBrandButNoCheckboxBrand = this.homeBrand && selectedBrands.length === 0;
+    
+    if (hadHomeBrandButNoCheckboxBrand) {
+      // Se desmarcó la marca que venía desde home, limpiar filtros de home y recargar todos los vehículos
+      this.homeBrand = '';
+      this.homeModel = '';
+      this.homeLocation = '';
+      this.searchTerm = '';
+      this.currentPage = 1;
+      
+      // Limpiar query params de la URL para evitar que se restauren los filtros
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true
+      });
+      
+      // Recargar todos los vehículos desde el servidor sin filtros
+      this.loadVehicles(1, false);
+      return; // Salir temprano, loadVehicles() llamará a applyFilters() nuevamente
+    }
+    
     // 1) Separar vehículos y banners (preservar banners con sus imágenes)
     const banners: { type: 'banner'; imageUrl?: string }[] = this.mixedItems.filter((i: any) => this.isBanner(i)) as { type: 'banner'; imageUrl?: string }[];
     const vehicleItems: Vehicle[] = (this.mixedItems.filter((i: any) => this.isVehicle(i)) as Vehicle[]);
