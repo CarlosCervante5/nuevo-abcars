@@ -218,8 +218,8 @@ export class ModernHomeComponent implements OnInit {
     this.isLoading = true;
     this.loadError = '';
 
-    // Cargar 7 vehículos desde la API (el 8vo será el banner)
-    this.vehicleService.searchVehicles({}, 1, 7).subscribe({
+    // Cargar 10 vehículos desde la API (el 11vo será el banner)
+    this.vehicleService.searchVehicles({}, 1, 10).subscribe({
       next: (response) => {
         if (response.status === 200 && response.data && response.data.data) {
           const apiVehicles = response.data.data;
