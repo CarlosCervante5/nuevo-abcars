@@ -211,6 +211,19 @@
         <p class="text-lg lg:text-xl text-gray-600 mb-8">Intenta ajustar tus filtros de búsqueda</p>
         <button (click)="clearFilters()" class="px-8 py-4 bg-yellow-500 text-white rounded-lg text-base font-semibold hover:bg-yellow-600 transition-colors">Limpiar filtros</button>
       </div>
+
+      <!-- Botón Ver todo -->
+      <div *ngIf="!isLoading && !loadError && vehicles.length > 0" class="text-center mt-12">
+        <a 
+          routerLink="/inventario" 
+          class="inline-flex items-center gap-2 px-6 py-2.5 bg-yellow-500 text-white rounded-lg font-semibold transition-all duration-300 text-lg shadow-lg hover:shadow-xl hover:-translate-y-1"
+        >
+          Ver todo
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
     </div>
   </section>
 

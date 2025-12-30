@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { VehicleCardComponent } from './vehicle-card/vehicle-card.component';
 import { HomeNavComponent } from '../shared/components/home-nav/home-nav.component';
@@ -43,7 +43,7 @@ interface QuickFilter {
 @Component({
   selector: 'app-modern-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, VehicleCardComponent, HomeNavComponent, ModernFooterComponent],
+  imports: [CommonModule, FormsModule, RouterModule, VehicleCardComponent, HomeNavComponent, ModernFooterComponent],
   templateUrl: './modern-home.component.html',
   styleUrls: ['./modern-home.component.css'],
   animations: [
