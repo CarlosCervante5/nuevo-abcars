@@ -153,6 +153,18 @@ export class FinancingComponent {
     return this.getDownPayment() + (this.getMonthlyPayment() * this.calculatorData.termMonths);
   }
 
+  getFormattedDownPayment(): string {
+    return this.getDownPayment().toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  getFormattedMonthlyPayment(): string {
+    return this.getMonthlyPayment().toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  getFormattedTotalAmount(): string {
+    return this.getTotalAmount().toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
   onSubmitFinancing() {
     if (this.financingForm.invalid || this.isSubmitting) {
       // Marcar todos los campos como touched para mostrar errores
