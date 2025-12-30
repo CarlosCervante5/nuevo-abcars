@@ -4,13 +4,15 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { RouterModule } from '@angular/router';
 import { HomeNavComponent } from '../../../shared/components/home-nav/home-nav.component';
 import { ModernFooterComponent } from '../../../shared/components/modern-footer/modern-footer.component';
+import { VehicleCardTailwindComponent, Vehicle } from '../../../shared/components/vehicle-card-tailwind/vehicle-card-tailwind.component';
 import { LeadService } from '../../../shared/services/lead.service';
+import { VehicleService } from '../../../shared/services/vehicle.service';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-financing',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, HomeNavComponent, ModernFooterComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, HomeNavComponent, ModernFooterComponent, VehicleCardTailwindComponent],
   templateUrl: './financing.component.html',
   styleUrls: ['./financing.component.css']
 })
@@ -25,9 +27,16 @@ export class FinancingComponent {
   financingForm: FormGroup;
   isSubmitting: boolean = false;
 
+  // Propiedades para el carrusel de vehículos
+  filteredVehicles: Vehicle[] = [];
+  isLoadingVehicles: boolean = false;
+  showVehicleCarousel: boolean = false;
+  private debounceTimer: any = null;
+
   constructor(
     private fb: FormBuilder,
-    private leadService: LeadService
+    private leadService: LeadService,
+    private vehicleService: VehicleService
   ) {
     this.financingForm = this.fb.group({
       name: ['', Validators.required],
@@ -40,6 +49,80 @@ export class FinancingComponent {
 
   updateCalculations() {
     // Los cálculos se actualizan automáticamente con los getters
+    
+    // Buscar vehículos con debounce para evitar múltiples llamadas mientras el usuario escribe
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+    }
+    
+    this.debounceTimer = setTimeout(() => {
+      this.loadVehiclesByPrice(this.calculatorData.vehiclePrice);
+    }, 500);
+  }
+
+  loadVehiclesByPrice(price: number): void {
+    // Validar que el precio sea válido
+    if (!price || price <= 0) {
+      this.showVehicleCarousel = false;
+      this.filteredVehicles = [];
+      return;
+    }
+
+    this.isLoadingVehicles = true;
+    this.showVehicleCarousel = false;
+
+    // Buscar vehículos en un rango de ±100,000 alrededor del precio ingresado
+    // El backend no está aplicando el filtro price_to correctamente, así que
+    // cargamos todos los vehículos y filtramos localmente
+    const filters: any = {};
+
+    // Calcular el rango de precios: ±100,000 del precio ingresado
+    const priceRange = {
+      min: Math.max(0, price - 100000), // No permitir precios negativos
+      max: price + 100000
+    };
+
+    // Cargar más vehículos para tener una mejor muestra (el backend no filtra por precio)
+    this.vehicleService.searchVehicles(filters, 1, 50).subscribe({
+      next: (response) => {
+        this.isLoadingVehicles = false;
+        
+        if (response.status === 200 && response.data && response.data.data) {
+          const apiVehicles = response.data.data;
+          
+          // Filtrar localmente por rango de precio (el backend no está aplicando el filtro price_to)
+          const filteredByPrice = apiVehicles.filter(v => {
+            const vehiclePrice = v.sale_price || 0;
+            return vehiclePrice >= priceRange.min && vehiclePrice <= priceRange.max;
+          });
+          
+          // Mapear vehículos de la API al formato que espera VehicleCardTailwindComponent
+          this.filteredVehicles = filteredByPrice.map(v => ({
+            uuid: v.uuid,
+            name: v.name,
+            sale_price: v.sale_price,
+            mileage: v.mileage || 0,
+            exterior_color: v.exterior_color || '',
+            year: v.model?.year || new Date().getFullYear(),
+            brand: v.brand ? { name: v.brand.name } : undefined,
+            model: v.model ? { name: v.model.name, year: v.model.year || new Date().getFullYear() } : undefined,
+            dealership: v.dealership ? { name: v.dealership.name, location: v.dealership.location } : undefined,
+            first_image: v.first_image ? { service_image_url: v.first_image.service_image_url } : undefined
+          }));
+
+          // Mostrar el carrusel solo si hay vehículos que cumplen con el precio
+          this.showVehicleCarousel = this.filteredVehicles.length > 0;
+        } else {
+          this.filteredVehicles = [];
+          this.showVehicleCarousel = false;
+        }
+      },
+      error: (error) => {
+        this.isLoadingVehicles = false;
+        this.filteredVehicles = [];
+        this.showVehicleCarousel = false;
+      }
+    });
   }
 
   getDownPayment(): number {

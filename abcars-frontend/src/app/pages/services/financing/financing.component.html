@@ -124,6 +124,33 @@
             </div>
           </div>
 
+          <!-- Carrusel de vehículos disponibles -->
+          <div *ngIf="showVehicleCarousel || isLoadingVehicles" class="bg-white rounded-3xl p-8 shadow-sm">
+            <h2 class="section-title mb-6">Vehículos disponibles en este rango de precio</h2>
+            
+            <!-- Loading state -->
+            <div *ngIf="isLoadingVehicles" class="flex justify-center items-center py-12">
+              <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <p class="ml-4 text-gray-600">Buscando vehículos...</p>
+            </div>
+
+            <!-- Carrusel de vehículos -->
+            <div *ngIf="!isLoadingVehicles && filteredVehicles.length > 0" class="relative">
+              <div class="overflow-x-auto scrollbar-hide" style="scroll-behavior: smooth;">
+                <div class="flex gap-6 pb-4" style="min-width: max-content;">
+                  <div *ngFor="let vehicle of filteredVehicles" class="flex-shrink-0" style="min-width: 300px; max-width: 300px;">
+                    <app-vehicle-card-tailwind [vehicle]="vehicle"></app-vehicle-card-tailwind>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mensaje si no hay vehículos -->
+            <div *ngIf="!isLoadingVehicles && filteredVehicles.length === 0 && showVehicleCarousel" class="text-center py-8">
+              <p class="text-gray-600">No se encontraron vehículos en este rango de precio.</p>
+            </div>
+          </div>
+
           <!-- Beneficios del financiamiento -->
           <div class="bg-white rounded-3xl p-8 shadow-sm">
             <h2 class="section-title">¿Por qué elegir nuestro financiamiento?</h2>
