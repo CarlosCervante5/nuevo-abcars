@@ -334,12 +334,42 @@
               </div>
               
               <div>
+                <label class="form-request-label">Enganche</label>
+                <input 
+                  type="text" 
+                  [value]="getFormattedDownPayment()"
+                  readonly
+                  class="form-request-input"
+                >
+              </div>
+              
+              <div>
+                <label class="form-request-label">Mensualidad</label>
+                <input 
+                  type="text" 
+                  [value]="getFormattedMonthlyPayment()"
+                  readonly
+                  class="form-request-input"
+                >
+              </div>
+              
+              <div>
+                <label class="form-request-label">Total a pagar</label>
+                <input 
+                  type="text" 
+                  [value]="getFormattedTotalAmount()"
+                  readonly
+                  class="form-request-input"
+                >
+              </div>
+              
+              <div>
                 <label class="form-request-label">Monto a financiar</label>
                 <input 
                   type="number" 
-                  formControlName="offer_price"
+                  [value]="getFinancedAmount()"
+                  readonly
                   class="form-request-input"
-                  placeholder="Ej: 350000"
                 >
               </div>
               
