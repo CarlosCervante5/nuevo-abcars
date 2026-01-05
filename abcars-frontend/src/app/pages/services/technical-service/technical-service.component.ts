@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { HomeNavComponent } from '../../../shared/components/home-nav/home-nav.component';
 import { ModernFooterComponent } from '../../../shared/components/modern-footer/modern-footer.component';
 import { StregaService } from '../../../shared/services/strega.service';
+import { Dealership } from '../../../shared/interfaces/admin.interfaces';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -17,6 +18,10 @@ import Swal from 'sweetalert2';
 export class TechnicalServiceComponent {
   serviceForm: FormGroup;
   isSubmitting: boolean = false;
+  dealerships: Dealership[] = [
+    { name: 'Chevrolet Balderrama Serdán (puebla)', location: '', description: null, created_at: new Date() },
+    { name: 'VECSA pachuca', location: '', description: null, created_at: new Date() }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -33,7 +38,8 @@ export class TechnicalServiceComponent {
       vehicleModel: ['', Validators.required],
       vehicleMileage: ['', [Validators.required, Validators.min(0)]],
       preferredDate: [''],
-      preferredTime: ['']
+      preferredTime: [''],
+      city: ['', Validators.required]
     });
   }
 
@@ -47,7 +53,7 @@ export class TechnicalServiceComponent {
     return new Date().getFullYear();
   }
 
-  buildQComments(serviceType: string, preferredDate: string, preferredTime: string, vehicleYear: string, vehicleBrand: string, vehicleModel: string, vehicleMileage: string): string {
+  buildQComments(serviceType: string, preferredDate: string, preferredTime: string, vehicleYear: string, vehicleBrand: string, vehicleModel: string, vehicleMileage: string, city: string): string {
     const serviceTypeText = serviceType === 'mantenimiento' ? 'Mantenimiento preventivo' :
                             serviceType === 'diagnostico' ? 'Diagnóstico computarizado' :
                             serviceType === 'reparacion' ? 'Reparación' :
@@ -61,13 +67,14 @@ export class TechnicalServiceComponent {
     }
 
     const timeFormatted = preferredTime || 'No especificada';
+    const cityText = city || 'No especificada';
 
     const vehicleYearText = vehicleYear || 'No especificado';
     const vehicleBrandText = vehicleBrand || 'No especificada';
     const vehicleModelText = vehicleModel || 'No especificado';
     const vehicleMileageText = vehicleMileage ? `${vehicleMileage} km` : 'No especificado';
 
-    return `Tipo de servicio: ${serviceTypeText}, Fecha preferida: ${dateFormatted}, Hora preferida: ${timeFormatted}, Año: ${vehicleYearText}, Marca: ${vehicleBrandText}, Modelo: ${vehicleModelText}, Kilometraje: ${vehicleMileageText}`;
+    return `Tipo de servicio: ${serviceTypeText}, Fecha preferida: ${dateFormatted}, Hora preferida: ${timeFormatted}, Sucursal: ${cityText}, Año: ${vehicleYearText}, Marca: ${vehicleBrandText}, Modelo: ${vehicleModelText}, Kilometraje: ${vehicleMileageText}`;
   }
 
   onSubmitService() {
@@ -89,9 +96,10 @@ export class TechnicalServiceComponent {
     const vehicleBrand = this.serviceForm.value.vehicleBrand;
     const vehicleModel = this.serviceForm.value.vehicleModel;
     const vehicleMileage = this.serviceForm.value.vehicleMileage;
+    const city = this.serviceForm.value.city;
 
     // Construir q_comments
-    const qComments = this.buildQComments(serviceType, preferredDate, preferredTime, vehicleYear, vehicleBrand, vehicleModel, vehicleMileage);
+    const qComments = this.buildQComments(serviceType, preferredDate, preferredTime, vehicleYear, vehicleBrand, vehicleModel, vehicleMileage, city);
 
     // Preparar datos con campos adicionales para enviar (EXCLUYENDO serviceType, preferredDate, preferredTime)
     const formData = {
@@ -105,7 +113,7 @@ export class TechnicalServiceComponent {
       q_time_to_buy: '',
       q_comments: qComments,
       opportunity_type: 'lead',
-      dealership_name: 'Chevrolet Serdán',
+      dealership_name: city || 'Chevrolet Serdán',
       campaign_name: 'Página ABCars',
       campaign_channel: 'WEB ABCars',
       campaign_source: 'Solicitud de agendamiento de servicio técnico'

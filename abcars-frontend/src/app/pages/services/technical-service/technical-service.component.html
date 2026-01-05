@@ -396,6 +396,20 @@
                 </select>
               </div>
               
+              <div>
+                <label class="form-request-label">Sucursal *</label>
+                <select 
+                  formControlName="city"
+                  [ngClass]="(serviceForm.get('city')?.invalid && serviceForm.get('city')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                >
+                  <option value="">Selecciona sucursal</option>
+                  <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+                </select>
+                <p *ngIf="serviceForm.get('city')?.invalid && serviceForm.get('city')?.touched" class="form-error-message">
+                  La sucursal es requerida
+                </p>
+              </div>
+              
               <button 
                 type="submit"
                 [disabled]="isSubmitting"

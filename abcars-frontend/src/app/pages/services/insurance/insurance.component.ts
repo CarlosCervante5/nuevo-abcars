@@ -7,6 +7,7 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
 import { VehicleService } from '../../../shared/services/vehicle.service';
 import { Brand, BrandsResponse } from '../../../shared/interfaces/vehicle_data.interface';
 import { StregaService } from '../../../shared/services/strega.service';
+import { Dealership } from '../../../shared/interfaces/admin.interfaces';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -32,6 +33,10 @@ export class InsuranceComponent implements OnInit {
 
   insuranceForm: FormGroup;
   isSubmitting: boolean = false;
+  dealerships: Dealership[] = [
+    { name: 'Chevrolet Balderrama Serdán (puebla)', location: '', description: null, created_at: new Date() },
+    { name: 'VECSA pachuca', location: '', description: null, created_at: new Date() }
+  ];
 
   constructor(
     private vehicleService: VehicleService,
@@ -43,6 +48,7 @@ export class InsuranceComponent implements OnInit {
       last_name: ['', Validators.required],
       phone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       email: ['', [Validators.required, Validators.email]],
+      city: ['', Validators.required],
       coverageType: ['', Validators.required]
     });
   }
@@ -96,12 +102,14 @@ export class InsuranceComponent implements OnInit {
     return 0;
   }
 
-  buildQComments(coverageAmount: number): string {
+  buildQComments(coverageAmount: number, city: string): string {
     const coverageTypeText = this.insuranceForm.value.coverageType === 'basica' ? 'Básica' :
                              this.insuranceForm.value.coverageType === 'estandar' ? 'Estándar' :
                              this.insuranceForm.value.coverageType === 'premium' ? 'Premium' : '';
 
-    return `Marca: ${this.quoteData.brand}, Modelo: ${this.quoteData.model}, Año: ${this.quoteData.year}, Valor comercial: $${this.quoteData.value.toLocaleString()} MXN, Tipo de cobertura: ${coverageTypeText}, Monto de la cobertura elegida: $${coverageAmount.toLocaleString()} MXN`;
+    const cityText = city || 'No especificada';
+
+    return `Marca: ${this.quoteData.brand}, Modelo: ${this.quoteData.model}, Año: ${this.quoteData.year}, Valor comercial: $${this.quoteData.value.toLocaleString()} MXN, Tipo de cobertura: ${coverageTypeText}, Monto de la cobertura elegida: $${coverageAmount.toLocaleString()} MXN, Sucursal: ${cityText}`;
   }
 
   onSubmitInsurance() {
@@ -117,9 +125,10 @@ export class InsuranceComponent implements OnInit {
 
     // Obtener monto de cobertura según tipo seleccionado
     const coverageAmount = this.getCoverageAmount();
+    const city = this.insuranceForm.value.city;
     
     // Construir q_comments
-    const qComments = this.buildQComments(coverageAmount);
+    const qComments = this.buildQComments(coverageAmount, city);
     
     // Preparar datos con campos adicionales para enviar
     const formData = {
@@ -130,7 +139,7 @@ export class InsuranceComponent implements OnInit {
       q_time_to_buy: '',
       q_comments: qComments,
       opportunity_type: 'lead',
-      dealership_name: 'Chevrolet Serdán',
+      dealership_name: city || 'Chevrolet Serdán',
       campaign_name: 'Página ABCars',
       campaign_channel: 'WEB ABCars',
       campaign_source: 'Solicitud de cotización de seguros'

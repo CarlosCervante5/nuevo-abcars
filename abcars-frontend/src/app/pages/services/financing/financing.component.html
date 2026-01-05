@@ -334,6 +334,20 @@
               </div>
               
               <div>
+                <label class="form-request-label">Sucursal *</label>
+                <select 
+                  formControlName="city"
+                  [ngClass]="(financingForm.get('city')?.invalid && financingForm.get('city')?.touched) ? 'form-request-input-error' : 'form-request-input'"
+                >
+                  <option value="">Selecciona sucursal</option>
+                  <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+                </select>
+                <p *ngIf="financingForm.get('city')?.invalid && financingForm.get('city')?.touched" class="form-error-message">
+                  La sucursal es requerida
+                </p>
+              </div>
+              
+              <div>
                 <label class="form-request-label">Enganche</label>
                 <input 
                   type="text" 
