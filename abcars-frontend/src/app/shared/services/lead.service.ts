@@ -8,6 +8,7 @@ export interface FinancingFormData {
   last_name?: string;
   phone: string;
   email: string;
+  city?: string;
   address?: string;
   occupation?: string;
   monthly_income?: string;

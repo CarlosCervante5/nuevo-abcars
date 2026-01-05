@@ -7,6 +7,7 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
 import { VehicleCardTailwindComponent, Vehicle } from '../../../shared/components/vehicle-card-tailwind/vehicle-card-tailwind.component';
 import { LeadService } from '../../../shared/services/lead.service';
 import { VehicleService } from '../../../shared/services/vehicle.service';
+import { Dealership } from '../../../shared/interfaces/admin.interfaces';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -26,6 +27,10 @@ export class FinancingComponent {
 
   financingForm: FormGroup;
   isSubmitting: boolean = false;
+  dealerships: Dealership[] = [
+    { name: 'Chevrolet Balderrama Serdán (puebla)', location: '', description: null, created_at: new Date() },
+    { name: 'VECSA pachuca', location: '', description: null, created_at: new Date() }
+  ];
 
   // Propiedades para el carrusel de vehículos
   filteredVehicles: Vehicle[] = [];
@@ -43,6 +48,7 @@ export class FinancingComponent {
       last_name: ['', Validators.required],
       phone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       email: ['', [Validators.required, Validators.email]],
+      city: ['', Validators.required],
       offer_price: ['']
     });
   }
@@ -187,7 +193,8 @@ export class FinancingComponent {
       last_name: this.financingForm.value.last_name || '',
       phone: this.financingForm.value.phone,
       email: this.financingForm.value.email,
-      comments: `El enganche 10%: $${downPayment.toLocaleString()} MXN Mensualidad: $${monthlyPayment.toLocaleString()} MXN Total a pagar: $${totalAmount.toLocaleString()} MXN`,
+      city: this.financingForm.value.city || '',
+      comments: `El enganche: $${downPayment.toLocaleString()} MXN Mensualidad: $${monthlyPayment.toLocaleString()} MXN Total a pagar: $${totalAmount.toLocaleString()} MXN`,
       vehicle_price: this.calculatorData.vehiclePrice,
       down_payment: downPayment,
       down_payment_percentage: this.calculatorData.downPaymentPercentage,
