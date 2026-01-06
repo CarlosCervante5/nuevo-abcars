@@ -1352,15 +1352,28 @@ interface MediaItem {
           <h4 class="text-lg font-semibold text-gray-900 mb-4">Información Personal</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Nombre completo *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nombre *</label>
               <input 
                 type="text" 
                 [(ngModel)]="financingFormData.name"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Tu nombre completo"
+                placeholder="Tu nombre"
                 required
               >
             </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Apellidos *</label>
+              <input 
+                type="text" 
+                [(ngModel)]="financingFormData.last_name"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Tus apellidos"
+                required
+              >
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
               <input 
@@ -1370,6 +1383,17 @@ interface MediaItem {
                 placeholder="Tu número de teléfono"
                 required
               >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Sucursal *</label>
+              <select 
+                [(ngModel)]="financingFormData.city"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              >
+                <option value="">Selecciona sucursal</option>
+                <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+              </select>
             </div>
           </div>
           
@@ -1851,6 +1875,10 @@ export class VehicleDetailComponent implements OnInit {
   testDriveFormData: any = {};
   offerFormData: any = {};
   isSubmitting = false;
+  dealerships = [
+    { name: 'Chevrolet Balderrama Serdán (puebla)' },
+    { name: 'VECSA pachuca' }
+  ];
 
   constructor(
     private route: ActivatedRoute,
@@ -2666,11 +2694,11 @@ export class VehicleDetailComponent implements OnInit {
     }
 
     // Validar campos requeridos básicos
-    if (!this.financingFormData.name || !this.financingFormData.phone || !this.financingFormData.email) {
+    if (!this.financingFormData.name || !this.financingFormData.last_name || !this.financingFormData.phone || !this.financingFormData.email || !this.financingFormData.city) {
       Swal.fire({
         icon: 'warning',
         title: 'Campos requeridos',
-        text: 'Por favor, completa al menos nombre, teléfono y email.',
+        text: 'Por favor, completa al menos nombre, apellidos, teléfono, email y sucursal.',
       });
       return;
     }
@@ -2681,6 +2709,7 @@ export class VehicleDetailComponent implements OnInit {
       last_name: this.financingFormData.last_name || '',
       phone: this.financingFormData.phone || '',
       email: this.financingFormData.email || '',
+      city: this.financingFormData.city || '',
       address: this.financingFormData.address || '',
       occupation: this.financingFormData.occupation || '',
       monthly_income: this.financingFormData.monthly_income || '',
