@@ -673,33 +673,59 @@ interface MediaItem {
         
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
             <input 
               type="text" 
               [(ngModel)]="financingFormData.name"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Tu nombre"
               required
             >
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="financingFormData.last_name"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Tus apellidos"
+              required
+            >
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
             <input 
               type="tel" 
               [(ngModel)]="financingFormData.phone"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Tu número de teléfono"
               required
             >
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
             <input 
               type="email" 
               [(ngModel)]="financingFormData.email"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="tu@email.com"
               required
             >
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal *</label>
+            <select 
+              [(ngModel)]="financingFormData.city"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            >
+              <option value="">Selecciona sucursal</option>
+              <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+            </select>
           </div>
           
           <div>
