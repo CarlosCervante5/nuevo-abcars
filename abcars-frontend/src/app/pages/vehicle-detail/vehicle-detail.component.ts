@@ -817,8 +817,8 @@ interface MediaItem {
       class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
       (click)="closeTestDriveModal()"
     >
-      <div class="bg-white rounded-3xl p-6 max-w-md w-full mx-4 my-8" (click)="$event.stopPropagation()">
-        <div class="flex items-center justify-between mb-4">
+      <div class="bg-white rounded-3xl max-w-md w-full mx-4 my-8 max-h-[90vh] flex flex-col" (click)="$event.stopPropagation()">
+        <div class="flex items-center justify-between p-6 pb-4 border-b border-gray-200 flex-shrink-0">
           <h3 class="text-xl font-bold text-gray-900">Agendar Prueba de Manejo</h3>
           <button 
             (click)="closeTestDriveModal()"
@@ -830,13 +830,26 @@ interface MediaItem {
           </button>
         </div>
         
-        <div class="space-y-4">
+        <div class="overflow-y-auto px-6 py-4 flex-1">
+          <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
             <input 
               type="text" 
               [(ngModel)]="testDriveFormData.name"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              placeholder="Tu nombre"
+              required
+            >
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="testDriveFormData.last_name"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              placeholder="Tus apellidos"
               required
             >
           </div>
@@ -847,6 +860,7 @@ interface MediaItem {
               type="tel" 
               [(ngModel)]="testDriveFormData.phone"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              placeholder="Tu número de teléfono"
               required
             >
           </div>
@@ -857,8 +871,21 @@ interface MediaItem {
               type="email" 
               [(ngModel)]="testDriveFormData.email"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              placeholder="tu@email.com"
               required
             >
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal *</label>
+            <select 
+              [(ngModel)]="testDriveFormData.city"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              required
+            >
+              <option value="">Selecciona sucursal</option>
+              <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+            </select>
           </div>
           
           <div>
@@ -866,6 +893,7 @@ interface MediaItem {
             <input 
               type="date" 
               [(ngModel)]="testDriveFormData.preferred_date"
+              [min]="getTodayDate()"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
             >
           </div>
@@ -886,6 +914,7 @@ interface MediaItem {
               <option value="3:00 PM">3:00 PM</option>
               <option value="4:00 PM">4:00 PM</option>
               <option value="5:00 PM">5:00 PM</option>
+              <option value="6:00 PM">6:00 PM</option>
             </select>
           </div>
           
@@ -898,7 +927,10 @@ interface MediaItem {
               placeholder="Algún comentario especial..."
             ></textarea>
           </div>
-          
+          </div>
+        </div>
+        
+        <div class="p-6 pt-4 border-t border-gray-200 flex-shrink-0">
           <button 
             (click)="submitTestDrive()"
             [disabled]="isSubmitting"
@@ -2284,6 +2316,33 @@ export class VehicleDetailComponent implements OnInit {
     return (this.vehicle?.price || 0) - this.getDownPayment();
   }
 
+  getTodayDate(): string {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  formatDate(dateString: string): string {
+    if (!dateString) return 'No especificada';
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
+  }
+
+  buildTestDriveComments(preferredDate: string, preferredTime: string, additionalComments: string): string {
+    const dateFormatted = this.formatDate(preferredDate);
+    const timeFormatted = preferredTime || 'No especificada';
+    
+    let comments = `Fecha preferida: ${dateFormatted}, Hora preferida: ${timeFormatted}`;
+    
+    if (additionalComments && additionalComments.trim()) {
+      comments += `. ${additionalComments.trim()}`;
+    }
+    
+    return comments;
+  }
+
   getCreditOpeningFee(): number {
     return Math.round(this.getFinanceAmount() * 0.03); // 3% de apertura de crédito
   }
@@ -2789,13 +2848,22 @@ export class VehicleDetailComponent implements OnInit {
   submitTestDrive() {
     if (this.isSubmitting) return;
 
+    // Construir comentarios con fecha, hora y comentarios adicionales
+    const comments = this.buildTestDriveComments(
+      this.testDriveFormData.preferred_date || '',
+      this.testDriveFormData.preferred_time || '',
+      this.testDriveFormData.comments || ''
+    );
+
     const formData = {
       name: this.testDriveFormData.name || '',
+      last_name: this.testDriveFormData.last_name || '',
       phone: this.testDriveFormData.phone || '',
       email: this.testDriveFormData.email || '',
+      city: this.testDriveFormData.city || '',
       preferred_date: this.testDriveFormData.preferred_date || '',
       preferred_time: this.testDriveFormData.preferred_time || '',
-      comments: this.testDriveFormData.comments || '',
+      comments: comments,
       vehicle_brand: this.vehicle?.brand || '',
       vehicle_model: this.vehicle?.model || '',
       vehicle_year: this.vehicle?.year,
