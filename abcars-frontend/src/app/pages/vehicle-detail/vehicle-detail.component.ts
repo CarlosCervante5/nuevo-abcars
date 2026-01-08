@@ -964,11 +964,23 @@ interface MediaItem {
         
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
             <input 
               type="text" 
               [(ngModel)]="offerFormData.name"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="Tu nombre"
+              required
+            >
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="offerFormData.last_name"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="Tus apellidos"
               required
             >
           </div>
@@ -991,6 +1003,18 @@ interface MediaItem {
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               required
             >
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal *</label>
+            <select
+              [(ngModel)]="offerFormData.city"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              required
+            >
+              <option value="">Selecciona sucursal</option>
+              <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+            </select>
           </div>
           
           <div>
@@ -2343,6 +2367,18 @@ export class VehicleDetailComponent implements OnInit {
     return comments;
   }
 
+  buildOfferComments(offerAmount: number, additionalComments: string): string {
+    const amountFormatted = offerAmount ? `$${offerAmount.toLocaleString('es-MX')}` : 'No especificado';
+    
+    let comments = `Monto ofrecido: ${amountFormatted}`;
+    
+    if (additionalComments && additionalComments.trim()) {
+      comments += `. ${additionalComments.trim()}`;
+    }
+    
+    return comments;
+  }
+
   getCreditOpeningFee(): number {
     return Math.round(this.getFinanceAmount() * 0.03); // 3% de apertura de crédito
   }
@@ -2897,13 +2933,21 @@ export class VehicleDetailComponent implements OnInit {
   submitOffer() {
     if (this.isSubmitting) return;
 
+    // Construir comentarios con monto ofrecido y comentarios adicionales
+    const comments = this.buildOfferComments(
+      this.offerFormData.offer_amount || 0,
+      this.offerFormData.comments || ''
+    );
+
     const formData = {
       name: this.offerFormData.name || '',
+      last_name: this.offerFormData.last_name || '',
       phone: this.offerFormData.phone || '',
       email: this.offerFormData.email || '',
+      city: this.offerFormData.city || '',
       offer_amount: this.offerFormData.offer_amount || 0,
       payment_conditions: this.offerFormData.payment_conditions || '',
-      comments: this.offerFormData.comments || '',
+      comments: comments,
       vehicle_brand: this.vehicle?.brand || '',
       vehicle_model: this.vehicle?.model || '',
       vehicle_year: this.vehicle?.year,
