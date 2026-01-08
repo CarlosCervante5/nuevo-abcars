@@ -41,8 +41,10 @@ export interface TestDriveFormData {
 
 export interface OfferFormData {
   name: string;
+  last_name?: string;
   phone: string;
   email: string;
+  city?: string;
   offer_amount: number;
   payment_conditions?: string;
   comments?: string;
