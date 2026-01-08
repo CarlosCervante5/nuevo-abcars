@@ -658,8 +658,8 @@ interface MediaItem {
       class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
       (click)="closeFinancingModal()"
     >
-      <div class="bg-white rounded-3xl p-6 max-w-md w-full mx-4 my-8" (click)="$event.stopPropagation()">
-        <div class="flex items-center justify-between mb-4">
+      <div class="bg-white rounded-3xl max-w-md w-full mx-4 my-8 max-h-[90vh] flex flex-col" (click)="$event.stopPropagation()">
+        <div class="flex items-center justify-between p-6 pb-4 border-b border-gray-200 flex-shrink-0">
           <h3 class="text-xl font-bold text-gray-900">Solicitar Financiamiento</h3>
           <button 
             (click)="closeFinancingModal()"
@@ -671,83 +671,87 @@ interface MediaItem {
           </button>
         </div>
         
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
-            <input 
-              type="text" 
-              [(ngModel)]="financingFormData.name"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Tu nombre"
-              required
-            >
+        <div class="overflow-y-auto px-6 py-4 flex-1">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+              <input 
+                type="text" 
+                [(ngModel)]="financingFormData.name"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Tu nombre"
+                required
+              >
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos *</label>
+              <input 
+                type="text" 
+                [(ngModel)]="financingFormData.last_name"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Tus apellidos"
+                required
+              >
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
+              <input 
+                type="tel" 
+                [(ngModel)]="financingFormData.phone"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Tu número de teléfono"
+                required
+              >
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+              <input 
+                type="email" 
+                [(ngModel)]="financingFormData.email"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="tu@email.com"
+                required
+              >
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal *</label>
+              <select 
+                [(ngModel)]="financingFormData.city"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              >
+                <option value="">Selecciona sucursal</option>
+                <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Monto de enganche</label>
+              <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option>20% - MXN {{ getDownPayment() | number }}</option>
+                <option>30% - MXN {{ getDownPayment() * 1.5 | number }}</option>
+                <option>40% - MXN {{ getDownPayment() * 2 | number }}</option>
+                <option>50% - MXN {{ getDownPayment() * 2.5 | number }}</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Plazo de financiamiento</label>
+              <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option>24 meses</option>
+                <option>36 meses</option>
+                <option>48 meses</option>
+                <option>60 meses</option>
+              </select>
+            </div>
           </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos *</label>
-            <input 
-              type="text" 
-              [(ngModel)]="financingFormData.last_name"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Tus apellidos"
-              required
-            >
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
-            <input 
-              type="tel" 
-              [(ngModel)]="financingFormData.phone"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Tu número de teléfono"
-              required
-            >
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-            <input 
-              type="email" 
-              [(ngModel)]="financingFormData.email"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="tu@email.com"
-              required
-            >
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal *</label>
-            <select 
-              [(ngModel)]="financingFormData.city"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            >
-              <option value="">Selecciona sucursal</option>
-              <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
-            </select>
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Monto de enganche</label>
-            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option>20% - MXN {{ getDownPayment() | number }}</option>
-              <option>30% - MXN {{ getDownPayment() * 1.5 | number }}</option>
-              <option>40% - MXN {{ getDownPayment() * 2 | number }}</option>
-              <option>50% - MXN {{ getDownPayment() * 2.5 | number }}</option>
-            </select>
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Plazo de financiamiento</label>
-            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option>24 meses</option>
-              <option>36 meses</option>
-              <option>48 meses</option>
-              <option>60 meses</option>
-            </select>
-          </div>
-          
+        </div>
+        
+        <div class="p-6 pt-4 border-t border-gray-200 flex-shrink-0">
           <button 
             (click)="submitFinancingRequest()"
             [disabled]="isSubmitting"
@@ -949,8 +953,8 @@ interface MediaItem {
       class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
       (click)="closeOfferModal()"
     >
-      <div class="bg-white rounded-3xl p-6 max-w-md w-full mx-4 my-8" (click)="$event.stopPropagation()">
-        <div class="flex items-center justify-between mb-4">
+      <div class="bg-white rounded-3xl max-w-md w-full mx-4 my-8 max-h-[90vh] flex flex-col" (click)="$event.stopPropagation()">
+        <div class="flex items-center justify-between p-6 pb-4 border-b border-gray-200 flex-shrink-0">
           <h3 class="text-xl font-bold text-gray-900">Tu oferta de contado</h3>
           <button 
             (click)="closeOfferModal()"
@@ -962,95 +966,99 @@ interface MediaItem {
           </button>
         </div>
         
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
-            <input 
-              type="text" 
-              [(ngModel)]="offerFormData.name"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              placeholder="Tu nombre"
-              required
-            >
+        <div class="overflow-y-auto px-6 py-4 flex-1">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+              <input 
+                type="text" 
+                [(ngModel)]="offerFormData.name"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Tu nombre"
+                required
+              >
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos *</label>
+              <input 
+                type="text" 
+                [(ngModel)]="offerFormData.last_name"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Tus apellidos"
+                required
+              >
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
+              <input 
+                type="tel" 
+                [(ngModel)]="offerFormData.phone"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              >
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+              <input 
+                type="email" 
+                [(ngModel)]="offerFormData.email"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              >
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal *</label>
+              <select
+                [(ngModel)]="offerFormData.city"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              >
+                <option value="">Selecciona sucursal</option>
+                <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Monto ofrecido (MXN) *</label>
+              <input 
+                type="number" 
+                [(ngModel)]="offerFormData.offer_amount"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                placeholder="Ej: 850000"
+                required
+              >
+            </div>
+            
+            <!-- <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Condiciones de pago</label>
+              <select 
+                [(ngModel)]="offerFormData.payment_conditions"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              >
+                <option value="">Selecciona condiciones</option>
+                <option value="Contado">Contado</option>
+                <option value="Financiamiento">Financiamiento</option>
+                <option value="Leasing">Leasing</option>
+              </select>
+            </div> -->
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Comentarios</label>
+              <textarea 
+                [(ngModel)]="offerFormData.comments"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                rows="2" 
+                placeholder="Condiciones especiales, plazo de respuesta..."
+              ></textarea>
+            </div>
           </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos *</label>
-            <input 
-              type="text" 
-              [(ngModel)]="offerFormData.last_name"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              placeholder="Tus apellidos"
-              required
-            >
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
-            <input 
-              type="tel" 
-              [(ngModel)]="offerFormData.phone"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              required
-            >
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-            <input 
-              type="email" 
-              [(ngModel)]="offerFormData.email"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              required
-            >
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal *</label>
-            <select
-              [(ngModel)]="offerFormData.city"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              required
-            >
-              <option value="">Selecciona sucursal</option>
-              <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
-            </select>
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Monto ofrecido (MXN) *</label>
-            <input 
-              type="number" 
-              [(ngModel)]="offerFormData.offer_amount"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
-              placeholder="Ej: 850000"
-              required
-            >
-          </div>
-          
-          <!-- <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Condiciones de pago</label>
-            <select 
-              [(ngModel)]="offerFormData.payment_conditions"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            >
-              <option value="">Selecciona condiciones</option>
-              <option value="Contado">Contado</option>
-              <option value="Financiamiento">Financiamiento</option>
-              <option value="Leasing">Leasing</option>
-            </select>
-          </div> -->
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Comentarios</label>
-            <textarea 
-              [(ngModel)]="offerFormData.comments"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
-              rows="2" 
-              placeholder="Condiciones especiales, plazo de respuesta..."
-            ></textarea>
-          </div>
-          
+        </div>
+        
+        <div class="p-6 pt-4 border-t border-gray-200 flex-shrink-0">
           <button 
             (click)="submitOffer()"
             [disabled]="isSubmitting"
