@@ -731,21 +731,26 @@ interface MediaItem {
             
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Monto de enganche</label>
-              <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option>20% - MXN {{ getDownPayment() | number }}</option>
-                <option>30% - MXN {{ getDownPayment() * 1.5 | number }}</option>
-                <option>40% - MXN {{ getDownPayment() * 2 | number }}</option>
-                <option>50% - MXN {{ getDownPayment() * 2.5 | number }}</option>
+              <select 
+                [(ngModel)]="financingFormData.down_payment_percentage"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option [value]="20">20% - MXN {{ getDownPaymentByPercentage(20) | number }}</option>
+                <option [value]="30">30% - MXN {{ getDownPaymentByPercentage(30) | number }}</option>
+                <option [value]="40">40% - MXN {{ getDownPaymentByPercentage(40) | number }}</option>
+                <option [value]="50">50% - MXN {{ getDownPaymentByPercentage(50) | number }}</option>
               </select>
             </div>
             
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Plazo de financiamiento</label>
-              <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option>24 meses</option>
-                <option>36 meses</option>
-                <option>48 meses</option>
-                <option>60 meses</option>
+              <select 
+                [(ngModel)]="financingFormData.term_months"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option *ngFor="let term of getAvailableTermsByYear(vehicle?.year || 0)" [value]="term">
+                  {{ term }} meses
+                </option>
               </select>
             </div>
           </div>
@@ -2332,6 +2337,10 @@ export class VehicleDetailComponent implements OnInit {
     return Math.round((this.vehicle?.price || 0) * 0.3); // 30% de enganche (como en la captura)
   }
 
+  getDownPaymentByPercentage(percentage: number): number {
+    return Math.round((this.vehicle?.price || 0) * (percentage / 100));
+  }
+
   getMonthlyFinancing(): number {
     const price = this.vehicle?.price || 0;
     const downPayment = this.getDownPayment();
@@ -2372,6 +2381,30 @@ export class VehicleDetailComponent implements OnInit {
 
     // Fórmula de pago mensual: P * [r(1+r)^n] / [(1+r)^n - 1]
     const monthlyPayment = financeAmount * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+    return Math.round(monthlyPayment);
+  }
+
+  calculateMonthlyPaymentForForm(downPaymentPercentage: number, termMonths: number): number {
+    const price = this.vehicle?.price || 0;
+    if (price <= 0) return 0;
+
+    const downPayment = this.getDownPaymentByPercentage(downPaymentPercentage);
+    const financeAmount = price - downPayment;
+
+    // Calcular tasa anual dinámicamente según el año del vehículo
+    const originalDownPaymentPercentage = this.calculatorData.downPaymentPercentage;
+    this.calculatorData.downPaymentPercentage = downPaymentPercentage;
+    
+    const annualRate = this.getAnnualInterestRate();
+    const monthlyRate = (annualRate / 12) / 100; // Convertir a decimal mensual
+    
+    // Restaurar el valor original
+    this.calculatorData.downPaymentPercentage = originalDownPaymentPercentage;
+
+    if (financeAmount <= 0 || monthlyRate <= 0 || termMonths <= 0) return 0;
+
+    // Fórmula de pago mensual: P * [r(1+r)^n] / [(1+r)^n - 1]
+    const monthlyPayment = financeAmount * (monthlyRate * Math.pow(1 + monthlyRate, termMonths)) / (Math.pow(1 + monthlyRate, termMonths) - 1);
     return Math.round(monthlyPayment);
   }
 
@@ -2805,6 +2838,14 @@ export class VehicleDetailComponent implements OnInit {
 
   // Métodos para abrir modales
   openFinancingModal() {
+    // Inicializar valores por defecto para los selects
+    if (!this.financingFormData.down_payment_percentage) {
+      this.financingFormData.down_payment_percentage = 20; // Primer valor del select (20%)
+    }
+    if (!this.financingFormData.term_months) {
+      const availableTerms = this.getAvailableTermsByYear(this.vehicle?.year || 0);
+      this.financingFormData.term_months = availableTerms.length > 0 ? availableTerms[0] : 12; // Primer término disponible
+    }
     this.showFinancingModal = true;
   }
 
@@ -2973,6 +3014,15 @@ export class VehicleDetailComponent implements OnInit {
       return;
     }
 
+    // Calcular valores de financiamiento
+    const downPaymentPercentage = this.financingFormData.down_payment_percentage || 30;
+    const downPayment = this.getDownPaymentByPercentage(downPaymentPercentage);
+    const termMonths = this.financingFormData.term_months || this.getMaxAvailableTerm(this.vehicle?.year);
+    const financeAmount = this.vehicle?.price ? this.vehicle.price - downPayment : 0;
+    
+    // Calcular mensualidad con los valores seleccionados
+    const monthlyPayment = this.calculateMonthlyPaymentForForm(downPaymentPercentage, termMonths);
+
     // Recopilar datos del formulario
     const formData = {
       name: this.financingFormData.name || '',
@@ -2990,11 +3040,11 @@ export class VehicleDetailComponent implements OnInit {
       vehicle_model: this.vehicle?.model || '',
       vehicle_year: this.vehicle?.year,
       vehicle_price: this.vehicle?.price,
-      down_payment: this.getDownPayment(),
-      down_payment_percentage: 30,
-      monthly_payment: this.getMonthlyFinancing(),
-      term_months: 48,
-      finance_amount: this.vehicle?.price ? this.vehicle.price - this.getDownPayment() : 0
+      down_payment: downPayment,
+      down_payment_percentage: downPaymentPercentage,
+      monthly_payment: monthlyPayment,
+      term_months: termMonths,
+      finance_amount: financeAmount
     };
 
     console.log('Enviando datos:', formData);
