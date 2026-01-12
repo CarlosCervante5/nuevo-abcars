@@ -288,8 +288,8 @@ interface MediaItem {
                         <span class="font-semibold text-gray-900">MXN {{ getDownPayment() | number }}</span>
                       </div>
                       <div class="flex justify-between items-center">
-                        <span class="text-gray-600">Mensualidad (48 meses)</span>
-                        <span class="font-semibold text-gray-900">MXN {{ getMonthlyFinancing() | number }}</span>
+                        <span class="text-gray-600">Mensualidad ({{ getMaxAvailableTerm(vehicle?.year) }} meses)</span>
+                        <span class="font-semibold text-gray-900">MXN {{ getMonthlyFinancingForDetails() | number }}</span>
                       </div>
                     </div>
                     
@@ -551,8 +551,8 @@ interface MediaItem {
                       <span class="font-semibold text-gray-900">MXN {{ getDownPayment() | number }}</span>
                     </div>
                     <div class="flex justify-between items-center">
-                      <span class="text-gray-600">Mensualidad (48 meses)</span>
-                      <span class="font-semibold text-gray-900">MXN {{ getMonthlyFinancing() | number }}</span>
+                      <span class="text-gray-600">Mensualidad ({{ getMaxAvailableTerm(vehicle?.year) }} meses)</span>
+                      <span class="font-semibold text-gray-900">MXN {{ getMonthlyFinancingForDetails() | number }}</span>
                     </div>
                   </div>
                   
@@ -1429,12 +1429,12 @@ interface MediaItem {
                 <span class="font-semibold">MXN {{ vehicle?.price | number }}</span>
               </div>
               <div class="flex justify-between">
-                <span>Enganche (30%):</span>
-                <span class="font-semibold">MXN {{ getDownPayment() | number }}</span>
+                <span>Enganche ({{ getFinancingDownPaymentPercentage() }}%):</span>
+                <span class="font-semibold">MXN {{ getFinancingDownPayment() | number }}</span>
               </div>
               <div class="flex justify-between">
-                <span>Mensualidad (48 meses):</span>
-                <span class="font-semibold text-blue-600">MXN {{ getMonthlyFinancing() | number }}</span>
+                <span>Mensualidad ({{ getFinancingSelectedTerm() }} meses):</span>
+                <span class="font-semibold text-blue-600">MXN {{ getFinancingMonthlyPayment() | number }}</span>
               </div>
             </div>
           </div>
@@ -1593,33 +1593,33 @@ interface MediaItem {
               </div>
               <div class="flex justify-between">
                 <span>Mensualidad:</span>
-                <span class="font-semibold text-green-600">MXN {{ getMonthlyFinancing() | number }}</span>
+                <span class="font-semibold text-green-600">MXN {{ getFinancingMonthlyPayment() | number }}</span>
               </div>
               <div class="flex justify-between">
                 <span>Plazo:</span>
-                <span class="font-semibold">48 meses</span>
+                <span class="font-semibold">{{ getFinancingSelectedTerm() }} meses</span>
               </div>
             </div>
           </div>
 
           <div class="space-y-4">
             <div class="flex items-start gap-3">
-              <input type="checkbox" id="terms" class="mt-1" required>
-              <label for="terms" class="text-sm text-gray-600">
+              <input type="checkbox" id="financing-terms" [(ngModel)]="termsAccepted" class="mt-1" required>
+              <label for="financing-terms" class="text-sm text-gray-600">
                 Acepto los <a href="#" class="text-blue-600 hover:underline">términos y condiciones</a> del financiamiento.
               </label>
             </div>
             
             <div class="flex items-start gap-3">
-              <input type="checkbox" id="privacy" class="mt-1" required>
-              <label for="privacy" class="text-sm text-gray-600">
+              <input type="checkbox" id="financing-privacy" [(ngModel)]="privacyAccepted" class="mt-1" required>
+              <label for="financing-privacy" class="text-sm text-gray-600">
                 Autorizo el uso de mis datos personales para el procesamiento de mi solicitud de financiamiento.
               </label>
             </div>
             
             <div class="flex items-start gap-3">
-              <input type="checkbox" id="contact" class="mt-1" required>
-              <label for="contact" class="text-sm text-gray-600">
+              <input type="checkbox" id="financing-contact" [(ngModel)]="contactAccepted" class="mt-1" required>
+              <label for="financing-contact" class="text-sm text-gray-600">
                 Autorizo que me contacten por teléfono, email o WhatsApp para dar seguimiento a mi solicitud.
               </label>
             </div>
@@ -1965,6 +1965,11 @@ export class VehicleDetailComponent implements OnInit {
   testDriveFormData: any = {};
   offerFormData: any = {};
   isSubmitting = false;
+  
+  // Propiedades para validar casillas del formulario de financiamiento
+  termsAccepted = false;
+  privacyAccepted = false;
+  contactAccepted = false;
   dealerships = [
     { name: 'Chevrolet Balderrama Serdán (puebla)' },
     { name: 'VECSA pachuca' }
@@ -2339,6 +2344,37 @@ export class VehicleDetailComponent implements OnInit {
     return Math.round(monthlyPayment);
   }
 
+  getMonthlyFinancingForDetails(): number {
+    // Calcular mensualidad usando la misma lógica que el simulador
+    const price = this.vehicle?.price || 0;
+    if (price <= 0) return 0;
+
+    // Usar 30% de enganche (valor por defecto en "Detalles del financiamiento")
+    const downPaymentPercentage = 30;
+    const downPayment = Math.round(price * (downPaymentPercentage / 100));
+    const financeAmount = price - downPayment;
+
+    // Obtener el plazo máximo según el año del vehículo
+    const months = this.getMaxAvailableTerm(this.vehicle?.year);
+
+    // Calcular tasa anual dinámicamente según el año del vehículo
+    // Necesitamos simular el calculatorData para usar getAnnualInterestRate
+    const originalDownPaymentPercentage = this.calculatorData.downPaymentPercentage;
+    this.calculatorData.downPaymentPercentage = downPaymentPercentage;
+    
+    const annualRate = this.getAnnualInterestRate();
+    const monthlyRate = (annualRate / 12) / 100; // Convertir a decimal mensual
+    
+    // Restaurar el valor original
+    this.calculatorData.downPaymentPercentage = originalDownPaymentPercentage;
+
+    if (financeAmount <= 0 || monthlyRate <= 0 || months <= 0) return 0;
+
+    // Fórmula de pago mensual: P * [r(1+r)^n] / [(1+r)^n - 1]
+    const monthlyPayment = financeAmount * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+    return Math.round(monthlyPayment);
+  }
+
   getTotalFinancing(): number {
     return this.getDownPayment() + (this.getMonthlyFinancing() * 48);
   }
@@ -2422,6 +2458,82 @@ export class VehicleDetailComponent implements OnInit {
   }
 
   // Métodos para la calculadora interactiva
+  getAvailableTermsByYear(year: number): number[] {
+    if (!year) {
+      // Si no hay año, devolver términos por defecto
+      return [12, 24, 36, 48, 60];
+    }
+
+    if (year === 2016) {
+      return [12];
+    } else if (year === 2017) {
+      return [12, 24];
+    } else if (year === 2018) {
+      return [12, 24, 36];
+    } else if (year === 2019) {
+      return [12, 24, 36, 48];
+    } else if (year >= 2020 && year <= 2026) {
+      return [12, 24, 36, 48, 60];
+    } else {
+      // Para años fuera del rango, devolver términos por defecto
+      return [12, 24, 36, 48, 60];
+    }
+  }
+
+  getMaxAvailableTerm(year: number | undefined): number {
+    const availableTerms = this.getAvailableTermsByYear(year || 0);
+    // Devolver el último término (el máximo)
+    return availableTerms[availableTerms.length - 1];
+  }
+
+  // Métodos para obtener valores del simulador o valores por defecto
+  getFinancingDownPaymentPercentage(): number {
+    // Si el simulador tiene valores válidos, usar el porcentaje del simulador
+    if (this.calculatorData.vehiclePrice > 0) {
+      return this.calculatorData.downPaymentPercentage;
+    }
+    // Por defecto, usar 30%
+    return 30;
+  }
+
+  getFinancingSelectedTerm(): number {
+    // Si el simulador tiene valores válidos, usar el plazo del simulador
+    if (this.calculatorData.vehiclePrice > 0) {
+      return this.calculatorData.selectedTerm;
+    }
+    // Por defecto, usar el máximo disponible según el año
+    return this.getMaxAvailableTerm(this.vehicle?.year);
+  }
+
+  getFinancingDownPayment(): number {
+    // Si el simulador tiene valores válidos, usar el enganche del simulador
+    if (this.calculatorData.vehiclePrice > 0) {
+      return this.calculatorData.downPaymentAmount;
+    }
+    // Por defecto, usar el método original
+    return this.getDownPayment();
+  }
+
+  getFinancingMonthlyPayment(): number {
+    // Si el simulador tiene valores válidos, usar la mensualidad del simulador
+    if (this.calculatorData.vehiclePrice > 0) {
+      return this.calculateInteractiveMonthlyPayment();
+    }
+    // Por defecto, calcular con los valores por defecto pero usando el plazo correcto
+    const price = this.vehicle?.price || 0;
+    const downPaymentPercentage = this.getFinancingDownPaymentPercentage();
+    const downPayment = Math.round(price * (downPaymentPercentage / 100));
+    const financeAmount = price - downPayment;
+    const monthlyRate = 0.129 / 12; // 12.9% anual / 12 meses
+    const months = this.getFinancingSelectedTerm();
+    
+    if (financeAmount <= 0 || months <= 0) return 0;
+    
+    // Fórmula de pago mensual: P * [r(1+r)^n] / [(1+r)^n - 1]
+    const monthlyPayment = financeAmount * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+    return Math.round(monthlyPayment);
+  }
+
   initializeCalculator() {
     if (this.vehicle) {
       this.calculatorData.vehiclePrice = this.vehicle.price;
@@ -2430,6 +2542,16 @@ export class VehicleDetailComponent implements OnInit {
       // La apertura de crédito siempre es 3% fijo
       this.calculatorData.creditOpeningFeePercentage = 3;
       this.calculatorData.creditOpeningFeeAmount = this.calculatorData.financeAmount * (this.calculatorData.creditOpeningFeePercentage / 100);
+      
+      // Actualizar términos disponibles según el año del vehículo
+      const availableTerms = this.getAvailableTermsByYear(this.vehicle.year);
+      this.calculatorData.availableTerms = availableTerms;
+      
+      // Ajustar selectedTerm si el valor actual no está en los nuevos términos disponibles
+      if (!availableTerms.includes(this.calculatorData.selectedTerm)) {
+        // Usar el primer término disponible o el más cercano
+        this.calculatorData.selectedTerm = availableTerms[0];
+      }
     }
   }
 
@@ -2563,6 +2685,10 @@ export class VehicleDetailComponent implements OnInit {
     this.showFinancingRequestModal = false;
     this.showFinancingModal = false; // También cerrar el modal simple si está abierto
     this.financingRequestStep = 1; // Resetear al paso 1
+    // Resetear casillas
+    this.termsAccepted = false;
+    this.privacyAccepted = false;
+    this.contactAccepted = false;
   }
 
   closeFinancingModal() {
@@ -2832,6 +2958,21 @@ export class VehicleDetailComponent implements OnInit {
       return;
     }
 
+    // Validar que las casillas estén marcadas
+    if (!this.termsAccepted || !this.privacyAccepted || !this.contactAccepted) {
+      const missingCheckboxes = [];
+      if (!this.termsAccepted) missingCheckboxes.push('términos y condiciones');
+      if (!this.privacyAccepted) missingCheckboxes.push('autorización de datos personales');
+      if (!this.contactAccepted) missingCheckboxes.push('autorización de contacto');
+      
+      Swal.fire({
+        icon: 'warning',
+        title: 'Casillas requeridas',
+        text: `Por favor, marca las siguientes casillas: ${missingCheckboxes.join(', ')}.`,
+      });
+      return;
+    }
+
     // Recopilar datos del formulario
     const formData = {
       name: this.financingFormData.name || '',
@@ -2876,6 +3017,10 @@ export class VehicleDetailComponent implements OnInit {
         this.financingRequestStep = 1;
         // Limpiar formulario
         this.financingFormData = {};
+        // Resetear casillas
+        this.termsAccepted = false;
+        this.privacyAccepted = false;
+        this.contactAccepted = false;
       },
       error: (error) => {
         console.error('Error al enviar:', error);
