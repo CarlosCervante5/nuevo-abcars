@@ -829,6 +829,9 @@ export class InventoryComponent implements OnInit {
     // Detectar si hay filtros desde home para cargar todos los vehículos filtrados de una vez
     const hasHomeFilters = !!(this.homeBrand || this.homeModel || this.homeLocation);
     
+    // Detectar si se está buscando por año (también necesita cargar todos los resultados de una vez)
+    const isYearSearch = useSearchTerm && this.searchTerm && this.searchTerm.trim() && this.isYear(this.searchTerm);
+    
     // Solo aplicar filtros si NO se están limpiando (es decir, si hay filtros activos)
     // Si vienen brand y model desde home (query params), usar parámetros específicos
     if (this.homeBrand && this.homeModel) {
@@ -838,16 +841,24 @@ export class InventoryComponent implements OnInit {
       // Si solo viene brand, usar parámetro brand
       filters.brand = this.homeBrand;
     } else if (useSearchTerm && this.searchTerm && this.searchTerm.trim() && !this.homeLocation) {
-      // Si viene searchTerm (modelo solo o término de búsqueda) pero NO solo location, usar keyword
-      // Si solo viene location, no usar keyword (se filtrará localmente)
-      filters.keyword = this.searchTerm.trim();
+      // Si el término de búsqueda es un año, usar filtro de año en lugar de keyword
+      if (this.isYear(this.searchTerm)) {
+        const year = parseInt(this.searchTerm.trim(), 10);
+        filters.yearFrom = year;
+        filters.yearTo = year;
+      } else {
+        // Si viene searchTerm (modelo solo o término de búsqueda) pero NO solo location, usar keyword
+        // Si solo viene location, no usar keyword (se filtrará localmente)
+        filters.keyword = this.searchTerm.trim();
+      }
     }
     // Si no hay ningún filtro, filters queda vacío y se cargan todos los vehículos
 
-    // Si hay filtros de home, cargar todos los vehículos filtrados (paginate = 100) en página 1
-    // Si no hay filtros de home, usar paginación normal del servidor
-    const paginate = hasHomeFilters ? 100 : this.pageSize;
-    const serverPage = hasHomeFilters ? 1 : page;
+    // Si hay filtros de home o búsqueda por año, cargar todos los vehículos filtrados (paginate = 100) en página 1
+    // Si no hay filtros especiales, usar paginación normal del servidor
+    const hasSpecialFilters = hasHomeFilters || isYearSearch;
+    const paginate = hasSpecialFilters ? 100 : this.pageSize;
+    const serverPage = hasSpecialFilters ? 1 : page;
 
     this.vehicleService.searchVehicles(filters, serverPage, paginate).subscribe({
       next: (response) => {
@@ -857,9 +868,9 @@ export class InventoryComponent implements OnInit {
           // Guardar información de paginación
           this.totalVehicles = response.data.total || 0;
           
-          // Si hay filtros de home, mostrar todos en una sola página (totalPages = 1)
-          // Si no hay filtros de home, usar paginación normal del servidor
-          if (hasHomeFilters) {
+          // Si hay filtros de home o búsqueda por año, mostrar todos en una sola página (totalPages = 1)
+          // Si no hay filtros especiales, usar paginación normal del servidor
+          if (hasSpecialFilters) {
             this.totalPages = 1; // Todos los resultados en una sola página
           } else {
             this.totalPages = response.data.last_page || Math.ceil(this.totalVehicles / this.pageSize);
@@ -1170,6 +1181,18 @@ export class InventoryComponent implements OnInit {
     return vinPattern.test(searchTerm.trim());
   }
 
+  // Detectar si el término de búsqueda es un año válido
+  isYear(searchTerm: string): boolean {
+    if (!searchTerm || !searchTerm.trim()) return false;
+    const trimmed = searchTerm.trim();
+    // Verificar si es un número de 4 dígitos (año razonable entre 1900 y 2100)
+    const yearPattern = /^\d{4}$/;
+    if (!yearPattern.test(trimmed)) return false;
+    const year = parseInt(trimmed, 10);
+    // Aceptar cualquier año razonable
+    return year >= 1900 && year <= 2100;
+  }
+
   onSearchChange() {
     // Si el usuario está buscando desde el inventario, limpiar filtros de home
     // para que la nueva búsqueda no use los filtros persistentes (igual que con texto)
@@ -1268,8 +1291,12 @@ export class InventoryComponent implements OnInit {
         : true;
 
       // Filtro de año
-      const itemYear = item.year || item.model?.year || new Date().getFullYear();
-      const matchesYear = itemYear >= this.filters.yearFrom && itemYear <= this.filters.yearTo;
+      // Si se está buscando por año desde el servidor, omitir el filtro de año local
+      let matchesYear = true;
+      if (!this.isYear(this.searchTerm)) {
+        const itemYear = item.year || item.model?.year || new Date().getFullYear();
+        matchesYear = itemYear >= this.filters.yearFrom && itemYear <= this.filters.yearTo;
+      }
 
       // Filtro de kilometraje
       const matchesMileage = !this.filters.maxMileage || (item.mileage || 0) <= this.filters.maxMileage;
