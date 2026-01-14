@@ -1,0 +1,58 @@
+.checklist-container {
+  padding: 16px;
+}
+
+.progress-bar {
+  position: relative;
+  width: 100%;
+  height: 32px;
+  background-color: var(--ion-color-light);
+  border-radius: 16px;
+  margin: 16px 0;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--ion-color-success);
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: bold;
+  color: var(--ion-color-dark);
+  z-index: 1;
+}
+
+.checkpoint-description {
+  color: var(--ion-color-medium);
+  font-size: 0.9em;
+  margin-top: 8px;
+}
+
+/* Responsive para tablets */
+@media (min-width: 768px) {
+  .checklist-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  ion-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+/* Responsive para desktop */
+@media (min-width: 1024px) {
+  ion-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+

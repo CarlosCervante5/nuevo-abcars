@@ -1,0 +1,86 @@
+.vehicle-photos-container {
+  padding: 16px;
+}
+
+.photos-section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+  margin-bottom: 24px;
+}
+
+.photos-subtitle-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  margin-top: 24px;
+}
+
+.photos-subtitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+  margin: 0;
+}
+
+.guide-button {
+  --color: var(--ion-color-primary);
+  font-size: 0.875rem;
+}
+
+.existing-photos-section,
+.new-photos-section {
+  margin-bottom: 32px;
+}
+
+.photo-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.photo-item {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+}
+
+.photo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  --padding: 8px;
+  --background: rgba(255, 255, 255, 0.9);
+  --color: var(--ion-color-danger);
+  z-index: 10;
+}
+
+.upload-button {
+  margin-top: 24px;
+}
+
+/* Responsive para tablets */
+@media (min-width: 768px) {
+  .vehicle-photos-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  .photo-actions {
+    flex-direction: row;
+  }
+}
+

@@ -1,0 +1,284 @@
+.camera-guide-content {
+  --background: #000;
+}
+
+.camera-video-container {
+  position: relative !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  background: #000 !important;
+  /* Formato 4:3 */
+  aspect-ratio: 4 / 3 !important;
+  height: calc(100vw * 3 / 4) !important;
+  min-height: calc(100vw * 3 / 4) !important;
+  max-height: calc(100vw * 3 / 4) !important;
+  flex: 1 1 auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.camera-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+  display: block;
+  transform: rotate(0deg);
+}
+
+/* Forzar orientación horizontal */
+.landscape-video {
+  transform: rotate(0deg);
+}
+
+/* Forzar orientación horizontal siempre, sin importar la orientación del dispositivo */
+@media (orientation: portrait) {
+  .camera-video-container {
+    width: 100%;
+    height: calc(100vw * 3 / 4); /* Altura basada en ancho para mantener 4:3 */
+    min-height: calc(100vw * 3 / 4);
+    max-height: calc(100vw * 3 / 4);
+    aspect-ratio: 4 / 3;
+    flex: 0 0 calc(100vw * 3 / 4);
+  }
+  
+  .camera-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: rotate(0deg);
+  }
+}
+
+
+.camera-guide-instructions-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 100%;
+  position: relative;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  padding: 2rem;
+}
+
+.guide-preview-container {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 1rem;
+  margin: 2rem 0;
+  min-height: 300px;
+}
+
+.camera-guide-preview {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  position: relative !important;
+  background: #000 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+.camera-guide-instructions {
+  text-align: center;
+  color: white;
+  margin-bottom: 2rem;
+  z-index: 10;
+}
+
+.camera-guide-instructions h3 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.camera-guide-instructions p {
+  margin: 0;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.camera-guide-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: 100%;
+  aspect-ratio: 4 / 3; /* Formato 4:3 */
+  z-index: 5;
+  pointer-events: none;
+  /* Asegurar que se escale correctamente */
+  min-width: 0;
+}
+
+.landscape-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.car-silhouette {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  /* Forzar orientación horizontal - rotar si el SVG original es vertical */
+  transform: rotate(0deg);
+}
+
+/* Filtro para la silueta: convertir a verde semitransparente preservando detalles internos */
+.silhouette-image {
+  opacity: 0.7;
+  filter: 
+    brightness(0.9)
+    contrast(1.3)
+    invert(1)
+    sepia(100%) 
+    saturate(4000%) 
+    hue-rotate(90deg)
+    brightness(1.1)
+    contrast(1.1);
+  mix-blend-mode: screen;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.guide-title-text {
+  text-shadow: 
+    0 0 10px rgba(0, 255, 0, 0.8),
+    0 0 5px rgba(0, 255, 0, 0.6),
+    2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.guide-subtitle-text {
+  text-shadow: 
+    0 0 8px rgba(255, 255, 255, 0.6),
+    2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.camera-guide-actions {
+  position: absolute !important;
+  bottom: 2rem !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: auto !important;
+  width: 100% !important;
+  padding: 0 1rem !important;
+  z-index: 10 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+.camera-guide-actions ion-button {
+  margin-bottom: 1rem;
+}
+
+.guide-hint {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0;
+  padding: 0 1rem;
+}
+
+.camera-guide-result {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #000;
+}
+
+.photo-preview-container {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #000;
+}
+
+.photo-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.camera-guide-result .camera-guide-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 800px;
+  aspect-ratio: 4 / 3; /* Formato 4:3 */
+}
+
+.camera-guide-result .camera-guide-actions {
+  position: relative;
+  bottom: auto;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.guide-selector-button {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 10px;
+  padding: 0.4rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.change-guide-btn {
+  --color: white;
+  --background: rgba(56, 128, 255, 0.8);
+  --background-hover: rgba(56, 128, 255, 1);
+  font-size: 0.8rem;
+  margin: 0;
+  font-weight: 500;
+  text-transform: none;
+  --padding-start: 0.6rem;
+  --padding-end: 0.6rem;
+  --padding-top: 0.4rem;
+  --padding-bottom: 0.4rem;
+  min-height: 36px;
+}
+
+.change-guide-btn:hover {
+  --background: rgba(56, 128, 255, 1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .camera-guide-overlay {
+    width: 95%;
+  }
+
+  .camera-guide-instructions h3 {
+    font-size: 1.25rem;
+  }
+
+  .camera-guide-instructions p {
+    font-size: 0.9rem;
+  }
+}
+

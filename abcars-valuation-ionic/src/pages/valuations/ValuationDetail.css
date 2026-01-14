@@ -1,0 +1,149 @@
+.valuation-detail-container {
+  padding: 8px;
+}
+
+.valuation-detail-container ion-card {
+  margin-bottom: 10px;
+  border-radius: 10px;
+}
+
+.valuation-detail-container ion-card-header {
+  padding: 10px 12px 6px 12px;
+}
+
+.valuation-detail-container ion-card-content {
+  padding: 6px 12px 10px 12px;
+}
+
+.valuation-detail-container ion-card-title {
+  font-size: 0.95rem !important;
+  font-weight: 600;
+  color: var(--ion-color-dark) !important;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+}
+
+.card-header ion-badge {
+  font-size: 0.65rem;
+  padding: 3px 6px;
+  flex-shrink: 0;
+}
+
+.card-header ion-card-title {
+  font-size: 0.9rem !important;
+  font-weight: 600;
+  color: var(--ion-color-dark) !important;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-header ion-card-title ion-icon {
+  font-size: 1rem;
+}
+
+.valuation-detail-container ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --min-height: auto;
+  padding: 4px 0;
+}
+
+.valuation-detail-container ion-label h3 {
+  font-size: 0.75rem !important;
+  font-weight: 500;
+  color: var(--ion-color-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 4px 0;
+}
+
+.valuation-detail-container ion-label p {
+  font-size: 0.85rem !important;
+  margin: 0;
+  color: var(--ion-color-dark);
+}
+
+.price {
+  font-size: 0.95rem !important;
+  font-weight: 600;
+  color: var(--ion-color-primary);
+}
+
+.price.highlight {
+  font-size: 1.1rem !important;
+  color: var(--ion-color-success);
+}
+
+.actions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 0 8px;
+}
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  padding: 32px;
+  text-align: center;
+}
+
+/* Responsive para tablets */
+@media (min-width: 768px) {
+  .valuation-detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 12px;
+  }
+
+  .valuation-detail-container ion-card-header {
+    padding: 12px 16px 8px 16px;
+  }
+
+  .valuation-detail-container ion-card-content {
+    padding: 8px 16px 12px 16px;
+  }
+
+  .valuation-detail-container ion-card-title {
+    font-size: 1.05rem !important;
+  }
+
+  .actions-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 0 12px;
+  }
+
+  .price {
+    font-size: 1rem !important;
+  }
+
+  .price.highlight {
+    font-size: 1.15rem !important;
+  }
+}
+
+/* Responsive para desktop */
+@media (min-width: 1024px) {
+  .valuation-detail-container {
+    padding: 16px;
+  }
+
+  .actions-container {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+}
+
