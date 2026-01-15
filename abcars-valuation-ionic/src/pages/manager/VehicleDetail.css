@@ -1,0 +1,105 @@
+.vehicle-detail-content {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+}
+
+.vehicle-detail-view {
+  padding: 0;
+}
+
+/* Quitar shadow box y border del card */
+.vehicle-detail-view ion-card {
+  box-shadow: none;
+  margin: 0 0 16px 0;
+  border-radius: 8px;
+  border: none;
+}
+
+.vehicle-main-image-section {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.vehicle-main-image {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.vehicle-main-image:hover {
+  transform: scale(1.02);
+}
+
+.vehicle-gallery-section {
+  margin-bottom: 16px;
+}
+
+.gallery-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+  margin-bottom: 12px;
+  margin-top: 16px;
+}
+
+.gallery-item {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: none;
+  border: none;
+  margin-bottom: 12px;
+  transition: transform 0.2s;
+}
+
+.gallery-item:hover {
+  transform: translateY(-2px);
+}
+
+.gallery-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.no-images-message {
+  text-align: center;
+  padding: 24px 16px;
+  color: var(--ion-color-medium);
+}
+
+.no-images-message p {
+  margin-bottom: 12px;
+  font-size: 0.9375rem;
+}
+
+.vehicle-edit-form {
+  padding: 8px;
+}
+
+.form-actions {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Responsive para tablets */
+@media (min-width: 768px) {
+  .vehicle-detail-view,
+  .vehicle-edit-form {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+}
+

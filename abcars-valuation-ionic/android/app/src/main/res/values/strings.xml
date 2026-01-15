@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ABCars Valuación</string>
+    <string name="title_activity_main">ABCars Valuación</string>
+    <string name="package_name">com.abcars.valuation</string>
+    <string name="custom_url_scheme">com.abcars.valuation</string>
+</resources>
