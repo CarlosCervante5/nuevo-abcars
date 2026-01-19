@@ -1,3 +1,5 @@
+import { Repair, SparePartItem } from './Repair';
+
 export interface Valuation {
   uuid: string;
   book_trade_in_offer?: number;
@@ -18,6 +20,9 @@ export interface Valuation {
   vehicle?: Vehicle;
   dealership?: Dealership;
   appointment?: Appointment;
+  repairs?: Repair[];
+  spareParts?: SparePartItem[];
+  spare_parts?: SparePartItem[];
   created_at: string;
 }
 

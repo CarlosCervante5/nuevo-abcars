@@ -13,6 +13,8 @@ import {
   CreatePartRequest,
   UpdatePartRequest,
   UpdateValuationRequest,
+  CreateSparePartRequest,
+  SparePartItem,
 } from '../models';
 
 export const valuationService = {
@@ -111,10 +113,12 @@ export const valuationService = {
 
   // Reparaciones
   async getRepairs(valuationUuid: string) {
-    const response = await api.get<RepairListResponse>(
-      `valuations/${valuationUuid}/repairs`
-    );
-    return response.data;
+    const detail = await this.getValuationDetail(valuationUuid);
+    return {
+      status: detail.status,
+      message: detail.message,
+      data: detail.data?.repairs ?? [],
+    };
   },
 
   async createRepair(request: CreateRepairRequest) {
@@ -132,8 +136,14 @@ export const valuationService = {
 
   // Refacciones
   async getParts(valuationUuid: string) {
-    const response = await api.get<PartListResponse>(`valuations/${valuationUuid}/parts`);
-    return response.data;
+    const detail = await this.getValuationDetail(valuationUuid);
+    const spareParts =
+      detail.data?.spareParts ?? detail.data?.spare_parts ?? [];
+    return {
+      status: detail.status,
+      message: detail.message,
+      data: spareParts,
+    };
   },
 
   async createPart(request: CreatePartRequest) {
@@ -143,6 +153,33 @@ export const valuationService = {
 
   async updatePart(partUuid: string, request: UpdatePartRequest) {
     const response = await api.put<ApiResponse<void>>(`valuations/parts/${partUuid}`, request);
+    return response.data;
+  },
+
+  // Solicitud HyP (carrocería y pintura)
+  async createBodyworkRequest(description: string, imageFile: File, valuationUuid: string) {
+    const formData = new FormData();
+    formData.append('description', description);
+    formData.append('image', imageFile);
+    formData.append('valuation_uuid', valuationUuid);
+    const response = await api.post<ApiResponse<void>>('bodyworks', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  // Refacciones (solicitud y listado)
+  async createSparePart(request: CreateSparePartRequest) {
+    const response = await api.post<ApiResponse<void>>('spare_parts', request);
+    return response.data;
+  },
+
+  async deleteSparePart(partUuid: string) {
+    const response = await api.post<ApiResponse<void>>('spare_parts/delete', {
+      part_uuid: partUuid,
+    });
     return response.data;
   },
 

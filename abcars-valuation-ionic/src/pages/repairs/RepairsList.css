@@ -95,3 +95,9 @@
   --color: var(--ion-color-danger);
 }
 
+.hyp-description {
+  font-size: 0.95rem;
+  line-height: 1.25rem;
+  white-space: normal;
+  word-break: break-word;
+}
