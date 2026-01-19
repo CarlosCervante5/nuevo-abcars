@@ -18,45 +18,23 @@ import {
   IonToast,
   IonBackButton,
   IonButtons,
-  IonFab,
-  IonFabButton,
-  IonModal,
-  IonInput,
   IonTextarea,
-  IonButtons as IonButtonsModal,
-  IonButton as IonButtonModal,
 } from '@ionic/react';
-import {
-  add,
-  constructOutline,
-  trashOutline,
-  createOutline,
-  close,
-  cameraOutline,
-  imageOutline,
-} from 'ionicons/icons';
-import { useParams, useHistory } from 'react-router-dom';
+import { constructOutline } from 'ionicons/icons';
+import { useParams } from 'react-router-dom';
 import { valuationService } from '../../services/valuationService';
-import { Repair, CreateRepairRequest, UpdateRepairRequest } from '../../models';
-import { cameraHelper, CameraImage } from '../../utils/camera';
+import { Repair } from '../../models';
 import './RepairsList.css';
 
 const RepairsList: React.FC = () => {
   const { valuationUuid } = useParams<{ valuationUuid: string }>();
   const [repairs, setRepairs] = useState<Repair[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [editingRepair, setEditingRepair] = useState<Repair | null>(null);
-  const [formData, setFormData] = useState({
-    description: '',
-    cost: '',
-    labor_hours: '',
-  });
+  const [submitting, setSubmitting] = useState(false);
+  const [description, setDescription] = useState('');
+  const [damageImage, setDamageImage] = useState<File | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [repairImages, setRepairImages] = useState<CameraImage[]>([]);
-  const [uploadingImages, setUploadingImages] = useState(false);
-  const history = useHistory();
 
   useEffect(() => {
     if (valuationUuid) {
@@ -81,138 +59,28 @@ const RepairsList: React.FC = () => {
     }
   };
 
-  const handleOpenModal = (repair?: Repair) => {
-    if (repair) {
-      setEditingRepair(repair);
-      setFormData({
-        description: repair.description,
-        cost: repair.cost.toString(),
-        labor_hours: repair.labor_hours?.toString() || '',
-      });
-    } else {
-      setEditingRepair(null);
-      setFormData({
-        description: '',
-        cost: '',
-        labor_hours: '',
-      });
-    }
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setEditingRepair(null);
-    setRepairImages([]);
-    setFormData({
-      description: '',
-      cost: '',
-      labor_hours: '',
-    });
-  };
-
-  const handleTakePhoto = async () => {
-    if (!valuationUuid) return;
+  const handleSubmit = async () => {
+    if (!valuationUuid || !damageImage || !description.trim()) return;
 
     try {
-      const image = await cameraHelper.takePhoto('camera');
-      if (!image || !image.file) return;
-
-      setRepairImages((prev) => [...prev, image]);
-
-      // Subir al servidor cuando se guarde la reparación
-    } catch (error: any) {
-      setToastMessage('Error al capturar foto');
+      setSubmitting(true);
+      await valuationService.createBodyworkRequest(
+        description.trim(),
+        damageImage,
+        valuationUuid
+      );
+      setDescription('');
+      setDamageImage(null);
+      setToastMessage('Solicitud HyP enviada');
       setShowToast(true);
-    }
-  };
-
-  const handleSelectFromGallery = async () => {
-    if (!valuationUuid) return;
-
-    try {
-      const image = await cameraHelper.takePhoto('gallery');
-      if (!image || !image.file) return;
-
-      setRepairImages((prev) => [...prev, image]);
-
-      // Subir al servidor cuando se guarde la reparación
-    } catch (error: any) {
-      setToastMessage('Error al seleccionar foto');
-      setShowToast(true);
-    }
-  };
-
-  const handleRemoveImage = (imageIndex: number) => {
-    setRepairImages((prev) => prev.filter((_, idx) => idx !== imageIndex));
-  };
-
-  const handleSave = async () => {
-    if (!valuationUuid) return;
-
-    try {
-      if (editingRepair) {
-        // Actualizar
-        const request: UpdateRepairRequest = {
-          description: formData.description,
-          cost: parseFloat(formData.cost),
-          labor_hours: formData.labor_hours ? parseFloat(formData.labor_hours) : undefined,
-        };
-        await valuationService.updateRepair(editingRepair.uuid, request);
-        
-        // Subir imágenes asociadas a la reparación
-        if (repairImages.length > 0) {
-          setUploadingImages(true);
-          for (let i = 0; i < repairImages.length; i++) {
-            const image = repairImages[i];
-            if (image.file) {
-              await valuationService.uploadImage(
-                valuationUuid,
-                `repair_${editingRepair.uuid}_${i}`,
-                image.file,
-                'repair'
-              );
-            }
-          }
-          setUploadingImages(false);
-        }
-        setToastMessage('Reparación actualizada');
-      } else {
-        // Crear
-        const request: CreateRepairRequest = {
-          valuation_uuid: valuationUuid,
-          description: formData.description,
-          cost: parseFloat(formData.cost),
-          labor_hours: formData.labor_hours ? parseFloat(formData.labor_hours) : undefined,
-        };
-        const response = await valuationService.createRepair(request);
-        
-        // Subir imágenes asociadas a la reparación si las hay
-        // Nota: El endpoint de creación no retorna el UUID, así que las imágenes
-        // se guardarán localmente y se subirán cuando se edite la reparación
-        if (repairImages.length > 0) {
-          setToastMessage('Reparación creada. Las fotos se guardarán cuando se recargue la lista.');
-        } else {
-          setToastMessage('Reparación creada');
-        }
-      }
-      setShowToast(true);
-      handleCloseModal();
       loadRepairs();
     } catch (error: any) {
-      setToastMessage('Error al guardar reparación');
+      setToastMessage('Error al enviar solicitud HyP');
       setShowToast(true);
+    } finally {
+      setSubmitting(false);
     }
   };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-    }).format(amount);
-  };
-
-  const totalCost = repairs.reduce((sum, repair) => sum + repair.cost, 0);
 
   return (
     <IonPage>
@@ -221,191 +89,87 @@ const RepairsList: React.FC = () => {
           <IonButtons slot="start">
             <IonBackButton defaultHref="/valuations" />
           </IonButtons>
-          <IonTitle>Reparaciones</IonTitle>
+          <IonTitle>Solicitud HyP</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
         <div className="repairs-container">
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>Agregar HyP</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent>
+              <IonItem>
+                <IonLabel position="stacked">Descripción del daño</IonLabel>
+                <IonTextarea
+                  value={description}
+                  onIonInput={(e) => setDescription(e.detail.value || '')}
+                  rows={4}
+                  placeholder="Descripción del daño..."
+                />
+              </IonItem>
+              <IonItem>
+                <IonLabel position="stacked">Imagen/Foto del daño</IonLabel>
+                <input
+                  type="file"
+                  accept=".png,.jpg,.jpeg"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    setDamageImage(file);
+                  }}
+                />
+              </IonItem>
+              <IonButton
+                expand="block"
+                onClick={handleSubmit}
+                disabled={!description.trim() || !damageImage || submitting}
+              >
+                {submitting ? 'Enviando...' : 'Solicitar'}
+              </IonButton>
+            </IonCardContent>
+          </IonCard>
+
           {loading ? (
-            <IonLoading isOpen={loading} message="Cargando reparaciones..." />
+            <IonLoading isOpen={loading} message="Cargando HyP..." />
           ) : (
             <>
               <IonCard>
                 <IonCardHeader>
-                  <IonCardTitle>Resumen</IonCardTitle>
+                  <IonCardTitle>Conceptos HyP Solicitados</IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  <IonItem lines="none">
-                    <IonLabel>
-                      <h2>Total de Reparaciones</h2>
-                      <p>{repairs.length}</p>
-                    </IonLabel>
-                  </IonItem>
-                  <IonItem lines="none">
-                    <IonLabel>
-                      <h2>Costo Total</h2>
-                      <p className="total-cost">{formatCurrency(totalCost)}</p>
-                    </IonLabel>
-                  </IonItem>
+                  {repairs.length === 0 ? (
+                    <div className="empty-state">
+                      <IonIcon icon={constructOutline} size="large" />
+                      <p>Sin descripciones HyP solicitadas</p>
+                    </div>
+                  ) : (
+                    <IonList>
+                      {repairs.map((repair) => (
+                        <IonCard key={repair.uuid}>
+                          <IonCardHeader>
+                          <IonCardTitle className="hyp-description">
+                            {repair.description}
+                          </IonCardTitle>
+                          </IonCardHeader>
+                          {repair.image_path && (
+                            <IonCardContent>
+                              <img
+                                src={repair.image_path}
+                                alt="Imagen del daño"
+                                style={{ width: '100%', borderRadius: '8px' }}
+                              />
+                            </IonCardContent>
+                          )}
+                        </IonCard>
+                      ))}
+                    </IonList>
+                  )}
                 </IonCardContent>
               </IonCard>
-
-              <IonList>
-                {repairs.map((repair) => (
-                  <IonCard key={repair.uuid}>
-                    <IonCardHeader>
-                      <div className="card-header">
-                        <IonCardTitle>{repair.description}</IonCardTitle>
-                        <IonButton
-                          fill="clear"
-                          size="small"
-                          onClick={() => handleOpenModal(repair)}
-                        >
-                          <IonIcon icon={createOutline} />
-                        </IonButton>
-                      </div>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      <IonItem lines="none">
-                        <IonLabel>
-                          <h3>Costo</h3>
-                          <p>{formatCurrency(repair.cost)}</p>
-                        </IonLabel>
-                      </IonItem>
-                      {repair.labor_hours && (
-                        <IonItem lines="none">
-                          <IonLabel>
-                            <h3>Horas de Mano de Obra</h3>
-                            <p>{repair.labor_hours} hrs</p>
-                          </IonLabel>
-                        </IonItem>
-                      )}
-                    </IonCardContent>
-                  </IonCard>
-                ))}
-              </IonList>
-
-              {repairs.length === 0 && (
-                <div className="empty-state">
-                  <IonIcon icon={constructOutline} size="large" />
-                  <p>No hay reparaciones registradas</p>
-                </div>
-              )}
             </>
           )}
         </div>
-
-        <IonFab vertical="bottom" horizontal="end" slot="fixed">
-          <IonFabButton onClick={() => handleOpenModal()}>
-            <IonIcon icon={add} />
-          </IonFabButton>
-        </IonFab>
-
-        <IonModal isOpen={showModal} onDidDismiss={handleCloseModal}>
-          <IonHeader>
-            <IonToolbar>
-              <IonTitle>
-                {editingRepair ? 'Editar Reparación' : 'Nueva Reparación'}
-              </IonTitle>
-              <IonButtonsModal slot="end">
-                <IonButtonModal onClick={handleCloseModal}>
-                  <IonIcon icon={close} />
-                </IonButtonModal>
-              </IonButtonsModal>
-            </IonToolbar>
-          </IonHeader>
-          <IonContent className="ion-padding">
-            <IonItem>
-              <IonLabel position="stacked">Descripción *</IonLabel>
-              <IonTextarea
-                value={formData.description}
-                onIonInput={(e) =>
-                  setFormData({ ...formData, description: e.detail.value! })
-                }
-                rows={4}
-                placeholder="Descripción de la reparación"
-                required
-              />
-            </IonItem>
-
-            <IonItem>
-              <IonLabel position="stacked">Costo (MXN) *</IonLabel>
-              <IonInput
-                type="number"
-                value={formData.cost}
-                onIonInput={(e) =>
-                  setFormData({ ...formData, cost: e.detail.value! })
-                }
-                placeholder="0.00"
-                required
-              />
-            </IonItem>
-
-            <IonItem>
-              <IonLabel position="stacked">Horas de Mano de Obra</IonLabel>
-              <IonInput
-                type="number"
-                value={formData.labor_hours}
-                onIonInput={(e) =>
-                  setFormData({ ...formData, labor_hours: e.detail.value! })
-                }
-                placeholder="0.0"
-              />
-            </IonItem>
-
-            {/* Botones para agregar fotos */}
-            <div className="photo-actions">
-              <IonButton
-                fill="outline"
-                expand="block"
-                onClick={handleTakePhoto}
-                disabled={uploadingImages}
-              >
-                <IonIcon icon={cameraOutline} slot="start" />
-                Tomar Foto
-              </IonButton>
-              <IonButton
-                fill="outline"
-                expand="block"
-                onClick={handleSelectFromGallery}
-                disabled={uploadingImages}
-              >
-                <IonIcon icon={imageOutline} slot="start" />
-                Seleccionar de Galería
-              </IonButton>
-            </div>
-
-            {/* Preview de fotos */}
-            {repairImages.length > 0 && (
-              <div className="photo-preview-container">
-                {repairImages.map((image, idx) => (
-                  <div key={idx} className="photo-preview">
-                    <img src={image.webPath} alt={`Foto ${idx + 1}`} />
-                    <IonButton
-                      fill="clear"
-                      size="small"
-                      color="danger"
-                      onClick={() => handleRemoveImage(idx)}
-                      className="photo-remove-btn"
-                    >
-                      <IonIcon icon={trashOutline} />
-                    </IonButton>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <IonButton
-              expand="block"
-              onClick={handleSave}
-              disabled={!formData.description || !formData.cost || uploadingImages}
-              className="ion-margin-top"
-            >
-              {editingRepair ? 'Actualizar' : 'Guardar'}
-            </IonButton>
-          </IonContent>
-        </IonModal>
-
         <IonToast
           isOpen={showToast}
           onDidDismiss={() => setShowToast(false)}

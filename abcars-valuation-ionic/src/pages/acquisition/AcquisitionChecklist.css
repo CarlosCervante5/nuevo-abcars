@@ -34,6 +34,60 @@
   margin-top: 8px;
 }
 
+.tenencia-toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.tenencia-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--ion-color-light-shade);
+  border-radius: 10px;
+  background: var(--ion-color-light);
+}
+
+.tenencia-toggle-input {
+  display: none;
+}
+
+.tenencia-toggle-slider {
+  width: 40px;
+  height: 22px;
+  background: var(--ion-color-medium);
+  border-radius: 999px;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.tenencia-toggle-slider::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 2px;
+  top: 2px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.tenencia-toggle-input:checked + .tenencia-toggle-slider {
+  background: var(--ion-color-success);
+}
+
+.tenencia-toggle-input:checked + .tenencia-toggle-slider::after {
+  transform: translateX(18px);
+}
+
+.tenencia-toggle-label {
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
 /* Responsive para tablets */
 @media (min-width: 768px) {
   .checklist-container {

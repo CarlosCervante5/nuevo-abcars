@@ -155,6 +155,43 @@ const AcquisitionChecklist: React.FC = () => {
     }
   };
 
+  const renderTenenciaToggles = (tenenciaItems: Checkpoint[]) => {
+    const currentYear = new Date().getFullYear();
+
+    return (
+      <IonCard key="tenencia-group">
+        <IonCardHeader>
+          <IonCardTitle>Información de la toma tenencia</IonCardTitle>
+        </IonCardHeader>
+        <IonCardContent>
+          <div className="tenencia-toggle-grid">
+            {tenenciaItems.map((item, index) => {
+              const yearValue = currentYear - index;
+              const isChecked = Boolean(item.selected_value);
+              return (
+                <label key={item.uuid} className="tenencia-toggle">
+                  <input
+                    type="checkbox"
+                    className="tenencia-toggle-input"
+                    checked={isChecked}
+                    onChange={(event) =>
+                      handleCheckpointChange(
+                        item.uuid,
+                        event.target.checked ? String(yearValue) : ''
+                      )
+                    }
+                  />
+                  <span className="tenencia-toggle-slider" />
+                  <span className="tenencia-toggle-label">{yearValue}</span>
+                </label>
+              );
+            })}
+          </div>
+        </IonCardContent>
+      </IonCard>
+    );
+  };
+
   const getProgress = () => {
     const completed = checkpoints.filter((cp) => cp.selected_value).length;
     return checkpoints.length > 0 ? (completed / checkpoints.length) * 100 : 0;
@@ -186,29 +223,46 @@ const AcquisitionChecklist: React.FC = () => {
             <IonLoading isOpen={loading} message="Cargando checklist..." />
           ) : (
             <IonList>
-              {checkpoints.map((checkpoint) => (
-                <IonCard key={checkpoint.uuid}>
-                  <IonCardHeader>
-                    <IonCardTitle>{checkpoint.name}</IonCardTitle>
-                    {checkpoint.description && (
-                      <p className="checkpoint-description">{checkpoint.description}</p>
-                    )}
-                  </IonCardHeader>
-                  <IonCardContent>
-                    <IonItem>
-                      <IonLabel position="stacked">Valor</IonLabel>
-                      {renderCheckpointInput(checkpoint)}
-                      {checkpoint.selected_value && (
-                        <IonIcon
-                          icon={checkmarkCircle}
-                          color="success"
-                          slot="end"
-                        />
-                      )}
-                    </IonItem>
-                  </IonCardContent>
-                </IonCard>
-              ))}
+              {(() => {
+                const tenenciaItems = checkpoints.filter(
+                  (cp) => cp.section_name === 'Información de la toma tenencia'
+                );
+                let tenenciaRendered = false;
+
+                return checkpoints.map((checkpoint) => {
+                  if (checkpoint.section_name === 'Información de la toma tenencia') {
+                    if (tenenciaRendered) {
+                      return null;
+                    }
+                    tenenciaRendered = true;
+                    return renderTenenciaToggles(tenenciaItems);
+                  }
+
+                  return (
+                    <IonCard key={checkpoint.uuid}>
+                      <IonCardHeader>
+                        <IonCardTitle>{checkpoint.name}</IonCardTitle>
+                        {checkpoint.description && (
+                          <p className="checkpoint-description">{checkpoint.description}</p>
+                        )}
+                      </IonCardHeader>
+                      <IonCardContent>
+                        <IonItem>
+                          <IonLabel position="stacked">Valor</IonLabel>
+                          {renderCheckpointInput(checkpoint)}
+                          {checkpoint.selected_value && (
+                            <IonIcon
+                              icon={checkmarkCircle}
+                              color="success"
+                              slot="end"
+                            />
+                          )}
+                        </IonItem>
+                      </IonCardContent>
+                    </IonCard>
+                  );
+                });
+              })()}
             </IonList>
           )}
         </div>
