@@ -4,6 +4,7 @@ export * from './Repair';
 
 export interface UpdateValuationRequest {
   valuation_uuid: string;
+  status?: string;
   book_trade_in_offer?: number;
   book_sale_price?: number;
   intellimotors_trade_in_offer?: number;
