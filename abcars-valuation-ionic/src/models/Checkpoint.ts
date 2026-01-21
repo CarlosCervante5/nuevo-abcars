@@ -29,6 +29,7 @@ export interface ChecklistRequest {
 }
 
 export const CHECKLIST_SECTIONS = [
+  'Información Cliente',
   'Mecánica y Eléctrica',
   'Revisión Exterior',
   'Revisión Interior',

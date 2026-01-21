@@ -20,6 +20,13 @@ export interface Valuation {
   vehicle?: Vehicle;
   dealership?: Dealership;
   appointment?: Appointment;
+  technician?: {
+    uuid: string;
+    user_profile?: {
+      name: string;
+      last_name: string;
+    };
+  };
   repairs?: Repair[];
   spareParts?: SparePartItem[];
   spare_parts?: SparePartItem[];
@@ -36,8 +43,18 @@ export interface Vehicle {
   mileage?: number;
   brand?: Brand;
   model?: Model;
+  version?: { name?: string } | string;
+  body?: { name?: string } | string;
   year?: number;
   specification?: VehicleSpecification;
+  country_of_origin?: string;
+  transmission?: string;
+  intake_engine?: string;
+  auto_start_stop?: string;
+  exterior_color?: string;
+  plates?: string;
+  cylinders?: number | string;
+  engine_type?: string;
 }
 
 export interface Brand {
@@ -64,6 +81,8 @@ export interface VehicleSpecification {
   auto_start_stop?: string;
   warranty_policy?: string;
   warranty_manual?: string;
+  intake_engine?: string;
+  exterior_color?: string;
 }
 
 export interface Dealership {
@@ -78,12 +97,14 @@ export interface Appointment {
   vehicle?: AppointmentVehicle;
   preferred_date?: string;
   preferred_time?: string;
+  scheduled_date?: string;
 }
 
 export interface Customer {
   name?: string;
   last_name?: string;
   phone?: string;
+  phone_1?: string;
   email?: string;
   full_name?: string;
 }

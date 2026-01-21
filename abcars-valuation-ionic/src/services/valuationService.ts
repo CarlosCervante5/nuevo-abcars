@@ -53,8 +53,14 @@ export const valuationService = {
       relationship_names: [
         'vehicle.brand',
         'vehicle.model',
+        'vehicle.version',
+        'vehicle.body',
+        'vehicle.specification',
         'dealership',
+        'appointment',
         'appointment.customer',
+        'appointment.vehicle',
+        'technician.userProfile',
         'checkpoints',
         'repairs',
         'spareParts',
@@ -70,6 +76,19 @@ export const valuationService = {
       section_name: sectionName,
     };
     const response = await api.post<CheckpointResponse>('valuations/checklist', request);
+    return response.data;
+  },
+
+  async updateCustomerInformation(request: Record<string, any>) {
+    const response = await api.post<ApiResponse<void>>('valuations/update_vehicle', request);
+    return response.data;
+  },
+
+  async getTechnicians() {
+    const response = await api.post<ApiResponse<{ users: { uuid: string; user_profile: { name: string; last_name: string } }[] }>>(
+      'users/by_role',
+      { role_name: 'technician' }
+    );
     return response.data;
   },
 
