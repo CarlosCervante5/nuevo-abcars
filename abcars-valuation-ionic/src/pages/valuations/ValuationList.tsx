@@ -21,7 +21,7 @@ import {
   IonFabButton,
 } from '@ionic/react';
 import { refresh, carOutline, calendarOutline, add, logOutOutline } from 'ionicons/icons';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { valuationService } from '../../services/valuationService';
 import { Valuation } from '../../models';
 import { authService } from '../../services/authService';
@@ -32,10 +32,18 @@ const ValuationList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const history = useHistory();
+  const location = useLocation<{ refresh?: boolean }>();
 
   useEffect(() => {
     loadValuations();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.refresh) {
+      loadValuations();
+      history.replace({ ...location, state: {} });
+    }
+  }, [location.key]);
 
   const loadValuations = async () => {
     try {

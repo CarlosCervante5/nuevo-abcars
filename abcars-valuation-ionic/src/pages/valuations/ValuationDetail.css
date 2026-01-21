@@ -29,6 +29,46 @@
   gap: 8px;
 }
 
+.status-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ion-color-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-dot-label {
+  line-height: 1;
+}
+
+.status-dot-gray {
+  background: #9aa0a6;
+}
+
+.status-dot-red {
+  background: #e53935;
+}
+
+.status-dot-green {
+  background: #2e7d32;
+}
+
 .card-header ion-badge {
   font-size: 0.65rem;
   padding: 3px 6px;
@@ -68,6 +108,12 @@
   font-size: 0.85rem !important;
   margin: 0;
   color: var(--ion-color-dark);
+}
+
+.vin-value {
+  white-space: nowrap;
+  display: inline-block;
+  max-width: 100%;
 }
 
 .price {
