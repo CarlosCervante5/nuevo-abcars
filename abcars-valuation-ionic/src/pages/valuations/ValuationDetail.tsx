@@ -128,6 +128,20 @@ const ValuationDetail: React.FC = () => {
     }
   };
 
+  const getPartsStatusClass = (status?: string) => {
+    switch (status) {
+      case 'parts_done':
+        return 'status-dot-green';
+      case 'pending_review':
+        return 'status-dot-red';
+      case 'on_hold':
+      case 'pending_entry':
+        return 'status-dot-gray';
+      default:
+        return 'status-dot-gray';
+    }
+  };
+
   if (loading) {
     return (
       <IonPage>
@@ -185,7 +199,17 @@ const ValuationDetail: React.FC = () => {
               <div className="card-header">
                 <IonCardTitle>
                   <IonIcon icon={carOutline} />{' '}
-                  {valuation.vehicle?.brand?.name} {valuation.vehicle?.model?.name}
+                  {(() => {
+                    const brand =
+                      valuation.vehicle?.brand?.name ||
+                      valuation.appointment?.vehicle?.brand_name ||
+                      '';
+                    const model =
+                      valuation.vehicle?.model?.name ||
+                      valuation.appointment?.vehicle?.model_name ||
+                      '';
+                    return `${brand} ${model}`.trim() || 'Vehículo';
+                  })()}
                 </IonCardTitle>
                 <IonBadge color={getStatusColor(valuation.status)}>
                   {getStatusText(valuation.status)}
@@ -199,7 +223,11 @@ const ValuationDetail: React.FC = () => {
                     <IonItem lines="none">
                       <IonLabel>
                         <h3>Año</h3>
-                        <p>{valuation.vehicle?.year || 'N/A'}</p>
+                        <p>
+                          {valuation.vehicle?.year ||
+                            valuation.appointment?.vehicle?.year ||
+                            'N/A'}
+                        </p>
                       </IonLabel>
                     </IonItem>
                   </IonCol>
@@ -207,15 +235,25 @@ const ValuationDetail: React.FC = () => {
                     <IonItem lines="none">
                       <IonLabel>
                         <h3>Kilometraje</h3>
-                        <p>{valuation.vehicle?.mileage?.toLocaleString() || 'N/A'} km</p>
+                        <p>
+                          {(valuation.vehicle?.mileage ??
+                            valuation.appointment?.vehicle?.mileage) !==
+                          undefined
+                            ? `${(
+                                valuation.vehicle?.mileage ??
+                                valuation.appointment?.vehicle?.mileage ??
+                                0
+                              ).toLocaleString()} km`
+                            : 'N/A'}
+                        </p>
                       </IonLabel>
                     </IonItem>
                   </IonCol>
-                  <IonCol size="6">
+                  <IonCol size="12" sizeMd="6">
                     <IonItem lines="none">
                       <IonLabel>
                         <h3>VIN</h3>
-                        <p>{valuation.vehicle?.vin || 'N/A'}</p>
+                        <p className="vin-value">{valuation.vehicle?.vin || 'N/A'}</p>
                       </IonLabel>
                     </IonItem>
                   </IonCol>
@@ -225,6 +263,21 @@ const ValuationDetail: React.FC = () => {
                       <IonLabel>
                         <h3>Sucursal</h3>
                         <p>{valuation.dealership?.name || 'N/A'}</p>
+                      </IonLabel>
+                    </IonItem>
+                  </IonCol>
+                  <IonCol size="6">
+                    <IonItem lines="none">
+                      <IonLabel>
+                        <div className="status-dot-row">
+                          <span className="status-dot-label">Refacciones</span>
+                          <span
+                            className={`status-dot ${getPartsStatusClass(
+                              valuation.status_parts
+                            )}`}
+                            aria-label="Estatus de refacciones"
+                          />
+                        </div>
                       </IonLabel>
                     </IonItem>
                   </IonCol>

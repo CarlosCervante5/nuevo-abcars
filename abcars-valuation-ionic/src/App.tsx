@@ -85,7 +85,7 @@ const App: React.FC = () => {
           <Route exact path="/valuations/new">
             {isAuthenticated ? <NewValuation /> : <Redirect to="/login" />}
           </Route>
-          <Route exact path="/valuations/:valuationUuid">
+          <Route exact path="/valuations/:valuationUuid([0-9a-fA-F-]{36})">
             {isAuthenticated ? <ValuationDetail /> : <Redirect to="/login" />}
           </Route>
           <Route exact path="/valuations/:valuationUuid/checklist">

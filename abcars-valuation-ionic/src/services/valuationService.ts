@@ -227,6 +227,19 @@ export const valuationService = {
     return response.data;
   },
 
+  // Marcas y modelos para citas de valuación
+  async getVehicleBrands() {
+    const response = await api.get<{ status: number; message: string; data: { vehicle_brands: { name: string }[] } }>('vehicle_brands');
+    return response.data;
+  },
+
+  async getModelsByBrand(brand: string) {
+    const response = await api.get<{ status: number; message: string; data: { line_models: { name: string }[] } }>(
+      `line_models/by_brand/${encodeURIComponent(brand)}`
+    );
+    return response.data;
+  },
+
   // Crear cliente internamente
   async createCustomer(request: {
     name: string;
