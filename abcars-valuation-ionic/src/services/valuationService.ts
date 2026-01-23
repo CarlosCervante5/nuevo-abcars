@@ -234,7 +234,7 @@ export const valuationService = {
 
   // Actualizar valuación
   async updateValuation(request: UpdateValuationRequest) {
-    const response = await api.put<ApiResponse<void>>('valuations/update', request);
+    const response = await api.post<ApiResponse<void>>('valuations/update', request);
     return response.data;
   },
 

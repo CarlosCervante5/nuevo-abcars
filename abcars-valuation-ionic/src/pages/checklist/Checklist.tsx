@@ -13,6 +13,7 @@ import {
   IonSelect,
   IonSelectOption,
   IonInput,
+  IonTextarea,
   IonButton,
   IonIcon,
   IonCard,
@@ -120,6 +121,7 @@ const Checklist: React.FC = () => {
     CHECKLIST_SECTIONS[0]
   );
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
+  const [inputValues, setInputValues] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -177,6 +179,15 @@ const Checklist: React.FC = () => {
       const response = await valuationService.getChecklist(valuationUuid, selectedSection);
       if (response.status === 200) {
         setCheckpoints(response.data);
+        setInputValues((prev) => {
+          const next = { ...prev };
+          response.data.forEach((cp) => {
+            if (next[cp.uuid] === undefined) {
+              next[cp.uuid] = cp.selected_value || '';
+            }
+          });
+          return next;
+        });
       }
     } catch (error: any) {
       setToastMessage('Error al cargar checklist');
@@ -347,14 +358,18 @@ const Checklist: React.FC = () => {
         type: 'car',
         valuation_uuid: valuationUuid,
       });
-      await valuationService.updateValuation({
-        valuation_uuid: valuationUuid,
-        status: 'on_progress',
-      });
-      setToastMessage('Alta/Actualización de registro exitoso.');
-      setShowToast(true);
       setCustomerLocked(true);
       setSelectedSection('Mecánica y Eléctrica');
+      try {
+        await valuationService.updateValuation({
+          valuation_uuid: valuationUuid,
+          status: 'on_progress',
+        });
+      } catch {
+        // Status update failure shouldn't block user flow.
+      }
+      setToastMessage('Alta/Actualización de registro exitoso.');
+      setShowToast(true);
     } catch {
       setToastMessage('Error al guardar información del cliente.');
       setShowToast(true);
@@ -392,6 +407,28 @@ const Checklist: React.FC = () => {
 
   const renderCheckpointInput = (checkpoint: Checkpoint) => {
     switch (checkpoint.value_type) {
+      case 'textarea':
+      case 'longtext':
+        return (
+          <IonTextarea
+            value={inputValues[checkpoint.uuid] ?? checkpoint.selected_value ?? ''}
+            placeholder="Ingresar texto"
+            autoGrow
+            onIonInput={(e) =>
+              setInputValues((prev) => ({
+                ...prev,
+                [checkpoint.uuid]: e.detail.value || '',
+              }))
+            }
+            onIonBlur={() =>
+              handleCheckpointChange(
+                checkpoint.uuid,
+                inputValues[checkpoint.uuid] ?? ''
+              )
+            }
+          />
+        );
+
       case 'select':
         return (
           <IonSelect
@@ -413,10 +450,19 @@ const Checklist: React.FC = () => {
       case 'text':
         return (
           <IonInput
-            value={checkpoint.selected_value || ''}
+            value={inputValues[checkpoint.uuid] ?? checkpoint.selected_value ?? ''}
             placeholder="Ingresar texto"
             onIonInput={(e) =>
-              handleCheckpointChange(checkpoint.uuid, e.detail.value || '')
+              setInputValues((prev) => ({
+                ...prev,
+                [checkpoint.uuid]: e.detail.value || '',
+              }))
+            }
+            onIonBlur={() =>
+              handleCheckpointChange(
+                checkpoint.uuid,
+                inputValues[checkpoint.uuid] ?? ''
+              )
             }
           />
         );
@@ -425,11 +471,36 @@ const Checklist: React.FC = () => {
         return (
           <IonInput
             type="number"
-            value={checkpoint.selected_value || ''}
+            value={inputValues[checkpoint.uuid] ?? checkpoint.selected_value ?? ''}
             placeholder="Ingresar número"
             onIonInput={(e) =>
-              handleCheckpointChange(checkpoint.uuid, e.detail.value || '')
+              setInputValues((prev) => ({
+                ...prev,
+                [checkpoint.uuid]: e.detail.value || '',
+              }))
             }
+            onIonBlur={() =>
+              handleCheckpointChange(
+                checkpoint.uuid,
+                inputValues[checkpoint.uuid] ?? ''
+              )
+            }
+          />
+        );
+
+      case 'date':
+        return (
+          <IonInput
+            type="date"
+            value={inputValues[checkpoint.uuid] ?? checkpoint.selected_value ?? ''}
+            onIonChange={(e) => {
+              const value = e.detail.value || '';
+              setInputValues((prev) => ({
+                ...prev,
+                [checkpoint.uuid]: value,
+              }));
+              handleCheckpointChange(checkpoint.uuid, value);
+            }}
           />
         );
 
@@ -450,7 +521,24 @@ const Checklist: React.FC = () => {
         );
 
       default:
-        return null;
+        return (
+          <IonInput
+            value={inputValues[checkpoint.uuid] ?? checkpoint.selected_value ?? ''}
+            placeholder="Ingresar texto"
+            onIonInput={(e) =>
+              setInputValues((prev) => ({
+                ...prev,
+                [checkpoint.uuid]: e.detail.value || '',
+              }))
+            }
+            onIonBlur={() =>
+              handleCheckpointChange(
+                checkpoint.uuid,
+                inputValues[checkpoint.uuid] ?? ''
+              )
+            }
+          />
+        );
     }
   };
 

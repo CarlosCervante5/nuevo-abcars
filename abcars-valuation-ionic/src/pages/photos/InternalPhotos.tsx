@@ -33,6 +33,10 @@ interface PhotoItem {
   existingUrl?: string;
 }
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || 'https://backend.abcars.mx/api/';
+const ASSET_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '/');
+
 const INTERIOR_PHOTOS = [
   { index: 0, name: 'Consola' },
   { index: 1, name: 'Asiento trasero' },
@@ -86,10 +90,14 @@ const InternalPhotos: React.FC = () => {
         response.data.forEach((item: any) => {
           const index = nameToIndex[item.name];
           if (index !== undefined) {
+            const rawPath = item.image_path || '';
+            const fullPath = rawPath.startsWith('http')
+              ? rawPath
+              : `${ASSET_BASE_URL}${rawPath.replace(/^\//, '')}`;
             setPhotos((prev) =>
               prev.map((p) =>
                 p.index === index
-                  ? { ...p, existingUrl: item.image_path, uploaded: true }
+                  ? { ...p, existingUrl: fullPath, uploaded: true }
                   : p
               )
             );

@@ -15,6 +15,16 @@ export const cameraHelper = {
    */
   async takePhoto(source: 'camera' | 'gallery' = 'camera'): Promise<CameraImage | null> {
     try {
+      const permissions = await Camera.requestPermissions({
+        permissions: source === 'camera' ? ['camera', 'photos'] : ['photos'],
+      });
+      if (source === 'camera' && permissions.camera === 'denied') {
+        throw new Error('Permiso de cámara denegado.');
+      }
+      if (permissions.photos === 'denied') {
+        throw new Error('Permiso de fotos denegado.');
+      }
+
       const image = await Camera.getPhoto({
         quality: 90,
         allowEditing: false,
@@ -38,7 +48,7 @@ export const cameraHelper = {
     } catch (error: any) {
       console.error('Error al capturar imagen:', error);
       if (error.message !== 'User cancelled photos app') {
-        throw new Error('Error al capturar imagen. Por favor intenta de nuevo.');
+        throw new Error(error.message || 'Error al capturar imagen. Por favor intenta de nuevo.');
       }
       return null;
     }
