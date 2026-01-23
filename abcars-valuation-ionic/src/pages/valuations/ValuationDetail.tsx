@@ -21,6 +21,7 @@ import {
   IonGrid,
   IonRow,
   IonCol,
+  useIonViewWillEnter,
 } from '@ionic/react';
 import {
   carOutline,
@@ -48,6 +49,12 @@ const ValuationDetail: React.FC = () => {
       loadValuationDetail();
     }
   }, [valuationUuid]);
+
+  useIonViewWillEnter(() => {
+    if (valuationUuid) {
+      loadValuationDetail();
+    }
+  });
 
   const loadValuationDetail = async () => {
     if (!valuationUuid) return;
@@ -127,6 +134,11 @@ const ValuationDetail: React.FC = () => {
         return status || 'L.P. Venta';
     }
   };
+
+  const shouldShowAcquisitionChecklist = (status?: string, statusParts?: string) =>
+    (status === 'checklist_ready' && statusParts === 'parts_done') ||
+    status === 'valuated' ||
+    status === 'complete_file';
 
   const getPartsStatusClass = (status?: string) => {
     switch (status) {
@@ -379,14 +391,16 @@ const ValuationDetail: React.FC = () => {
               Checklist de Valuación
             </IonButton>
 
-            <IonButton
-              expand="block"
-              color="secondary"
-              onClick={() => history.push(`/valuations/${valuationUuid}/acquisition`)}
-            >
-              <IonIcon icon={documentTextOutline} slot="start" />
-              Checklist de Adquisición
-            </IonButton>
+            {shouldShowAcquisitionChecklist(valuation.status, valuation.status_parts) && (
+              <IonButton
+                expand="block"
+                color="secondary"
+                onClick={() => history.push(`/valuations/${valuationUuid}/acquisition`)}
+              >
+                <IonIcon icon={documentTextOutline} slot="start" />
+                Checklist de Adquisición
+              </IonButton>
+            )}
 
             <IonButton
               expand="block"

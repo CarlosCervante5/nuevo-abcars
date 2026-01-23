@@ -19,6 +19,7 @@ import {
   IonAlert,
   IonFab,
   IonFabButton,
+  useIonViewWillEnter,
 } from '@ionic/react';
 import { refresh, carOutline, calendarOutline, add, logOutOutline } from 'ionicons/icons';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -37,6 +38,10 @@ const ValuationList: React.FC = () => {
   useEffect(() => {
     loadValuations();
   }, []);
+
+  useIonViewWillEnter(() => {
+    loadValuations();
+  });
 
   useEffect(() => {
     if (location.state?.refresh) {

@@ -3,7 +3,7 @@ export interface Checkpoint {
   name: string;
   description?: string;
   values: string[];
-  value_type: 'select' | 'text' | 'number' | 'boolean';
+  value_type: 'select' | 'text' | 'number' | 'boolean' | 'date' | 'textarea' | 'longtext';
   section_name: string;
   image_path?: string;
   selected_value?: string;
