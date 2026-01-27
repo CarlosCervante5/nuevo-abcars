@@ -2259,24 +2259,24 @@ export class VehicleDetailComponent implements OnInit {
     }
 
     // Campos existentes en vehicle_specifications
-    if (spec?.engine_type) {
-      specs.push({ label: 'Tipo de motor', value: this.formatColor(spec.engine_type) });
-    }
-    if (spec?.country_of_origin) {
-      specs.push({ label: 'País de origen', value: this.formatColor(spec.country_of_origin) });
-    }
-    if (spec?.intake_engine) {
-      specs.push({ label: 'Aspiración del motor', value: this.formatColor(spec.intake_engine) });
-    }
-    if (spec?.auto_start_stop) {
-      specs.push({ label: 'Start-stop', value: spec.auto_start_stop === 'yes' ? 'Sí' : 'No' });
-    }
-    if (spec?.keys_number) {
-      specs.push({ label: 'Número de llaves', value: spec.keys_number.toString() });
-    }
-    if (spec?.plates) {
-      specs.push({ label: 'Placas', value: spec.plates });
-    }
+    // if (spec?.engine_type) {
+    //   specs.push({ label: 'Tipo de motor', value: this.formatColor(spec.engine_type) });
+    // }
+    // if (spec?.country_of_origin) {
+    //   specs.push({ label: 'País de origen', value: this.formatColor(spec.country_of_origin) });
+    // }
+    // if (spec?.intake_engine) {
+    //   specs.push({ label: 'Aspiración del motor', value: this.formatColor(spec.intake_engine) });
+    // }
+    // if (spec?.auto_start_stop) {
+    //   specs.push({ label: 'Start-stop', value: spec.auto_start_stop === 'yes' ? 'Sí' : 'No' });
+    // }
+    // if (spec?.keys_number) {
+    //   specs.push({ label: 'Número de llaves', value: spec.keys_number.toString() });
+    // }
+    // if (spec?.plates) {
+    //   specs.push({ label: 'Placas', value: spec.plates });
+    // }
 
     // Campos hardcodeados comentados - NO EXISTEN EN BD
     // { label: 'Peso', value: this.getWeight() },
