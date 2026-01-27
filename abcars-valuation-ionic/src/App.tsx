@@ -31,6 +31,7 @@ import Login from './pages/auth/Login';
 import ValuationList from './pages/valuations/ValuationList';
 import ValuationDetail from './pages/valuations/ValuationDetail';
 import NewValuation from './pages/valuations/NewValuation';
+import QuoteRequest from './pages/valuations/QuoteRequest';
 import Checklist from './pages/checklist/Checklist';
 import AcquisitionChecklist from './pages/acquisition/AcquisitionChecklist';
 import RepairsList from './pages/repairs/RepairsList';
@@ -90,6 +91,9 @@ const App: React.FC = () => {
           </Route>
           <Route exact path="/valuations/:valuationUuid/checklist">
             {isAuthenticated ? <Checklist /> : <Redirect to="/login" />}
+          </Route>
+          <Route exact path="/valuations/:valuationUuid/quote-request">
+            {isAuthenticated ? <QuoteRequest /> : <Redirect to="/login" />}
           </Route>
           <Route exact path="/valuations/:valuationUuid/acquisition">
             {isAuthenticated ? <AcquisitionChecklist /> : <Redirect to="/login" />}

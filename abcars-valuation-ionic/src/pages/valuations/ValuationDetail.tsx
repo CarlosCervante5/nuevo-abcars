@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   IonContent,
   IonHeader,
@@ -22,6 +22,8 @@ import {
   IonRow,
   IonCol,
   useIonViewWillEnter,
+  IonModal,
+  IonFooter,
 } from '@ionic/react';
 import {
   carOutline,
@@ -31,6 +33,7 @@ import {
   cubeOutline,
   documentTextOutline,
   checkmarkCircleOutline,
+  downloadOutline,
 } from 'ionicons/icons';
 import { useParams, useHistory } from 'react-router-dom';
 import { valuationService } from '../../services/valuationService';
@@ -42,6 +45,9 @@ const ValuationDetail: React.FC = () => {
   const [valuation, setValuation] = useState<Valuation | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showPdf, setShowPdf] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const history = useHistory();
 
   useEffect(() => {
@@ -139,6 +145,40 @@ const ValuationDetail: React.FC = () => {
     (status === 'checklist_ready' && statusParts === 'parts_done') ||
     status === 'valuated' ||
     status === 'complete_file';
+
+  const shouldShowValuar = (status?: string, statusParts?: string) =>
+    (status === 'checklist_ready' && statusParts === 'parts_done') || status === 'valuated';
+
+  const shouldShowDownloadValuation = (status?: string) =>
+    status === 'valuated' || status === 'complete_file';
+
+  const handleDownloadValuation = async () => {
+    if (!valuationUuid) return;
+    try {
+      const blob = await valuationService.downloadValuationPdf(valuationUuid);
+      const url = window.URL.createObjectURL(blob);
+      setPdfUrl(url);
+      setShowPdf(true);
+    } catch (err: any) {
+      setError(err?.message || 'Error al descargar la valuación');
+    }
+  };
+
+  const handleClosePdf = () => {
+    setShowPdf(false);
+    if (pdfUrl) {
+      window.URL.revokeObjectURL(pdfUrl);
+      setPdfUrl(null);
+    }
+  };
+
+  const handlePrintPdf = () => {
+    try {
+      iframeRef.current?.contentWindow?.print();
+    } catch (err) {
+      window.print();
+    }
+  };
 
   const getPartsStatusClass = (status?: string) => {
     switch (status) {
@@ -391,6 +431,24 @@ const ValuationDetail: React.FC = () => {
               Checklist de Valuación
             </IonButton>
 
+            {shouldShowDownloadValuation(valuation.status) && (
+              <IonButton expand="block" color="medium" onClick={handleDownloadValuation}>
+                <IonIcon icon={downloadOutline} slot="start" />
+                Descargar Valuación
+              </IonButton>
+            )}
+
+            {shouldShowValuar(valuation.status, valuation.status_parts) && (
+              <IonButton
+                expand="block"
+                color="success"
+                onClick={() => history.push(`/valuations/${valuationUuid}/quote-request`)}
+              >
+                <IonIcon icon={calendarOutline} slot="start" />
+                Valuar
+              </IonButton>
+            )}
+
             {shouldShowAcquisitionChecklist(valuation.status, valuation.status_parts) && (
               <IonButton
                 expand="block"
@@ -429,6 +487,33 @@ const ValuationDetail: React.FC = () => {
           message={error}
           buttons={['Aceptar']}
         />
+        <IonModal isOpen={showPdf} onDidDismiss={handleClosePdf} className="valuation-pdf-modal">
+          <IonHeader>
+            <IonToolbar color="primary">
+              <IonTitle>Valuación</IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={handleClosePdf}>Cerrar</IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent>
+            {pdfUrl && (
+              <iframe
+                ref={iframeRef}
+                src={pdfUrl}
+                title="Valuación PDF"
+                className="valuation-pdf-frame"
+              />
+            )}
+          </IonContent>
+          <IonFooter>
+            <IonToolbar>
+              <IonButtons slot="end">
+                <IonButton onClick={handlePrintPdf}>Imprimir</IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonFooter>
+        </IonModal>
       </IonContent>
     </IonPage>
   );

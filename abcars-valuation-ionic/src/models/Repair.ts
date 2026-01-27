@@ -47,6 +47,9 @@ export interface SparePartItem {
   name: string;
   quantity: number;
   labor_time: number;
+  part_supplier_original?: {
+    cost?: number;
+  };
 }
 
 export interface CreateSparePartRequest {

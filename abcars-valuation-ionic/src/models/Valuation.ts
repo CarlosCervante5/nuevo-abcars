@@ -12,6 +12,7 @@ export interface Valuation {
   estimated_total?: number;
   trade_in_final?: number;
   final_offer?: number;
+  take_type?: string;
   status: string;
   status_repairs: string;
   status_parts: string;
@@ -27,6 +28,13 @@ export interface Valuation {
       last_name: string;
     };
   };
+  seller?: {
+    uuid: string;
+    user_profile?: {
+      name: string;
+      last_name: string;
+    };
+  }[];
   repairs?: Repair[];
   spareParts?: SparePartItem[];
   spare_parts?: SparePartItem[];
