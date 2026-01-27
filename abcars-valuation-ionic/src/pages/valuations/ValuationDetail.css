@@ -193,3 +193,14 @@
   }
 }
 
+.valuation-pdf-modal {
+  --width: 100%;
+  --height: 100%;
+}
+
+.valuation-pdf-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+

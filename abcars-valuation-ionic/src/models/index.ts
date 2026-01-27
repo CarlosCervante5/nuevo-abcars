@@ -4,6 +4,7 @@ export * from './Repair';
 
 export interface UpdateValuationRequest {
   valuation_uuid: string;
+  seller_uuid?: string;
   status?: string;
   book_trade_in_offer?: number;
   book_sale_price?: number;
@@ -16,5 +17,6 @@ export interface UpdateValuationRequest {
   trade_in_final?: number;
   final_offer?: number;
   comments?: string;
+  take_type?: string;
 }
 

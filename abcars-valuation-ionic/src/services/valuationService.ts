@@ -64,6 +64,8 @@ export const valuationService = {
         'checkpoints',
         'repairs',
         'spareParts',
+        'spareParts.partSupplierOriginal',
+        'seller.userProfile',
       ],
     });
     return response.data;
@@ -88,6 +90,14 @@ export const valuationService = {
     const response = await api.post<ApiResponse<{ users: { uuid: string; user_profile: { name: string; last_name: string } }[] }>>(
       'users/by_role',
       { role_name: 'technician' }
+    );
+    return response.data;
+  },
+
+  async getSellers() {
+    const response = await api.post<ApiResponse<{ users: { uuid: string; user_profile: { name: string; last_name: string } }[] }>>(
+      'users/by_role',
+      { role_name: 'seller' }
     );
     return response.data;
   },
@@ -230,6 +240,15 @@ export const valuationService = {
       group_name: groupName,
     });
     return response.data;
+  },
+
+  // Descargar PDF de valuación
+  async downloadValuationPdf(valuationUuid: string) {
+    const response = await api.get('valuations/download_pdf', {
+      params: { valuation_uuid: valuationUuid },
+      responseType: 'blob',
+    });
+    return response.data as Blob;
   },
 
   // Actualizar valuación
