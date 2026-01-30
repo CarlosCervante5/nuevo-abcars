@@ -51,7 +51,8 @@ class LogBandwidthUsage
         
         if ($requestCount > $this->maxRequests) {
             // Enviar correo de alerta
-            Mail::mailer('logs')->to('jgcl.proyectos@gmail.com')->send(new AlertAnomalousRequest($ip, $request->path(), $request->method()));
+            // Mail::mailer('logs')->to('jgcl.proyectos@gmail.com')->send(new AlertAnomalousRequest($ip, $request->path(), $request->method()));
+            Mail::mailer('logs')->to('lesamaoyabi@gmail.com')->send(new AlertAnomalousRequest($ip, $request->path(), $request->method()));
 
             throw new ThrottleRequestsException('Too many requests from this IP.');
         }

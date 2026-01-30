@@ -423,7 +423,8 @@ class VehicleService
                 'availability' => 'in stock',
                 'inventory' => '1',
                 'condition' => 'used',
-                'price' => $vehicle->sale_price,
+                // 'price' => $vehicle->sale_price,
+                'price' => $vehicle->offer_price ?? $vehicle->sale_price,
                 'link' => "https://abcars.mx/compra-tu-auto/detail/$vehicle->uuid",                
                 'brand' => $vehicle->brand->name,                        
                 'color' => $vehicle->exterior_color,
@@ -451,6 +452,62 @@ class VehicleService
         $xml = $this->arrayToXml($data);
 
         return $xml;
+    }
+
+    /**
+     * Busca vehículos de gama alta y retornar XML
+     *
+     */
+
+    public function searchVehiclesXMLhighend()
+    {
+        $vehicles = Vehicle::with(['brand', 'model', 'images', 'firstImage'])
+            ->where('page_status', 'active')
+            ->where('category', 'pre_owned')
+            ->where('sale_price', '>=', 800000)
+            ->whereHas('images')
+            ->get();
+
+        // Cabecera RSS con namespace de Google
+        $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:g="http://base.google.com/ns/1.0"></rss>');
+        $channel = $xml->addChild('channel');
+        $channel->addChild('title', 'Inventario de ABCars Gama Alta');
+        $channel->addChild('link', 'https://abcars.mx');
+        $channel->addChild('description', 'Inventario de ABCars Gama Alta para Facebook');
+
+        foreach ($vehicles as $vehicle) {
+            $item = $channel->addChild('item');
+
+            // Campos obligatorios con prefijo g:
+            $item->addChild('g:id', $vehicle->id, 'http://base.google.com/ns/1.0');
+            $item->addChild('title', htmlspecialchars($vehicle->name));
+            $item->addChild('description', htmlspecialchars($vehicle->description));
+            $item->addChild('link', "https://abcars.mx/compra-tu-auto/detail/$vehicle->uuid");
+
+            $item->addChild('g:image_link', $vehicle->firstImage->service_image_url, 'http://base.google.com/ns/1.0');
+
+            foreach ($vehicle->images as $index => $image) {
+                if ($index === 0) continue;
+                $item->addChild('g:additional_image_link', $image->service_image_url, 'http://base.google.com/ns/1.0');
+            }
+
+            $item->addChild('g:condition', 'used', 'http://base.google.com/ns/1.0');
+            $item->addChild('g:availability', 'in stock', 'http://base.google.com/ns/1.0');
+
+            // Precio con moneda obligatoria (MXN)
+            $price = $vehicle->offer_price ?? $vehicle->sale_price;
+            $item->addChild('g:price', $price . ' MXN', 'http://base.google.com/ns/1.0');
+
+            $item->addChild('g:brand', $vehicle->brand->name, 'http://base.google.com/ns/1.0');
+            $item->addChild('g:color', $vehicle->exterior_color, 'http://base.google.com/ns/1.0');
+            $item->addChild('g:google_product_category', '916', 'http://base.google.com/ns/1.0');
+            
+            $item->addChild('g:custom_label_0', $vehicle->model->name, 'http://base.google.com/ns/1.0');
+            $item->addChild('g:custom_label_1', $vehicle->model->year, 'http://base.google.com/ns/1.0');
+            $item->addChild('g:custom_label_2', $vehicle->mileage . ' kms', 'http://base.google.com/ns/1.0');
+        }
+
+        return $xml->asXML();
     }
 
     /**
