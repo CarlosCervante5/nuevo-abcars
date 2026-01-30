@@ -41,6 +41,7 @@ class StoreFinancingRequest extends FormRequest
             'monthly_payment' => 'nullable|numeric',
             'term_months' => 'nullable|integer',
             'finance_amount' => 'nullable|numeric',
+            'city' => 'nullable|string'
         ];
     }
 }

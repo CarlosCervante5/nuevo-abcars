@@ -233,6 +233,25 @@ class VehicleController extends Controller
 
             $vehicles = $this->vehicleService->searchVehiclesXML();
             
+            return response($vehicles, 200)->header('Content-Type', 'text/xml');
+            // return response($vehicles, 200)->header('Content-Type', 'application/rss+xml; charset=UTF-8');
+
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al obtener la búsqueda de vehiculos', $e->getMessage(), 500, 'GET_VEHICLE_SEARCH_ERROR');
+        }
+    }
+    
+    /**
+     * Encontrar vehículos de gama alta y retornarlos en formato XML.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function preownedXMLhighend()
+    {
+        try {
+
+            $vehicles = $this->vehicleService->searchVehiclesXMLhighend();
+            
             // return response($vehicles, 200)->header('Content-Type', 'text/xml');
             return response($vehicles, 200)->header('Content-Type', 'application/rss+xml; charset=UTF-8');
 

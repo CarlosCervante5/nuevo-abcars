@@ -49,7 +49,7 @@ class SearchVehiclesRequest extends FormRequest
 
             'status' => ($this->has('status') && !empty($this->input('status')))
                 ? $stringToArray($this->input('status'))
-                : [],
+                : ['active'],
 
             'categories' => $this->has('categories')
                 ? $stringToArray($this->input('categories'))
@@ -103,7 +103,7 @@ class SearchVehiclesRequest extends FormRequest
 
             'filters' => $this->has('filters') ? $this->boolean('filters') : false,
 
-            'has_images' => $this->has('has_images') ? $this->boolean('has_images') : false,
+            'has_images' => $this->has('has_images') ? $this->boolean('has_images') : true,
 
             'order_by' => $this->input('order_by', ''),
 

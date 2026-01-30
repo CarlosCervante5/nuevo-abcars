@@ -23,6 +23,7 @@ class StoreOfferRequest extends FormRequest
     {
         return [
             'name' => 'required|max:255|string',
+            'last_name' => 'nullable|max:255|string',
             'phone' => 'required|string',
             'email' => 'required|email|max:255',
             'offer_amount' => 'required|numeric',
@@ -32,6 +33,7 @@ class StoreOfferRequest extends FormRequest
             'vehicle_model' => 'nullable|string',
             'vehicle_year' => 'nullable|integer',
             'vehicle_uuid' => 'nullable|string|uuid',
+            'city' => 'nullable|string'
         ];
     }
 }

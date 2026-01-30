@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Strega;
 
 use App\Helpers\ApiResponseHelper;
+use App\Helpers\GoogleSheetHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Strega\Opportunities\AttatchOpportunityRequest;
 use App\Http\Requests\Strega\Opportunities\DetailOpportunityRequest;
@@ -98,6 +99,26 @@ class OpportunityController extends Controller
             $data = $request->validated();
 
             $this->opportunityService->createPublicOpportunity($data);
+
+            $leadData = [
+                'formType' => 'Formulario Servicio',
+                'nombre' => $request->name,
+                'apellido' => $request->last_name,
+                'correo' => $request->email,
+                'telefono' => $request->phone,
+                'modelo_body' => $request->q_model_interest,
+                'marca' => $request->q_brand_interest,
+                'clientPriceOffer' => $request->q_initial_investment,
+                'comentario' => $request->q_comments,
+                'sucursal' => $request->dealership_name,
+                'nombre_campagna' => 'abcars.mx',
+                'canal_campagna' => $request->campaign_channel,
+                'fuente_campagna' => $request->campaign_source
+            ];
+
+            $webhookUrl = GoogleSheetHelper::getWebhookUrl('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER');
+
+            GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $leadData);
 
             // // Create zappier object
             // $zappier = array(
