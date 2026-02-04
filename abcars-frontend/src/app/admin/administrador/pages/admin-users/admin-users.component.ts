@@ -4,7 +4,7 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { AdminService } from '@services/admin.service';
-import { Datum, UsersResponse, userTable } from '@interfaces/admin.interfaces';
+import { Datum, UsersResponse, userTable, Overview } from '@interfaces/admin.interfaces';
 import { AddUserComponent } from '../../components/add-user/add-user.component';
 import Swal from 'sweetalert2';
 import { UpdateUserComponent } from '../../components/update-user/update-user.component';
@@ -17,6 +17,17 @@ import { Dealership } from '../../../../shared/interfaces/admin.interfaces';
     standalone: false
 })
 export class AdminUsersComponent {
+    private user = JSON.parse(localStorage.getItem('user')!);
+    public itemOverview: Overview = {
+        user: {
+            name: this.user.name,
+            surname: this.user.surname,
+            role: 'Admin',
+            email: this.user.email,
+            picturepath: ''
+        },
+        pages: []
+    }
     public users !: Datum [];
     public uuids: userTable[] = [];
     //variables para la paginación

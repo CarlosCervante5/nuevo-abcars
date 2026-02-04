@@ -52,8 +52,8 @@ export class UpdateUserComponent {
             last_name:      ['', [ Validators.pattern("[a-zA-ZÀ-ÿ ]+"), Validators.required]],
             phone_1:        ['', [this.phoneValidator.bind(this), Validators.required]],
             phone_2:        ['', [this.phoneValidator.bind(this)]],
-            gender:         ['',],
-            email:          ['', [Validators.pattern("[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$")]],
+            gender:         [''],
+            email:          ['', [Validators.email]],
             location:       ['', [Validators.required]],
             role_name:      ['', [Validators.required]],
             picture:        [''],
@@ -62,13 +62,14 @@ export class UpdateUserComponent {
     }
 
     private phoneValidator(control: AbstractControl) {
-        const phone = control.value;
+        const rawPhone = control.value;
 
-        if (!phone) {
+        if (!rawPhone) {
             return null; // If the field is empty, it's valid
         }
 
         // If a phone number is provided, validate the format
+        const phone = String(rawPhone).replace(/\D/g, '');
         const phonePattern = /^[0-9]+$/;
         const valid = phonePattern.test(phone) && phone.length === 10;
 
@@ -90,11 +91,11 @@ export class UpdateUserComponent {
                     this.form.patchValue({
                         name: this.users.profile.name,
                         last_name: this.users.profile.last_name,
-                        gender: this.users.profile.gender,
+                        gender: this.users.profile.gender || '',
                         email: this.users.user.email,
-                        phone_1: this.users.profile.phone_1,
-                        phone_2: this.users.profile.phone_2,
-                        location: this.users.profile.location,
+                        phone_1: this.users.profile.phone_1 ? String(this.users.profile.phone_1) : '',
+                        phone_2: this.users.profile.phone_2 ? String(this.users.profile.phone_2) : '',
+                        location: this.users.profile.location || '',
                         role_name: this.users.role,
                     });
                     this.foto = this.users.profile.picture ? this.users.profile.picture: 'assets/img/user.jpeg';
@@ -146,6 +147,10 @@ export class UpdateUserComponent {
    
 
     public onSubmit(){
+        if (this.form.invalid) {
+            this.form.markAllAsTouched();
+            return;
+        }
         this._adminservice.updateUser(this.uuid_user, this.form.get('name')!.value, this.form.get('last_name')!.value, this.form.get('phone_1')!.value, this.form.get('phone_2')!.value,
         this.form.get('gender')!.value, this.form.get('email')!.value, this.form.get('location')!.value, this.form.get('role_name')!.value, this.files,
         this.form.get('password')!.value)
@@ -190,6 +195,10 @@ export class UpdateUserComponent {
                 this.filters();
             }
         })
+    }
+
+    public onImageError(): void {
+        this.foto = 'assets/img/user.jpeg';
     }
 
     private filters(): void {
