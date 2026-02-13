@@ -75,13 +75,13 @@ const PartsList: React.FC = () => {
 
     try {
       setSubmitting(true);
-      await valuationService.createSparePart({
+      const res = await valuationService.createSparePart({
         valuation_uuid: valuationUuid,
         name: formData.name.trim(),
         quantity: amount,
         labor_time: hours,
       });
-      setToastMessage('Refacción registrada');
+      setToastMessage((res as any)?.message || 'Refacción registrada');
       setShowToast(true);
       setFormData({ name: '', amount: '', hours: '' });
       loadParts();
@@ -95,8 +95,8 @@ const PartsList: React.FC = () => {
 
   const handleDelete = async (partUuid: string) => {
     try {
-      await valuationService.deleteSparePart(partUuid);
-      setToastMessage('Refacción eliminada');
+      const res = await valuationService.deleteSparePart(partUuid);
+      setToastMessage((res as any)?.message || 'Refacción eliminada');
       setShowToast(true);
       loadParts();
     } catch (error: any) {

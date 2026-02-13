@@ -153,7 +153,7 @@ const InternalPhotos: React.FC = () => {
     try {
       setUploading((prev) => ({ ...prev, [index]: true }));
 
-      await valuationService.uploadImage(
+      const res = await valuationService.uploadImage(
         valuationUuid,
         photo.name,
         photo.image.file,
@@ -164,7 +164,7 @@ const InternalPhotos: React.FC = () => {
         prev.map((p) => (p.index === index ? { ...p, uploaded: true } : p))
       );
 
-      setToastMessage(`${photo.name} subida correctamente`);
+      setToastMessage((res as any)?.message || `${photo.name} subida correctamente`);
       setShowToast(true);
     } catch (error: any) {
       setToastMessage(`Error al subir ${photo.name}`);

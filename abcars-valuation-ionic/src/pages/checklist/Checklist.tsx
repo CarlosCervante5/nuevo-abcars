@@ -345,7 +345,7 @@ const Checklist: React.FC = () => {
 
     try {
       setSavingCustomer(true);
-      await valuationService.updateCustomerInformation({
+      const res = await valuationService.updateCustomerInformation({
         ...customerInfo,
         brand: customerInfo.brand.trim(),
         dealership_name: customerInfo.dealership_name.trim(),
@@ -368,7 +368,7 @@ const Checklist: React.FC = () => {
       } catch {
         // Status update failure shouldn't block user flow.
       }
-      setToastMessage('Alta/Actualización de registro exitoso.');
+      setToastMessage((res as any)?.message || 'Alta/Actualización de registro exitoso.');
       setShowToast(true);
     } catch {
       setToastMessage('Error al guardar información del cliente.');
@@ -386,7 +386,7 @@ const Checklist: React.FC = () => {
 
     try {
       setSaving(true);
-      await valuationService.updateCheckpoint(valuationUuid, checkpointUuid, selectedValue);
+      const res = await valuationService.updateCheckpoint(valuationUuid, checkpointUuid, selectedValue);
       
       // Actualizar estado local
       setCheckpoints((prev) =>
@@ -395,7 +395,7 @@ const Checklist: React.FC = () => {
         )
       );
       
-      setToastMessage('Guardado correctamente');
+      setToastMessage((res as any)?.message || 'Guardado correctamente');
       setShowToast(true);
     } catch (error: any) {
       setToastMessage('Error al guardar');

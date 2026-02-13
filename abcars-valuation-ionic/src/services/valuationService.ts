@@ -16,6 +16,9 @@ import {
   CreateSparePartRequest,
   SparePartItem,
 } from '../models';
+import { connectivityService } from './connectivityService';
+import { offlineQueue, generateQueueId } from './offlineQueue';
+import { fileToDataUrl } from './offlineSync';
 
 export const valuationService = {
   // Autenticación
@@ -82,6 +85,15 @@ export const valuationService = {
   },
 
   async updateCustomerInformation(request: Record<string, any>) {
+    if (!connectivityService.isOnline()) {
+      await offlineQueue.add({
+        id: generateQueueId(),
+        type: 'update_customer_info',
+        payload: request,
+        valuationUuid: request.valuation_uuid,
+      });
+      return { status: 200, message: 'Se enviará cuando haya conexión.', data: null };
+    }
     const response = await api.post<ApiResponse<void>>('valuations/update_vehicle', request);
     return response.data;
   },
@@ -107,6 +119,15 @@ export const valuationService = {
     checkpointUuid: string,
     selectedValue: string
   ) {
+    if (!connectivityService.isOnline()) {
+      await offlineQueue.add({
+        id: generateQueueId(),
+        type: 'update_checkpoint',
+        payload: { valuation_uuid: valuationUuid, checkpoint_uuid: checkpointUuid, selected_value: selectedValue },
+        valuationUuid,
+      });
+      return { status: 200, message: 'Se enviará cuando haya conexión.', data: null };
+    }
     const request: UpdateCheckpointRequest = {
       valuation_uuid: valuationUuid,
       checkpoint_uuid: checkpointUuid,
@@ -131,6 +152,15 @@ export const valuationService = {
     checkpointUuid: string,
     selectedValue: string
   ) {
+    if (!connectivityService.isOnline()) {
+      await offlineQueue.add({
+        id: generateQueueId(),
+        type: 'update_acquisition_checkpoint',
+        payload: { valuation_uuid: valuationUuid, checkpoint_uuid: checkpointUuid, selected_value: selectedValue },
+        valuationUuid,
+      });
+      return { status: 200, message: 'Se enviará cuando haya conexión.', data: null };
+    }
     const request: UpdateCheckpointRequest = {
       valuation_uuid: valuationUuid,
       checkpoint_uuid: checkpointUuid,
@@ -187,6 +217,22 @@ export const valuationService = {
 
   // Solicitud HyP (carrocería y pintura)
   async createBodyworkRequest(description: string, imageFile: File, valuationUuid: string) {
+    if (!connectivityService.isOnline()) {
+      const imageBase64 = await fileToDataUrl(imageFile);
+      await offlineQueue.add({
+        id: generateQueueId(),
+        type: 'create_bodywork_request',
+        payload: {
+          description,
+          valuation_uuid: valuationUuid,
+          imageBase64,
+          fileName: imageFile.name,
+          mimeType: imageFile.type || 'image/jpeg',
+        },
+        valuationUuid,
+      });
+      return { status: 200, message: 'Se enviará cuando haya conexión.', data: null };
+    }
     const formData = new FormData();
     formData.append('description', description);
     formData.append('image', imageFile);
@@ -201,11 +247,33 @@ export const valuationService = {
 
   // Refacciones (solicitud y listado)
   async createSparePart(request: CreateSparePartRequest) {
+    if (!connectivityService.isOnline()) {
+      await offlineQueue.add({
+        id: generateQueueId(),
+        type: 'create_spare_part',
+        payload: {
+          valuation_uuid: request.valuation_uuid,
+          name: request.name,
+          quantity: request.quantity,
+          labor_time: request.labor_time,
+        },
+        valuationUuid: request.valuation_uuid,
+      });
+      return { status: 200, message: 'Se enviará cuando haya conexión.', data: null };
+    }
     const response = await api.post<ApiResponse<void>>('spare_parts', request);
     return response.data;
   },
 
   async deleteSparePart(partUuid: string) {
+    if (!connectivityService.isOnline()) {
+      await offlineQueue.add({
+        id: generateQueueId(),
+        type: 'delete_spare_part',
+        payload: { part_uuid: partUuid },
+      });
+      return { status: 200, message: 'Se enviará cuando haya conexión.', data: null };
+    }
     const response = await api.post<ApiResponse<void>>('spare_parts/delete', {
       part_uuid: partUuid,
     });
@@ -219,6 +287,23 @@ export const valuationService = {
     imageFile: File,
     groupName: string = 'checkpoint'
   ) {
+    if (!connectivityService.isOnline()) {
+      const imageBase64 = await fileToDataUrl(imageFile);
+      await offlineQueue.add({
+        id: generateQueueId(),
+        type: 'upload_image',
+        payload: {
+          valuation_uuid: valuationUuid,
+          name: imageName,
+          group_name: groupName,
+          imageBase64,
+          mimeType: imageFile.type || 'image/jpeg',
+          fileName: imageFile.name,
+        },
+        valuationUuid,
+      });
+      return { status: 200, message: 'Se enviará cuando haya conexión.', data: null };
+    }
     const formData = new FormData();
     formData.append('valuation_uuid', valuationUuid);
     formData.append('name', imageName);
@@ -253,6 +338,15 @@ export const valuationService = {
 
   // Actualizar valuación
   async updateValuation(request: UpdateValuationRequest) {
+    if (!connectivityService.isOnline()) {
+      await offlineQueue.add({
+        id: generateQueueId(),
+        type: 'update_valuation',
+        payload: request as unknown as Record<string, unknown>,
+        valuationUuid: request.valuation_uuid,
+      });
+      return { status: 200, message: 'Se enviará cuando haya conexión.', data: null };
+    }
     const response = await api.post<ApiResponse<void>>('valuations/update', request);
     return response.data;
   },

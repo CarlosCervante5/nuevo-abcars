@@ -22,6 +22,8 @@ import {
 import { save } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { valuationService } from '../../services/valuationService';
+import { connectivityService } from '../../services/connectivityService';
+import { offlineQueue, generateQueueId } from '../../services/offlineQueue';
 import './NewValuation.css';
 
 const EMAIL_REGEX = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
@@ -158,6 +160,44 @@ const NewValuation: React.FC = () => {
     if (validationError) {
       setToastMessage(validationError);
       setShowToast(true);
+      return;
+    }
+
+    if (!connectivityService.isOnline()) {
+      try {
+        setLoading(true);
+        const formattedDate = `${formData.scheduled_date} ${formData.hour}`;
+        await offlineQueue.add({
+          id: generateQueueId(),
+          type: 'create_valuation_with_customer',
+          payload: {
+            customer: {
+              name: formData.name.trim(),
+              last_name: formData.last_name.trim(),
+              email: formData.email.trim(),
+              phone_1: formData.phone_1.trim(),
+              origin_agency: profileLocation,
+            },
+            appointment: {
+              type: 'valuation',
+              brand_name: formData.brand_name.trim(),
+              model_name: formData.model_name.trim(),
+              year: parseInt(formData.year, 10),
+              mileage: parseInt(formData.mileage, 10),
+              scheduled_date: formattedDate,
+              dealership_name: profileLocation,
+            },
+          },
+        });
+        setToastMessage('Cita guardada. Se enviará cuando haya conexión.');
+        setShowToast(true);
+        setTimeout(() => history.push('/valuations'), 1200);
+      } catch {
+        setToastMessage('Error al guardar localmente.');
+        setShowToast(true);
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
