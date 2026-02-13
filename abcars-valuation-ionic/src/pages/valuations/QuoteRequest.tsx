@@ -183,7 +183,7 @@ const QuoteRequest: React.FC = () => {
 
     try {
       setSaving(true);
-      await valuationService.updateValuation({
+      const res = await valuationService.updateValuation({
         valuation_uuid: valuationUuid,
         seller_uuid: form.seller,
         book_trade_in_offer: Number(form.take),
@@ -200,7 +200,7 @@ const QuoteRequest: React.FC = () => {
         comments: form.comments,
         take_type: takeType,
       });
-      setToastMessage('Alta de registro exitoso.');
+      setToastMessage((res as any)?.message || 'Alta de registro exitoso.');
       setShowToast(true);
       setTimeout(() => {
         history.push('/valuations', { refresh: true });

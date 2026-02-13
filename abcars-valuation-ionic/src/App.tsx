@@ -41,8 +41,16 @@ import InternalPhotos from './pages/photos/InternalPhotos';
 import VehicleList from './pages/manager/VehicleList';
 import VehicleDetail from './pages/manager/VehicleDetail';
 import VehiclePhotos from './pages/manager/VehiclePhotos';
+import { connectivityService } from './services/connectivityService';
+import { processOfflineQueue } from './services/offlineSync';
 
 setupIonicReact();
+
+function runOfflineSync() {
+  if (!localStorage.getItem('auth_token')) return;
+  if (!connectivityService.isOnline()) return;
+  processOfflineQueue().catch((err) => console.warn('Offline sync error:', err));
+}
 
 const App: React.FC = () => {
   // Verificar si hay token guardado y escuchar cambios
@@ -71,6 +79,13 @@ const App: React.FC = () => {
       clearInterval(interval);
       window.removeEventListener('storage', handleStorageChange);
     };
+  }, []);
+
+  // Sincronizar cola offline al recuperar conexión y al montar si hay conexión
+  React.useEffect(() => {
+    runOfflineSync();
+    const unsubscribe = connectivityService.onOnline(runOfflineSync);
+    return unsubscribe;
   }, []);
 
   return (

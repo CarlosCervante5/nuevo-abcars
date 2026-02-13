@@ -69,7 +69,7 @@ const AcquisitionChecklist: React.FC = () => {
 
     try {
       setSaving(true);
-      await valuationService.updateAcquisitionCheckpoint(
+      const res = await valuationService.updateAcquisitionCheckpoint(
         valuationUuid,
         checkpointUuid,
         selectedValue
@@ -81,7 +81,7 @@ const AcquisitionChecklist: React.FC = () => {
         )
       );
       
-      setToastMessage('Guardado correctamente');
+      setToastMessage((res as any)?.message || 'Guardado correctamente');
       setShowToast(true);
     } catch (error: any) {
       setToastMessage('Error al guardar');

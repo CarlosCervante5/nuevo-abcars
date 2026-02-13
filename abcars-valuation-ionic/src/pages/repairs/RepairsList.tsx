@@ -64,14 +64,14 @@ const RepairsList: React.FC = () => {
 
     try {
       setSubmitting(true);
-      await valuationService.createBodyworkRequest(
+      const res = await valuationService.createBodyworkRequest(
         description.trim(),
         damageImage,
         valuationUuid
       );
       setDescription('');
       setDamageImage(null);
-      setToastMessage('Solicitud HyP enviada');
+      setToastMessage((res as any)?.message || 'Solicitud HyP enviada');
       setShowToast(true);
       loadRepairs();
     } catch (error: any) {
