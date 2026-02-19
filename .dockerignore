@@ -1,0 +1,9 @@
+# No subir frontend ni Ionic al contexto del build del backend
+abcars-frontend
+abcars-valuation-ionic
+.git
+.gitignore
+*.md
+.env
+.env.*
+.DS_Store
