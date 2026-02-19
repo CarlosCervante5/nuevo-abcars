@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libfreetype-dev \
     libzip-dev \
     libonig-dev \
+    libxml2-dev \
     zip \
     unzip \
     git \
