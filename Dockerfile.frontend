@@ -9,8 +9,11 @@ RUN npm ci
 
 COPY abcars-frontend/ .
 
+# Los environment están en .gitignore; crearlos aquí con API_URL del build
 ARG API_URL=https://backend.abcars.mx
-RUN sed -i "s|baseUrl:.*|baseUrl: '${API_URL}'|" src/environments/environment.production.ts
+RUN mkdir -p src/environments && \
+    echo "export const environment = { production: false, baseUrl: 'http://localhost:8000' };" > src/environments/environment.ts && \
+    echo "export const environment = { production: true, baseUrl: '${API_URL}' };" > src/environments/environment.production.ts
 
 RUN npm run build -- --configuration=production
 
