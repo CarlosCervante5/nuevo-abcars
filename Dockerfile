@@ -23,7 +23,8 @@ WORKDIR /app
 
 # Copiar solo el backend desde la raíz del monorepo
 COPY abcars-backend/composer.json abcars-backend/composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
+# Incluir require-dev (Faker) para que los seeders que usan Factory puedan ejecutarse en el contenedor
+RUN composer install --optimize-autoloader --no-scripts --no-interaction
 
 COPY abcars-backend/ .
 RUN composer run-script post-autoload-dump --no-interaction || true
