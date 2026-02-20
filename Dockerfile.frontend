@@ -1,0 +1,26 @@
+# Frontend Angular - usar desde raíz del repo (contexto = raíz).
+# En Railway: Root Directory vacío, Dockerfile Path = Dockerfile.frontend
+
+FROM node:20-alpine AS build
+WORKDIR /app
+
+COPY abcars-frontend/package.json abcars-frontend/package-lock.json* ./
+RUN npm ci
+
+COPY abcars-frontend/ .
+
+ARG API_URL=https://backend.abcars.mx
+RUN sed -i "s|baseUrl:.*|baseUrl: '${API_URL}'|" src/environments/environment.production.ts
+
+RUN npm run build -- --configuration=production
+
+FROM node:20-alpine
+WORKDIR /app
+RUN npm install -g serve
+
+COPY --from=build /app/dist/abcars-frontend/browser ./browser
+
+ENV PORT=8080
+EXPOSE 8080
+
+CMD ["sh", "-c", "serve -s browser -l ${PORT}"]

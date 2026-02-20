@@ -1,5 +1,4 @@
-# No subir frontend ni Ionic al contexto del build del backend
-abcars-frontend
+# No subir Ionic al contexto del build (backend y frontend no lo usan)
 abcars-valuation-ionic
 .git
 .gitignore
