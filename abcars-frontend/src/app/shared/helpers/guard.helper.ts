@@ -6,12 +6,15 @@ import { AccountService } from 'src/app/auth/pages/account/services/account.serv
 /**
  * Helper function to validate role in guards
  * Prevents infinite loops by checking token and role before making HTTP request
+ * @param role - string o array de roles permitidos (ej: 'valuator' o ['valuator', 'seller'])
  */
 export function validateRoleGuard(
-  role: string,
+  role: string | string[],
   accountService: AccountService,
   router: Router
 ): Observable<boolean> {
+  const allowedRoles = Array.isArray(role) ? role : [role];
+
   // Verificar si hay token antes de hacer la petición
   const token = localStorage.getItem('user_token');
   const storedRole = localStorage.getItem('role');
@@ -22,14 +25,14 @@ export function validateRoleGuard(
     return of(false);
   }
 
-  // Si el rol no coincide, redirigir inmediatamente
-  if (storedRole !== role) {
+  // Si el rol no está en la lista permitida, redirigir inmediatamente
+  if (!allowedRoles.includes(storedRole || '')) {
     router.navigate(['/auth/iniciar-sesion'], { replaceUrl: true });
     return of(false);
   }
   
-  // Si hay token y el rol coincide, validar con el backend
-  return accountService.validateRole(role)
+  // Si hay token y el rol coincide, validar con el backend (usar el rol almacenado)
+  return accountService.validateRole(storedRole!)
     .pipe(
       map(() => true),
       catchError((error) => {
