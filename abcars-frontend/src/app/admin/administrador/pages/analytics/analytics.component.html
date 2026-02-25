@@ -1,0 +1,97 @@
+<app-overview [overview]="itemOverview" [url_index]="'/admin/administrator'" [hideModules]="true"></app-overview>
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+    <div class="bg-white shadow-sm rounded-xl p-6">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Analytics</h1>
+          <nav class="mt-2 text-sm text-gray-500" aria-label="breadcrumb">
+            <ol class="flex flex-wrap items-center gap-2">
+              <li><a class="text-gray-500 hover:text-gray-700" [routerLink]="['/admin/administrator']">Overview</a></li>
+              <li class="text-gray-400">/</li>
+              <li class="text-gray-700 font-medium" aria-current="page">Analytics</li>
+            </ol>
+          </nav>
+        </div>
+        <div>
+          <select [(ngModel)]="selectedDays" (ngModelChange)="onDaysChange()"
+            class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+            <option [value]="7">Últimos 7 días</option>
+            <option [value]="30">Últimos 30 días</option>
+            <option [value]="60">Últimos 60 días</option>
+            <option [value]="90">Últimos 90 días</option>
+          </select>
+        </div>
+      </div>
+
+      <div *ngIf="loading" class="flex justify-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
+      </div>
+
+      <div *ngIf="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        {{ error }}
+      </div>
+
+      <div *ngIf="stats && !loading" class="space-y-6">
+        <!-- Tarjetas de resumen -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+            <p class="text-sm font-medium text-blue-600">Visitas totales</p>
+            <p class="text-2xl font-bold text-blue-900 mt-1">{{ stats.page_views.total | number }}</p>
+          </div>
+          <div class="bg-purple-50 rounded-xl p-4 border border-purple-100">
+            <p class="text-sm font-medium text-purple-600">Formularios enviados</p>
+            <p class="text-2xl font-bold text-purple-900 mt-1">{{ stats.form_submissions.total | number }}</p>
+          </div>
+          <div class="bg-green-50 rounded-xl p-4 border border-green-100">
+            <p class="text-sm font-medium text-green-600">Valuaciones</p>
+            <p class="text-2xl font-bold text-green-900 mt-1">{{ stats.valuations.total | number }}</p>
+          </div>
+          <div class="bg-amber-50 rounded-xl p-4 border border-amber-100">
+            <p class="text-sm font-medium text-amber-600">Citas agendadas</p>
+            <p class="text-2xl font-bold text-amber-900 mt-1">{{ stats.appointments.total | number }}</p>
+          </div>
+        </div>
+
+        <!-- Formularios por tipo -->
+        <div class="border border-gray-200 rounded-xl overflow-hidden">
+          <h3 class="bg-gray-50 px-4 py-3 font-semibold text-gray-800">Formularios por tipo</h3>
+          <div class="p-4">
+            <div *ngIf="stats.form_submissions.by_type && (stats.form_submissions.by_type | keyvalue).length; else noForms"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div *ngFor="let item of stats.form_submissions.by_type | keyvalue"
+                class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium text-gray-700">{{ getFormTypeLabel(item.key) }}</span>
+                <span class="text-lg font-bold text-yellow-600">{{ item.value }}</span>
+              </div>
+            </div>
+            <ng-template #noForms>
+              <p class="text-gray-500 text-center py-4">No hay envíos de formularios en el período seleccionado.</p>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Visitas por día (últimos 14 días) -->
+        <div class="border border-gray-200 rounded-xl overflow-hidden">
+          <h3 class="bg-gray-50 px-4 py-3 font-semibold text-gray-800">Visitas por día</h3>
+          <div class="p-4 overflow-x-auto">
+            <div *ngIf="stats.page_views.by_day?.length; else noViews" class="space-y-2 min-w-[300px]">
+              <div *ngFor="let day of stats.page_views.by_day.slice(-14)"
+                class="flex items-center gap-3">
+                <span class="text-sm text-gray-600 w-24">{{ day.date }}</span>
+                <div class="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
+                  <div class="bg-yellow-500 h-full rounded-full"
+                    [style.width.%]="getBarWidth(day.total)"></div>
+                </div>
+                <span class="text-sm font-medium w-12">{{ day.total }}</span>
+              </div>
+            </div>
+            <ng-template #noViews>
+              <p class="text-gray-500 text-center py-4">No hay datos de visitas. Activa el tracking en el sitio.</p>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -16,10 +16,10 @@ export class ValuatorGuard  {
   }
 
   canActivate(): Observable<boolean> | Promise<boolean> | boolean {
-    return validateRoleGuard('valuator', this._accountService, this._router);
+    return validateRoleGuard(['valuator', 'seller', 'administrator', 'super_admin'], this._accountService, this._router);
   }
 
   canLoad(): Observable<boolean> | Promise<boolean> | boolean {
-    return validateRoleGuard('valuator', this._accountService, this._router);
+    return validateRoleGuard(['valuator', 'seller', 'administrator', 'super_admin'], this._accountService, this._router);
   }
 }

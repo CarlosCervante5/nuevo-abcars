@@ -29,6 +29,22 @@
     min-height: 120px !important;
 }
 
+.card-module-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--abcars-primary, #f59e0b);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+}
+
+.card-module-icon i {
+    font-size: 1.125rem;
+}
+
 .card-module-body h4 {
     font-size: 1rem !important;
     font-weight: 700 !important;
@@ -128,6 +144,29 @@
     font-size: 0.75rem !important;
     color: #6b7280 !important;
     text-transform: capitalize !important;
+}
+
+.admin-icon-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    border-radius: 0.5rem !important;
+    background: none !important;
+    border: none !important;
+    color: #6b7280 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.admin-icon-btn:hover {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+.admin-icon-btn i {
+    font-size: 1.25rem !important;
 }
 
 .admin-home-btn {
@@ -248,4 +287,256 @@
     transform: translateY(0) !important;
     opacity: 1 !important;
     visibility: visible !important;
+}
+
+/* ========== Seller Dashboard - diseño mejorado ========== */
+.seller-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-bottom: 2rem;
+}
+
+.seller-dashboard-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.seller-dashboard-welcome {
+    flex: 1;
+    min-width: 200px;
+}
+
+.seller-dashboard-title {
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    margin: 0 0 0.25rem 0 !important;
+}
+
+.seller-dashboard-subtitle {
+    font-size: 1rem !important;
+    color: #6b7280 !important;
+    margin: 0 !important;
+}
+
+.seller-dashboard-referral {
+    flex-shrink: 0;
+    min-width: 280px;
+}
+
+.seller-referral-label {
+    font-size: 0.6875rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+    color: #6b7280 !important;
+    margin: 0 0 0.5rem 0 !important;
+}
+
+.seller-referral-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem 0.25rem 0.75rem;
+}
+
+.seller-referral-icon {
+    color: #9ca3af;
+    font-size: 1rem;
+}
+
+.seller-referral-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    font-size: 0.875rem;
+    color: #374151;
+    outline: none;
+}
+
+.seller-referral-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.seller-referral-copy-btn:hover {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    transform: translateY(-1px);
+}
+
+.seller-modules-section {
+    margin-bottom: 2rem;
+}
+
+.seller-modules-title {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    margin: 0 0 1.25rem 0 !important;
+}
+
+.seller-modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.seller-module-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.seller-module-card:hover:not(.seller-module-disabled) {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.seller-module-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.seller-module-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.seller-module-icon i {
+    font-size: 1.25rem;
+    color: white;
+}
+
+.seller-module-icon[data-color="blue"] {
+    background: #3b82f6;
+}
+
+.seller-module-icon[data-color="purple"] {
+    background: #8b5cf6;
+}
+
+.seller-module-icon[data-color="green"] {
+    background: #10b981;
+}
+
+.seller-module-icon[data-color="amber"] {
+    background: #f59e0b;
+}
+
+.seller-module-title {
+    font-size: 1.125rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    margin: 0 0 0.5rem 0 !important;
+}
+
+.seller-module-desc {
+    font-size: 0.875rem !important;
+    color: #6b7280 !important;
+    line-height: 1.5 !important;
+    margin: 0 0 1rem 0 !important;
+    flex: 1;
+}
+
+.seller-module-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    color: #f59e0b !important;
+    text-decoration: none !important;
+    transition: color 0.2s ease;
+}
+
+.seller-module-link:hover {
+    color: #d97706 !important;
+}
+
+.seller-cta-banner {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    border-radius: 1rem;
+    padding: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.seller-cta-content {
+    flex: 1;
+    min-width: 200px;
+}
+
+.seller-cta-title {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: white !important;
+    margin: 0 0 0.5rem 0 !important;
+}
+
+.seller-cta-desc {
+    font-size: 0.9375rem !important;
+    color: #9ca3af !important;
+    margin: 0 !important;
+    line-height: 1.5;
+}
+
+.seller-cta-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.seller-stat {
+    text-align: center;
+    font-size: 0.75rem !important;
+    color: #9ca3af !important;
+}
+
+.seller-stat-num {
+    display: block;
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    color: white !important;
+}
+
+.seller-footer {
+    font-size: 0.8125rem !important;
+    color: #9ca3af !important;
+    text-align: center;
+    margin: 0;
 }

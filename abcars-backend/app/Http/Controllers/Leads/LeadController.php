@@ -15,15 +15,31 @@ use App\Http\Requests\Leads\StoreTestDriveRequest;
 use App\Http\Requests\Leads\StoreOfferRequest;
 use App\Http\Requests\Leads\StoreValuationRequest;
 use App\Mail\ReceptionNotification;
+use App\Models\Analytics\FormSubmission;
 use App\Models\Leads\ReceptionForm;
 use App\Models\Leads\RidersQuiz;
 use App\Models\Vehicle;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class LeadController extends Controller
 {
+    private function trackFormSubmission(string $formType, array $metadata, Request $request): void
+    {
+        try {
+            FormSubmission::create([
+                'form_type' => $formType,
+                'metadata' => $metadata,
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        } catch (\Exception $e) {
+            Log::warning('Analytics form submission tracking failed', ['error' => $e->getMessage()]);
+        }
+    }
+
     public function askInfomation(StoreAskInfomationRequest $request){
 
         try {
@@ -64,6 +80,8 @@ class LeadController extends Controller
             // AskInformation::create($data);
 
             GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $leadData, $vehicleData, $additionalData);
+
+            $this->trackFormSubmission('ask_information', array_merge($leadData, $vehicleData, $additionalData), $request);
 
             // Retornar respuesta exitosa
             return ApiResponseHelper::apiSuccess(201, 'Solicitud de información almacenada correctamente.');
@@ -193,6 +211,8 @@ class LeadController extends Controller
 
             GoogleSheetHelper::sendToGoogleSheet($webhookUrl_2, $receptionFormTwo);
 
+            $this->trackFormSubmission('reception_form', $receptionFormTwo, $request);
+
             // Retornar respuesta exitosa
             return ApiResponseHelper::apiSuccess(201, 'Formulario de recepcion almacenado correctamente.');
 
@@ -233,6 +253,8 @@ class LeadController extends Controller
 
             GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $google_sheet);
 
+            $this->trackFormSubmission('riders_quiz', $google_sheet, $request);
+
             // Retornar respuesta exitosa
             return ApiResponseHelper::apiSuccess(201, 'Cuestionario de riders almacenado correctamente.');
 
@@ -271,6 +293,8 @@ class LeadController extends Controller
             $webhookUrl = GoogleSheetHelper::getWebhookUrl('GOOGLE_SHEET_WEBHOOK_CAR_CARE');
 
             GoogleSheetHelper::sendToGoogleSheet($webhookUrl, $google_sheet);
+
+            $this->trackFormSubmission('car_care', $google_sheet, $request);
 
             // Retornar respuesta exitosa
             return ApiResponseHelper::apiSuccess(201, 'Cuestionario de care care almacenado correctamente.');
@@ -375,6 +399,8 @@ class LeadController extends Controller
                 Log::warning('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER not configured');
             }
 
+            $this->trackFormSubmission('financing', $googleSheetData, $request);
+
             return ApiResponseHelper::apiSuccess(201, 'Solicitud de financiamiento almacenada correctamente.');
 
         } catch (ValidationException $e) {
@@ -444,6 +470,8 @@ class LeadController extends Controller
             } else {
                 Log::warning('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER not configured');
             }
+
+            $this->trackFormSubmission('test_drive', $googleSheetData, $request);
 
             return ApiResponseHelper::apiSuccess(201, 'Solicitud de prueba de manejo almacenada correctamente.');
 
@@ -517,6 +545,8 @@ class LeadController extends Controller
                 Log::warning('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER not configured');
             }
 
+            $this->trackFormSubmission('offer', $googleSheetData, $request);
+
             return ApiResponseHelper::apiSuccess(201, 'Oferta almacenada correctamente.');
 
         } catch (ValidationException $e) {
@@ -562,6 +592,7 @@ class LeadController extends Controller
                 'año' => $data['year'],
                 'kilometraje' => $data['mileage'],
                 'comentarios' => $fullComments,
+                'referido_por' => $data['referrer_uuid'] ?? '',
             ];
 
             $webhookUrl = GoogleSheetHelper::getWebhookUrl('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER');
@@ -587,6 +618,8 @@ class LeadController extends Controller
             } else {
                 Log::warning('GOOGLE_SHEET_WEBHOOK_PRICE_OFFER not configured');
             }
+
+            $this->trackFormSubmission('valuation', $googleSheetData, $request);
 
             return ApiResponseHelper::apiSuccess(201, 'Solicitud de valuación almacenada correctamente.');
 

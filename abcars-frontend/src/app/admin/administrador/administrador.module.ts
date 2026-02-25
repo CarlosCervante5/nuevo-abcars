@@ -7,6 +7,9 @@ import { DashboardAdminComponent } from "./pages/dashboard/dashboardAdmin.compon
 import { AdministradorRoutingModule } from "./administrador-routing.module";
 import { AdminUsersComponent } from './pages/admin-users/admin-users.component';
 import { AdminPermisosComponent } from './pages/admin-permisos/admin-permisos.component';
+import { AnalyticsComponent } from './pages/analytics/analytics.component';
+import { ApiInfoComponent } from './pages/api-info/api-info.component';
+import { DocumentationComponent } from './pages/documentation/documentation.component';
 import { AddUserComponent } from './components/add-user/add-user.component';
 import { SkCubeComponent } from "@components/sk-cube/sk-cube.component";
 import { MatFormFieldModule } from "@angular/material/form-field";
@@ -19,6 +22,9 @@ import { NewNavComponent } from "src/app/shared/versiones-nav/new-nav/new-nav.co
         DashboardAdminComponent,
         AdminUsersComponent,
         AdminPermisosComponent,
+        AnalyticsComponent,
+        ApiInfoComponent,
+        DocumentationComponent,
         AddUserComponent,
         UpdateUserComponent
     ],

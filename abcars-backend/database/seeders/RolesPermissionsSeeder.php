@@ -52,6 +52,13 @@ class RolesPermissionsSeeder extends Seeder
         Role::firstOrCreate(['name' => 'strega-administrator']);
         Role::firstOrCreate(['name' => 'appointment_manager']);
 
+        // Super Admin: todos los permisos (control total del sistema)
+        $allPermissions = Permission::all()->pluck('name')->toArray();
+        $roleSuperAdmin = Role::firstOrCreate(['name' => 'super_admin']);
+        if (!empty($allPermissions)) {
+            $roleSuperAdmin->syncPermissions($allPermissions);
+        }
+
         // Usuarios demo (solo si no existen, para que manager/admin/gestor/staff entren tras re-deploys)
         $user = User::firstOrCreate(
             ['email' => 'manager@abcars.mx'],
@@ -71,6 +78,16 @@ class RolesPermissionsSeeder extends Seeder
             $user->userProfile()->create(['name' => 'Admin', 'last_name' => 'ABCars']);
         }
 
+        // Usuario Super Admin (control total del sistema)
+        $userSuperAdmin = User::firstOrCreate(
+            ['email' => 'superadmin@abcars.mx'],
+            ['nickname' => 'super_admin', 'password' => 'SuperAdmin%2024%%']
+        );
+        if ($userSuperAdmin->wasRecentlyCreated) {
+            $userSuperAdmin->assignRole($roleSuperAdmin);
+            $userSuperAdmin->userProfile()->create(['name' => 'Super', 'last_name' => 'Admin']);
+        }
+
         $user = User::firstOrCreate(
             ['email' => 'gestor@abcars.mx'],
             ['nickname' => 'gestor', 'password' => 'Gestor%2024%%']
@@ -87,6 +104,28 @@ class RolesPermissionsSeeder extends Seeder
         if ($user->wasRecentlyCreated) {
             $user->assignRole($role6);
             $user->userProfile()->create(['name' => 'Staff', 'last_name' => 'ABCars']);
+        }
+
+        // Usuario de prueba: valuator (app de valuación)
+        $roleValuator = Role::findByName('valuator');
+        $user = User::firstOrCreate(
+            ['email' => 'valuator@abcars.mx'],
+            ['nickname' => 'valuator', 'password' => 'Valuator%2024%%']
+        );
+        if ($user->wasRecentlyCreated) {
+            $user->assignRole($roleValuator);
+            $user->userProfile()->create(['name' => 'Valuator', 'last_name' => 'Prueba']);
+        }
+
+        // Usuario de prueba: vendedor
+        $roleSeller = Role::findByName('seller');
+        $user = User::firstOrCreate(
+            ['email' => 'vendedor@abcars.mx'],
+            ['nickname' => 'vendedor', 'password' => 'Vendedor123']
+        );
+        if ($user->wasRecentlyCreated) {
+            $user->assignRole($roleSeller);
+            $user->userProfile()->create(['name' => 'Vendedor', 'last_name' => 'Prueba']);
         }
     }
 }

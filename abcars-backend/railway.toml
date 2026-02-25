@@ -1,0 +1,6 @@
+# Configuración de deploy para Railway
+# https://docs.railway.app/deploy/config-as-code
+
+[deploy]
+# Ejecuta migraciones y seeder de roles/permisos/admin antes de cada deploy
+preDeployCommand = ["php artisan migrate --force", "php artisan db:seed --class=RolesPermissionsSeeder --force"]

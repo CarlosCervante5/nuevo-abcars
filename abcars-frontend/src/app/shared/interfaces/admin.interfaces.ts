@@ -22,7 +22,10 @@ export interface OverviewPages {
     title: string;
     icon?: string;
     permalink?: string;
+    externalUrl?: string;
     action?: () => void;
+    description?: string;
+    iconColor?: 'blue' | 'purple' | 'green' | 'amber';
 }
 /**GESTOR */
 //PROMOTIONS
@@ -610,8 +613,18 @@ export interface RolesResponse {
     id:         number;
     name:       string;
     guard_name: string;
-    created_at: Date;
-    updated_at: Date;
+    created_at?: Date;
+    updated_at?: Date;
+}
+
+export interface PermissionResponse {
+    id:         number;
+    name:       string;
+    guard_name: string;
+}
+
+export interface RoleDetailResponse extends RolesResponse {
+    permissions?: PermissionResponse[];
 }
 
 export interface roles{

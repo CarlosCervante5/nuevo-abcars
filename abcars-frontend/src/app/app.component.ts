@@ -1,7 +1,9 @@
-import { Component, DoCheck, ElementRef, ViewChild } from '@angular/core';
+import { Component, DoCheck, ElementRef, ViewChild, OnInit } from '@angular/core';
 import { AuthService } from './auth/services/auth.service';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { SessionExpirationService } from './shared/services/session-expiration.service';
+import { AnalyticsService } from './shared/services/analytics.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -11,7 +13,7 @@ import Swal from 'sweetalert2';
     standalone: false
 })
 
-export class AppComponent implements DoCheck{
+export class AppComponent implements DoCheck, OnInit {
 
     public auth_user: boolean = false;
     public url_dashboard: string = '/auth/mi-cuenta';
@@ -24,10 +26,20 @@ export class AppComponent implements DoCheck{
     constructor(
         private _router: Router,
         private _authService: AuthService,
-        private _sessionExpirationService: SessionExpirationService // Inyectar servicio para inicializarlo
+        private _sessionExpirationService: SessionExpirationService,
+        private _analyticsService: AnalyticsService
     ) {
-        this._router.routeReuseStrategy.shouldReuseRoute = () => false;    
-     }
+        this._router.routeReuseStrategy.shouldReuseRoute = () => false;
+    }
+
+    ngOnInit(): void {
+        this._router.events.pipe(
+            filter((e): e is NavigationEnd => e instanceof NavigationEnd)
+        ).subscribe((e: NavigationEnd) => {
+            this._analyticsService.trackPageView(e.urlAfterRedirects, document.referrer || undefined)
+                .subscribe({ error: () => {} });
+        });
+    }
 
     // Checking session storage for get token user
     ngDoCheck(): void {

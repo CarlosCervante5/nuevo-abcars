@@ -12,6 +12,9 @@
             <div class="admin-desktop-nav">
                 <!-- User Info -->
                 <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background-color 0.2s ease;" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='transparent'">
+                    <button type="button" class="admin-icon-btn" title="Notificaciones" *ngIf="role === 'Seller Dashboard' || role === 'Vendedor'">
+                        <i class="fi fi-rr-bell"></i>
+                    </button>
                     <img [src]="image_path" alt="User" style="border-radius: 50%; width: 2.5rem; height: 2.5rem; object-fit: cover; border: 2px solid #e5e7eb;">
                     <div style="display: flex; flex-direction: column;">
                         <span class="admin-user-name">{{ name }}</span>
@@ -93,23 +96,100 @@
     </div>
 </nav>
 
-<div class="container mx-auto px-4 pt-24" *ngIf="!hideModules">
-    <div class="w-full mt-5 mb-5">
-        <!-- Role Information -->
-        <div class="flex items-center">
-            <div class="w-1/12"></div>
-    
-            <div class="flex-auto">
-                <h3 class="admin-dashboard-title">ABCars Dashboard</h3>
-                <br>
-                <h6 class="font-light text-lg text-justify"></h6>
+<div class="container mx-auto px-6 lg:px-8 pt-24" *ngIf="!hideModules">
+    <!-- Seller / Admin Dashboard - diseño mejorado con tarjetas -->
+    <div class="seller-dashboard" *ngIf="isSellerDashboard || isAdminDashboard">
+        <div class="seller-dashboard-header">
+            <div class="seller-dashboard-welcome">
+                <h1 class="seller-dashboard-title">ABCars Dashboard</h1>
+                <p class="seller-dashboard-subtitle">{{ isAdminDashboard ? 'Panel de administración: inventario, solicitudes, valuaciones, usuarios y permisos.' : 'Bienvenido de nuevo, gestiona tu inventario y referidos.' }}</p>
             </div>
-    
+            <div class="seller-dashboard-referral" *ngIf="referralLink && !isAdminDashboard">
+                <h3 class="seller-referral-label">LINK DE REFERIDOS</h3>
+                <div class="seller-referral-input-wrap">
+                    <i class="fi fi-rr-link seller-referral-icon"></i>
+                    <input type="text" [value]="referralLink" readonly class="seller-referral-input">
+                    <button type="button" (click)="copyReferralLink()" class="seller-referral-copy-btn">
+                        <i class="fi fi-rr-copy-alt"></i> Copiar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="seller-modules-section">
+            <h3 class="seller-modules-title">Mis Módulos</h3>
+            <div class="seller-modules-grid">
+                <div 
+                    class="seller-module-card"
+                    *ngFor="let page of overview?.pages; let i = index"
+                    [routerLink]="(page.permalink && !page.externalUrl) ? [page.permalink] : null"
+                    (click)="page.externalUrl ? openExternal(page.externalUrl) : (page.action ? page.action() : null)"
+                    [class.cursor-pointer]="!!(page.action || page.permalink || page.externalUrl)"
+                    [class.seller-module-disabled]="!page.permalink && !page.action && !page.externalUrl">
+                    <div class="seller-module-icon" [attr.data-color]="page.iconColor || 'blue'">
+                        <i [class]="page.icon || 'fi fi-rr-folder'"></i>
+                    </div>
+                    <h4 class="seller-module-title">{{ page.title }}</h4>
+                    <p class="seller-module-desc" *ngIf="page.description">{{ page.description }}</p>
+                    <a 
+                        class="seller-module-link" 
+                        *ngIf="page.permalink && !page.externalUrl" 
+                        [routerLink]="page.permalink"
+                        (click)="$event.stopPropagation()">
+                        VER MÁS <i class="fi fi-rr-arrow-right"></i>
+                    </a>
+                    <a 
+                        class="seller-module-link" 
+                        *ngIf="page.externalUrl" 
+                        [href]="page.externalUrl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        (click)="$event.stopPropagation()">
+                        VER MÁS <i class="fi fi-rr-arrow-right"></i>
+                    </a>
+                    <a 
+                        class="seller-module-link" 
+                        *ngIf="page.action && !page.permalink && !page.externalUrl" 
+                        (click)="page.action(); $event.stopPropagation()">
+                        VER MÁS <i class="fi fi-rr-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="seller-cta-banner" *ngIf="!isAdminDashboard">
+            <div class="seller-cta-content">
+                <h3 class="seller-cta-title">Impulsa tus ventas</h3>
+                <p class="seller-cta-desc">Nuestro sistema de IA ayuda a sugerir precios competitivos para que vendas más rápido que nunca.</p>
+            </div>
+            <div class="seller-cta-stats">
+                <div class="seller-stat"><span class="seller-stat-num">—</span> AUTOS VENDIDOS</div>
+                <div class="seller-stat"><span class="seller-stat-num">—</span> REFERIDOS MES</div>
+                <div class="seller-stat"><span class="seller-stat-num">—</span> RATING VENDEDOR</div>
+            </div>
+        </div>
+
+        <footer class="seller-footer">© {{ currentYear }} ABCars.mx - Todos los derechos reservados{{ isAdminDashboard ? '.' : ' para socios estratégicos.' }}</footer>
+    </div>
+
+    <!-- Dashboard estándar (valuator, etc.) -->
+    <div class="w-full mt-5 mb-5" *ngIf="!isSellerDashboard && !isAdminDashboard">
+        <div class="flex items-center flex-wrap gap-4">
+            <div class="w-1/12"></div>
+            <div class="flex-auto flex items-center gap-4 flex-wrap">
+                <h3 class="admin-dashboard-title">ABCars Dashboard</h3>
+                <div *ngIf="referralLink" class="flex items-center gap-2">
+                    <span class="text-sm text-gray-600">Link de referidos:</span>
+                    <input type="text" [value]="referralLink" readonly class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-gray-50 min-w-[200px] max-w-[320px]">
+                    <button type="button" (click)="copyReferralLink()" class="px-3 py-1.5 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 text-sm font-medium whitespace-nowrap">
+                        <i class="fi fi-rr-copy-alt mr-1"></i> Copiar
+                    </button>
+                </div>
+                <h6 class="font-light text-lg text-justify w-full"></h6>
+            </div>
             <div class="flex-auto"></div>
         </div>
-        
         <hr class="my-4 border-gray-300">
-
         <div class="w-full sm:w-full md:w-2/3 lg:w-3/4">
             <app-valuation-statistics-overview *ngIf="overview?.user?.role === 'valuation_manager' "></app-valuation-statistics-overview>
             <div class="mt-5">
@@ -124,24 +204,12 @@
                           [class.disabled]="!page.permalink && !page.action"
                           *ngFor="let page of overview?.pages">
                             <div class="card-module-body">
+                                <div class="card-module-icon" *ngIf="page.icon">
+                                    <i [class]="page.icon"></i>
+                                </div>
                                 <h4>{{ page.title }}</h4>
-                                <a 
-                                class="link-module" 
-                                *ngIf="page.permalink" 
-                                [routerLink]="page.permalink"
-                                (click)="$event.stopPropagation()"
-                                >
-                                Ver más 
-                                <i class="fas fa-chevron-right"></i>
-                                </a>
-                                <a 
-                                class="link-module" 
-                                *ngIf="page.action && !page.permalink" 
-                                (click)="page.action(); $event.stopPropagation()"
-                                >
-                                Ver más 
-                                <i class="fas fa-chevron-right"></i>
-                                </a>
+                                <a class="link-module" *ngIf="page.permalink" [routerLink]="page.permalink" (click)="$event.stopPropagation()">Ver más <i class="fi fi-rr-arrow-right"></i></a>
+                                <a class="link-module" *ngIf="page.action && !page.permalink" (click)="page.action(); $event.stopPropagation()">Ver más <i class="fi fi-rr-arrow-right"></i></a>
                             </div>
                         </div>
                     </div>

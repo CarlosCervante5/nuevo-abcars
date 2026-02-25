@@ -1,0 +1,41 @@
+<app-overview [overview]="itemOverview" [url_index]="'/admin/administrator'" [hideModules]="true"></app-overview>
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+    <div class="bg-white shadow-sm rounded-xl p-6">
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Documentación de la API</h1>
+        <nav class="mt-2 text-sm text-gray-500">
+          <a class="text-gray-500 hover:text-gray-700" [routerLink]="['/admin/administrator']">Overview</a>
+          <span class="mx-2">/</span>
+          <span class="text-gray-700 font-medium">Documentación</span>
+        </nav>
+      </div>
+
+      <div *ngIf="loading" class="flex justify-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
+      </div>
+
+      <div *ngIf="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        {{ error }}
+      </div>
+
+      <div *ngIf="docs && !loading" class="space-y-6">
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <h3 class="font-semibold text-gray-800">{{ docs['name'] }}</h3>
+          <p class="text-sm text-gray-600 mt-1">Versión {{ docs['version'] }}</p>
+          <p class="text-sm text-gray-600 mt-1">Autenticación: {{ docs['auth'] }}</p>
+        </div>
+
+        <div *ngIf="docs['endpoints']" class="space-y-4">
+          <h3 class="font-semibold text-gray-800">Endpoints por módulo</h3>
+          <div *ngFor="let group of getEndpoints(docs['endpoints'])" class="border border-gray-200 rounded-lg overflow-hidden">
+            <div class="bg-gray-100 px-4 py-2 font-medium text-gray-800 capitalize">{{ group[0] }}</div>
+            <ul class="p-4 space-y-1">
+              <li *ngFor="let endpoint of group[1]" class="font-mono text-sm text-gray-700">{{ endpoint }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

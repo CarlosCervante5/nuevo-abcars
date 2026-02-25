@@ -26,6 +26,7 @@ export class OverviewComponent implements OnInit {
     @Input() overview?: Overview;
     @Input() url_index?: String;
     @Input() hideModules: boolean = false; // Para ocultar la sección "Mis Modulos"
+    @Input() referralLink?: string; // Link de referido para mostrar junto al título (sellers)
 
     // References    
     public image_path: string = '';
@@ -33,6 +34,17 @@ export class OverviewComponent implements OnInit {
     public email: string = '';
     public role: string = '';
     public mobileMenuOpen: boolean = false;
+    public currentYear: number = new Date().getFullYear();
+
+    get isSellerDashboard(): boolean {
+        const role = this.overview?.user?.role;
+        return (role === 'Vendedor' || role === 'Seller Dashboard') && !this.hideModules && !!this.overview?.pages?.length;
+    }
+
+    get isAdminDashboard(): boolean {
+        const role = this.overview?.user?.role;
+        return (role === 'Admin' || role === 'Super Admin') && !this.hideModules && !!this.overview?.pages?.length;
+    }
 
     constructor(
         private _accountService: AccountService, 
@@ -110,5 +122,18 @@ export class OverviewComponent implements OnInit {
 
     public closeMobileMenu() {
         this.mobileMenuOpen = false;
+    }
+
+    copyReferralLink(): void {
+        if (this.referralLink) {
+            navigator.clipboard.writeText(this.referralLink).then(() => {
+                const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500, timerProgressBar: true });
+                Toast.fire({ icon: 'success', title: 'Link copiado' });
+            });
+        }
+    }
+
+    openExternal(url: string): void {
+        if (url) window.open(url, '_blank', 'noopener,noreferrer');
     }
 }

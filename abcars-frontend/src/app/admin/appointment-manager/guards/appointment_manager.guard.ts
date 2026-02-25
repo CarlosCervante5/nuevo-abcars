@@ -16,10 +16,10 @@ export class AppointmentManagerGuard  {
   }
 
   canActivate(): Observable<boolean> | Promise<boolean> | boolean {
-    return validateRoleGuard('appointment_manager', this._accountService, this._router);
+    return validateRoleGuard(['appointment_manager', 'seller', 'administrator', 'super_admin'], this._accountService, this._router);
   }
 
   canLoad(): Observable<boolean> | Promise<boolean> | boolean {
-    return validateRoleGuard('appointment_manager', this._accountService, this._router);
+    return validateRoleGuard(['appointment_manager', 'seller', 'administrator', 'super_admin'], this._accountService, this._router);
   }
 }

@@ -32,8 +32,18 @@ use App\Http\Controllers\Vehicles\VehicleBodyController;
 use App\Http\Controllers\Vehicles\VehicleBrandController;
 use App\Http\Controllers\Vehicles\VehicleController;
 use App\Http\Controllers\Vehicles\VehicleImageController;
+use App\Http\Controllers\Analytics\AnalyticsController;
 use Illuminate\Support\Facades\Route;
 
+// Información básica de la API (GET /api)
+Route::get('/', function () {
+    return response()->json([
+        'name' => 'ABCars API',
+        'version' => '2.0',
+        'documentation' => url('/api-docs'),
+        'status' => 'ok',
+    ], 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+});
 
 // Segmento Autenticación
 
@@ -73,12 +83,12 @@ Route::prefix('dealerships')->middleware('bandwidth_usage')->group(function () {
 
 Route::prefix('users')->middleware('auth:sanctum')->group(function () {
     
-    Route::get('/', [UserController::class, 'index'])->middleware(['role:administrator', 'permission:list users']);
+    Route::get('/', [UserController::class, 'index'])->middleware(['role:administrator|super_admin', 'permission:list users']);
     Route::get('/search', [UserController::class, 'search']);
-    Route::post('/', [UserController::class, 'store'])->middleware(['role:administrator', 'permission:create users']);
-    Route::post('/detail', [UserController::class, 'detail'])->middleware('role:administrator');
-    Route::post('/update', [UserController::class, 'update'])->middleware('role:administrator', 'permission:update users');
-    Route::post('/delete', [UserController::class, 'delete'])->middleware('role:administrator', 'permission:delete users');
+    Route::post('/', [UserController::class, 'store'])->middleware(['role:administrator|super_admin', 'permission:create users']);
+    Route::post('/detail', [UserController::class, 'detail'])->middleware('role:administrator|super_admin');
+    Route::post('/update', [UserController::class, 'update'])->middleware(['role:administrator|super_admin', 'permission:update users']);
+    Route::post('/delete', [UserController::class, 'delete'])->middleware(['role:administrator|super_admin', 'permission:delete users']);
     Route::post('/by_role', [UserController::class, 'ByRole']);
 
 });
@@ -100,10 +110,19 @@ Route::prefix('customers')->middleware('auth:sanctum')->group(function () {
 // Fin Segmento Customers
 
 
-// Segmento Roles y Permisos
+// Segmento Roles y Permisos (solo administrator y super_admin)
 
-Route::apiResource('roles', RoleController::class)->middleware('auth:sanctum');
-Route::apiResource('permissions', PermissionController::class)->middleware('auth:sanctum');
+Route::prefix('roles')->middleware(['auth:sanctum', 'role:administrator|super_admin'])->group(function () {
+    Route::get('/', [RoleController::class, 'index']);
+    Route::post('/', [RoleController::class, 'store']);
+    Route::get('/{id}', [RoleController::class, 'show']);
+    Route::put('/{id}', [RoleController::class, 'update']);
+    Route::patch('/{id}', [RoleController::class, 'update']);
+    Route::delete('/{id}', [RoleController::class, 'destroy']);
+});
+Route::prefix('permissions')->middleware(['auth:sanctum', 'role:administrator|super_admin'])->group(function () {
+    Route::get('/', [PermissionController::class, 'index']);
+});
 
 // Fin Segmento Roles y Permisos
 
@@ -257,6 +276,17 @@ Route::prefix('leads')->middleware('bandwidth_usage')->group(function () {
 });
 
 // Fin Segmento Leads
+
+
+// Segmento Analytics
+
+Route::prefix('analytics')->group(function () {
+    Route::post('/page-view', [AnalyticsController::class, 'trackPageView']);
+    Route::get('/stats', [AnalyticsController::class, 'getStats'])
+        ->middleware(['auth:sanctum', 'role:administrator|super_admin']);
+});
+
+// Fin Segmento Analytics
 
 
 // Segmento Campaigns
