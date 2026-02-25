@@ -158,7 +158,7 @@ export class UpdateUserComponent {
             next: (response: GralResponse) =>{
                 Swal.fire({                    
                     icon: 'success',
-                    title: 'Usuario actualizado con exito',
+                    title: 'Usuario actualizado con éxito',
                     text: response.message,
                     showConfirmButton: false,
                     timer: 2000
@@ -212,8 +212,9 @@ export class UpdateUserComponent {
         );
     }
 
-    private _filter<T extends { name: string }>(value: string, options: T[]): T[] {
-        const filterValue = value.toLowerCase();
+    private _filter<T extends { name: string }>(value: string, options: T[] | undefined): T[] {
+        if (!options) return [];
+        const filterValue = (value || '').toLowerCase();
         return options.filter(option => option.name.toLowerCase().includes(filterValue));
     }
 

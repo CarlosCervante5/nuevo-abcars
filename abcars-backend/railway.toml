@@ -3,4 +3,4 @@
 
 [deploy]
 # Ejecuta migraciones y seeder de roles/permisos/admin antes de cada deploy
-preDeployCommand = ["php artisan migrate --force", "php artisan db:seed --class=RolesPermissionsSeeder --force"]
+preDeployCommand = ["php artisan migrate --force", "php artisan db:seed --class=RolesPermissionsSeeder --force", "php artisan db:seed --class=DealershipsSeeder --force"]

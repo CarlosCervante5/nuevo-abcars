@@ -27,19 +27,19 @@
                                             </div>
                                             <div class="col-6 col-md-6">
                                                 <mat-form-field appearance="outline">
-                                                    <mat-label>Apellidos(s)</mat-label>
+                                                    <mat-label>Apellido(s)*</mat-label>
                                                     <input matInput type="text" placeholder="Ortega" formControlName="last_name">
                                                     <mat-hint *ngIf="last_nameInvalid">Escribe los apellidos del usuario. </mat-hint>
                                                 </mat-form-field>
                                             </div>
                                             <div class="col-6 col-md-6">
                                                 <mat-form-field appearance="outline">
-                                                    <mat-label>Genero:</mat-label>
+                                                    <mat-label>Género*</mat-label>
                                                     <mat-select formControlName="gender">
                                                         <mat-option value="M">Femenino</mat-option>
                                                         <mat-option value="H">Masculino</mat-option>
                                                     </mat-select>
-                                                    <mat-hint *ngIf="genderInvalid">Seleccione el genero del usuario. </mat-hint>
+                                                    <mat-hint *ngIf="genderInvalid">Seleccione el género del usuario. </mat-hint>
                                                 </mat-form-field>
                                             </div>
                                             <div class="col-6 col-md-6">
@@ -99,8 +99,8 @@
                                             </div>
                                             <div class="col-6 col-md-6">
                                                 <mat-form-field appearance="outline">
-                                                    <mat-label>Password</mat-label>
-                                                    <input matInput type="text" placeholder="*****" formControlName="password">
+                                                    <mat-label>Contraseña*</mat-label>
+                                                    <input matInput type="password" placeholder="*****" formControlName="password">
                                                     <mat-hint *ngIf="passwordInvalid">Escribe la contraseña del usuario. </mat-hint>
                                                 </mat-form-field>
                                             </div>
@@ -109,7 +109,7 @@
                                                 <label for="picture" class="drop-container">
                                                     <span class="drop-title">Drop files here</span>
                                                     or
-                                                    <input type="file" id="picture" (change)="assignImagePromo($event)" accept=".png, .jpg, .jpeg, .webp" required> 
+                                                    <input type="file" id="picture" (change)="assignImagePromo($event)" accept=".png, .jpg, .jpeg, .webp"> 
                                                 </label>
                                             </div>
                                             <div class="row mt-5">
