@@ -11,6 +11,20 @@ class StoreDealershipRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $merge = [];
+        foreach (['latitude', 'longitude', 'description', 'address'] as $field) {
+            $val = $this->input($field);
+            if ($val === '' || $val === null || $val === 'null') {
+                $merge[$field] = null;
+            }
+        }
+        if (!empty($merge)) {
+            $this->merge($merge);
+        }
+    }
+
     public function rules(): array
     {
         return [

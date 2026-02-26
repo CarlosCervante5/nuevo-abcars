@@ -72,23 +72,31 @@ export class AdminDealershipsComponent implements OnInit {
       Swal.fire({ icon: 'warning', title: 'Campos requeridos', text: 'Nombre y ubicación son obligatorios.' });
       return;
     }
+    const payload: Partial<Dealership> = {
+      name: this.formData.name!.trim(),
+      location: this.formData.location!.trim(),
+      description: this.formData.description?.trim() || null,
+      address: this.formData.address?.trim() || null,
+      latitude: this.formData.latitude != null && this.formData.latitude !== '' ? Number(this.formData.latitude) : null,
+      longitude: this.formData.longitude != null && this.formData.longitude !== '' ? Number(this.formData.longitude) : null
+    };
     if (this.isCreating) {
-      this.adminService.createDealership(this.formData).subscribe({
+      this.adminService.createDealership(payload).subscribe({
         next: () => {
           Swal.fire({ icon: 'success', title: 'Sucursal creada' });
           this.cancelForm();
           this.loadDealerships();
         },
-        error: (err) => Swal.fire({ icon: 'error', title: 'Error', text: err?.error?.message || 'Error al crear.' })
+        error: (err) => this.showError(err, 'crear')
       });
     } else if (this.editingId) {
-      this.adminService.updateDealership(this.editingId, this.formData).subscribe({
+      this.adminService.updateDealership(this.editingId, payload).subscribe({
         next: () => {
           Swal.fire({ icon: 'success', title: 'Sucursal actualizada' });
           this.cancelForm();
           this.loadDealerships();
         },
-        error: (err) => Swal.fire({ icon: 'error', title: 'Error', text: err?.error?.message || 'Error al actualizar.' })
+        error: (err) => this.showError(err, 'actualizar')
       });
     }
   }
@@ -130,5 +138,12 @@ export class AdminDealershipsComponent implements OnInit {
   capitalize(str: string): string {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
+
+  private showError(err: any, action: string): void {
+    const msg = err?.error?.message;
+    const errors = err?.error?.errors;
+    const text = msg || (errors ? Object.values(errors).flat().join(' ') : `Error al ${action}.`);
+    Swal.fire({ icon: 'error', title: 'Error', text });
   }
 }
