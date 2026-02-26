@@ -72,13 +72,23 @@ export class AdminDealershipsComponent implements OnInit {
       Swal.fire({ icon: 'warning', title: 'Campos requeridos', text: 'Nombre y ubicación son obligatorios.' });
       return;
     }
+    const lat = this.formData.latitude != null && this.formData.latitude !== '' ? Number(this.formData.latitude) : null;
+    const lng = this.formData.longitude != null && this.formData.longitude !== '' ? Number(this.formData.longitude) : null;
+    if (lat != null && (lat < -90 || lat > 90)) {
+      Swal.fire({ icon: 'warning', title: 'Latitud inválida', text: 'La latitud debe estar entre -90 y 90.' });
+      return;
+    }
+    if (lng != null && (lng < -180 || lng > 180)) {
+      Swal.fire({ icon: 'warning', title: 'Longitud inválida', text: 'La longitud debe estar entre -180 y 180. En México usa valores negativos (ej: -99.13).' });
+      return;
+    }
     const payload: Partial<Dealership> = {
       name: this.formData.name!.trim(),
       location: this.formData.location!.trim(),
       description: this.formData.description?.trim() || null,
       address: this.formData.address?.trim() || null,
-      latitude: this.formData.latitude != null && this.formData.latitude !== '' ? Number(this.formData.latitude) : null,
-      longitude: this.formData.longitude != null && this.formData.longitude !== '' ? Number(this.formData.longitude) : null
+      latitude: lat,
+      longitude: lng
     };
     if (this.isCreating) {
       this.adminService.createDealership(payload).subscribe({

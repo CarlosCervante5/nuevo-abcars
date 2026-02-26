@@ -36,4 +36,12 @@ class StoreDealershipRequest extends FormRequest
             'longitude' => 'nullable|numeric|between:-180,180',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'latitude.between' => 'La latitud debe estar entre -90 y 90.',
+            'longitude.between' => 'La longitud debe estar entre -180 y 180 (ej: -99.13 para México).',
+        ];
+    }
 }
