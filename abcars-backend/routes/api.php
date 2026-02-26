@@ -73,8 +73,15 @@ Route::prefix('auth')->group(function () {
 // Segmento Sucursales
 
 Route::prefix('dealerships')->middleware('bandwidth_usage')->group(function () {
-
     Route::post('/search', [DealershipController::class, 'search']);
+});
+
+Route::prefix('dealerships')->middleware(['auth:sanctum', 'role:administrator|super_admin'])->group(function () {
+    Route::get('/', [DealershipController::class, 'index']);
+    Route::post('/store', [DealershipController::class, 'store']);
+    Route::get('/{id}', [DealershipController::class, 'show']);
+    Route::put('/{id}', [DealershipController::class, 'update']);
+    Route::delete('/{id}', [DealershipController::class, 'destroy']);
 });
 
 // Fin Sucursales

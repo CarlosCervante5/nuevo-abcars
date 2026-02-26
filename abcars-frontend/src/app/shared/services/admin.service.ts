@@ -6,7 +6,7 @@ import { FormGroup } from '@angular/forms';
 
 //interfaces
 import { DetailsReward, RegisterResponse } from '@interfaces/auth.interface';
-import {detailsRewardResponse, createcampaing , GetcampaingResponse, DeleteVehicleImage, ImageOrderPromo, DeleteCampaign, UploadImages, ImageOrder , GetPromotionsByBrand,GralResponse, RiderResponse, ChangeOrder, rewardsResponse, UsersResponse, DetailResponsive, RolesResponse, DealerShipResponse, CustomerResponse} from '@interfaces/admin.interfaces';
+import {detailsRewardResponse, createcampaing , GetcampaingResponse, DeleteVehicleImage, ImageOrderPromo, DeleteCampaign, UploadImages, ImageOrder , GetPromotionsByBrand,GralResponse, RiderResponse, ChangeOrder, rewardsResponse, UsersResponse, DetailResponsive, RolesResponse, RoleDetailResponse, PermissionResponse, DealerShipResponse, Dealership, CustomerResponse} from '@interfaces/admin.interfaces';
 import { UploadVideo,UploadEventImages, CreateEvent , DeleteEvent, GetEvents, MyEvents, DeleteEventImage} from '@interfaces/community.interface';
 import { RewardResponse } from '@interfaces/rewards.interface';
 
@@ -562,10 +562,52 @@ export class AdminService {
         return this._http.get<RolesResponse[]>(`${this.baseUrl}/api/roles` , { headers });
     }
 
+    public getRole(id: number) {
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem('user_token')}`);
+        return this._http.get<RoleDetailResponse>(`${this.baseUrl}/api/roles/${id}`, { headers });
+    }
+
+    public updateRole(id: number, data: { name?: string; permissions?: string[] }) {
+        const headers = new HttpHeaders()
+            .set('Authorization', `Bearer ${localStorage.getItem('user_token')}`)
+            .set('Content-Type', 'application/json');
+        return this._http.put<RoleDetailResponse>(`${this.baseUrl}/api/roles/${id}`, data, { headers });
+    }
+
+    public getPermissions() {
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem('user_token')}`);
+        return this._http.get<PermissionResponse[]>(`${this.baseUrl}/api/permissions`, { headers });
+    }
+
     public getDealerships(){
         let user_token = localStorage.getItem('user_token');
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
-        return this._http.post<DealerShipResponse>(`${this.baseUrl}/api/dealerships/search` , { headers });
+        return this._http.post<DealerShipResponse>(`${this.baseUrl}/api/dealerships/search` , {}, { headers });
+    }
+
+    public getDealershipsList(){
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem('user_token')}`);
+        return this._http.get<DealerShipResponse>(`${this.baseUrl}/api/dealerships`, { headers });
+    }
+
+    public getDealership(id: number){
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem('user_token')}`);
+        return this._http.get<DealerShipResponse>(`${this.baseUrl}/api/dealerships/${id}`, { headers });
+    }
+
+    public createDealership(data: Partial<Dealership>){
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem('user_token')}`);
+        return this._http.post<DealerShipResponse>(`${this.baseUrl}/api/dealerships/store`, data, { headers });
+    }
+
+    public updateDealership(id: number, data: Partial<Dealership>){
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem('user_token')}`);
+        return this._http.put<DealerShipResponse>(`${this.baseUrl}/api/dealerships/${id}`, data, { headers });
+    }
+
+    public deleteDealership(id: number){
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem('user_token')}`);
+        return this._http.delete<GralResponse>(`${this.baseUrl}/api/dealerships/${id}`, { headers });
     }
 
     public deleteUser(uuid:string){

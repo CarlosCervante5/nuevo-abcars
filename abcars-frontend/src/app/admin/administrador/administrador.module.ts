@@ -7,6 +7,8 @@ import { DashboardAdminComponent } from "./pages/dashboard/dashboardAdmin.compon
 import { AdministradorRoutingModule } from "./administrador-routing.module";
 import { AdminUsersComponent } from './pages/admin-users/admin-users.component';
 import { AdminPermisosComponent } from './pages/admin-permisos/admin-permisos.component';
+import { AdminDealershipsComponent } from './pages/admin-dealerships/admin-dealerships.component';
+import { DealershipsMapComponent } from './pages/dealerships-map/dealerships-map.component';
 import { AnalyticsComponent } from './pages/analytics/analytics.component';
 import { ApiInfoComponent } from './pages/api-info/api-info.component';
 import { DocumentationComponent } from './pages/documentation/documentation.component';
@@ -22,6 +24,8 @@ import { NewNavComponent } from "src/app/shared/versiones-nav/new-nav/new-nav.co
         DashboardAdminComponent,
         AdminUsersComponent,
         AdminPermisosComponent,
+        AdminDealershipsComponent,
+        DealershipsMapComponent,
         AnalyticsComponent,
         ApiInfoComponent,
         DocumentationComponent,

@@ -57,6 +57,13 @@ export class DashboardAdminComponent {
         iconColor: 'blue'
       },
       {
+        title: 'Sucursales',
+        icon: 'fi fi-rr-store-alt',
+        permalink: '/admin/administrator/dealerships',
+        description: 'Crear, editar y gestionar sucursales y sus ubicaciones.',
+        iconColor: 'blue'
+      },
+      {
         title: 'Información de la API',
         icon: 'fi fi-rr-code',
         permalink: '/admin/administrator/api-info',

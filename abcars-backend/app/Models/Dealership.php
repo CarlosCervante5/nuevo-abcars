@@ -29,6 +29,9 @@ class Dealership extends Model
         'name',
         'location',
         'description',
+        'address',
+        'latitude',
+        'longitude',
     ];
 
     /**
@@ -37,7 +40,6 @@ class Dealership extends Model
      * @var array<int, string>
      */
     protected $hidden = [
-        'id',
         'updated_at',
         'deleted_at'
     ];

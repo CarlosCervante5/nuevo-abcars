@@ -1,0 +1,71 @@
+<app-overview [overview]="itemOverview" [url_index]="'/admin/administrator'" [hideModules]="true"></app-overview>
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+    <div class="bg-white shadow-sm rounded-xl p-6">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Ubicación de sucursales</h1>
+          <nav class="mt-2 text-sm text-gray-500" aria-label="breadcrumb">
+            <ol class="flex flex-wrap items-center gap-2">
+              <li><a class="text-gray-500 hover:text-gray-700" [routerLink]="['/admin/administrator']">Overview</a></li>
+              <li class="text-gray-400">/</li>
+              <li><a class="text-gray-500 hover:text-gray-700" [routerLink]="['/admin/administrator/dealerships']">Sucursales</a></li>
+              <li class="text-gray-400">/</li>
+              <li class="text-gray-700 font-medium" aria-current="page">Ubicaciones</li>
+            </ol>
+          </nav>
+        </div>
+        <a [routerLink]="['/admin/administrator/dealerships']"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+          <i class="fi fi-rr-arrow-left"></i>
+          Volver a sucursales
+        </a>
+      </div>
+
+      <div *ngIf="loading" class="flex justify-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
+      </div>
+
+      <div *ngIf="!loading && dealerships.length === 0" class="text-center py-12 text-gray-500">
+        <i class="fi fi-rr-marker text-4xl mb-4 block opacity-50"></i>
+        <p>No hay sucursales. Agrega sucursales con coordenadas para verlas en el mapa.</p>
+      </div>
+
+      <div *ngIf="!loading && dealerships.length > 0" class="space-y-6">
+        <p class="text-sm text-gray-600">
+          Haz clic en "Ver en mapa" para abrir la ubicación en Google Maps.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div *ngFor="let d of dealerships" class="border border-gray-200 rounded-xl overflow-hidden">
+            <div class="p-4 bg-gray-50">
+              <h3 class="font-semibold text-gray-900">{{ capitalize(d.name) }}</h3>
+              <p class="text-sm text-gray-600 mt-1">{{ capitalize(d.location) }}</p>
+              <p *ngIf="d.address" class="text-sm text-gray-500 mt-1">{{ d.address }}</p>
+              <div *ngIf="d.latitude != null && d.longitude != null" class="mt-2 text-xs text-gray-500">
+                {{ d.latitude | number:'1.4-4' }}, {{ d.longitude | number:'1.4-4' }}
+              </div>
+              <button type="button" (click)="openInMaps(d)"
+                class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600">
+                <i class="fi fi-rr-marker"></i>
+                Ver en mapa
+              </button>
+            </div>
+            <div *ngIf="getMapEmbedUrl(d)" class="h-48 bg-gray-100">
+              <iframe
+                [src]="getMapEmbedUrl(d)"
+                width="100%"
+                height="100%"
+                style="border:0;"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                title="Mapa de {{ d.name }}">
+              </iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

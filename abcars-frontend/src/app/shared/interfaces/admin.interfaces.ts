@@ -640,10 +640,14 @@ export interface DealerShipResponse{
 }
 
 export interface Dealership {
+    id?:         number;
     name:        string;
     location:    string;
-    description: null;
-    created_at:  Date;
+    description?: string | null;
+    address?:    string | null;
+    latitude?:   number | null;
+    longitude?:  number | null;
+    created_at?: Date;
 }
 
 
