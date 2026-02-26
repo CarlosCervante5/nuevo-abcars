@@ -20,6 +20,14 @@ class StoreDealershipRequest extends FormRequest
                 $merge[$field] = null;
             }
         }
+        // Corrección común: longitud positiva 86-118 → negativa (México)
+        $lng = $this->input('longitude');
+        if (is_numeric($lng)) {
+            $num = (float) $lng;
+            if ($num > 0 && $num >= 86 && $num <= 118) {
+                $merge['longitude'] = -$num;
+            }
+        }
         if (!empty($merge)) {
             $this->merge($merge);
         }

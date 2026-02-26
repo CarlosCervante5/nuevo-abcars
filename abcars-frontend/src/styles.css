@@ -322,6 +322,12 @@ app-public-post {
     padding: 0 !important;
 }
 
+/* Bottom sheet ancho para CRUDs (usuarios, etc.) */
+::ng-deep .bottom-sheet-crud-wide .mat-bottom-sheet-container {
+    max-width: 640px !important;
+    margin: 0 auto;
+}
+
 /* Asegurar que los componentes dentro de bottom sheets tengan fondo blanco */
 ::ng-deep .mat-bottom-sheet-container > * {
     background-color: white;
@@ -364,4 +370,25 @@ app-public-post {
 
 .barra ::ng-deep .mdc-text-field__input {
     width: 100% !important;
+}
+
+/* Link Regresar - vistas admin valuator/seller */
+.valuator-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+    text-decoration: none;
+    margin-bottom: 0.75rem;
+    transition: color 0.2s ease;
+}
+
+.valuator-back-link:hover {
+    color: var(--abcars-primary, #f59e0b);
+}
+
+.valuator-back-link-center {
+    justify-content: center;
+    margin-bottom: 1rem;
 }

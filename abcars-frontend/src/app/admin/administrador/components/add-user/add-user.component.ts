@@ -19,7 +19,7 @@ export class AddUserComponent {
 
     public form !: FormGroup;
     public spinner = false;
-    public files!: File [];
+    public files: File[] = [];
     //variables para el select de roles
     public roles!: roles[];
     public rolesControl = new FormControl();
@@ -53,7 +53,7 @@ export class AddUserComponent {
             location:       ['', [Validators.required]],
             role_name:      ['', [Validators.required]],
             picture:        [''],
-            password:       ['', [Validators.required]],
+            password:       ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[a-zñ])(?=.*[A-ZÑ])(?=.*\d)(?=.*[@$!%*?&])[A-Za-zÑñ\d@$!%*?&]+$/u)]],
         });
     }
 
@@ -124,8 +124,11 @@ export class AddUserComponent {
                     {reload: true}
                     );
             },
-            error:(error)=>{
-                console.log(error);
+            error: (err) => {
+                const msg = err?.error?.message;
+                const errors = err?.error?.errors;
+                const text = msg || (errors ? Object.values(errors).flat().join(' ') : 'Error al crear el usuario.');
+                Swal.fire({ icon: 'error', title: 'Error', text });
             }
         })
     }

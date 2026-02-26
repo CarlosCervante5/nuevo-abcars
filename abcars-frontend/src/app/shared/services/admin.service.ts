@@ -517,8 +517,8 @@ export class AdminService {
         formData.append('email', `${email}`);         
         formData.append('location', `${location}`);
         formData.append('role_name', `${role_name}`);
-        if(picture != null){
-            picture.forEach((file, index) => formData.append(`image`, file));
+        if (picture && Array.isArray(picture) && picture.length > 0) {
+            formData.append('image', picture[0]);
         }
         formData.append('password', `${password}`);   
         let user_token = localStorage.getItem('user_token');

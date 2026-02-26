@@ -1,56 +1,58 @@
-    .drop-container {
-        position: relative;
-        display: flex;
-        gap: 10px;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 150px;
-        padding: 20px;
-        border-radius: 10px;
-        border: 2px dashed #555;
-        color: #444;
-        cursor: pointer;
-        transition: background .2s ease-in-out, border .2s ease-in-out;
-    }
-    .drop-container:hover {
-        background: #eee;
-        border-color: #111;
-    }
+.add-user-modal {
+  min-width: 320px;
+}
 
-    .drop-container:hover .drop-title {
-        color: #222;
-    }
+.add-user-modal input,
+.add-user-modal select {
+  min-height: 42px;
+}
 
-    .drop-title {
-        color: #444;
-        font-size: 20px;
-        font-weight: bold;
-        text-align: center;
-        transition: color .2s ease-in-out;
-    }
+.drop-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  height: 120px;
+  padding: 16px;
+  border-radius: 0.5rem;
+  border: 2px dashed #d1d5db;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  background: #f9fafb;
+}
 
-    input[type=file] {
-        width: 350px;
-        max-width: 100%;
-        color: #444;
-        padding: 5px;
-        background: #fff;
-        border-radius: 10px;
-        border: 1px solid #555;
-    }
+.drop-container:hover {
+  background: #f3f4f6;
+  border-color: #f59e0b;
+  color: #92400e;
+}
 
-    input[type=file]::file-selector-button {
-        margin-right: 20px;
-        border: none;
-        background: #008bcc;
-        padding: 10px 20px;
-        border-radius: 10px;
-        color: #fff;
-        cursor: pointer;
-        transition: background .2s ease-in-out;
-    }
+.drop-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
 
-    input[type=file]::file-selector-button:hover {
-        background: #008bcc;
-    }
+.add-user-modal input[type=file] {
+  width: 100%;
+  max-width: 100%;
+  padding: 8px;
+  font-size: 0.875rem;
+}
+
+.add-user-modal input[type=file]::file-selector-button {
+  margin-right: 12px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 0.5rem;
+  background: #f59e0b;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.add-user-modal input[type=file]::file-selector-button:hover {
+  background: #d97706;
+}

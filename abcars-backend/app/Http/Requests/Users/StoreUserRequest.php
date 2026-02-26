@@ -14,6 +14,20 @@ class StoreUserRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $merge = [];
+        foreach (['phone_1', 'phone_2', 'gender'] as $field) {
+            $val = $this->input($field);
+            if ($val === '' || $val === null || $val === 'null') {
+                $merge[$field] = null;
+            }
+        }
+        if (!empty($merge)) {
+            $this->merge($merge);
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -36,7 +50,8 @@ class StoreUserRequest extends FormRequest
                 'min:8',
                 'regex:/^(?=.*[a-zñ])(?=.*[A-ZÑ])(?=.*\d)(?=.*[@$!%*?&])[A-Za-zÑñ\d@$!%*?&]+$/u'
             ],
-            'image' => 'sometimes|required|image|mimes:jpeg,png,jpg,gif,pdf|max:10128',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,jpeg,gif,webp|max:10128',
+            'image.*' => 'nullable|image|mimes:jpeg,png,jpg,jpeg,gif,webp|max:10128',
         ];
     }
 

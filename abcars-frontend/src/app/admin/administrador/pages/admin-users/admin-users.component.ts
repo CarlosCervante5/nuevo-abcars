@@ -133,7 +133,9 @@ export class AdminUsersComponent {
     }
 
     public addUser(){
-        const bottomSheetRef = this._bottomSheet.open(AddUserComponent);
+        const bottomSheetRef = this._bottomSheet.open(AddUserComponent, {
+          panelClass: 'bottom-sheet-crud-wide'
+        });
         bottomSheetRef.afterDismissed().subscribe((dataFromChild) => {      
             if(dataFromChild != undefined && dataFromChild.reload === true ){        
                 this.reload.emit(true);
@@ -163,10 +165,9 @@ export class AdminUsersComponent {
     }
 
     public updateUser(uuid:string){
-        const bottomSheetRef = this._bottomSheet.open(UpdateUserComponent,{
-            data: {
-                uuid: uuid
-            }
+        const bottomSheetRef = this._bottomSheet.open(UpdateUserComponent, {
+            data: { uuid },
+            panelClass: 'bottom-sheet-crud-wide'
         });
         bottomSheetRef.afterDismissed().subscribe((dataFromChild) => {      
             if(dataFromChild != undefined && dataFromChild.reload === true ){        
