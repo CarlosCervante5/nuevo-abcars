@@ -239,6 +239,9 @@ const VehicleDetail: React.FC = () => {
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
       currency: 'MXN',
+      currencyDisplay: 'code',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(price);
   };
 
@@ -426,7 +429,7 @@ const VehicleDetail: React.FC = () => {
                 </IonItem>
 
                 <IonItem>
-                  <IonLabel position="stacked">Precio de Venta *</IonLabel>
+                  <IonLabel position="stacked">Precio de Venta (MXN) *</IonLabel>
                   <IonInput
                     type="number"
                     value={formData.sale_price}
@@ -436,7 +439,7 @@ const VehicleDetail: React.FC = () => {
                 </IonItem>
 
                 <IonItem>
-                  <IonLabel position="stacked">Precio de Lista</IonLabel>
+                  <IonLabel position="stacked">Precio de Lista (MXN)</IonLabel>
                   <IonInput
                     type="number"
                     value={formData.list_price}

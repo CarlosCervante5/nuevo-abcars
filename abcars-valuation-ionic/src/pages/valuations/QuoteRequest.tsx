@@ -235,7 +235,7 @@ const QuoteRequest: React.FC = () => {
               <IonRow>
                 <IonCol size="12" sizeMd="6">
                   <IonItem>
-                    <IonLabel position="stacked">Toma (Libro Guía)</IonLabel>
+                    <IonLabel position="stacked">Toma (Libro Guía) MXN</IonLabel>
                     <IonInput
                       type="number"
                       value={form.take}
@@ -247,7 +247,7 @@ const QuoteRequest: React.FC = () => {
                 </IonCol>
                 <IonCol size="12" sizeMd="6">
                   <IonItem>
-                    <IonLabel position="stacked">Venta (Libro Guía)</IonLabel>
+                    <IonLabel position="stacked">Venta (Libro Guía) MXN</IonLabel>
                     <IonInput
                       type="number"
                       value={form.sale}
@@ -259,7 +259,7 @@ const QuoteRequest: React.FC = () => {
                 </IonCol>
                 <IonCol size="12" sizeMd="6">
                   <IonItem>
-                    <IonLabel position="stacked">Toma (Intelimotors)</IonLabel>
+                    <IonLabel position="stacked">Toma (Intelimotors) MXN</IonLabel>
                     <IonInput
                       type="number"
                       value={form.take_intelimotors}
@@ -271,7 +271,7 @@ const QuoteRequest: React.FC = () => {
                 </IonCol>
                 <IonCol size="12" sizeMd="6">
                   <IonItem>
-                    <IonLabel position="stacked">Venta (Intelimotors)</IonLabel>
+                    <IonLabel position="stacked">Venta (Intelimotors) MXN</IonLabel>
                     <IonInput
                       type="number"
                       value={form.sale_intelimotors}
@@ -288,25 +288,25 @@ const QuoteRequest: React.FC = () => {
               <IonRow>
                 <IonCol size="12" sizeMd="6">
                   <IonItem>
-                    <IonLabel position="stacked">Mano de obra</IonLabel>
+                    <IonLabel position="stacked">Mano de obra MXN</IonLabel>
                     <IonInput type="number" value={form.workforce} readonly />
                   </IonItem>
                 </IonCol>
                 <IonCol size="12" sizeMd="6">
                   <IonItem>
-                    <IonLabel position="stacked">Partes / Refacciones</IonLabel>
+                    <IonLabel position="stacked">Partes / Refacciones MXN</IonLabel>
                     <IonInput type="number" value={form.spare_parts} readonly />
                   </IonItem>
                 </IonCol>
                 <IonCol size="12" sizeMd="6">
                   <IonItem>
-                    <IonLabel position="stacked">HyP</IonLabel>
+                    <IonLabel position="stacked">HyP MXN</IonLabel>
                     <IonInput type="number" value={form.hyp} readonly />
                   </IonItem>
                 </IonCol>
                 <IonCol size="12" sizeMd="6">
                   <IonItem>
-                    <IonLabel position="stacked">Total</IonLabel>
+                    <IonLabel position="stacked">Total MXN</IonLabel>
                     <IonInput type="number" value={form.total} readonly />
                   </IonItem>
                 </IonCol>
@@ -317,7 +317,7 @@ const QuoteRequest: React.FC = () => {
               <IonRow>
                 <IonCol size="12" sizeMd="6">
                   <IonItem>
-                    <IonLabel position="stacked">Valor toma</IonLabel>
+                    <IonLabel position="stacked">Valor toma MXN</IonLabel>
                     <IonInput
                       type="number"
                       value={form.take_value}
@@ -329,7 +329,7 @@ const QuoteRequest: React.FC = () => {
                 </IonCol>
                 <IonCol size="12" sizeMd="6">
                   <IonItem>
-                    <IonLabel position="stacked">Oferta final</IonLabel>
+                    <IonLabel position="stacked">Oferta final MXN</IonLabel>
                     <IonInput
                       type="number"
                       value={form.final_offer}
