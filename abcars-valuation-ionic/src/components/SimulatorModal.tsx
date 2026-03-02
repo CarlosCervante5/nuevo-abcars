@@ -65,13 +65,7 @@ const SimulatorModal: React.FC<SimulatorModalProps> = ({
   const totalAmount = downPayment + monthlyPayment * termMonths;
 
   const formatMxn = (n: number) =>
-    new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-      currencyDisplay: 'code',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(n);
+    `MX$ ${n.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
   const handleRequestFinancing = () => {
     onRequestFinancing?.({

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   IonContent,
   IonHeader,
@@ -39,7 +39,8 @@ const PublicVehicleDetail: React.FC = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
-  const [touchStartX, setTouchStartX] = useState(0);
+  const touchStartX = useRef(0);
+  const isDragging = useRef(false);
   const [showSimulatorModal, setShowSimulatorModal] = useState(false);
   const [showFinancingModal, setShowFinancingModal] = useState(false);
   const [simulatorData, setSimulatorData] = useState<SimulatorData | null>(null);
@@ -73,13 +74,7 @@ const PublicVehicleDetail: React.FC = () => {
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-      currencyDisplay: 'code',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
+    return `MX$ ${price.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   };
 
   const getDisplayImage = () => {
@@ -140,30 +135,55 @@ const PublicVehicleDetail: React.FC = () => {
     setShowFinancingModal(true);
   };
 
+  const displayImages = images.length > 0 ? images : (vehicle?.firstImage ? [vehicle.firstImage] : []);
+
   const prevImage = () => {
+    if (displayImages.length <= 1) return;
     setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : displayImages.length - 1));
   };
 
   const nextImage = () => {
+    if (displayImages.length <= 1) return;
     setCurrentImageIndex((prev) => (prev < displayImages.length - 1 ? prev + 1 : 0));
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.touches[0].clientX);
+    touchStartX.current = e.touches[0].clientX;
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
+    if (displayImages.length <= 1) return;
     const touchEndX = e.changedTouches[0].clientX;
-    const diff = touchStartX - touchEndX;
-    if (Math.abs(diff) > 50) {
+    const diff = touchStartX.current - touchEndX;
+    const minSwipe = 50;
+    if (Math.abs(diff) > minSwipe) {
       if (diff > 0) nextImage();
       else prevImage();
     }
   };
 
-  if (!vehicle && !loading) return null;
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (displayImages.length <= 1) return;
+    touchStartX.current = e.clientX;
+    isDragging.current = true;
+  };
 
-  const displayImages = images.length > 0 ? images : (vehicle?.firstImage ? [vehicle.firstImage] : []);
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isDragging.current || displayImages.length <= 1) return;
+    const diff = touchStartX.current - e.clientX;
+    const minSwipe = 50;
+    if (Math.abs(diff) > minSwipe) {
+      if (diff > 0) nextImage();
+      else prevImage();
+    }
+    isDragging.current = false;
+  };
+
+  const handleMouseLeave = () => {
+    isDragging.current = false;
+  };
+
+  if (!vehicle && !loading) return null;
   const imgUrl = getDisplayImage();
 
   return (
@@ -191,6 +211,11 @@ const PublicVehicleDetail: React.FC = () => {
                 className="detail-image-wrap"
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseLeave}
+                role="region"
+                aria-label="Galería de imágenes, desliza para ver más"
               >
                 {imgUrl ? (
                   <img src={imgUrl} alt={vehicle.name} className="detail-image" />
@@ -224,6 +249,7 @@ const PublicVehicleDetail: React.FC = () => {
                     <div className="image-counter">
                       {currentImageIndex + 1}/{displayImages.length}
                     </div>
+                    <span className="swipe-hint">Desliza</span>
                   </>
                 )}
               </div>

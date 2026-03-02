@@ -71,7 +71,7 @@ const FinancingFormModal: React.FC<FinancingFormModalProps> = ({
     setIsSubmitting(true);
     try {
       const comments = simulatorData
-        ? `Enganche: ${simulatorData.downPayment.toLocaleString('es-MX')} MXN | Mensualidad: ${simulatorData.monthlyPayment.toLocaleString('es-MX')} MXN | Total: ${simulatorData.totalAmount.toLocaleString('es-MX')} MXN`
+        ? `Enganche: MX$ ${simulatorData.downPayment.toLocaleString('es-MX')} | Mensualidad: MX$ ${simulatorData.monthlyPayment.toLocaleString('es-MX')} | Total: MX$ ${simulatorData.totalAmount.toLocaleString('es-MX')}`
         : '';
 
       const data: FinancingFormData = {
@@ -194,9 +194,9 @@ const FinancingFormModal: React.FC<FinancingFormModalProps> = ({
 
           {simulatorData && (
             <div className="form-summary-readonly">
-              <p>Enganche: {simulatorData.downPayment.toLocaleString('es-MX')} MXN</p>
-              <p>Mensualidad: {simulatorData.monthlyPayment.toLocaleString('es-MX')} MXN</p>
-              <p>Total: {simulatorData.totalAmount.toLocaleString('es-MX')} MXN</p>
+              <p>Enganche: MX$ {simulatorData.downPayment.toLocaleString('es-MX')}</p>
+              <p>Mensualidad: MX$ {simulatorData.monthlyPayment.toLocaleString('es-MX')}</p>
+              <p>Total: MX$ {simulatorData.totalAmount.toLocaleString('es-MX')}</p>
             </div>
           )}
 

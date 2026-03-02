@@ -91,13 +91,7 @@ const ValuationDetail: React.FC = () => {
 
   const formatCurrency = (amount?: number) => {
     if (!amount) return 'N/A';
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-      currencyDisplay: 'code',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
+    return `MX$ ${amount.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   };
 
   const getStatusColor = (status: string) => {
