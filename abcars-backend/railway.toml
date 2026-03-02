@@ -1,6 +1,9 @@
 # Configuración de deploy para Railway
 # https://docs.railway.app/deploy/config-as-code
 
+[build]
+builder = "nixpacks"
+
 [deploy]
-# Ejecuta migraciones y seeder de roles/permisos/admin antes de cada deploy
-preDeployCommand = ["php artisan migrate --force", "php artisan db:seed --class=RolesPermissionsSeeder --force", "php artisan db:seed --class=DealershipsSeeder --force"]
+# Un solo comando; Railway solo permite 1 elemento en el array
+preDeployCommand = ["chmod +x ./railway/init-app.sh && sh ./railway/init-app.sh"]
