@@ -1,0 +1,10 @@
+# Build y deploy del frontend en Railway.
+# En el servicio: Root Directory = abcars-frontend
+# Variable obligatoria: API_URL = URL del backend (ej. https://xxx.up.railway.app)
+
+[build]
+builder = "nixpacks"
+buildCommand = "npm ci && npm run build:railway"
+
+[deploy]
+startCommand = "npm start"
