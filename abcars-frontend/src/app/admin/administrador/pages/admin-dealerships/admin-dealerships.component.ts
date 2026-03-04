@@ -72,8 +72,8 @@ export class AdminDealershipsComponent implements OnInit {
       Swal.fire({ icon: 'warning', title: 'Campos requeridos', text: 'Nombre y ubicación son obligatorios.' });
       return;
     }
-    const lat = this.formData.latitude != null && this.formData.latitude !== '' ? Number(this.formData.latitude) : null;
-    const lng = this.formData.longitude != null && this.formData.longitude !== '' ? Number(this.formData.longitude) : null;
+    const lat = this.formData.latitude != null ? Number(this.formData.latitude) : null;
+    const lng = this.formData.longitude != null ? Number(this.formData.longitude) : null;
     if (lat != null && (lat < -90 || lat > 90)) {
       Swal.fire({ icon: 'warning', title: 'Latitud inválida', text: 'La latitud debe estar entre -90 y 90.' });
       return;
