@@ -12,6 +12,7 @@ $allowedOrigins = $corsEnv
     ? array_map('trim', explode(',', $corsEnv))
     : array_values(array_filter([
         env('FRONTEND_URL'),
+        'https://honest-art-production-20e5.up.railway.app',
         'https://vigilant-renewal-production-d135.up.railway.app',
         'https://abcars.mx',
         'http://localhost:4200',
@@ -19,7 +20,11 @@ $allowedOrigins = $corsEnv
         'http://127.0.0.1:4200',
     ]));
 if (empty($allowedOrigins)) {
-    $allowedOrigins = ['https://vigilant-renewal-production-d135.up.railway.app', 'http://localhost:4200'];
+    $allowedOrigins = [
+        'https://honest-art-production-20e5.up.railway.app',
+        'https://vigilant-renewal-production-d135.up.railway.app',
+        'http://localhost:4200',
+    ];
 }
 
 return [
