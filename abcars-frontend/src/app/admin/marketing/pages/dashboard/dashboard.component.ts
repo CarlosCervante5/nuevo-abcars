@@ -28,13 +28,14 @@ export class DashboardComponent {
       {
         title: 'Vehículos',
         icon: 'fi fi-rr-car',
-        permalink: '/admin/marketing/vehicles'
+        permalink: '/admin/marketing/vehicles',
+        iconColor: 'blue'
       },
       {
         title: 'Banner principal',
-        icon: 'fi fi-rr-car',
-        // permalink: ''
-        action: () => this.openBannerBottomSheet()
+        icon: 'fi fi-rr-picture',
+        action: () => this.openBannerBottomSheet(),
+        iconColor: 'amber'
       },
     ]
   };

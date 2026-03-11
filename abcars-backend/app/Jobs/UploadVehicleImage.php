@@ -28,7 +28,6 @@ class UploadVehicleImage implements ShouldQueue
     public $tries = 5;
     public $backoff = 60;
     protected $base_folder;
-    protected $aws_url;
 
     /**
      * Create a new job instance.
@@ -41,9 +40,7 @@ class UploadVehicleImage implements ShouldQueue
         $this->sort_id = $index;
         $this->original_filename = $original_filename;
         $this->is_last = $is_last;
-        $this->base_folder = env('AWS_VEHICLES_FOLDER_BASE', 'default_folder');
-        $this->aws_url = env('AWS_CLOUDFRONT_URL');
-        
+        $this->base_folder = env('CLOUDINARY_VEHICLES_FOLDER_BASE', 'abcars_images');
     }
 
     /**
@@ -74,35 +71,25 @@ class UploadVehicleImage implements ShouldQueue
                 ]
             ]);
 
-            $s3_path = $this->base_folder . '/' . $this->vehicle_uuid . '/' . $name . '.jpg';
-            
-            $image_contents = file_get_contents($cloudinary_file['secure_url']);
-            
-            $s3_result = Storage::disk('s3')->put($s3_path, $image_contents);
+            $cloudinary_url = $cloudinary_file['secure_url'];
+            $public_id = $cloudinary_file['public_id'] ?? null;
 
-            if ($s3_result) {
-                
-                VehicleImage::create([
-                    'sort_id' => $this->sort_id,
-                    'image_name' => $this->original_filename,
-                    'vehicle_id' => $this->vehicle_id,
-                    'service_image_url' =>  $this->aws_url . '/' . $s3_path
-                ]);
+            VehicleImage::create([
+                'sort_id' => $this->sort_id,
+                'image_name' => $this->original_filename,
+                'vehicle_id' => $this->vehicle_id,
+                'service_public_id' => $public_id,
+                'service_image_url' => $cloudinary_url,
+            ]);
 
-                if ($this->is_last) {
-                    Vehicle::where('id', $this->vehicle_id)
-                        ->update(['page_status' => 'active']);
-                }
-            
-            } else {
-                throw new Exception('Failed to upload image to S3');
+            if ($this->is_last) {
+                Vehicle::where('id', $this->vehicle_id)
+                    ->update(['page_status' => 'active']);
             }
-
-            $cloudinary->uploadApi()->destroy($cloudinary_file['public_id']);
 
             Storage::delete($this->path);
 
-            ApiResponseHelper::imageSuccess(200, 'Imagen subida correctamente al servicio externo', ['url' => $this->aws_url . '/' . $s3_path]); 
+            ApiResponseHelper::imageSuccess(200, 'Imagen subida correctamente al servicio externo', ['url' => $cloudinary_url]); 
 
         } catch (\Exception $e) {
             ApiResponseHelper::imageError('Error en el job para subir la imagen para id: '.$this->vehicle_id, $e->getMessage(), 500, 'UPLOAD_IMAGE_ERROR');
