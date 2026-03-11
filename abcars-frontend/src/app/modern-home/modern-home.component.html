@@ -3,17 +3,13 @@
   <!-- Header Superior -->
   <app-home-nav></app-home-nav>
 
-  <!-- Hero Section -->
-  <!-- <section class="relative h-[500px] bg-center bg-no-repeat" [ngClass]="{'bg-contain': !showHeroText}" [ngStyle]="{'background-image': 'url(\'' + heroImagePath + '\')'}"> -->
-  <section class="relative h-[500px] bg-cover bg-center bg-no-repeat" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.4)), url('assets/images/bg_hero.jpg');">    
-    <!-- Overlay con gradiente (siempre visible) -->
-    <!-- <div class="absolute inset-0 bg-gradient-to-b from-black/60 to-black/40 z-0"></div> -->
-    
+  <!-- Hero Section: imagen subida → contain + overlay solo arriba (menú legible); default → cover + overlay completo + texto -->
+  <section class="relative h-[500px] bg-center bg-no-repeat" [ngClass]="showHeroText ? 'bg-cover' : 'bg-contain'" [style.background-image]="showHeroText ? 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.4)), url(\'' + heroImagePath + '\')' : 'url(\'' + heroImagePath + '\')'">
+    <!-- Overlay solo en la parte superior cuando hay imagen subida (para que el menú se lea bien) -->
+    <div *ngIf="!showHeroText" class="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/60 to-transparent z-[5] pointer-events-none" aria-hidden="true"></div>
     <div class="relative z-10 flex flex-col justify-center h-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <!-- Título Principal -->
-      <!-- <div class="text-center mb-8" *ngIf="showHeroText"> -->
-      <div class="text-center mb-8">
+      <!-- Título solo cuando se usa imagen por defecto (sin banner subido) -->
+      <div class="text-center mb-8" *ngIf="showHeroText">
         <h1 class="hero-title">
           El Seminuevo que buscas<br>al precio que quieres
         </h1>

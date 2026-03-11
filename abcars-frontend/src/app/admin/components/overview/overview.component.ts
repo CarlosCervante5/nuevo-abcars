@@ -46,6 +46,13 @@ export class OverviewComponent implements OnInit {
         return (role === 'Admin' || role === 'Super Admin') && !this.hideModules && !!this.overview?.pages?.length;
     }
 
+    /** Usa las tarjetas modernas (Mis Módulos) con ícono por color y enlace "VER MÁS" con flecha para Admin, Seller y Marketing. */
+    get useModuleCardsLayout(): boolean {
+        const role = this.overview?.user?.role;
+        return (role === 'Admin' || role === 'Super Admin' || role === 'Marketing' || role === 'Vendedor' || role === 'Seller Dashboard')
+            && !this.hideModules && !!this.overview?.pages?.length;
+    }
+
     constructor(
         private _accountService: AccountService, 
         private titleService: Title,

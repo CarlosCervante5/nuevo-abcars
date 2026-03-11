@@ -23,7 +23,6 @@ class UploadBannerMainImage
     protected $main_banner;
     protected $original_filename;
     protected $base_folder;
-    protected $aws_url;
 
     /**
      * Create a new job instance.
@@ -33,8 +32,7 @@ class UploadBannerMainImage
         $this->path = $path;
         $this->main_banner = $main_banner;
         $this->original_filename = $original_filename;
-        $this->base_folder = env('AWS_MAIN_BANNER_FOLDER_BASE', 'default_folder');
-        $this->aws_url = env('AWS_CLOUDFRONT_URL');
+        $this->base_folder = env('CLOUDINARY_MAIN_BANNER_FOLDER_BASE', 'abcars_images');
     }
 
     /**
@@ -63,25 +61,13 @@ class UploadBannerMainImage
                 ]
             ]);
 
-            $s3_path = $this->base_folder . '/' . $this->main_banner->uuid . '/' . $name . '.jpg';
+            $cloudinary_url = $cloudinary_file['secure_url'];
 
-            $image_contents = file_get_contents($cloudinary_file['secure_url']);
-
-            $s3_result = Storage::disk('s3')->put($s3_path, $image_contents);
-
-            if ($s3_result) {
-
-                $this->main_banner->update(['image_path' => $this->aws_url . '/' . $s3_path]);
-
-            } else {
-                throw new Exception('Failed to upload image to S3');
-            }
-
-            $cloudinary->uploadApi()->destroy($cloudinary_file['public_id']);
+            $this->main_banner->update(['image_path' => $cloudinary_url]);
 
             Storage::delete($this->path);
 
-            ApiResponseHelper::imageSuccess(200, 'Imagen subida correctamente al servicio externo', ['url' => $this->aws_url . '/' . $s3_path]);
+            ApiResponseHelper::imageSuccess(200, 'Imagen subida correctamente al servicio externo', ['url' => $cloudinary_url]);
 
         } catch (\Exception $e) {
             
