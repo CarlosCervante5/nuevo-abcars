@@ -28,12 +28,11 @@ class UploadValuationImage implements ShouldQueue
     public $tries = 5;
     public $backoff = 60;
     protected $base_folder;
-    protected $aws_url;
 
     /**
      * Create a new job instance.
      */
-    public function __construct( String $path, String $valuation_uuid, int $valuation_id, int $index, String $original_filename, String $name, String $group_name)
+    public function __construct(string $path, string $valuation_uuid, int $valuation_id, int $index, string $original_filename, string $name, string $group_name)
     {
         $this->path = $path;
         $this->valuation_uuid = $valuation_uuid;
@@ -42,84 +41,71 @@ class UploadValuationImage implements ShouldQueue
         $this->original_filename = $original_filename;
         $this->name = $name;
         $this->group_name = $group_name;
-        $this->base_folder = env('AWS_VALUATIONS_FOLDER_BASE', 'default_folder');
-        $this->aws_url = env('AWS_CLOUDFRONT_URL');
-
+        $this->base_folder = env('CLOUDINARY_VALUATIONS_FOLDER_BASE', 'abcars_valuations');
     }
 
     /**
      * Execute the job.
      */
     public function handle(Cloudinary $cloudinary): void
-    {   
-        // Validaciones
+    {
         $this->validateInputs();
 
         try {
-
-            Log::info('Job details:', [
+            Log::info('Valuation image job:', [
                 'valuation_id' => $this->valuation_id,
                 'valuation_uuid' => $this->valuation_uuid,
                 'path' => $this->path,
-                'sort_id' => $this->sort_id
+                'sort_id' => $this->sort_id,
             ]);
 
-            $name = time().'_'.$this->sort_id;
+            $name = time() . '_' . $this->sort_id;
 
             $cloudinary_file = $cloudinary->uploadApi()->upload(storage_path('app/' . $this->path), [
                 'public_id' => $name,
                 'folder' => $this->base_folder . '/' . $this->valuation_uuid,
                 'transformation' => [
                     'quality' => 'auto',
-                    'fetch_format' => 'jpg'
-                ]
+                    'fetch_format' => 'jpg',
+                ],
             ]);
 
-            $s3_path = $this->base_folder . '/' . $this->valuation_uuid . '/' . $name . '.jpg';
-            
-            $image_contents = file_get_contents($cloudinary_file['secure_url']);
-            
-            $s3_result = Storage::disk('s3')->put($s3_path, $image_contents);
+            $cloudinary_url = $cloudinary_file['secure_url'];
 
-            if ($s3_result) {
-
-                if ( $this->group_name == 'interior' || $this->group_name == 'exterior' ){
-
-                    ValuationImage::where('name', $this->name)
-                    ->where('group_name', $this->group_name)
+            $groupLower = strtolower($this->group_name);
+            if ($groupLower === 'interior' || $groupLower === 'exterior') {
+                ValuationImage::where('name', $this->name)
+                    ->where('group_name', $groupLower)
                     ->where('valuation_id', $this->valuation_id)
                     ->delete();
-
-                }
-
-                ValuationImage::create([
-                    'sort_id' => $this->sort_id,
-                    'name' => $this->name,
-                    'group_name' => $this->group_name,
-                    'image_path' => $this->aws_url . '/' . $s3_path,
-                    'valuation_id' => $this->valuation_id,
-                ]);
-
-            } else {
-                throw new Exception('Failed to upload image to S3');
             }
 
-            $cloudinary->uploadApi()->destroy($cloudinary_file['public_id']);
+            ValuationImage::create([
+                'sort_id' => $this->sort_id,
+                'name' => $this->name,
+                'group_name' => $groupLower,
+                'image_path' => $cloudinary_url,
+                'valuation_id' => $this->valuation_id,
+            ]);
 
             Storage::delete($this->path);
 
-            ApiResponseHelper::imageSuccess(200, 'Imagen subida correctamente al servicio externo.', ['url' => $this->aws_url . '/' . $s3_path]);
+            Log::info('Valuation image uploaded to Cloudinary:', [
+                'valuation_id' => $this->valuation_id,
+            ]);
 
-        } catch (\Exception $e) {
-            ApiResponseHelper::imageError('Error en el job para subir la imagen para id: '.$this->valuation_id, $e->getMessage(), 500, 'UPLOAD_IMAGE_ERROR');
-
-            ApiResponseHelper::imageError('Imagen guardada localmente para valuacion uuid: '.$this->valuation_uuid, 'Guardada en: ' . $this->path, 500, 'SAVE_LOCAL_IMAGE_ERROR');
+            ApiResponseHelper::imageSuccess(200, 'Imagen subida correctamente al servicio externo.', ['url' => $cloudinary_url]);
+        } catch (Exception $e) {
+            Log::error('Error uploading valuation image:', ['exception' => $e->getMessage()]);
+            ApiResponseHelper::imageError(
+                'Error en el job para subir la imagen de valuación (id: ' . $this->valuation_id . ')',
+                $e->getMessage(),
+                500,
+                'UPLOAD_IMAGE_ERROR'
+            );
         }
     }
 
-    /**
-     * Validates the required inputs.
-     */
     protected function validateInputs(): void
     {
         $requiredFields = [
@@ -129,11 +115,11 @@ class UploadValuationImage implements ShouldQueue
             'sort_id' => $this->sort_id,
             'original_filename' => $this->original_filename,
             'name' => $this->name,
-            'group_name' => $this->group_name
+            'group_name' => $this->group_name,
         ];
 
         foreach ($requiredFields as $field => $value) {
-            if (empty($value)) {
+            if ($value === null || $value === '') {
                 throw new Exception("{$field} is required");
             }
         }
