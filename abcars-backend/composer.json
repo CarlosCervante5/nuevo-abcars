@@ -38,6 +38,12 @@
         }
     },
     "scripts": {
+        "migrate-seed": [
+            "@php artisan migrate --force",
+            "@php artisan db:seed --class=RolesPermissionsSeeder --force",
+            "@php artisan db:seed --class=DealershipsSeeder --force",
+            "@php artisan db:seed --class=DeliveryPhotosSeeder --force"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
