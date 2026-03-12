@@ -4,12 +4,14 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { PromotionsComponent } from './pages/promotions/promotions.component';
 import { ScheduleEventsComponent } from './pages/schedule-events/schedule-events.component';
 import { RewardsComponent } from './pages/rewards/rewards.component';
+import { DeliveryPhotosComponent } from './pages/delivery-photos/delivery-photos.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent },
   { path: 'promotions', component: PromotionsComponent },
   { path: 'scheduled-events', component: ScheduleEventsComponent },
   { path: 'rewards', component: RewardsComponent },
+  { path: 'delivery-photos', component: DeliveryPhotosComponent },
 ];
 
 @NgModule({

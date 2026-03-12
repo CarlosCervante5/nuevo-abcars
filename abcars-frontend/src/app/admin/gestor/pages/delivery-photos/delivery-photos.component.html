@@ -1,0 +1,105 @@
+<app-overview [overview]="itemOverview" [url_index]="'/admin/gestor'" [hideModules]="true"></app-overview>
+<div class="container mx-auto px-4 pt-24">
+  <div class="w-full mt-5 mb-5">
+    <h4 class="delivery-photos-title">Fotos de Entregas</h4>
+    <nav class="delivery-photos-breadcrumb" aria-label="breadcrumb">
+      <ol class="delivery-photos-breadcrumb-list">
+        <li class="delivery-photos-breadcrumb-item" [routerLink]="['/admin/gestor/']">Overview</li>
+        <li class="delivery-photos-breadcrumb-item delivery-photos-breadcrumb-item-active" aria-current="page">Fotos de entregas</li>
+      </ol>
+    </nav>
+
+    <!-- Formulario de subida -->
+    <div class="delivery-photos-upload-card">
+      <h5 class="delivery-photos-upload-title">Agregar foto de entrega</h5>
+      <p class="delivery-photos-upload-desc">Las fotos se mostrarán en el carrusel "Entregas Felices" del home.</p>
+      <div class="delivery-photos-form">
+        <div class="delivery-photos-form-row">
+          <div class="delivery-photos-form-group">
+            <label>Imagen *</label>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              (change)="onFileSelected($event)"
+              [disabled]="uploading"
+            />
+            <span *ngIf="selectedFile" class="delivery-photos-file-name">{{ selectedFile.name }}</span>
+          </div>
+          <div class="delivery-photos-form-group">
+            <label>Descripción (opcional)</label>
+            <input
+              type="text"
+              [(ngModel)]="caption"
+              placeholder="Ej: Entrega BMW Serie 3 - Cliente satisfecho"
+              maxlength="255"
+              [disabled]="uploading"
+            />
+          </div>
+          <div class="delivery-photos-form-group delivery-photos-form-group-sm">
+            <label>Orden</label>
+            <input
+              type="number"
+              [(ngModel)]="sortOrder"
+              placeholder="Auto"
+              min="0"
+              [disabled]="uploading"
+            />
+          </div>
+        </div>
+        <div class="delivery-photos-form-actions">
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="upload()"
+            [disabled]="!selectedFile || uploading"
+            class="delivery-photos-btn-upload"
+          >
+            <span *ngIf="!uploading">Subir foto</span>
+            <span *ngIf="uploading">Subiendo...</span>
+          </button>
+          <button mat-button (click)="clearForm()" [disabled]="uploading">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Listado de fotos -->
+    <div class="delivery-photos-grid">
+      <div *ngIf="loading" class="delivery-photos-loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando fotos...</p>
+      </div>
+      <div *ngIf="!loading && photos.length === 0" class="delivery-photos-empty">
+        <mat-icon>photo_library</mat-icon>
+        <p>No hay fotos de entregas. Sube la primera.</p>
+      </div>
+      <div *ngFor="let photo of photos" class="delivery-photos-card">
+        <div class="delivery-photos-card-image">
+          <img [src]="photo.service_image_url" [alt]="photo.caption || 'Entrega'" />
+          <button
+            mat-icon-button
+            class="delivery-photos-delete-btn"
+            (click)="deletePhoto(photo)"
+            matTooltip="Eliminar foto"
+            aria-label="Eliminar"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+        <p *ngIf="photo.caption" class="delivery-photos-card-caption">{{ photo.caption }}</p>
+      </div>
+    </div>
+
+    <!-- Paginación -->
+    <div *ngIf="!loading && lastPage > 1" class="delivery-photos-pagination">
+      <button mat-button (click)="prevPage()" [disabled]="currentPage <= 1">
+        <mat-icon>chevron_left</mat-icon> Anterior
+      </button>
+      <span class="delivery-photos-pagination-info">
+        Página {{ currentPage }} de {{ lastPage }} ({{ totalPhotos }} fotos)
+      </span>
+      <button mat-button (click)="nextPage()" [disabled]="currentPage >= lastPage">
+        Siguiente <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

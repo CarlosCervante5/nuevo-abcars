@@ -129,7 +129,7 @@ html {
 
 /* Sistema de colores homogéneo */
 .bg-primary {
-  background-color: rgb(234 179 8); /* yellow-600 */
+  background-color: #ffc63a;
 }
 
 .bg-secondary {
@@ -141,7 +141,7 @@ html {
 }
 
 .text-primary {
-  color: rgb(234 179 8); /* yellow-600 */
+  color: #ffc63a;
 }
 
 .text-secondary {
@@ -198,7 +198,7 @@ html {
   font-weight: 700 !important;
   line-height: 1.2 !important;
   letter-spacing: -0.02em !important;
-  color: #facc15 !important; /* yellow-400 */
+  color: #ffc63a !important;
 }
 
 /* Responsive - tablet */
@@ -257,4 +257,22 @@ html {
 .section-title.\!text-white,
 .section-title-large.\!text-white {
   color: #ffffff !important;
+}
+
+/* Carrusel de entregas */
+.delivery-carousel {
+  padding-bottom: 2.5rem;
+}
+
+.delivery-carousel::part(button-prev),
+.delivery-carousel::part(button-next) {
+  color: #ffc63a;
+}
+
+.delivery-carousel::part(pagination) {
+  --swiper-pagination-color: #ffc63a;
+}
+
+.delivery-slide {
+  height: auto;
 }

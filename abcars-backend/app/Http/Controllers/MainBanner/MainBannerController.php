@@ -68,14 +68,12 @@ class MainBannerController extends Controller
     public function search(SearchMainBannerRequest $request)
     {
         try {
-            
             $data = $request->validated();
-
-            
             $main_image = MarketingCampaign::where('name', $data['name'])->first();
 
-            return ApiResponseHelper::apiSuccess(200, 'Imagen del banner principal obtenida exitosamente', ['image_path' => $main_image->image_path]);
+            $imagePath = $main_image?->image_path ?? null;
 
+            return ApiResponseHelper::apiSuccess(200, 'Imagen del banner principal obtenida exitosamente', ['image_path' => $imagePath]);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener la imagen del banner principal', $e->getMessage(), 500, 'GET_MAIN_BANNER_ERROR');
         }

@@ -83,6 +83,13 @@ export class DashboardAdminComponent {
         permalink: '/admin/administrator/analytics',
         description: 'Visitas, formularios enviados, valuaciones y citas del sitio.',
         iconColor: 'green'
+      },
+      {
+        title: 'Fotos de entregas',
+        icon: 'fi fi-rr-gift',
+        permalink: '/admin/gestor/delivery-photos',
+        description: 'Carrusel de fotos de entregas de vehículos en el home.',
+        iconColor: 'amber'
       }
     ]
   }

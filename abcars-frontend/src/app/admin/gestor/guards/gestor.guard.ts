@@ -15,10 +15,10 @@ export class GestorGuard  {
   ) { }
 
   canActivate(): Observable<boolean> | boolean {
-    return validateRoleGuard('gestor', this._accountService, this._router);
+    return validateRoleGuard(['gestor', 'administrator', 'super_admin'], this._accountService, this._router);
   }
 
   canLoad(): Observable<boolean> | boolean {
-    return validateRoleGuard('gestor', this._accountService, this._router);
+    return validateRoleGuard(['gestor', 'administrator', 'super_admin'], this._accountService, this._router);
   }
 }

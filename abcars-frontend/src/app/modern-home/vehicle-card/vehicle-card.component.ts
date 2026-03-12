@@ -26,7 +26,7 @@ import { Vehicle } from '../../interfaces/vehicle.interface';
         </div>
         <!-- Etiqueta PREMIUM -->
         <div class="absolute top-3 right-3" *ngIf="vehicle.status === 'premium'">
-          <span class="px-2 py-1 bg-yellow-500 text-black text-xs font-bold rounded">
+          <span class="px-2 py-1 bg-primary-500 text-black text-xs font-bold rounded">
             PREMIUM
           </span>
         </div>
@@ -60,7 +60,7 @@ import { Vehicle } from '../../interfaces/vehicle.interface';
         <div class="mb-4 pt-3 border-t border-gray-100 flex-shrink-0">
           <div class="flex justify-between items-center mb-2">
             <span class="text-sm text-gray-500">Precio contado</span>
-            <span class="text-base font-bold text-yellow-600">MXN {{ getContadoPrice() | number }}</span>
+            <span class="text-base font-bold text-primary-500">MXN {{ getContadoPrice() | number }}</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-500">Pago mensual</span>

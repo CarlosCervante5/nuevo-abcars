@@ -6,19 +6,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Paleta principal ABCars modernizada
+        // Paleta principal ABCars - #ffc63a
         primary: {
-          50: '#fff9e5',
+          50: '#fffae5',
           100: '#fff4cc',
           200: '#ffe899',
           300: '#ffdc66',
-          400: '#ffcf3a',
-          500: '#e9b123',
-          600: '#d1a01f',
-          700: '#b4891a',
-          800: '#926f15',
-          900: '#785b12',
-          950: '#453208',
+          400: '#ffd04d',
+          500: '#ffc63a',
+          600: '#e6b233',
+          700: '#cca02d',
+          800: '#997726',
+          900: '#664d1a',
+          950: '#33260d',
         },
         secondary: {
           50: '#f8fafc',
@@ -127,7 +127,7 @@ module.exports = {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
         'gradient-modern': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'gradient-abcars': 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+        'gradient-abcars': 'linear-gradient(135deg, #ffc63a 0%, #e6b233 100%)',
         'gradient-hero': 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
         'dots-pattern': "radial-gradient(circle at 25px 25px, rgba(255,255,255,.2) 2px, transparent 0)",
       },
@@ -142,7 +142,7 @@ module.exports = {
         'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
         'modern': '0 8px 30px rgba(0, 0, 0, 0.12)',
         'glow': '0 0 20px rgba(59, 130, 246, 0.15)',
-        'glow-yellow': '0 0 20px rgba(245, 158, 11, 0.15)',
+        'glow-yellow': '0 0 20px rgba(255, 198, 58, 0.15)',
       }
     },
   },

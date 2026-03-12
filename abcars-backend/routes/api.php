@@ -11,6 +11,7 @@ use App\Http\Controllers\Quizzes\QuizController;
 use App\Http\Controllers\Events\EventController;
 use App\Http\Controllers\Promotions\PromotionController;
 use App\Http\Controllers\Leads\LeadController;
+use App\Http\Controllers\DeliveryPhotos\DeliveryPhotoController;
 use App\Http\Controllers\MainBanner\MainBannerController;
 use App\Http\Controllers\Multimedia\MultimediaController;
 use App\Http\Controllers\Repairs\RepairController;
@@ -567,6 +568,15 @@ Route::prefix('banner')->middleware('bandwidth_usage')->group(function () {
 
 // Fin Main Banner
 
+// Segmento Fotos de Entregas (carrusel home)
+Route::prefix('delivery-photos')->middleware('bandwidth_usage')->group(function () {
+    Route::get('/', [DeliveryPhotoController::class, 'index']);
+    Route::middleware(['auth:sanctum', 'role:administrator|gestor|super_admin'])->group(function () {
+        Route::post('/', [DeliveryPhotoController::class, 'store']);
+        Route::delete('/{uuid}', [DeliveryPhotoController::class, 'destroy']);
+    });
+});
+// Fin Fotos de Entregas
 
 // Segmento Strega
 

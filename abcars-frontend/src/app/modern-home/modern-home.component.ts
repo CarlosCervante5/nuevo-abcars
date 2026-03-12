@@ -1,14 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { trigger, state, style, animate, transition } from '@angular/animations';
+import { register } from 'swiper/element/bundle';
+
+register();
 import { VehicleCardComponent } from './vehicle-card/vehicle-card.component';
 import { HomeNavComponent } from '../shared/components/home-nav/home-nav.component';
 import { ModernFooterComponent } from '../shared/components/modern-footer/modern-footer.component';
 import { VehicleService } from '../shared/services/vehicle.service';
 import { CampaingService } from '../shared/services/campaing.service';
 import { CompraTuAutoService } from '@services/compra-tu-auto.service';
+import { DeliveryPhotosService, DeliveryPhoto } from '@services/delivery-photos.service';
 import { Vehicle as ApiVehicle } from '../shared/interfaces/vehicle_data.interface';
 
 interface Vehicle {
@@ -46,6 +50,7 @@ interface QuickFilter {
   imports: [CommonModule, FormsModule, RouterModule, VehicleCardComponent, HomeNavComponent, ModernFooterComponent],
   templateUrl: './modern-home.component.html',
   styleUrls: ['./modern-home.component.css'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   animations: [
     trigger('fadeInOut', [
       transition(':enter', [
@@ -126,20 +131,76 @@ export class ModernHomeComponent implements OnInit {
     }
   ];
 
+  deliveryPhotos: DeliveryPhoto[] = [];
+  deliveryPhotosLoading = false;
+  deliveryCarouselSlidesPerView = 4;
+  deliveryPhotosCurrentPage = 1;
+  deliveryPhotosLastPage = 1;
+  deliveryPhotosTotal = 0;
+  readonly deliveryPhotosPerPage = 10;
+
   constructor(
     private router: Router,
     private vehicleService: VehicleService,
     private campaingService: CampaingService,
-    private compraTuAutoService: CompraTuAutoService
+    private compraTuAutoService: CompraTuAutoService,
+    private deliveryPhotosService: DeliveryPhotosService
   ) {}
 
   ngOnInit() {
+    this.updateDeliveryCarouselSlides();
     // Cargar banner principal del Hero
     this.loadMainBanner();
     // Cargar promociones primero, los vehículos se cargarán cuando las promociones estén listas
     this.loadActivePromotions();
     // Cargar marcas del inventario completo
     this.loadBrandsFromInventory();
+    // Cargar fotos de entregas para el carrusel
+    this.loadDeliveryPhotos();
+  }
+
+  @HostListener('window:resize')
+  updateDeliveryCarouselSlides() {
+    const w = window.innerWidth;
+    if (w < 640) {
+      this.deliveryCarouselSlidesPerView = 1;
+    } else if (w < 1024) {
+      this.deliveryCarouselSlidesPerView = 2;
+    } else {
+      this.deliveryCarouselSlidesPerView = 4;
+    }
+  }
+
+  loadDeliveryPhotos(page = 1) {
+    this.deliveryPhotosLoading = true;
+    this.deliveryPhotosService.list(page, this.deliveryPhotosPerPage).subscribe({
+      next: (resp) => {
+        const d = resp?.data;
+        if (d && Array.isArray(d.data)) {
+          this.deliveryPhotos = d.data;
+          this.deliveryPhotosCurrentPage = d.current_page ?? 1;
+          this.deliveryPhotosLastPage = d.last_page ?? 1;
+          this.deliveryPhotosTotal = d.total ?? 0;
+        }
+        this.deliveryPhotosLoading = false;
+      },
+      error: () => {
+        this.deliveryPhotos = [];
+        this.deliveryPhotosLoading = false;
+      }
+    });
+  }
+
+  deliveryPhotosPrevPage() {
+    if (this.deliveryPhotosCurrentPage > 1) {
+      this.loadDeliveryPhotos(this.deliveryPhotosCurrentPage - 1);
+    }
+  }
+
+  deliveryPhotosNextPage() {
+    if (this.deliveryPhotosCurrentPage < this.deliveryPhotosLastPage) {
+      this.loadDeliveryPhotos(this.deliveryPhotosCurrentPage + 1);
+    }
   }
 
   loadMainBanner() {

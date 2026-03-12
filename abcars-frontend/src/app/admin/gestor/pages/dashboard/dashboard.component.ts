@@ -26,6 +26,11 @@ export class DashboardComponent {
         icon: 'fi fi-rr-car',
         permalink: '/admin/gestor/promotions'
       },
+      {
+        title: 'Fotos de entregas',
+        icon: 'fi fi-rr-gift',
+        permalink: '/admin/gestor/delivery-photos'
+      },
       // {
       //   title: 'Eventos',
       //   icon: 'fi fi-rr-id-badge',
