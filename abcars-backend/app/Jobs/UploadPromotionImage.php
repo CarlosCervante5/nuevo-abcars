@@ -66,6 +66,12 @@ class UploadPromotionImage implements ShouldQueue
 
             $name = time() . '_' . $this->sort_id;
 
+            // En algunos entornos (como Railway) ciertas librerías intentan leer /app/.env directamente.
+            // Aseguramos que el archivo exista (vacío) para evitar errores de file_get_contents(/app/.env).
+            if (!file_exists('/app/.env')) {
+                @touch('/app/.env');
+            }
+
             $cloudinary_file = $cloudinary->uploadApi()->upload(storage_path('app/' . $this->path), [
                 'public_id' => $name,
                 'folder' => $this->base_folder . '/' . $campaign->uuid,
