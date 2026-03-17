@@ -79,7 +79,8 @@ class PromotionController extends Controller
 
 
                 // Enviar cada lote a una cola de trabajo para procesamiento en segundo plano
-                UploadPromotionImage::dispatch($path, $name, $campaign_uuid, ($sort_id + $index), $image->getClientOriginalName(), $spec_sheet);
+                // UploadPromotionImage::dispatch($path, $name, $campaign_uuid, ($sort_id + $index), $image->getClientOriginalName(), $spec_sheet);
+                UploadPromotionImage::dispatchSync($path, $name, $campaign_uuid, ($sort_id + $index), $image->getClientOriginalName(), $spec_sheet);
             }
 
             if (!empty($invalidImages)) {
