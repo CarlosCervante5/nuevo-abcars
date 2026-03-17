@@ -62,15 +62,12 @@ class UploadPromotionImage implements ShouldQueue
                 'campaign_uuid' => $campaign->uuid,
                 'path' => $this->path,
                 'sort_id' => $this->sort_id,
+                'cwd' => getcwd(),
+                'app_env_file_exists' => file_exists('/app/.env'),
+                'local_env_file_exists' => file_exists(base_path('.env')),
             ]);
 
             $name = time() . '_' . $this->sort_id;
-
-            // En algunos entornos (como Railway) ciertas librerías intentan leer /app/.env directamente.
-            // Aseguramos que el archivo exista (vacío) para evitar errores de file_get_contents(/app/.env).
-            if (!file_exists('/app/.env')) {
-                @touch('/app/.env');
-            }
 
             $cloudinary_file = $cloudinary->uploadApi()->upload(storage_path('app/' . $this->path), [
                 'public_id' => $name,
@@ -101,7 +98,14 @@ class UploadPromotionImage implements ShouldQueue
 
             ApiResponseHelper::imageSuccess(200, 'Imagen subida correctamente al servicio externo', ['url' => $cloudinary_url]);
         } catch (Exception $e) {
-            Log::error('Error uploading promotion image:', ['exception' => $e->getMessage()]);
+            Log::error('Error uploading promotion image:', [
+                'exception' => $e->getMessage(),
+                'exception_class' => get_class($e),
+                'stack' => $e->getTraceAsString(),
+                'cwd' => getcwd(),
+                'app_env_file_exists' => file_exists('/app/.env'),
+                'local_env_file_exists' => file_exists(base_path('.env')),
+            ]);
             ApiResponseHelper::imageError(
                 'Error en el job para subir la imagen de promoción (campaña: ' . $this->campaign_uuid . ')',
                 $e->getMessage(),
