@@ -79,7 +79,7 @@ class PromotionController extends Controller
 
 
                 // Enviar cada lote a una cola de trabajo para procesamiento en segundo plano
-                UploadPromotionImage::dispatchSync($path, $name, $campaign_uuid, ($sort_id + $index), $image->getClientOriginalName(), $spec_sheet);
+                UploadPromotionImage::dispatch($path, $name, $campaign_uuid, ($sort_id + $index), $image->getClientOriginalName(), $spec_sheet);
             }
 
             if (!empty($invalidImages)) {
@@ -91,17 +91,7 @@ class PromotionController extends Controller
 
 
         } catch (\Exception $e) {
-            // Debug temporal: devolver detalle del error real para identificar por qué no sube a Cloudinary.
-            // Se puede revertir luego a ApiResponseHelper::apiError cuando el flujo quede estable.
-            return response()->json([
-                'status' => 500,
-                'message' => 'Hubo un problema con su solicitud: Error al subir las promociones',
-                'error' => [
-                    'exception_class' => get_class($e),
-                    'message' => $e->getMessage(),
-                    'code' => $e->getCode(),
-                ]
-            ], 500);
+            return ApiResponseHelper::apiError('Error al subir las promociones', $e->getMessage(), 500, 'GET_PROMOTION_UPLOAD_ERROR');
         }
     }
 
