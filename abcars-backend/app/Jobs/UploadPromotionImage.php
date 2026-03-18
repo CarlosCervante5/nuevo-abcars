@@ -60,7 +60,16 @@ class UploadPromotionImage implements ShouldQueue
 
             $name = time() . '_' . $this->sort_id;
 
-            $cloudinary_file = $cloudinary->uploadApi()->upload(storage_path('app/' . $this->path), [
+            $localPath = storage_path('app/' . $this->path);
+            Log::info('Promotion image upload starting', [
+                'campaign_uuid' => $campaign->uuid,
+                'local_path' => $localPath,
+                'exists' => file_exists($localPath),
+                'size' => file_exists($localPath) ? filesize($localPath) : null,
+                'base_folder' => $this->base_folder,
+            ]);
+
+            $cloudinary_file = $cloudinary->uploadApi()->upload($localPath, [
                 'public_id' => $name,
                 'folder' => $this->base_folder . '/' . $campaign->uuid,
                 'transformation' => [
@@ -70,6 +79,11 @@ class UploadPromotionImage implements ShouldQueue
             ]);
 
             $cloudinary_url = $cloudinary_file['secure_url'];
+            Log::info('Promotion image uploaded to Cloudinary (raw)', [
+                'secure_url' => $cloudinary_file['secure_url'] ?? null,
+                'public_id' => $cloudinary_file['public_id'] ?? null,
+                'folder' => $this->base_folder . '/' . $campaign->uuid,
+            ]);
 
             $promotion = MarketingPromotion::create([
                 'sort_id' => $this->sort_id,
@@ -89,7 +103,10 @@ class UploadPromotionImage implements ShouldQueue
 
             ApiResponseHelper::imageSuccess(200, 'Imagen subida correctamente al servicio externo', ['url' => $cloudinary_url]);
         } catch (Exception $e) {
-            Log::error('Error uploading promotion image:', ['exception' => $e->getMessage()]);
+            Log::error('Error uploading promotion image:', [
+                'exception' => $e->getMessage(),
+                'exception_class' => get_class($e),
+            ]);
             ApiResponseHelper::imageError(
                 'Error en el job para subir la imagen de promoción (campaña: ' . $this->campaign_uuid . ')',
                 $e->getMessage(),
