@@ -91,7 +91,17 @@ class PromotionController extends Controller
 
 
         } catch (\Exception $e) {
-            return ApiResponseHelper::apiError('Error al subir las promociones', $e->getMessage(), 500, 'GET_PROMOTION_UPLOAD_ERROR');
+            // Debug temporal: devolver detalle del error real para identificar por qué no sube a Cloudinary.
+            // Se puede revertir luego a ApiResponseHelper::apiError cuando el flujo quede estable.
+            return response()->json([
+                'status' => 500,
+                'message' => 'Hubo un problema con su solicitud: Error al subir las promociones',
+                'error' => [
+                    'exception_class' => get_class($e),
+                    'message' => $e->getMessage(),
+                    'code' => $e->getCode(),
+                ]
+            ], 500);
         }
     }
 
