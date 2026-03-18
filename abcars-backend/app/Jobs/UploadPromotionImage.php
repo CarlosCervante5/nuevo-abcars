@@ -61,7 +61,7 @@ class UploadPromotionImage implements ShouldQueue
             $name = time() . '_' . $this->sort_id;
 
             $localPath = storage_path('app/' . $this->path);
-            Log::info('Promotion image upload starting', [
+            Log::error('Promotion image upload starting', [
                 'campaign_uuid' => $campaign->uuid,
                 'local_path' => $localPath,
                 'exists' => file_exists($localPath),
@@ -79,7 +79,7 @@ class UploadPromotionImage implements ShouldQueue
             ]);
 
             $cloudinary_url = $cloudinary_file['secure_url'];
-            Log::info('Promotion image uploaded to Cloudinary (raw)', [
+            Log::error('Promotion image uploaded to Cloudinary (raw)', [
                 'secure_url' => $cloudinary_file['secure_url'] ?? null,
                 'public_id' => $cloudinary_file['public_id'] ?? null,
                 'folder' => $this->base_folder . '/' . $campaign->uuid,
