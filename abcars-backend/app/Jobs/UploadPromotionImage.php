@@ -61,13 +61,9 @@ class UploadPromotionImage implements ShouldQueue
             $name = time() . '_' . $this->sort_id;
 
             $localPath = storage_path('app/' . $this->path);
-            Log::channel('stderr')->error('Promotion image upload starting', [
-                'campaign_uuid' => $campaign->uuid,
-                'local_path' => $localPath,
-                'exists' => file_exists($localPath),
-                'size' => file_exists($localPath) ? filesize($localPath) : null,
-                'base_folder' => $this->base_folder,
-            ]);
+            if (!file_exists($localPath)) {
+                throw new Exception('Local promotion image file not found: ' . $localPath);
+            }
 
             $cloudinary_file = $cloudinary->uploadApi()->upload($localPath, [
                 'public_id' => $name,
@@ -79,11 +75,6 @@ class UploadPromotionImage implements ShouldQueue
             ]);
 
             $cloudinary_url = $cloudinary_file['secure_url'];
-            Log::channel('stderr')->error('Promotion image uploaded to Cloudinary (raw)', [
-                'secure_url' => $cloudinary_file['secure_url'] ?? null,
-                'public_id' => $cloudinary_file['public_id'] ?? null,
-                'folder' => $this->base_folder . '/' . $campaign->uuid,
-            ]);
 
             $promotion = MarketingPromotion::create([
                 'sort_id' => $this->sort_id,
@@ -103,13 +94,10 @@ class UploadPromotionImage implements ShouldQueue
 
             ApiResponseHelper::imageSuccess(200, 'Imagen subida correctamente al servicio externo', ['url' => $cloudinary_url]);
         } catch (Exception $e) {
-            Log::channel('stderr')->error('Error uploading promotion image:', [
+            Log::error('Error uploading promotion image:', [
                 'exception' => $e->getMessage(),
                 'exception_class' => get_class($e),
             ]);
-
-            // Importante: no silencie errores. Si falla el upload, el controlador debe recibirlo
-            // (especialmente en Railway cuando usamos dispatchSync para diagnosticar).
             throw $e;
         }
     }
