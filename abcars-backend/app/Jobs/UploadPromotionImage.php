@@ -107,12 +107,10 @@ class UploadPromotionImage implements ShouldQueue
                 'exception' => $e->getMessage(),
                 'exception_class' => get_class($e),
             ]);
-            ApiResponseHelper::imageError(
-                'Error en el job para subir la imagen de promoción (campaña: ' . $this->campaign_uuid . ')',
-                $e->getMessage(),
-                500,
-                'UPLOAD_IMAGE_ERROR'
-            );
+
+            // Importante: no silencie errores. Si falla el upload, el controlador debe recibirlo
+            // (especialmente en Railway cuando usamos dispatchSync para diagnosticar).
+            throw $e;
         }
     }
 
