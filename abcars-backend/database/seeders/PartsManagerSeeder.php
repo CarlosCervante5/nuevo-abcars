@@ -19,14 +19,14 @@ class PartsManagerSeeder extends Seeder
 
         $role = Role::findByName('spare_parts');
 
-        // Create demo users
-        $user = User::factory()->create([
-            'nickname' => 'spare_parts',
-            'email' => 'spare_parts@abcars.mx',
-            'password' => 'SpareParts%2024%%'
-        ]);
-        
-        $user->assignRole($role);
-        
+        $user = User::firstOrCreate(
+            ['email' => 'spare_parts@abcars.mx'],
+            ['nickname' => 'spare_parts', 'password' => 'SpareParts%2024%%']
+        );
+        if ($user->wasRecentlyCreated) {
+            $user->assignRole($role);
+        } elseif (! $user->hasRole('spare_parts')) {
+            $user->assignRole($role);
+        }
     }
 }
