@@ -71,8 +71,8 @@ export class ChecklistComponent implements OnInit {
     public btn_follow:boolean = false;
     public btn_save:boolean = true;
 
-    // References Overview para el encabezado
-    public itemOverview: Overview;
+    // References Overview para el encabezado (asignado en constructor)
+    public itemOverview!: Overview;
 
     constructor(
         private _formBuilder: UntypedFormBuilder,

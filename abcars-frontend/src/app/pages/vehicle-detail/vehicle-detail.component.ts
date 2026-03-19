@@ -2497,15 +2497,30 @@ export class VehicleDetailComponent implements OnInit {
       return [12, 24, 36, 48, 60];
     }
 
-    if (year === 2016) {
+    // if (year === 2016) {
+    //   return [12];
+    // } else if (year === 2017) {
+    //   return [12, 24];
+    // } else if (year === 2018) {
+    //   return [12, 24, 36];
+    // } else if (year === 2019) {
+    //   return [12, 24, 36, 48];
+    // } else if (year >= 2020 && year <= 2026) {
+    //   return [12, 24, 36, 48, 60];
+    // } else {
+      // Para años fuera del rango, devolver términos por defecto
+    //   return [12, 24, 36, 48, 60];
+    // }
+    
+    if (year === 2017) {
       return [12];
-    } else if (year === 2017) {
-      return [12, 24];
     } else if (year === 2018) {
-      return [12, 24, 36];
+      return [12, 24];
     } else if (year === 2019) {
+      return [12, 24, 36];
+    } else if (year === 2020) {
       return [12, 24, 36, 48];
-    } else if (year >= 2020 && year <= 2026) {
+    } else if (year >= 2021 && year <= 2027) {
       return [12, 24, 36, 48, 60];
     } else {
       // Para años fuera del rango, devolver términos por defecto
@@ -2623,7 +2638,16 @@ export class VehicleDetailComponent implements OnInit {
     const downPaymentPercentage = this.calculatorData.downPaymentPercentage;
 
     // Años 2020-2026
-    if (year >= 2020 && year <= 2026) {
+    // if (year >= 2020 && year <= 2026) {
+    //   if (downPaymentPercentage > 30) {
+    //     return 15.99;
+    //   } else {
+    //     return 16.99;
+    //   }
+    // }
+    
+    // Años 2021-2027
+    if (year >= 2021 && year <= 2027) {
       if (downPaymentPercentage > 30) {
         return 15.99;
       } else {
@@ -2632,7 +2656,16 @@ export class VehicleDetailComponent implements OnInit {
     }
     
     // Años 2016-2019
-    if (year >= 2016 && year <= 2019) {
+    // if (year >= 2016 && year <= 2019) {
+    //   if (downPaymentPercentage > 30) {
+    //     return 16.99;
+    //   } else {
+    //     return 17.99;
+    //   }
+    // }
+    
+    // Años 2017-2020
+    if (year >= 2017 && year <= 2020) {
       if (downPaymentPercentage > 30) {
         return 16.99;
       } else {
