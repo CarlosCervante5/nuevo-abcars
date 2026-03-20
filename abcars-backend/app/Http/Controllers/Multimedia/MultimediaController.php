@@ -74,7 +74,7 @@ class MultimediaController extends Controller
             
                 $path = $file->store($mimeType === 'image/' ? 'temp_images' : 'temp_videos');
             
-                UploadEventMultimedia::dispatch($path, $event_uuid, ($sort_id + $index), $file->getClientOriginalName(), $mimeType);
+                UploadEventMultimedia::dispatchSync($path, $event_uuid, ($sort_id + $index), $file->getClientOriginalName(), $mimeType);
             
             }
 

@@ -102,6 +102,7 @@ class UploadRewardPointImage  implements ShouldQueue
             ApiResponseHelper::imageError('Error en el job para subir la imagen para uuid: '.$this->reward_point->uuid, $e->getMessage(), 500, 'UPLOAD_IMAGE_ERROR');
 
             ApiResponseHelper::imageError('Imagen guardada localmente para reward point uuid: '.$this->reward_point->uuid, 'Guardada en: ' . $this->path, 500, 'SAVE_LOCAL_IMAGE_ERROR');
+            throw $e;
         }
     }
 

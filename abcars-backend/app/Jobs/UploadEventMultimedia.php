@@ -129,6 +129,7 @@ class UploadEventMultimedia implements ShouldQueue
             // Manejo de excepciones
             Log::error('Error uploading image:', ['exception' => $e->getMessage()]);
             ApiResponseHelper::imageError('Error en el job para subir el multimedia para id: ' . $this->event_uuid, $e->getMessage(), 500, 'UPLOAD_MULTIMEDIA_ERROR');
+            throw $e;
         }
     }
 

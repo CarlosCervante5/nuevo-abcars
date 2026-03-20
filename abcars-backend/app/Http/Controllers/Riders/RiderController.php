@@ -546,7 +546,7 @@ class RiderController extends Controller
 
                 $path = $initial_image->store('temp_images');
 
-                UploadRewardPointImage::dispatch($path, 'kilometraje_inicial', $reward_point, $initial_image->getClientOriginalName());
+                UploadRewardPointImage::dispatchSync($path, 'kilometraje_inicial', $reward_point, $initial_image->getClientOriginalName());
             }
 
             if( isset($data['final_image']) ){
@@ -555,7 +555,7 @@ class RiderController extends Controller
 
                 $path = $final_image->store('temp_images');
 
-                UploadRewardPointImage::dispatch($path, 'kilometraje_final', $reward_point, $final_image->getClientOriginalName());
+                UploadRewardPointImage::dispatchSync($path, 'kilometraje_final', $reward_point, $final_image->getClientOriginalName());
             }
                     
             // Retornar respuesta exitosa

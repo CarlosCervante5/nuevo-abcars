@@ -103,6 +103,7 @@ class UploadValuationImage implements ShouldQueue
                 500,
                 'UPLOAD_IMAGE_ERROR'
             );
+            throw $e;
         }
     }
 

@@ -272,7 +272,7 @@ class BlogController extends Controller
                 $image = $request->file('content_multimedia_1');
                 $path = $image->store('temp_images');
 
-                UploadPostContentImage::dispatch($path, $content, $image->getClientOriginalName(), 'content_multimedia_1');
+                UploadPostContentImage::dispatchSync($path, $content, $image->getClientOriginalName(), 'content_multimedia_1');
 
             }
 
@@ -281,7 +281,7 @@ class BlogController extends Controller
                 $image = $request->file('content_multimedia_2');
                 $path = $image->store('temp_images');
 
-                UploadPostContentImage::dispatch($path, $content, $image->getClientOriginalName(), 'content_multimedia_2');
+                UploadPostContentImage::dispatchSync($path, $content, $image->getClientOriginalName(), 'content_multimedia_2');
 
             }
 

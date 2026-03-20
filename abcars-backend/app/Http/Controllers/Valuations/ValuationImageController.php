@@ -65,7 +65,7 @@ class ValuationImageController extends Controller
                 $path = $image->store('temp_images');
 
                 // Enviar cada lote a una cola de trabajo para procesamiento en segundo plano
-                UploadValuationImage::dispatch($path, $valuation->uuid, $valuation->id, ($sort_id + $index), $image->getClientOriginalName(), $name, $group_name);
+                UploadValuationImage::dispatchSync($path, $valuation->uuid, $valuation->id, ($sort_id + $index), $image->getClientOriginalName(), $name, $group_name);
             }
 
             if (!empty($invalidImages)) {
