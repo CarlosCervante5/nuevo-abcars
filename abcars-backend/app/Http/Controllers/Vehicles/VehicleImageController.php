@@ -65,8 +65,8 @@ class VehicleImageController extends Controller
                 // Determinar si es la última imagen
                 $is_last = $index === count($images) - 1;
 
-                // Enviar cada lote a una cola de trabajo para procesamiento en segundo plano
-                UploadVehicleImage::dispatch($path, $vehicle->uuid, $vehicle->id, ($sort_id + $index), $image->getClientOriginalName(), $is_last);
+                // Ejecutar en el mismo proceso para asegurar acceso al archivo temporal en Railway
+                UploadVehicleImage::dispatchSync($path, $vehicle->uuid, $vehicle->id, ($sort_id + $index), $image->getClientOriginalName(), $is_last);
             }
 
             if (!empty($invalidImages)) {
