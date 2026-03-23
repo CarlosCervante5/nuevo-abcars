@@ -6,6 +6,7 @@ use App\Mail\ValuationNotification;
 use App\Models\Customer;
 use App\Models\CustomerAppointment;
 use App\Models\CustomerVehicle;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class AppointmentService
@@ -50,7 +51,29 @@ class AppointmentService
                 $a = CustomerAppointment::find($appointmentId);
 
                 if ($c && $v && $a) {
-                    Mail::to($to)->send(new ValuationNotification($c, $v, $a));
+                    try {
+                        Mail::to($to)->send(new ValuationNotification($c, $v, $a));
+                        Log::info('Valuation notification sent', [
+                            'to' => $to,
+                            'appointment_id' => $appointmentId,
+                            'dealership_name' => $a->dealership_name,
+                        ]);
+                    } catch (\Throwable $e) {
+                        Log::error('Valuation notification failed', [
+                            'to' => $to,
+                            'appointment_id' => $appointmentId,
+                            'dealership_name' => $a->dealership_name,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                } else {
+                    Log::warning('Valuation notification skipped: missing entities', [
+                        'to' => $to,
+                        'customer_found' => (bool) $c,
+                        'vehicle_found' => (bool) $v,
+                        'appointment_found' => (bool) $a,
+                        'appointment_id' => $appointmentId,
+                    ]);
                 }
             })->afterResponse();
         } elseif ($data['dealership_name'] === 'vecsa hidalgo' && $hidalgoMail !== '') {
@@ -65,7 +88,29 @@ class AppointmentService
                 $a = CustomerAppointment::find($appointmentId);
 
                 if ($c && $v && $a) {
-                    Mail::to($to)->send(new ValuationNotification($c, $v, $a));
+                    try {
+                        Mail::to($to)->send(new ValuationNotification($c, $v, $a));
+                        Log::info('Valuation notification sent', [
+                            'to' => $to,
+                            'appointment_id' => $appointmentId,
+                            'dealership_name' => $a->dealership_name,
+                        ]);
+                    } catch (\Throwable $e) {
+                        Log::error('Valuation notification failed', [
+                            'to' => $to,
+                            'appointment_id' => $appointmentId,
+                            'dealership_name' => $a->dealership_name,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                } else {
+                    Log::warning('Valuation notification skipped: missing entities', [
+                        'to' => $to,
+                        'customer_found' => (bool) $c,
+                        'vehicle_found' => (bool) $v,
+                        'appointment_found' => (bool) $a,
+                        'appointment_id' => $appointmentId,
+                    ]);
                 }
             })->afterResponse();
         }

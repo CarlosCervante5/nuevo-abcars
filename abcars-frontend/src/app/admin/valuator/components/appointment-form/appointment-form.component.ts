@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { FormControl, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { MatAutocompleteSelectedEvent, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { RegisterResponse } from '@interfaces/auth.interface';
 import { Brand, BrandsResponse, Model, ModelsResponse } from '@interfaces/vehicle_data.interface';
@@ -18,6 +18,7 @@ import {reload} from '../../../../shared/helpers/session.helper';
     standalone: false
 })
 export class AppointmentFormComponent implements OnInit {
+    @ViewChild('brandAutocompleteTrigger') brandAutocompleteTrigger?: MatAutocompleteTrigger;
 
     // References form
     public form!: UntypedFormGroup;
@@ -27,11 +28,8 @@ export class AppointmentFormComponent implements OnInit {
     public maxDate: Date = new Date(new Date().setDate( new Date().getDate() + 365));
     public spinner: boolean = false;
 
-    brandControl = new FormControl();
     public brands: Brand[] = [];
     filteredBrands: Observable<Brand[]> = of([]);
-
-    modelControl = new FormControl();
     public models: Model[] = [];
     filteredModels: Observable<Model[]> = of([]);
 
@@ -135,13 +133,13 @@ export class AppointmentFormComponent implements OnInit {
     }
 
     private filters(): void {
-        this.filteredBrands = this.brandControl.valueChanges.pipe(
+        this.filteredBrands = this.form.get('brand_name')!.valueChanges.pipe(
             startWith(''),
-            map(value => this._filter(value, this.brands))
+            map(value => this._filter((value ?? '').toString(), this.brands))
         );
-        this.filteredModels = this.modelControl.valueChanges.pipe(
+        this.filteredModels = this.form.get('model_name')!.valueChanges.pipe(
             startWith(''),
-            map(value => this._filter(value, this.models))
+            map(value => this._filter((value ?? '').toString(), this.models))
         );
     }
 
@@ -152,8 +150,8 @@ export class AppointmentFormComponent implements OnInit {
 
     public onBrandSelected(event: MatAutocompleteSelectedEvent): void {
         const selectedBrand = event.option.value;
-        
-        this.form.patchValue({ brand: selectedBrand });
+
+        this.form.patchValue({ brand_name: selectedBrand, model_name: '' });
         this._vehicleService.getModelsByBrand(selectedBrand)
             .subscribe({
                 next: (modelResponse: ModelsResponse) => {
@@ -166,9 +164,28 @@ export class AppointmentFormComponent implements OnInit {
             });
     }
 
+    public openBrandOptions(): void {
+        setTimeout(() => this.brandAutocompleteTrigger?.openPanel(), 0);
+    }
+
+    public ensureBrandExists(): void {
+        const currentValue = (this.form.get('brand_name')?.value ?? '').toString().trim();
+        if (!currentValue) return;
+
+        const exists = this.brands.some((brand) => brand.name.toLowerCase() === currentValue.toLowerCase());
+        if (exists) return;
+
+        this._vehicleService.createBrand(currentValue).subscribe({
+            next: () => this.getBrands(),
+            error: () => {
+                // Keep UX uninterrupted if automatic creation fails.
+            }
+        });
+    }
+
     public onModelSelected(event: MatAutocompleteSelectedEvent): void {
         const selectedModel = event.option.value;
-        this.form.patchValue({ model: selectedModel});
+        this.form.patchValue({ model_name: selectedModel });
         this.filters();
     }
 
