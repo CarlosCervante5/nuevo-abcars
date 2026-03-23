@@ -35,10 +35,39 @@ class AppointmentService
             'customer_id' => $customer->id
         ]);
 
-        if( $data['dealership_name'] != 'vecsa hidalgo') {
-            Mail::to(env('VALUATION_PUEBLA_MAIL', ''))->send(new ValuationNotification($customer, $customer_vehicle, $customer_appointment));
-        } else {
-            Mail::to(env('VALUATION_HIDALGO_MAIL', ''))->send(new ValuationNotification($customer, $customer_vehicle, $customer_appointment));
+        $pueblaMail = trim((string) env('VALUATION_PUEBLA_MAIL', ''));
+        $hidalgoMail = trim((string) env('VALUATION_HIDALGO_MAIL', ''));
+
+        if ($data['dealership_name'] != 'vecsa hidalgo' && $pueblaMail !== '') {
+            $to = $pueblaMail;
+            $customerId = $customer->id;
+            $vehicleId = $customer_vehicle->id;
+            $appointmentId = $customer_appointment->id;
+
+            dispatch(function () use ($to, $customerId, $vehicleId, $appointmentId) {
+                $c = Customer::find($customerId);
+                $v = CustomerVehicle::find($vehicleId);
+                $a = CustomerAppointment::find($appointmentId);
+
+                if ($c && $v && $a) {
+                    Mail::to($to)->send(new ValuationNotification($c, $v, $a));
+                }
+            })->afterResponse();
+        } elseif ($data['dealership_name'] === 'vecsa hidalgo' && $hidalgoMail !== '') {
+            $to = $hidalgoMail;
+            $customerId = $customer->id;
+            $vehicleId = $customer_vehicle->id;
+            $appointmentId = $customer_appointment->id;
+
+            dispatch(function () use ($to, $customerId, $vehicleId, $appointmentId) {
+                $c = Customer::find($customerId);
+                $v = CustomerVehicle::find($vehicleId);
+                $a = CustomerAppointment::find($appointmentId);
+
+                if ($c && $v && $a) {
+                    Mail::to($to)->send(new ValuationNotification($c, $v, $a));
+                }
+            })->afterResponse();
         }
 
         return $customer_appointment;
