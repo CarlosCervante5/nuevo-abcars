@@ -37,12 +37,6 @@ constructor(
         return this._http.get<BrandsResponse>(`${ this.baseUrl }/api/vehicle_brands`);
     }
 
-    public createBrand(name: string): Observable<any> {
-        const user_token = localStorage.getItem('user_token');
-        const headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
-        return this._http.post(`${ this.baseUrl }/api/vehicle_brands`, { name }, { headers });
-    }
-
     public getModels(brand: string):Observable<ModelsResponse>{
         return this._http.get<ModelsResponse>(`${ this.baseUrl }/api/line_models/by_brand/${brand}`);
     }
