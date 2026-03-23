@@ -13,8 +13,12 @@ class AcquisitionCheckpointsSeeder extends Seeder
      */
     public function run(): void
     {
+        $table = env('DB_TABLE_PREFIX', '') . 'acquisition_checkpoints';
+        if (DB::table($table)->exists()) {
+            return;
+        }
 
-        DB::table(env('DB_TABLE_PREFIX', '') . 'acquisition_checkpoints')->insert([
+        DB::table($table)->insert([
             
             [
                 'uuid' => Uuid::uuid4(),
