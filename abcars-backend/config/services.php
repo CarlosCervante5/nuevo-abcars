@@ -44,4 +44,11 @@ return [
         'hidalgo_mail' => env('VALUATION_HIDALGO_MAIL', ''),
     ],
 
+    /*
+    | Correo de prueba tras deploy (Railway). Solo se usa si RAILWAY_DEPLOY_MAIL_TEST=1.
+    */
+    'deploy_mail_test' => [
+        'to' => env('MAIL_DEPLOY_TEST_TO', ''),
+    ],
+
 ];
