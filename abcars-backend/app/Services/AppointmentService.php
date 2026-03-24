@@ -41,8 +41,8 @@ class AppointmentService
             'customer_id' => $customer->id
         ]);
 
-        $pueblaMail = trim((string) env('VALUATION_PUEBLA_MAIL', ''));
-        $hidalgoMail = trim((string) env('VALUATION_HIDALGO_MAIL', ''));
+        $pueblaMail = trim((string) config('services.valuation.puebla_mail', ''));
+        $hidalgoMail = trim((string) config('services.valuation.hidalgo_mail', ''));
 
         if ($data['dealership_name'] != 'vecsa hidalgo' && $pueblaMail !== '') {
             $to = $pueblaMail;

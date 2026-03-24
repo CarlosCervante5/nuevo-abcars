@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    /*
+    | Destinatarios de notificación de citas de valuación.
+    | Deben leerse vía config(), no env() en servicios: con config:cache env() en runtime devuelve null.
+    */
+    'valuation' => [
+        'puebla_mail' => env('VALUATION_PUEBLA_MAIL', ''),
+        'hidalgo_mail' => env('VALUATION_HIDALGO_MAIL', ''),
+    ],
+
 ];
