@@ -37,3 +37,7 @@ fi
 
 # Create storage link for public files (ignores error if already exists)
 php artisan storage:link 2>/dev/null || true
+
+# Prueba SMTP opcional en deploy (Railway): RAILWAY_DEPLOY_MAIL_TEST=1 + MAIL_DEPLOY_TEST_TO
+chmod +x ./railway/send-deploy-test-mail.sh 2>/dev/null || true
+sh ./railway/send-deploy-test-mail.sh
