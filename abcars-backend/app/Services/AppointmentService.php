@@ -6,6 +6,8 @@ use App\Mail\ValuationNotification;
 use App\Models\Customer;
 use App\Models\CustomerAppointment;
 use App\Models\CustomerVehicle;
+use App\Models\LineModel;
+use App\Models\VehicleBrand;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -19,6 +21,9 @@ class AppointmentService
     public function createAppointment($data)
     {
         $customer = Customer::findByUuid($data['customer_uuid']);
+
+        // Persistir marca/modelo en catálogo para reutilizarlos en el autocomplete.
+        $this->syncVehicleCatalog($data);
 
         $customer_vehicle = CustomerVehicle::firstOrCreate([
             'mileage' => $data['mileage'],
@@ -118,4 +123,48 @@ class AppointmentService
         return $customer_appointment;
     }
 
+    private function syncVehicleCatalog(array $data): void
+    {
+        try {
+            $brandName = trim((string) ($data['brand_name'] ?? ''));
+            $modelName = trim((string) ($data['model_name'] ?? ''));
+
+            if ($brandName === '' || $modelName === '') {
+                return;
+            }
+
+            $brand = VehicleBrand::query()
+                ->whereRaw('LOWER(name) = ?', [mb_strtolower($brandName, 'UTF-8')])
+                ->first();
+
+            if (! $brand) {
+                $brand = VehicleBrand::create([
+                    'name' => $brandName,
+                ]);
+            }
+
+            $model = LineModel::query()
+                ->where('brand_id', $brand->id)
+                ->whereRaw('LOWER(name) = ?', [mb_strtolower($modelName, 'UTF-8')])
+                ->first();
+
+            if (! $model) {
+                $rawYear = (int) ($data['year'] ?? 0);
+                $safeYear = $rawYear > 0 ? $rawYear : (int) date('Y');
+
+                LineModel::create([
+                    'name' => $modelName,
+                    'year' => $safeYear,
+                    'brand_id' => $brand->id,
+                    'line_id' => null,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::error('Vehicle catalog sync failed during appointment creation', [
+                'brand_name' => $data['brand_name'] ?? null,
+                'model_name' => $data['model_name'] ?? null,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
 }
