@@ -6,8 +6,8 @@ Implementar un chatbot público basado en OpenAI para ABCars con backend en Lara
 
 ## Tareas
 
-- [ ] 1. Crear el servicio PublicAssistantToolsService con las 5 herramientas
-  - [ ] 1.1 Crear `app/Services/PublicAssistant/PublicAssistantToolsService.php` con el método `execute()` que despacha a las 5 herramientas y el método `getToolsDefinitions()` que retorna las definiciones OpenAI de las herramientas
+- [x] 1. Crear el servicio PublicAssistantToolsService con las 5 herramientas
+  - [x] 1.1 Crear `app/Services/PublicAssistant/PublicAssistantToolsService.php` con el método `execute()` que despacha a las 5 herramientas y el método `getToolsDefinitions()` que retorna las definiciones OpenAI de las herramientas
     - Implementar `searchPublicVehicles`: filtrar Vehicle con `page_status='active'`, parámetros opcionales (`keyword`, `brand`, `type`, `min_price`, `max_price`), máximo 10 resultados, ordenados por `created_at` desc, solo campos públicos (whitelist del diseño)
     - Implementar `getVehicleDetails`: buscar por UUID, solo `page_status='active'`, incluir imágenes y especificaciones, excluir campos prohibidos (`id`, `vin`, `purchase_date`, `sale_price`, etc.)
     - Implementar `createAppointment`: validar nombre (≥2 chars), teléfono (10 dígitos), email (formato válido), fecha futura, sucursal existente en `dealerships`. Buscar o crear Customer por teléfono/email. Crear CustomerAppointment con `type='visit'`, `status='scheduled'`. Retornar UUID, fecha y sucursal
@@ -56,8 +56,8 @@ Implementar un chatbot público basado en OpenAI para ABCars con backend en Lara
     - Para cualquier cita existente, verificar que la respuesta de `getAppointmentStatus` contenga exactamente: status, fecha programada, nombre de sucursal y tipo
     - **Valida: Requerimiento 6.3**
 
-- [ ] 2. Crear el PublicAssistantController y configurar rutas
-  - [ ] 2.1 Crear `app/Http/Controllers/PublicAssistant/PublicAssistantController.php`
+- [x] 2. Crear el PublicAssistantController y configurar rutas
+  - [x] 2.1 Crear `app/Http/Controllers/PublicAssistant/PublicAssistantController.php`
     - Inyectar `PublicAssistantToolsService` en el constructor
     - Implementar método `query(Request $request)`: validar `message` (required, string, max:500) y `conversation_history` (nullable, array, max:20 elementos con role y content)
     - Verificar que `OPENAI_API_KEY` esté configurada, retornar 503 si no
@@ -67,7 +67,7 @@ Implementar un chatbot público basado en OpenAI para ABCars con backend en Lara
     - Retornar `{response: string, data: array|null}`
     - _Requerimientos: 1.1, 1.3, 1.4, 1.5, 2.2, 2.3, 7.2, 7.3, 7.4, 9.2, 9.5_
 
-  - [ ] 2.2 Registrar la ruta pública en `routes/api.php`
+  - [x] 2.2 Registrar la ruta pública en `routes/api.php`
     - Agregar grupo `public-assistant` con middlewares `bandwidth_usage` y `throttle:20,1` (sin `auth:sanctum`)
     - Registrar `POST /query` apuntando a `PublicAssistantController@query`
     - _Requerimientos: 1.1, 1.2, 9.4_
@@ -88,18 +88,18 @@ Implementar un chatbot público basado en OpenAI para ABCars con backend en Lara
     - Test: `get_appointment_status` con UUID inexistente retorna not found
     - _Requerimientos: 1.1, 1.5, 2.1, 2.4, 5.2, 6.2, 9.1_
 
-- [ ] 3. Checkpoint — Verificar backend
+- [x] 3. Checkpoint — Verificar backend
   - Asegurar que todos los tests pasen, preguntar al usuario si surgen dudas.
 
-- [ ] 4. Crear el servicio PublicAssistantService en el frontend Angular
-  - [ ] 4.1 Crear `src/app/shared/services/public-assistant.service.ts`
+- [x] 4. Crear el servicio PublicAssistantService en el frontend Angular
+  - [x] 4.1 Crear `src/app/shared/services/public-assistant.service.ts`
     - Definir interfaces `ChatMessage` (`role: 'user' | 'assistant'`, `content: string`, `timestamp: Date`) y `AssistantResponse` (`response: string`, `data: any | null`)
     - Implementar método `sendMessage(message: string, conversationHistory: ChatMessage[]): Observable<AssistantResponse>` que haga POST a `/api/public-assistant/query` con timeout de 30 segundos
     - Seguir el patrón de los servicios existentes (ej. `assistant.service.ts`)
     - _Requerimientos: 8.3, 8.5_
 
-- [ ] 5. Crear el ChatWidgetComponent en el frontend Angular
-  - [ ] 5.1 Crear componente `src/app/shared/chat-widget/` (standalone component)
+- [x] 5. Crear el ChatWidgetComponent en el frontend Angular
+  - [x] 5.1 Crear componente `src/app/shared/chat-widget/` (standalone component)
     - Implementar botón flotante en esquina inferior derecha (posición fija) con ícono de chat
     - Implementar panel de conversación expandible con lista de burbujas de mensajes
     - Implementar campo de entrada de texto y botón de envío
@@ -122,13 +122,13 @@ Implementar un chatbot público basado en OpenAI para ABCars con backend en Lara
     - Test: error de red muestra mensaje amigable
     - _Requerimientos: 8.1, 8.2, 8.4, 8.5_
 
-- [ ] 6. Integrar el ChatWidgetComponent en la aplicación
-  - [ ] 6.1 Agregar `<app-chat-widget>` en `app.component.html` para que aparezca en todas las páginas públicas
+- [x] 6. Integrar el ChatWidgetComponent en la aplicación
+  - [x] 6.1 Agregar `<app-chat-widget>` en `app.component.html` para que aparezca en todas las páginas públicas
     - Importar `ChatWidgetComponent` en el módulo o componente raíz correspondiente
     - Verificar que el widget no interfiera con el layout existente ni con el botón de WhatsApp (`sticky-whatsapp`)
     - _Requerimientos: 8.1_
 
-- [ ] 7. Checkpoint final — Verificar integración completa
+- [x] 7. Checkpoint final — Verificar integración completa
   - Asegurar que todos los tests pasen, preguntar al usuario si surgen dudas.
 
 ## Notas

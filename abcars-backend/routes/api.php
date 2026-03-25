@@ -302,6 +302,11 @@ Route::prefix('assistant')->middleware(['auth:sanctum', 'role:administrator|supe
     Route::post('/query', [AssistantController::class, 'query']);
 });
 
+// Segmento Asistente Público (sin autenticación)
+Route::prefix('public-assistant')->middleware(['bandwidth_usage', 'throttle:20,1'])->group(function () {
+    Route::post('/query', [\App\Http\Controllers\PublicAssistant\PublicAssistantController::class, 'query']);
+});
+
 // Fin Segmento Asistente
 
 // Segmento Campaigns

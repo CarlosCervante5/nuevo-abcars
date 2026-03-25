@@ -7,6 +7,7 @@ import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@a
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AuthInterceptor } from './shared/interceptors/auth.interceptor';
+import { ChatWidgetComponent } from './shared/chat-widget/chat-widget.component';
 
 // Componentes standalone principales (no necesitan declaración)
 // import { ModernNavComponent } from './shared/components/modern-nav/modern-nav.component';
@@ -22,6 +23,7 @@ import { AuthInterceptor } from './shared/interceptors/auth.interceptor';
     BrowserAnimationsModule,
     AppRoutingModule, // Contiene las rutas
     RouterModule,     // Provee la directiva routerLink
+    ChatWidgetComponent, // Widget de chat público (standalone)
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
