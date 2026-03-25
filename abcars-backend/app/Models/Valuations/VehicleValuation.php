@@ -138,7 +138,7 @@ class VehicleValuation extends Model
 
     public function images()
     {
-        return $this->hasMany(ValuationRepair::class, 'valuation_id');
+        return $this->hasMany(ValuationImage::class, 'valuation_id');
     }
 
     public function valuator()

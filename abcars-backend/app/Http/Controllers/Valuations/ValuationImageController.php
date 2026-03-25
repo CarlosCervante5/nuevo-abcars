@@ -9,6 +9,7 @@ use App\Http\Requests\Valuations\SearchValuationImagesRequest;
 use App\Jobs\UploadValuationImage;
 use App\Models\Valuations\ValuationImage;
 use App\Models\Valuations\VehicleValuation;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ValuationImageController extends Controller
@@ -34,46 +35,50 @@ class ValuationImageController extends Controller
     public function store(UploadValuationImageRequest $request)
     {
         try {
-            
             $valuation_uuid = $request->input('valuation_uuid');
             $name = $request->input('name');
             $group_name = $request->input('group_name');
             $images = $request->file('images');
 
-            $valuation = VehicleValuation::findByUuid($valuation_uuid);
+            return DB::transaction(function () use ($valuation_uuid, $name, $group_name, $images) {
+                $valuation = VehicleValuation::where('uuid', $valuation_uuid)->lockForUpdate()->first();
 
-            if (!$valuation) {
-
-                return ApiResponseHelper::apiError('La valuacion no existe', 'No existe el id: '. $valuation ,404, 'CREATE_VALUATION_IMAGES_ERROR');
-            }
-
-            // Obtener el sort_id más alto de las imágenes del vehículo, sino regresa 1
-            $sort_id = $valuation->images->max('sort_id') + 1 ?? 1;
-
-            $invalidImages = [];
-
-            foreach ($images as $index => $image) {
-
-                // Validar si el archivo es válido
-                if (!$image->isValid()) {
-                    // Registrar la imagen inválida
-                    $invalidImages[] = $image->getClientOriginalName();
-                    continue; // Saltar a la siguiente iteración del bucle
+                if (! $valuation) {
+                    return ApiResponseHelper::apiError('La valuacion no existe', 'No existe el uuid: '.$valuation_uuid, 404, 'CREATE_VALUATION_IMAGES_ERROR');
                 }
 
-                // Guardar temporalmente el archivo
-                $path = $image->store('temp_images');
+                // Max sobre valuation_images (no confundir con otras tablas); lock evita carreras entre requests.
+                $baseSort = (int) (ValuationImage::where('valuation_id', $valuation->id)->max('sort_id') ?? 0) + 1;
 
-                // Enviar cada lote a una cola de trabajo para procesamiento en segundo plano
-                UploadValuationImage::dispatchSync($path, $valuation->uuid, $valuation->id, ($sort_id + $index), $image->getClientOriginalName(), $name, $group_name);
-            }
+                $invalidImages = [];
+                $offset = 0;
 
-            if (!empty($invalidImages)) {
-                return ApiResponseHelper::apiSuccess(201, 'El set de imagenes se envió a procesar, pero contenía ALGUNOS archivos inválidos o corruptos', $invalidImages);
-            }
-        
-            // Retornar respuesta exitosa
-            return ApiResponseHelper::apiSuccess(201, 'Set de imagenes enviadas a procesar');
+                foreach ($images as $image) {
+                    if (! $image->isValid()) {
+                        $invalidImages[] = $image->getClientOriginalName();
+                        continue;
+                    }
+
+                    $path = $image->store('temp_images');
+
+                    UploadValuationImage::dispatchSync(
+                        $path,
+                        $valuation->uuid,
+                        $valuation->id,
+                        $baseSort + $offset,
+                        $image->getClientOriginalName(),
+                        $name,
+                        $group_name
+                    );
+                    $offset++;
+                }
+
+                if (! empty($invalidImages)) {
+                    return ApiResponseHelper::apiSuccess(201, 'El set de imagenes se envió a procesar, pero contenía ALGUNOS archivos inválidos o corruptos', $invalidImages);
+                }
+
+                return ApiResponseHelper::apiSuccess(201, 'Set de imagenes enviadas a procesar');
+            });
 
         } catch (ValidationException $e) {
             // Manejar errores de validación y retornar respuesta de error
