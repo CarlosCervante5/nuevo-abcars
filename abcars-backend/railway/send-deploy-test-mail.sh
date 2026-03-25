@@ -13,5 +13,9 @@ if [ "${RAILWAY_DEPLOY_MAIL_TEST:-}" != "1" ]; then
 fi
 
 echo "[send-deploy-test-mail] Enviando correo de prueba vía mail:send-deploy-test ..."
-php artisan mail:send-deploy-test
-echo "[send-deploy-test-mail] OK."
+if php artisan mail:send-deploy-test; then
+  echo "[send-deploy-test-mail] OK."
+else
+  echo "[send-deploy-test-mail] ERROR: revisa el mensaje arriba (p. ej. timeout SMTP desde Railway). El deploy NO se marca como fallido por esto."
+fi
+exit 0
