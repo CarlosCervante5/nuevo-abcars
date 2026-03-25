@@ -43,46 +43,16 @@ class AppointmentService
 
         $pueblaMail = trim((string) config('services.valuation.puebla_mail', ''));
         $hidalgoMail = trim((string) config('services.valuation.hidalgo_mail', ''));
+        $dealershipName = (string) ($data['dealership_name'] ?? '');
+        $useHidalgoInbox = self::dealershipUsesHidalgoValuationInbox($dealershipName);
+        $to = $useHidalgoInbox ? $hidalgoMail : $pueblaMail;
 
-        if ($data['dealership_name'] != 'vecsa hidalgo' && $pueblaMail !== '') {
-            $to = $pueblaMail;
-            $customerId = $customer->id;
-            $vehicleId = $customer_vehicle->id;
-            $appointmentId = $customer_appointment->id;
-
-            dispatch(function () use ($to, $customerId, $vehicleId, $appointmentId) {
-                $c = Customer::find($customerId);
-                $v = CustomerVehicle::find($vehicleId);
-                $a = CustomerAppointment::find($appointmentId);
-
-                if ($c && $v && $a) {
-                    try {
-                        Mail::to($to)->send(new ValuationNotification($c, $v, $a));
-                        Log::info('Valuation notification sent', [
-                            'to' => $to,
-                            'appointment_id' => $appointmentId,
-                            'dealership_name' => $a->dealership_name,
-                        ]);
-                    } catch (\Throwable $e) {
-                        Log::error('Valuation notification failed', [
-                            'to' => $to,
-                            'appointment_id' => $appointmentId,
-                            'dealership_name' => $a->dealership_name,
-                            'error' => $e->getMessage(),
-                        ]);
-                    }
-                } else {
-                    Log::warning('Valuation notification skipped: missing entities', [
-                        'to' => $to,
-                        'customer_found' => (bool) $c,
-                        'vehicle_found' => (bool) $v,
-                        'appointment_found' => (bool) $a,
-                        'appointment_id' => $appointmentId,
-                    ]);
-                }
-            })->afterResponse();
-        } elseif ($data['dealership_name'] === 'vecsa hidalgo' && $hidalgoMail !== '') {
-            $to = $hidalgoMail;
+        if ($to === '') {
+            Log::warning('Valuation notification skipped: no VALUATION_* mail configured for branch', [
+                'dealership_name' => $dealershipName,
+                'branch' => $useHidalgoInbox ? 'hidalgo' : 'puebla',
+            ]);
+        } else {
             $customerId = $customer->id;
             $vehicleId = $customer_vehicle->id;
             $appointmentId = $customer_appointment->id;
@@ -121,6 +91,17 @@ class AppointmentService
         }
 
         return $customer_appointment;
+    }
+
+    /**
+     * Formulario público usa "VECSA pachuca"; antes solo coincidía el literal "vecsa hidalgo".
+     */
+    private static function dealershipUsesHidalgoValuationInbox(string $dealershipName): bool
+    {
+        $n = mb_strtolower(trim($dealershipName), 'UTF-8');
+
+        return $n === 'vecsa hidalgo'
+            || str_contains($n, 'pachuca');
     }
 
     private function syncVehicleCatalog(array $data): void

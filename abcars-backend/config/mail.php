@@ -55,8 +55,9 @@ return [
             'host' => env('MAIL_HOST', '127.0.0.1'),
             'port' => env('MAIL_PORT', 2525),
             'encryption' => env('MAIL_ENCRYPTION', 'tls'),
-            'username' => env('MAIL_USERNAME_MARKETING'),
-            'password' => env('MAIL_PASSWORD_MARKETING'),
+            // Brevo/docs suelen usar MAIL_USERNAME + MAIL_PASSWORD; el mailer default es "marketing".
+            'username' => env('MAIL_USERNAME_MARKETING') ?: env('MAIL_USERNAME'),
+            'password' => env('MAIL_PASSWORD_MARKETING') ?: env('MAIL_PASSWORD'),
             'timeout' => env('MAIL_TIMEOUT', 10),
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
