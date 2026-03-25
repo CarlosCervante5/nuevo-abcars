@@ -121,6 +121,7 @@ export class ExternalRevisionPictureComponent implements OnInit {
     }
 
     public getImagesOthers(): void {
+        this.carImagesPathsOthers = [];
         this._externalImagesService.getOthersExternalImages( this.uuid_valuator )
             .subscribe({
                 next: (resp) => {
@@ -230,42 +231,34 @@ export class ExternalRevisionPictureComponent implements OnInit {
             this.imgs.push(document)
         }
         this.totalRecords = this.imgs.length;
-        this.count = 1;
+        this.count = this.totalRecords;
         // console.log({'Files: ': this.imgs, 'Total Records: ': this.totalRecords});
         console.log('Files: ', this.imgs, 'Total Records: ', this.totalRecords);
-        this.imgs.map( image => {
-            this.saveImageOthers(image);
-        });
+        this.saveImageOthers(this.imgs);
     }
 
-    public saveImageOthers(event: any){
-        console.log(event);
+    public saveImageOthers(images: File[]){
+        console.log(images);
         const newItem = {
             valuation_uuid: this.uuid_valuator,
             name: 'otros',
             group_name: 'Exterior_others',
-            images: [event]
+            images
         };
         console.log('Nuevo item creado:', newItem);
         this._externalImagesService.setExternalImage(newItem)
             .subscribe({
                 next: () => {
-                    if (this.count < this.totalRecords) {
-                        this.count++;
-                    } else {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Inserción de Imagenes exitosa.',
-                            text: 'Set de imágenes enviadas correctamente',
-                            showConfirmButton: true,
-                            confirmButtonColor: '#EEB838',
-                            timer: 3500
-                        });
-                        this.spinner = false;
-                        // setTimeout(() => {
-                        //     this.getImages();
-                        // }, 3500);
-                    }
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Inserción de Imagenes exitosa.',
+                        text: 'Set de imágenes enviadas correctamente',
+                        showConfirmButton: true,
+                        confirmButtonColor: '#EEB838',
+                        timer: 3500
+                    });
+                    this.spinner = false;
+                    this.getImagesOthers();
                 },
                 error: (error) => {
                     Swal.fire({
@@ -276,6 +269,7 @@ export class ExternalRevisionPictureComponent implements OnInit {
                         confirmButtonColor: '#EEB838',
                         timer: 3500
                     });
+                    this.spinner = false;
                 }
             });
     }
