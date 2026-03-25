@@ -1,13 +1,16 @@
 <!-- <app-new-nav></app-new-nav> -->
-<app-overview [overview]="itemOverview" [url_index]="'/admin/valuator'" [hideModules]="true"></app-overview>
+<app-overview [overview]="itemOverview" [url_index]="baseUrl" [hideModules]="true"></app-overview>
 <div class="container mx-auto px-4 pt-24">
     <div class="w-full mt-5">
         <div class="w-full">
+            <a [routerLink]="[baseUrl, 'appointment']" class="valuator-back-link">
+                <i class="fi fi-rr-arrow-left"></i> Regresar a Citas de valuación
+            </a>
             <h4 class="checklist-page-title">Checklist de Valuación</h4>
             <nav class="checklist-breadcrumb" aria-label="breadcrumb">
                 <ol class="checklist-breadcrumb-list">
-                    <li class="checklist-breadcrumb-item" [routerLink]="['/admin/valuator']">Overview</li>
-                    <li class="checklist-breadcrumb-item" [routerLink]="['/admin/valuator/appointment']">Citas de valuación</li>
+                    <li class="checklist-breadcrumb-item" [routerLink]="[baseUrl]">Overview</li>
+                    <li class="checklist-breadcrumb-item" [routerLink]="[baseUrl, 'appointment']">Citas de valuación</li>
                     <li class="checklist-breadcrumb-item checklist-breadcrumb-item-active" aria-current="page">Checklist de valuación</li>
                 </ol>
             </nav>

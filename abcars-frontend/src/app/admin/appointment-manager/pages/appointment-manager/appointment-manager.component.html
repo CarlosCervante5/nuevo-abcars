@@ -1,25 +1,23 @@
-<app-overview [overview]="itemOverview" [url_index]="'/admin/appointment_manager'" [hideModules]="true"></app-overview>
-<div class="container mx-auto px-4 pt-24">
+<app-overview [overview]="itemOverview" [url_index]="isSeller ? '/admin/seller' : '/admin/appointment_manager'" [hideModules]="true"></app-overview>
+<div class="container mx-auto px-6 lg:px-8 pt-24">
     <div class="w-full mb-6">
-        <h4 class="appointment-manager-title">Citas externas de valuación</h4>
+        <h4 class="appointment-manager-title">{{ isSeller ? 'Solicitudes de mis referidos' : 'Citas externas de valuación' }}</h4>
         <nav class="appointment-manager-breadcrumb" aria-label="breadcrumb">
             <ol class="appointment-manager-breadcrumb-list">
-                <li class="appointment-manager-breadcrumb-item" [routerLink]="['/admin/appointment_manager']">Overview</li>
-                <li class="appointment-manager-breadcrumb-item appointment-manager-breadcrumb-item-active" aria-current="page">Citas externas de valuación</li>
+                <li class="appointment-manager-breadcrumb-item" [routerLink]="[isSeller ? '/admin/seller' : '/admin/appointment_manager']">Overview</li>
+                <li class="appointment-manager-breadcrumb-item appointment-manager-breadcrumb-item-active" aria-current="page">{{ isSeller ? 'Solicitudes de mis referidos' : 'Citas externas de valuación' }}</li>
             </ol>
         </nav>
     </div>
 
     <!-- Search Input -->
-    <div class="w-full mb-4">
-        <div class="appointment-manager-form-field">
-            <label class="appointment-manager-label">Buscar...</label>
-            <input 
-                type="text" 
-                placeholder="Teclea tu búsqueda..."
-                class="appointment-manager-input"
-            >
-        </div>
+    <div class="appointment-manager-search-wrap">
+        <i class="fi fi-rr-search appointment-manager-search-icon"></i>
+        <input 
+            type="text" 
+            placeholder="Buscar por nombre, teléfono, marca, modelo..."
+            class="appointment-manager-input"
+        >
     </div>
     
     <!-- Update Button -->
@@ -109,4 +107,6 @@
             ></mat-paginator>
         </div>
     </div>
+
+    <footer class="admin-view-footer">© {{ currentYear }} ABCars.mx - Todos los derechos reservados.</footer>
 </div>

@@ -8,6 +8,7 @@ import { DealershipsMapComponent } from './pages/dealerships-map/dealerships-map
 import { AnalyticsComponent } from './pages/analytics/analytics.component';
 import { ApiInfoComponent } from './pages/api-info/api-info.component';
 import { DocumentationComponent } from './pages/documentation/documentation.component';
+import { AssistantComponent } from './pages/assistant/assistant.component';
 
 const routes: Routes = [
   { path: '', component: DashboardAdminComponent },
@@ -16,6 +17,7 @@ const routes: Routes = [
   { path: 'dealerships', component: AdminDealershipsComponent },
   { path: 'dealerships-map', component: DealershipsMapComponent },
   { path: 'analytics', component: AnalyticsComponent },
+  { path: 'assistant', component: AssistantComponent },
   { path: 'api-info', component: ApiInfoComponent },
   { path: 'documentation', component: DocumentationComponent },
 ];

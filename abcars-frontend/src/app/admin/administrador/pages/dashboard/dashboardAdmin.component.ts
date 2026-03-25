@@ -85,6 +85,13 @@ export class DashboardAdminComponent {
         iconColor: 'green'
       },
       {
+        title: 'Asistente de datos',
+        icon: 'fi fi-rr-comment-dots',
+        permalink: '/admin/administrator/assistant',
+        description: 'Consulta información del sistema en lenguaje natural.',
+        iconColor: 'purple'
+      },
+      {
         title: 'Fotos de entregas',
         icon: 'fi fi-rr-gift',
         permalink: '/admin/gestor/delivery-photos',

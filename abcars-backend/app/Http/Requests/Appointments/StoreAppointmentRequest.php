@@ -29,7 +29,8 @@ class StoreAppointmentRequest extends FormRequest
             'year' => 'required|integer',
             'mileage' => 'required|integer',
             'scheduled_date' => 'required|max:255|string',
-            'dealership_name' => 'required|max:255|string'
+            'dealership_name' => 'required|max:255|string',
+            'referrer_uuid' => 'nullable|string|exists:users,uuid'
         ];
     }
 }

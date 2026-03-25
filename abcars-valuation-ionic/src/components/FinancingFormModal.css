@@ -1,0 +1,64 @@
+.financing-form-modal {
+  --width: 100%;
+  --max-width: 480px;
+  --height: 90%;
+  --border-radius: 16px 16px 0 0;
+}
+
+.financing-form-modal .modal-title-icon {
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.financing-form {
+  padding: 8px 0 24px;
+}
+
+.form-field {
+  margin-bottom: 20px;
+}
+
+.form-field ion-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+  margin-bottom: 8px;
+}
+
+.form-field ion-input,
+.form-field ion-select {
+  --background: #f4f5f8;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  border-radius: 12px;
+  margin-top: 4px;
+}
+
+.form-error {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--ion-color-danger);
+  margin-top: 4px;
+}
+
+.form-field .ion-invalid {
+  --border-color: var(--ion-color-danger);
+}
+
+.form-summary-readonly {
+  background: #f4f5f8;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  color: var(--ion-color-secondary);
+}
+
+.form-summary-readonly p {
+  margin: 4px 0;
+}
+
+.form-submit-btn {
+  margin-top: 16px;
+}

@@ -50,6 +50,7 @@ class CustomerAppointment extends Model
         'status',
         'customer_id',
         'vehicle_id',
+        'referrer_user_id',
         'prev_appointment_id',
     ];
 

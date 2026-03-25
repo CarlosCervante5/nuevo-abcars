@@ -27,12 +27,33 @@ const CATEGORIES = [
   { id: 'truck', label: 'Camionetas', bodyNames: ['pickup', 'truck', 'camioneta'] },
 ];
 
-const translateFuelType = (type: string): string => {
+const translateFuelType = (type?: string): string => {
+  if (!type) return 'GASOLINA';
   const map: Record<string, string> = {
-    gasoline: 'GASOLINA', diesel: 'DIÉSEL', electric: 'ELÉCTRICO',
-    hybrid: 'HÍBRIDO', hydrogen: 'HIDRÓGENO', natural_gas: 'GAS NATURAL',
+    gasoline: 'GASOLINA', gasolina: 'GASOLINA', diesel: 'DIÉSEL', diésel: 'DIÉSEL',
+    electric: 'ELÉCTRICO', eléctrico: 'ELÉCTRICO', hybrid: 'HÍBRIDO', híbrido: 'HÍBRIDO',
+    hydrogen: 'HIDRÓGENO', natural_gas: 'GAS NATURAL', gas: 'GAS NATURAL',
   };
-  return map[type?.toLowerCase()] || type?.toUpperCase() || 'GASOLINA';
+  return map[type?.toLowerCase().trim()] || type?.toUpperCase() || 'GASOLINA';
+};
+
+const translateTransmission = (type?: string): string => {
+  if (!type) return 'N/D';
+  const map: Record<string, string> = {
+    automatic: 'Automática', automatico: 'Automática', manual: 'Manual',
+    semiautomatic: 'Semi automática', cvt: 'CVT', triptronic: 'Tiptronic',
+    'dual-clutch': 'Doble embrague', dual_clutch: 'Doble embrague',
+  };
+  return map[type?.toLowerCase().trim()] || type;
+};
+
+const translateDriveTrain = (type?: string): string => {
+  if (!type) return '';
+  const map: Record<string, string> = {
+    fwd: 'Tracción delantera', rwd: 'Tracción trasera', awd: 'Tracción integral',
+    '4wd': '4x4', '4x4': '4x4',
+  };
+  return map[type?.toLowerCase().trim()] || type;
 };
 
 const PublicInventoryList: React.FC = () => {
@@ -119,7 +140,9 @@ const PublicInventoryList: React.FC = () => {
   };
 
   const getDriveLabel = (vehicle: Vehicle) => {
-    return vehicle.drive_train || vehicle.transmission || 'N/D';
+    const dt = translateDriveTrain(vehicle.drive_train);
+    const tr = translateTransmission(vehicle.transmission);
+    return dt || tr || 'N/D';
   };
 
   return (
@@ -249,7 +272,7 @@ const PublicInventoryList: React.FC = () => {
                         <div className="vehicle-card-badges">
                           <span className="spec-badge">
                             <IonIcon icon={car} />
-                            {vehicle.cylinders ? `${vehicle.cylinders} HP` : vehicle.fuel_type || 'N/A'}
+                            {vehicle.cylinders ? `${vehicle.cylinders} HP` : translateFuelType(vehicle.fuel_type)}
                           </span>
                           <span className="spec-badge">
                             {vehicle.fuel_type ? translateFuelType(vehicle.fuel_type) : 'GASOLINA'}

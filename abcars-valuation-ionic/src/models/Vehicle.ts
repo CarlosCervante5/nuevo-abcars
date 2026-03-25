@@ -24,6 +24,7 @@ export interface Vehicle {
   model?: {
     uuid: string;
     name: string;
+    year?: number;
   };
   version?: {
     uuid: string;

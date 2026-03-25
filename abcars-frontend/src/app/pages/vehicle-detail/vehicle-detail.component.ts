@@ -7,6 +7,7 @@ import { DarkNavComponent } from '../../shared/components/dark-nav/dark-nav.comp
 import { ModernFooterComponent } from '../../shared/components/modern-footer/modern-footer.component';
 import { VehicleService } from '../../shared/services/vehicle.service';
 import { LeadService } from '../../shared/services/lead.service';
+import { ReferralService } from '../../shared/services/referral.service';
 import { Vehicle as ApiVehicle } from '../../shared/interfaces/vehicle_data.interface';
 import Swal from 'sweetalert2';
 
@@ -1985,10 +1986,12 @@ export class VehicleDetailComponent implements OnInit {
     private router: Router,
     private location: Location,
     private vehicleService: VehicleService,
-    private leadService: LeadService
+    private leadService: LeadService,
+    private referralService: ReferralService
   ) {}
 
   ngOnInit() {
+    this.referralService.captureFromUrl(this.route);
     this.route.params.subscribe(params => {
       this.vehicleId = params['id'];
       this.loadVehicle();

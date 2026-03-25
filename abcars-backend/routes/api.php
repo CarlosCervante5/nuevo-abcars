@@ -34,6 +34,7 @@ use App\Http\Controllers\Vehicles\VehicleBrandController;
 use App\Http\Controllers\Vehicles\VehicleController;
 use App\Http\Controllers\Vehicles\VehicleImageController;
 use App\Http\Controllers\Analytics\AnalyticsController;
+use App\Http\Controllers\Assistant\AssistantController;
 use Illuminate\Support\Facades\Route;
 
 // Información básica de la API (GET /api)
@@ -296,6 +297,12 @@ Route::prefix('analytics')->group(function () {
 
 // Fin Segmento Analytics
 
+// Segmento Asistente (solo administrator y super_admin)
+Route::prefix('assistant')->middleware(['auth:sanctum', 'role:administrator|super_admin'])->group(function () {
+    Route::post('/query', [AssistantController::class, 'query']);
+});
+
+// Fin Segmento Asistente
 
 // Segmento Campaigns
 

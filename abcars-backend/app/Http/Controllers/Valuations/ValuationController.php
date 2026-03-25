@@ -153,7 +153,13 @@ class ValuationController extends Controller
 
             $user = auth()->user();
 
-            $valuations = $user->valuations()->with('appointment.customer', 'appointment.vehicle', 'valuator', 'vehicle')
+            // Si es seller, solo mostrar valuaciones de citas generadas por sus links de referidos
+            $baseQuery = $user->hasRole('seller')
+                ? VehicleValuation::with('appointment.customer', 'appointment.vehicle', 'valuator', 'vehicle')
+                    ->whereHas('appointment', fn ($q) => $q->where('referrer_user_id', $user->id))
+                : $user->valuations()->with('appointment.customer', 'appointment.vehicle', 'valuator', 'vehicle');
+
+            $valuations = $baseQuery
             ->where(function ($query) use ($data) {
                 if (!empty($data['keyword'])) {
                     $keyword = '%' . $data['keyword'] . '%';

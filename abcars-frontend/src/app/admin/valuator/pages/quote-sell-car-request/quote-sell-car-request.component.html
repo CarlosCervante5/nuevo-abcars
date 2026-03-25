@@ -1,14 +1,17 @@
 <!-- <app-new-nav></app-new-nav> -->
-<app-overview [overview]="itemOverview" [url_index]="'/admin/valuator'" [hideModules]="true"></app-overview>
+<app-overview [overview]="itemOverview" [url_index]="baseUrl" [hideModules]="true"></app-overview>
 <div class="container mx-auto px-4 pt-24">
     <div class="w-full mt-24">
         <div class="text-center">
+            <a [routerLink]="[baseUrl, 'appointment']" class="valuator-back-link valuator-back-link-center">
+                <i class="fi fi-rr-arrow-left"></i> Regresar a Citas de Valuación
+            </a>
             <h1 class="quote-sell-page-title">Cotización de la solicitud Vender tu Auto</h1>
             <h2 class="quote-sell-page-subtitle">Realiza la cotización del Auto Solicitado.</h2>
             <nav class="quote-sell-breadcrumb" aria-label="breadcrumb">
                 <ol class="quote-sell-breadcrumb-list">
-                    <li class="quote-sell-breadcrumb-item" [routerLink]="['/admin/valuator']">Overview</li>
-                    <li class="quote-sell-breadcrumb-item" [routerLink]="['/admin/valuator/appointment']">Citas de Valuación</li>
+                    <li class="quote-sell-breadcrumb-item" [routerLink]="[baseUrl]">Overview</li>
+                    <li class="quote-sell-breadcrumb-item" [routerLink]="[baseUrl, 'appointment']">Citas de Valuación</li>
                     <li class="quote-sell-breadcrumb-item quote-sell-breadcrumb-item-active" aria-current="page">Cotización</li>
                 </ol>
             </nav>

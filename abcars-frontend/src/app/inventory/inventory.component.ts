@@ -7,6 +7,7 @@ import { DarkNavComponent } from 'src/app/shared/components/dark-nav/dark-nav.co
 import { ModernFooterComponent } from 'src/app/shared/components/modern-footer/modern-footer.component';
 import { VehicleService } from '../shared/services/vehicle.service';
 import { CampaingService } from '../shared/services/campaing.service';
+import { ReferralService } from '../shared/services/referral.service';
 import { Vehicle as ApiVehicle } from '../shared/interfaces/vehicle_data.interface';
 
 // Extender Vehicle para incluir apiData
@@ -715,11 +716,13 @@ export class InventoryComponent implements OnInit {
   constructor(
     private vehicleService: VehicleService,
     private campaingService: CampaingService,
+    private referralService: ReferralService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
 
   ngOnInit(): void {
+    this.referralService.captureFromUrl(this.route);
     // Leer query params del home y establecer filtros
     this.route.queryParams.subscribe(params => {
       // Establecer filtros de home

@@ -1,0 +1,12 @@
+cd nuevo-abcars
+git switch valuationIonicTavo
+git pull origin main    /   git pull origin valuationIonicTavo
+# cambios...
+git add .
+git commit -m "..."
+git push origin valuationIonicTavo
+
+git switch sanboxNuevoABcars
+git pull origin sanboxNuevoABcars
+git merge valuationIonicTavo
+git push origin sanboxNuevoABcars

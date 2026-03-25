@@ -1,0 +1,118 @@
+<app-overview [overview]="itemOverview" [url_index]="baseUrl" [hideModules]="true"></app-overview>
+<div class="container mx-auto px-6 lg:px-8 pt-24">
+    <div class="w-full mt-5 mb-5">
+        <!-- Header Section -->
+        <div class="inventory-view-header">
+            <a [routerLink]="[baseUrl]" class="valuator-back-link">
+                <i class="fi fi-rr-arrow-left"></i> Regresar a Overview
+            </a>
+            <h4 class="inventory-view-page-title">Inventario</h4>
+            <nav class="inventory-view-breadcrumb" aria-label="breadcrumb">
+                <ol class="inventory-view-breadcrumb-list">
+                    <li class="inventory-view-breadcrumb-item" [routerLink]="[baseUrl]">Overview</li>
+                    <li class="inventory-view-breadcrumb-item inventory-view-breadcrumb-item-active" aria-current="page">Inventario</li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Search Input -->
+        <div class="inventory-view-search-wrap">
+            <i class="fi fi-rr-search inventory-view-search-icon"></i>
+            <input 
+                type="text"
+                [(ngModel)]="palabra_busqueda" 
+                (keyup.enter)="getVehicles(1)" 
+                placeholder="Buscar por vin, marca, modelo, año..."
+                class="inventory-view-search-input"
+            >
+        </div>
+
+        <!-- Table (solo lectura) -->
+        <div class="row">
+            <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 mb-2">
+                <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef> Status </th>
+                    <td mat-cell *matCellDef="let element">
+                        <img *ngIf="element.page_status == 'active'" src="assets/icons-fontawesome/power-off-solid-green.svg" alt="Activo" width="24px" height="24px">
+                        <img *ngIf="element.page_status != 'active'" src="assets/icons-fontawesome/power-off-solid-red.svg" alt="Inactivo" width="24px" height="24px">
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="nameVehicle">
+                    <th mat-header-cell *matHeaderCellDef> Vehículo </th>
+                    <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="vin">
+                    <th mat-header-cell *matHeaderCellDef> VIN </th>
+                    <td mat-cell *matCellDef="let element"> {{element.vin}} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="km">
+                    <th mat-header-cell *matHeaderCellDef> Km </th>
+                    <td mat-cell *matCellDef="let element" style="min-width: 140px; white-space: nowrap"> {{element.mileage | number }} km </td>
+                </ng-container>
+
+                <ng-container matColumnDef="price">
+                    <th mat-header-cell *matHeaderCellDef> Precio </th>
+                    <td mat-cell *matCellDef="let element" style="min-width: 140px; white-space: nowrap"> {{element.sale_price | currency:'$ ':'symbol':'1.2-2'}} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="image">
+                    <th mat-header-cell *matHeaderCellDef>Imagen</th>
+                    <td mat-cell *matCellDef="let element"> 
+                        <img mat-card-image [src]="element.first_image ? image(element.first_image.service_image_url) : image(null)" class="inventory-view-card-image" alt="{{ element.name | titlecase }}">
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let element">
+                        <div class="inventory-view-actions">
+                            <button 
+                                *ngIf="showShareColumn"
+                                type="button" 
+                                class="inventory-view-btn inventory-view-btn-share"
+                                (click)="copyVehicleReferralLink(element, $event)"
+                                matTooltip="Compartir link de referido"
+                                title="Compartir link de referido"
+                            >
+                                <i class="fi fi-rr-share"></i>
+                                <span>Compartir</span>
+                            </button>
+                            <button 
+                                type="button" 
+                                class="inventory-view-btn inventory-view-btn-photos"
+                                (click)="downloadPhotos(element, $event)"
+                                matTooltip="Descargar fotos"
+                                title="Descargar fotos"
+                            >
+                                <i class="fi fi-rr-download"></i>
+                                <span>Fotos</span>
+                            </button>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="viewDetail(row)" class="inventory-view-row-clickable"></tr>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="inventory-view-pagination-wrap">
+            <span class="inventory-view-pagination-info">Mostrando {{ length }} vehículos</span>
+            <mat-paginator 
+                [length]="length" 
+                [pageSize]="pageSize" 
+                [pageSizeOptions]="pageSizeOptions" 
+                [pageIndex]="pageIndex - 1" 
+                aria-label="Select page" 
+                (page)="paginationChange($event)" 
+                #paginador
+            ></mat-paginator>
+        </div>
+
+        <footer class="admin-view-footer">© {{ currentYear }} ABCars.mx - Todos los derechos reservados.</footer>
+    </div>
+</div>

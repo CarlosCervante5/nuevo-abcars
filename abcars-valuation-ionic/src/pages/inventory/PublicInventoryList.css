@@ -1,0 +1,341 @@
+/* Public Inventory - ABCars brand colors: primary #FFC73A, secondary #4B5563 */
+.public-inventory-header {
+  --background: #ffffff;
+  --border-color: #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.public-inventory-toolbar {
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  --min-height: 56px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 16px;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
+.header-icon {
+  font-size: 24px;
+  color: var(--ion-color-secondary);
+}
+
+.header-login-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.header-login-btn ion-icon {
+  font-size: 20px;
+}
+
+.public-inventory-container {
+  padding: 16px;
+  padding-bottom: 32px;
+}
+
+.search-section {
+  margin-bottom: 20px;
+}
+
+.public-searchbar {
+  --background: #f4f5f8;
+  --border-radius: 12px;
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 8px 0;
+}
+
+.public-searchbar .searchbar-input {
+  font-size: 0.95rem;
+}
+
+.categories-section {
+  margin-bottom: 24px;
+}
+
+.categories-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ion-color-secondary);
+  letter-spacing: 0.5px;
+}
+
+.view-all {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ion-color-primary);
+  letter-spacing: 0.5px;
+}
+
+.categories-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.categories-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.category-btn {
+  flex-shrink: 0;
+  padding: 10px 20px;
+  border-radius: 24px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: var(--ion-color-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-btn.active {
+  background: var(--ion-color-primary);
+  border-color: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+}
+
+.inventory-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ion-color-dark);
+  margin: 0 0 16px 0;
+}
+
+.vehicle-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.vehicle-card {
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.vehicle-card:active {
+  transform: scale(0.98);
+}
+
+.vehicle-card-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f4f5f8 0%, #e5e7eb 100%);
+}
+
+.vehicle-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.vehicle-card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--ion-color-medium);
+  gap: 8px;
+}
+
+.vehicle-card-placeholder ion-icon {
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+.vehicle-card-placeholder span {
+  font-size: 0.875rem;
+  opacity: 0.7;
+}
+
+.vehicle-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.vehicle-badge.new {
+  background: #3b82f6;
+  color: white;
+}
+
+.vehicle-badge.featured {
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+}
+
+.favorite-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.favorite-btn svg {
+  width: 20px;
+  height: 20px;
+  color: var(--ion-color-medium);
+}
+
+.favorite-btn.active svg {
+  color: var(--ion-color-primary);
+}
+
+.vehicle-card-body {
+  padding: 16px;
+}
+
+.vehicle-card-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.vehicle-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ion-color-dark);
+  margin: 0;
+  flex: 1;
+  line-height: 1.3;
+}
+
+.vehicle-card-price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ion-color-primary);
+  flex-shrink: 0;
+}
+
+.vehicle-card-specs {
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+  margin: 0 0 10px 0;
+}
+
+.vehicle-card-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.spec-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #f4f5f8;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ion-color-secondary);
+}
+
+.spec-badge ion-icon {
+  font-size: 14px;
+  color: var(--ion-color-primary);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  min-height: 300px;
+}
+
+.empty-state .empty-icon {
+  color: var(--ion-color-medium);
+  margin-bottom: 16px;
+}
+
+.empty-state p {
+  margin: 0;
+  color: var(--ion-color-medium);
+  font-size: 1rem;
+}
+
+@media (min-width: 768px) {
+  .vehicle-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .public-inventory-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .vehicle-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

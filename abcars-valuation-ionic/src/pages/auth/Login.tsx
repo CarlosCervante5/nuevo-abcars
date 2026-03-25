@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import {
   IonContent,
   IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
   IonItem,
   IonLabel,
   IonInput,
@@ -13,7 +10,6 @@ import {
   IonCard,
   IonCardContent,
   IonCardHeader,
-  IonCardTitle,
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { valuationService } from '../../services/valuationService';
@@ -99,7 +95,6 @@ const Login: React.FC = () => {
               <div className="logo-container">
                 <img src="/logo.svg" alt="ABCars Logo" className="logo" />
               </div>
-              <IonCardTitle>Iniciar Sesión</IonCardTitle>
             </IonCardHeader>
             <IonCardContent>
               <form onSubmit={handleLogin}>
@@ -139,6 +134,10 @@ const Login: React.FC = () => {
                 >
                   {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                 </IonButton>
+
+                <p className="inventory-link">
+                  <a onClick={() => history.push('/inventory')}>Ver inventario público</a>
+                </p>
               </form>
             </IonCardContent>
           </IonCard>

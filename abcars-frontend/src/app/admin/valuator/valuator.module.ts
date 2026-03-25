@@ -15,6 +15,8 @@ import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.co
 import { BodyworkPaintValuatorFormComponent } from './components/bodywork-paint-valuator-form/bodywork-paint-valuator-form.component';
 import { QuoteSellCarRequestComponent } from './pages/quote-sell-car-request/quote-sell-car-request.component';
 import { DocumentationVehicleComponent } from './components/documentation-vehicle/documentation-vehicle.component';
+import { InventoryViewComponent } from './pages/inventory-view/inventory-view.component';
+import { VehicleDetailViewComponent } from './pages/vehicle-detail-view/vehicle-detail-view.component';
 import { SkCubeComponent } from "@components/sk-cube/sk-cube.component";
 import { CommonModule } from '@angular/common';
 
@@ -28,6 +30,8 @@ import { CommonModule } from '@angular/common';
     DashboardComponent,
     ExternalRevisionPictureComponent,
     InternalRevisionPictureComponent,
+    InventoryViewComponent,
+    VehicleDetailViewComponent,
     QuoteSellCarRequestComponent,
     SparePartsFormComponent,
     DocumentationVehicleComponent

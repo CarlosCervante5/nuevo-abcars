@@ -1,0 +1,287 @@
+:host {
+  display: block;
+}
+
+.inventory-view-page-title {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.inventory-view-breadcrumb {
+  margin-bottom: 0 !important;
+}
+
+.inventory-view-breadcrumb-list {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 0.875rem !important;
+}
+
+.inventory-view-breadcrumb-item {
+  display: flex !important;
+  align-items: center !important;
+  color: #6b7280 !important;
+  cursor: pointer !important;
+  transition: color 0.2s ease !important;
+}
+
+.inventory-view-breadcrumb-item:hover {
+  color: var(--abcars-primary, #f59e0b) !important;
+}
+
+.inventory-view-breadcrumb-item:not(:last-child)::after {
+  content: '' !important;
+  display: inline-block !important;
+  width: 8px !important;
+  height: 8px !important;
+  margin: 0 0.5rem !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.inventory-view-breadcrumb-item-active {
+  color: #111827 !important;
+  font-weight: 600 !important;
+  cursor: default !important;
+}
+
+.inventory-view-breadcrumb-item-active:hover {
+  color: #111827 !important;
+}
+
+.inventory-view-search-wrap {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.inventory-view-search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 1.125rem;
+  pointer-events: none;
+}
+
+.inventory-view-search-input {
+  width: 100% !important;
+  padding: 0.75rem 1rem 0.75rem 2.75rem !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.5rem !important;
+  font-size: 0.875rem !important;
+  transition: all 0.2s ease !important;
+  background: #fff !important;
+}
+
+.inventory-view-search-input:focus {
+  outline: none !important;
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.inventory-view-search-input::placeholder {
+  color: #9ca3af;
+}
+
+::ng-deep .mat-elevation-z8 {
+  width: 100%;
+  table-layout: fixed;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+::ng-deep .mat-elevation-z8 th {
+  background-color: #f9fafb !important;
+  color: #374151 !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+::ng-deep .mat-elevation-z8 th,
+::ng-deep .mat-elevation-z8 td {
+  padding: 0.75rem 1rem !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-bottom: 1px solid #f3f4f6 !important;
+}
+
+::ng-deep .mat-column-status {
+  width: 80px;
+  min-width: 80px;
+  max-width: 80px;
+  text-align: center;
+}
+
+::ng-deep .mat-column-nameVehicle {
+  width: 200px;
+  min-width: 200px;
+  max-width: 200px;
+}
+
+::ng-deep .mat-column-vin {
+  width: 180px;
+  min-width: 180px;
+  max-width: 180px;
+}
+
+::ng-deep .mat-column-km {
+  width: 120px;
+  min-width: 120px;
+  max-width: 120px;
+  text-align: right;
+}
+
+::ng-deep .mat-column-price {
+  width: 140px;
+  min-width: 140px;
+  max-width: 140px;
+  text-align: right;
+}
+
+::ng-deep .mat-column-image {
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
+}
+
+::ng-deep .mat-column-actions {
+  width: 200px;
+  min-width: 200px;
+  max-width: 200px;
+  text-align: center;
+}
+
+::ng-deep .mat-column-image td {
+  padding: 4px 8px !important;
+  text-align: center;
+}
+
+.inventory-view-card-image {
+  width: 100px !important;
+  height: 75px !important;
+  object-fit: cover !important;
+  border-radius: 4px !important;
+}
+
+/* Filas clickeables */
+::ng-deep .inventory-view-row-clickable {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+::ng-deep .inventory-view-row-clickable:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* Contenedor de acciones */
+.inventory-view-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Botones base */
+.inventory-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.inventory-view-btn i {
+  font-size: 1rem;
+}
+
+/* Botón Compartir - estilo primario ABCars */
+.inventory-view-btn-share {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.3);
+}
+
+.inventory-view-btn-share:hover {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
+  transform: translateY(-1px);
+}
+
+.inventory-view-btn-share:active {
+  transform: translateY(0);
+}
+
+/* Botón Fotos - estilo secundario */
+.inventory-view-btn-photos {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.inventory-view-btn-photos:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+  border-color: #d1d5db;
+}
+
+.inventory-view-btn-photos:active {
+  background-color: #d1d5db;
+}
+
+/* Pagination */
+.inventory-view-pagination-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
+.inventory-view-pagination-info {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+::ng-deep .inventory-view-pagination-wrap .mat-mdc-paginator {
+  background: transparent !important;
+}
+
+::ng-deep .inventory-view-pagination-wrap .mat-mdc-paginator .mat-mdc-paginator-navigation-next,
+::ng-deep .inventory-view-pagination-wrap .mat-mdc-paginator .mat-mdc-paginator-navigation-previous {
+  color: #f59e0b !important;
+}
+
+::ng-deep .inventory-view-pagination-wrap .mat-mdc-paginator .mat-mdc-paginator-range-actions .mat-mdc-paginator-navigation-next,
+::ng-deep .inventory-view-pagination-wrap .mat-mdc-paginator .mat-mdc-paginator-range-actions .mat-mdc-paginator-navigation-previous {
+  color: #f59e0b !important;
+}
+
+/* Footer */
+.admin-view-footer {
+  display: block;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: #9ca3af;
+  padding: 1.5rem 0;
+  margin: 0;
+}

@@ -27,13 +27,22 @@ class AppointmentService
             'customer_id' => $customer->id
         ]);
 
-        $customer_appointment = CustomerAppointment::create([
+        $appointmentData = [
             'type' => $data['type'],
             'scheduled_date' => $data['scheduled_date'],
             'dealership_name' => $data['dealership_name'],
             'vehicle_id' => $customer_vehicle->id,
             'customer_id' => $customer->id
-        ]);
+        ];
+
+        if (!empty($data['referrer_uuid'])) {
+            $referrer = \App\Models\User::where('uuid', $data['referrer_uuid'])->first();
+            if ($referrer) {
+                $appointmentData['referrer_user_id'] = $referrer->id;
+            }
+        }
+
+        $customer_appointment = CustomerAppointment::create($appointmentData);
 
         if( $data['dealership_name'] != 'vecsa hidalgo') {
             Mail::to(env('VALUATION_PUEBLA_MAIL', ''))->send(new ValuationNotification($customer, $customer_vehicle, $customer_appointment));

@@ -1,0 +1,88 @@
+.simulator-modal {
+  --width: 100%;
+  --max-width: 480px;
+  --height: 90%;
+  --border-radius: 16px 16px 0 0;
+}
+
+.simulator-modal .modal-title-icon {
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.simulator-form {
+  padding: 8px 0 24px;
+}
+
+.simulator-field {
+  margin-bottom: 20px;
+}
+
+.simulator-field ion-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+  margin-bottom: 8px;
+}
+
+.simulator-field ion-input,
+.simulator-field ion-select {
+  --background: #f4f5f8;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  border-radius: 12px;
+  margin-top: 4px;
+}
+
+.simulator-summary {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 24px 0 16px;
+  border: 2px solid #FFC73A;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.simulator-summary h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 16px 0;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.summary-item {
+  text-align: center;
+}
+
+.summary-amount {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000000;
+}
+
+.summary-label {
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
+.simulator-disclaimer {
+  font-size: 0.8rem;
+  color: #92400e;
+  margin: 0 0 20px 0;
+  padding: 12px;
+  background: #fef3c7;
+  border-radius: 8px;
+  border-left: 4px solid #d97706;
+}
+
+.simulator-cta {
+  margin-top: 8px;
+}

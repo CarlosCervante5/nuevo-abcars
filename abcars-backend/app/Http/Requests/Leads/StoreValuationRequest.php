@@ -33,6 +33,7 @@ class StoreValuationRequest extends FormRequest
             'model' => 'required|string',
             'year' => 'required|integer',
             'mileage' => 'required|integer',
+            'referrer_uuid' => 'nullable|string|exists:users,uuid',
         ];
     }
 }

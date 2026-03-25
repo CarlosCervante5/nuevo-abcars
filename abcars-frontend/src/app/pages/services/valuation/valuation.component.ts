@@ -10,6 +10,7 @@ import { AdminService } from '../../../shared/services/admin.service';
 import { Dealership, DealerShipResponse } from '../../../shared/interfaces/admin.interfaces';
 import { AppointmentService } from '../../../shared/services/appointment.service';
 import { LeadService } from '../../../shared/services/lead.service';
+import { ReferralService } from '../../../shared/services/referral.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -34,6 +35,7 @@ export class ValuationComponent implements OnInit {
     private adminService: AdminService,
     private appointmentService: AppointmentService,
     private leadService: LeadService,
+    private referralService: ReferralService,
     private fb: FormBuilder
   ) {
     this.valuationForm = this.fb.group({
@@ -54,6 +56,7 @@ export class ValuationComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.referralService.captureFromUrl();
     this.getBrands();
     // Sucursales ahora están hardcodeadas, no se cargan dinámicamente
     // this.getDealerships();
@@ -198,7 +201,8 @@ export class ValuationComponent implements OnInit {
             : '';
     
           // Construir objeto para la cita de valuación
-          const appointmentData = {
+          const referrerUuid = this.referralService.getReferrerUuid();
+          const appointmentData: Record<string, unknown> = {
             type: 'valuation',
             customer_uuid: customerUuid,
             brand_name: formValue.brand || '',
@@ -208,6 +212,9 @@ export class ValuationComponent implements OnInit {
             scheduled_date: scheduledDateTime,
             dealership_name: formValue.city || ''
           };
+          if (referrerUuid) {
+            appointmentData.referrer_uuid = referrerUuid;
+          }
 
           // Crear FormGroup temporal para la cita
           const appointmentForm = this.fb.group(appointmentData);
@@ -227,7 +234,8 @@ export class ValuationComponent implements OnInit {
                 brand: formValue.brand || '',
                 model: formValue.model || '',
                 year: formValue.year ? Number(formValue.year) : 0,
-                mileage: formValue.mileage ? Number(formValue.mileage) : 0
+                mileage: formValue.mileage ? Number(formValue.mileage) : 0,
+                ...(referrerUuid && { referrer_uuid: referrerUuid })
               };
 
               this.leadService.sendValuationRequest(valuationLeadData).subscribe({

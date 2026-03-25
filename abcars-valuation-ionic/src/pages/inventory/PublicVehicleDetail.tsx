@@ -13,6 +13,8 @@ import {
 } from '@ionic/react';
 import { arrowBack, shareSocialOutline, heart, calculatorOutline, cardOutline, chevronBackOutline, chevronForwardOutline, locationOutline, constructOutline, flashOutline, speedometerOutline, car } from 'ionicons/icons';
 import { useParams, useHistory } from 'react-router-dom';
+import { Share } from '@capacitor/share';
+import { Capacitor } from '@capacitor/core';
 import { vehicleService } from '../../services/vehicleService';
 import { Vehicle, VehicleImage } from '../../models/Vehicle';
 import SimulatorModal, { SimulatorData } from '../../components/SimulatorModal';
@@ -22,10 +24,31 @@ import './PublicVehicleDetail.css';
 const translateFuelType = (type?: string): string => {
   if (!type) return 'Gasolina';
   const map: Record<string, string> = {
-    gasoline: 'Gasolina', diesel: 'Diésel', electric: 'Eléctrico',
-    hybrid: 'Híbrido', hydrogen: 'Hidrógeno', natural_gas: 'Gas natural',
+    gasoline: 'Gasolina', gasolina: 'Gasolina', diesel: 'Diésel', diésel: 'Diésel',
+    electric: 'Eléctrico', eléctrico: 'Eléctrico', hybrid: 'Híbrido', híbrido: 'Híbrido',
+    hydrogen: 'Hidrógeno', natural_gas: 'Gas natural', gas: 'Gas natural',
   };
-  return map[type?.toLowerCase()] || type;
+  return map[type?.toLowerCase().trim()] || type;
+};
+
+const translateTransmission = (type?: string): string => {
+  if (!type) return 'N/D';
+  const map: Record<string, string> = {
+    automatic: 'Automática', automatico: 'Automática', automática: 'Automática',
+    manual: 'Manual', semiautomatic: 'Semi automática', semiautomática: 'Semi automática',
+    cvt: 'CVT', triptronic: 'Tiptronic', 'dual-clutch': 'Doble embrague',
+    dual_clutch: 'Doble embrague',
+  };
+  return map[type?.toLowerCase().trim()] || type;
+};
+
+const translateDriveTrain = (type?: string): string => {
+  if (!type) return '';
+  const map: Record<string, string> = {
+    fwd: 'Tracción delantera', rwd: 'Tracción trasera', awd: 'Tracción integral',
+    '4wd': '4x4', '4x4': '4x4',
+  };
+  return map[type?.toLowerCase().trim()] || type;
 };
 
 const PublicVehicleDetail: React.FC = () => {
@@ -95,30 +118,35 @@ const PublicVehicleDetail: React.FC = () => {
 
   const getKeyFeatures = (): string[] => {
     const features: string[] = [];
-    // Agregar características basadas en los datos disponibles
-    if (vehicle?.transmission) features.push(vehicle.transmission);
-    if (vehicle?.drive_train) features.push(vehicle.drive_train);
-    if (vehicle?.fuel_type) features.push(vehicle.fuel_type);
+    // Agregar características basadas en los datos disponibles (traducidas)
+    if (vehicle?.transmission) features.push(translateTransmission(vehicle.transmission));
+    const dt = translateDriveTrain(vehicle?.drive_train);
+    if (dt) features.push(dt);
+    if (vehicle?.fuel_type) features.push(translateFuelType(vehicle.fuel_type));
     if (vehicle?.interior_color) features.push(`Interior ${vehicle.interior_color}`);
     if (vehicle?.exterior_color) features.push(`Exterior ${vehicle.exterior_color}`);
     return features.length > 0 ? features : ['Cámara de reversa', 'Monitor de punto ciego', 'Apple CarPlay', 'Techo solar'];
   };
 
   const handleShare = async () => {
-    if (navigator.share && vehicle) {
-      try {
-        await navigator.share({
-          title: `${vehicle.brand?.name} ${vehicle.model?.name}`,
-          text: vehicle.description || `Vehículo en venta - ${formatPrice(vehicle.sale_price)}`,
-          url: window.location.href,
-        });
-      } catch (err) {
+    if (!vehicle) return;
+    try {
+      const shareUrl = Capacitor.isNativePlatform()
+        ? `${window.location.origin}/inventory/${vehicle.uuid}`
+        : window.location.href;
+      await Share.share({
+        title: `${vehicle.brand?.name} ${vehicle.model?.name}`,
+        text: vehicle.description || `Vehículo en venta - ${formatPrice(vehicle.sale_price)}`,
+        url: shareUrl,
+        dialogTitle: 'Compartir vehículo',
+      });
+      setToastMessage('Compartido correctamente');
+      setShowToast(true);
+    } catch (err: any) {
+      if (err?.message !== 'Share canceled') {
         setToastMessage('No se pudo compartir');
         setShowToast(true);
       }
-    } else {
-      setToastMessage('Compartir no disponible');
-      setShowToast(true);
     }
   };
 
@@ -298,7 +326,7 @@ const PublicVehicleDetail: React.FC = () => {
               <div className="spec-card">
                 <IonIcon icon={constructOutline} className="spec-icon" />
                 <span className="spec-label">TRANSMISIÓN</span>
-                <span className="spec-value">{vehicle.transmission || 'N/D'}</span>
+                <span className="spec-value">{translateTransmission(vehicle.transmission) || 'N/D'}</span>
               </div>
               <div className="spec-card">
                 <IonIcon icon={flashOutline} className="spec-icon" />
@@ -343,10 +371,6 @@ const PublicVehicleDetail: React.FC = () => {
               <div className="location-info">
                 <IonIcon icon={locationOutline} className="location-icon" />
                 <span>ABC Cars, {vehicle.dealership?.location || 'Ciudad de México'}</span>
-              </div>
-              <div className="map-placeholder">
-                <IonIcon icon={locationOutline} size="large" />
-                <span>Mapa</span>
               </div>
             </div>
 

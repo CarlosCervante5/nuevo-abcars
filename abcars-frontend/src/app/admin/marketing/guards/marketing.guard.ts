@@ -16,10 +16,10 @@ export class MarketingGuard  {
   }
 
   canActivate(): Observable<boolean> | Promise<boolean> | boolean {
-    return validateRoleGuard('marketing', this._accountService, this._router);
+    return validateRoleGuard(['marketing', 'administrator', 'super_admin'], this._accountService, this._router);
   }
 
   canLoad(): Observable<boolean> | Promise<boolean> | boolean {
-    return validateRoleGuard('marketing', this._accountService, this._router);
+    return validateRoleGuard(['marketing', 'administrator', 'super_admin'], this._accountService, this._router);
   }
 }

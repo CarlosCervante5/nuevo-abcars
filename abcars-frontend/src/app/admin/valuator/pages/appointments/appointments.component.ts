@@ -39,6 +39,7 @@ export class AppointmentsComponent implements OnInit {
   displayedColumns: string[] = ['id', 'name', 'lastName', 'brand', 'model', 'vin', 'year', 'status', 'statusParts', 'statusRepairs', 'actions'];
 
   public palabra_busqueda: string = '';
+  public currentYear: number = new Date().getFullYear();
   private timer: any;
   public openMenus: { [key: string]: boolean } = {};
 
@@ -46,6 +47,12 @@ export class AppointmentsComponent implements OnInit {
   public itemOverview: Overview;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  private role = localStorage.getItem('role') || '';
+
+  get baseUrl(): string {
+    return this.role === 'seller' ? '/admin/seller' : '/admin/valuator';
+  }
 
   constructor(
     private _bottomSheet: MatBottomSheet,
@@ -56,6 +63,9 @@ export class AppointmentsComponent implements OnInit {
     const sanitizer = inject(DomSanitizer)
     iconRegistry.addSvgIconLiteral('thumbs-up', sanitizer.bypassSecurityTrustHtml(THUMBUP_ICON));
 
+    const base = this.role === 'seller' ? '/admin/seller' : '/admin/valuator';
+    const roleLabel = this.role === 'seller' ? 'Vendedor' : 'Valuator';
+
     // Inicializar itemOverview
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -63,7 +73,7 @@ export class AppointmentsComponent implements OnInit {
         user: {
           name: user.name || user.nickname || 'Usuario',
           surname: user.surname || '',
-          role: 'Valuator',
+          role: roleLabel,
           email: user.email || '',
           picturepath: ''
         },
@@ -71,7 +81,7 @@ export class AppointmentsComponent implements OnInit {
           {
             title: 'Citas valuación',
             icon: 'fi fi-rr-car',
-            permalink: '/admin/valuator/appointment'
+            permalink: base + '/appointment'
           }
         ]
       };
@@ -81,7 +91,7 @@ export class AppointmentsComponent implements OnInit {
         user: {
           name: 'Usuario',
           surname: '',
-          role: 'Valuator',
+          role: roleLabel,
           email: '',
           picturepath: ''
         },
@@ -89,7 +99,7 @@ export class AppointmentsComponent implements OnInit {
           {
             title: 'Citas valuación',
             icon: 'fi fi-rr-car',
-            permalink: '/admin/valuator/appointment'
+            permalink: base + '/appointment'
           }
         ]
       };

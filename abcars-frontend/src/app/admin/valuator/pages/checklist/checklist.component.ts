@@ -73,6 +73,12 @@ export class ChecklistComponent implements OnInit {
     // References Overview para el encabezado
     public itemOverview: Overview;
 
+    private role = localStorage.getItem('role') || '';
+
+    get baseUrl(): string {
+        return this.role === 'seller' ? '/admin/seller' : '/admin/valuator';
+    }
+
     constructor(
         private _formBuilder: UntypedFormBuilder,
         private _activatedRoute: ActivatedRoute,
@@ -81,6 +87,9 @@ export class ChecklistComponent implements OnInit {
         private _detailValuationService: DetailValuationService,
         private _router: Router
     ) {
+        const base = this.role === 'seller' ? '/admin/seller' : '/admin/valuator';
+        const roleLabel = this.role === 'seller' ? 'Vendedor' : 'Valuator';
+
         // Inicializar itemOverview
         try {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -88,7 +97,7 @@ export class ChecklistComponent implements OnInit {
                 user: {
                     name: user.name || user.nickname || 'Usuario',
                     surname: user.surname || '',
-                    role: 'Valuator',
+                    role: roleLabel,
                     email: user.email || '',
                     picturepath: ''
                 },
@@ -96,7 +105,7 @@ export class ChecklistComponent implements OnInit {
                     {
                         title: 'Citas valuación',
                         icon: 'fi fi-rr-car',
-                        permalink: '/admin/valuator/appointment'
+                        permalink: base + '/appointment'
                     }
                 ]
             };
@@ -106,7 +115,7 @@ export class ChecklistComponent implements OnInit {
                 user: {
                     name: 'Usuario',
                     surname: '',
-                    role: 'Valuator',
+                    role: roleLabel,
                     email: '',
                     picturepath: ''
                 },
@@ -114,7 +123,7 @@ export class ChecklistComponent implements OnInit {
                     {
                         title: 'Citas valuación',
                         icon: 'fi fi-rr-car',
-                        permalink: '/admin/valuator/appointment'
+                        permalink: base + '/appointment'
                     }
                 ]
             };
@@ -503,7 +512,7 @@ export class ChecklistComponent implements OnInit {
                             text: 'No se pudo cargar el checklist. Por favor, intenta nuevamente.',
                             confirmButtonText: 'Aceptar'
                         }).then(() => {
-                            this._router.navigate(['/admin/valuator/appointment']);
+                            this._router.navigate([this.baseUrl, 'appointment']);
                         });
                     }
                 }
@@ -531,7 +540,7 @@ export class ChecklistComponent implements OnInit {
                             text: 'No se pudo cargar la información de la cita. Por favor, verifica que la cita existe.',
                             confirmButtonText: 'Aceptar'
                         }).then(() => {
-                            this._router.navigate(['/admin/valuator/appointment']);
+                            this._router.navigate([this.baseUrl, 'appointment']);
                         });
                         return;
                     }
@@ -676,7 +685,7 @@ export class ChecklistComponent implements OnInit {
                     text: 'No se pudo cargar la información de la valuación. Por favor, intenta nuevamente.',
                     confirmButtonText: 'Aceptar'
                 }).then(() => {
-                    this._router.navigate(['/admin/valuator/appointment']);
+                    this._router.navigate([this.baseUrl, 'appointment']);
                 });
             }
         });

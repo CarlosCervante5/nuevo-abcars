@@ -66,6 +66,12 @@ class AppointmentController extends Controller
                 $query->where('app_abcars_customer_appointments.type', $data['type']);
             }
 
+            // Si el usuario es seller, mostrar solo sus referidos (solicitudes desde sus links)
+            $user = auth()->user();
+            if ($user && $user->hasRole('seller')) {
+                $query->where('app_abcars_customer_appointments.referrer_user_id', $user->id);
+            }
+
             if (!empty($data['keyword'])) {
                 $keyword = '%' . $data['keyword'] . '%';
                 

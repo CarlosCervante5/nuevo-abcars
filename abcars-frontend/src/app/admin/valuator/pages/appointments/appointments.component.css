@@ -76,29 +76,51 @@
 }
 
 /* Search Bar */
-.appointments-search-bar {
-    margin-bottom: 1rem !important;
+.appointments-search-wrap {
+    position: relative;
+    margin-bottom: 1.25rem;
+}
+
+.appointments-search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 1.125rem;
+    pointer-events: none;
 }
 
 .appointments-search-input {
     width: 100% !important;
-    padding: 0.75rem 1rem !important;
-    border: 1px solid #d1d5db !important;
+    padding: 0.75rem 1rem 0.75rem 2.75rem !important;
+    border: 1px solid #e5e7eb !important;
     border-radius: 0.5rem !important;
     font-size: 0.875rem !important;
     transition: all 0.2s ease !important;
+    background: #fff !important;
 }
 
 .appointments-search-input:focus {
     outline: none !important;
-    ring: 2px !important;
-    ring-color: #f59e0b !important;
     border-color: #f59e0b !important;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.appointments-search-input::placeholder {
+    color: #9ca3af;
 }
 
 /* Table Container */
 .appointments-table-container {
     margin-top: 1.25rem !important;
+}
+
+.appointments-table-container .mat-elevation-z8 {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 /* Status Badges */
@@ -189,4 +211,14 @@ mat-icon {
     display: inline-block !important;
     text-align: center !important;
     vertical-align: middle !important;
+}
+
+/* Footer */
+.admin-view-footer {
+    display: block;
+    text-align: center;
+    font-size: 0.8125rem;
+    color: #9ca3af;
+    padding: 1.5rem 0;
+    margin: 0;
 }

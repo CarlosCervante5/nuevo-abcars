@@ -1,0 +1,178 @@
+<app-overview [overview]="itemOverview" [url_index]="baseUrl" [hideModules]="true"></app-overview>
+<div class="container mx-auto px-6 lg:px-8 pt-24">
+    <div class="w-full mt-5 mb-5">
+        <ng-container *ngIf="loading; else contentTemplate">
+            <div class="w-full flex justify-center items-center py-20">
+                <app-sk-cube></app-sk-cube>
+            </div>
+        </ng-container>
+
+        <ng-template #contentTemplate>
+            <ng-container *ngIf="vehicle">
+                <!-- Breadcrumb y acciones -->
+                <div class="vehicle-detail-view-header">
+                    <nav class="vehicle-detail-view-breadcrumb" aria-label="breadcrumb">
+                        <ol class="vehicle-detail-view-breadcrumb-list">
+                            <li class="vehicle-detail-view-breadcrumb-item" [routerLink]="[baseUrl]">Overview</li>
+                            <li class="vehicle-detail-view-breadcrumb-item" [routerLink]="[baseUrl, 'inventory']">Inventario</li>
+                            <li class="vehicle-detail-view-breadcrumb-item vehicle-detail-view-breadcrumb-item-active" aria-current="page">{{ vehicle.name }}</li>
+                        </ol>
+                    </nav>
+                    <div class="vehicle-detail-view-actions">
+                        <a [routerLink]="[baseUrl, 'inventory']" class="valuator-back-link vehicle-detail-view-back-link">
+                            <i class="fi fi-rr-arrow-left"></i> Regresar a Inventario
+                        </a>
+                        <button type="button" class="vehicle-detail-view-btn vehicle-detail-view-btn-primary" (click)="downloadPhotos($event)">
+                            <i class="fi fi-rr-download"></i> Descargar fotos
+                        </button>
+                    </div>
+                </div>
+
+                <h1 class="vehicle-detail-view-title">{{ vehicle.name }}</h1>
+                <p class="vehicle-detail-view-subtitle">{{ vehicle.brand?.name }} {{ vehicle.model?.name }} {{ vehicle.version?.name }} · {{ vehicle.model?.year }}</p>
+
+                <!-- Galería de imágenes -->
+                <div class="vehicle-detail-view-gallery mb-8" *ngIf="vehicle.images?.length || vehicle.first_image">
+                    <h3 class="vehicle-detail-view-section-title">Fotos de la unidad</h3>
+                    <div class="vehicle-detail-view-images-grid">
+                        <ng-container *ngIf="vehicle.images?.length; else singleImage">
+                            <div *ngFor="let img of vehicle.images" class="vehicle-detail-view-image-wrap">
+                                <img [src]="image(img.service_image_url)" [alt]="vehicle.name" class="vehicle-detail-view-image">
+                            </div>
+                        </ng-container>
+                        <ng-template #singleImage>
+                            <div class="vehicle-detail-view-image-wrap" *ngIf="vehicle.first_image">
+                                <img [src]="image(vehicle.first_image.service_image_url)" [alt]="vehicle.name" class="vehicle-detail-view-image">
+                            </div>
+                        </ng-template>
+                    </div>
+                </div>
+
+                <!-- Información general -->
+                <div class="vehicle-detail-view-section mb-6">
+                    <h3 class="vehicle-detail-view-section-title">Información general</h3>
+                    <div class="vehicle-detail-view-grid">
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Nombre</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.name }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Descripción</span>
+                            <span class="vehicle-detail-view-value vehicle-detail-view-value-block">{{ vehicle.description || '-' }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">VIN</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.vin }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Estatus</span>
+                            <span class="vehicle-detail-view-value">
+                                <span class="vehicle-detail-view-status" [class.active]="vehicle.page_status === 'active'" [class.inactive]="vehicle.page_status !== 'active'">
+                                    {{ getStatusLabel(vehicle.page_status) }}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Sucursal</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.dealership?.name || '-' }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Ubicación</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.dealership?.location || '-' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Especificaciones del vehículo -->
+                <div class="vehicle-detail-view-section mb-6">
+                    <h3 class="vehicle-detail-view-section-title">Especificaciones</h3>
+                    <div class="vehicle-detail-view-grid">
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Marca</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.brand?.name || '-' }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Modelo</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.model?.name || '-' }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Año</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.model?.year || '-' }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Versión</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.version?.name || '-' }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Carrocería</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.body?.name || '-' }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Tipo</span>
+                            <span class="vehicle-detail-view-value">{{ getTypeLabel(vehicle.type) }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Categoría</span>
+                            <span class="vehicle-detail-view-value">{{ getCategoryLabel(vehicle.category) }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Kilometraje</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.mileage | number }} km</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Transmisión</span>
+                            <span class="vehicle-detail-view-value">{{ getTransmissionLabel(vehicle.transmission) }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Combustible</span>
+                            <span class="vehicle-detail-view-value">{{ getFuelLabel(vehicle.fuel_type) }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Cilindros</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.cylinders || '-' }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Color exterior</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.exterior_color || '-' }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Color interior</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.interior_color || '-' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Precios -->
+                <div class="vehicle-detail-view-section mb-6">
+                    <h3 class="vehicle-detail-view-section-title">Precios</h3>
+                    <div class="vehicle-detail-view-grid">
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Precio de venta</span>
+                            <span class="vehicle-detail-view-value price">{{ vehicle.sale_price | currency:'$ ':'symbol':'1.2-2' }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Precio de lista</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.list_price | currency:'$ ':'symbol':'1.2-2' }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field" *ngIf="vehicle.offer_price">
+                            <span class="vehicle-detail-view-label">Precio de oferta</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.offer_price | currency:'$ ':'symbol':'1.2-2' }}</span>
+                        </div>
+                        <div class="vehicle-detail-view-field">
+                            <span class="vehicle-detail-view-label">Fecha de compra</span>
+                            <span class="vehicle-detail-view-value">{{ vehicle.purchase_date | date:'dd/MM/yyyy' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hoja de especificaciones -->
+                <div class="vehicle-detail-view-section mb-6" *ngIf="vehicle.spec_sheet">
+                    <h3 class="vehicle-detail-view-section-title">Hoja de especificaciones</h3>
+                    <a [href]="vehicle.spec_sheet" target="_blank" rel="noopener" class="vehicle-detail-view-link">{{ vehicle.spec_sheet }}</a>
+                </div>
+            </ng-container>
+        </ng-template>
+
+        <footer class="admin-view-footer">© {{ currentYear }} ABCars.mx - Todos los derechos reservados.</footer>
+    </div>
+</div>

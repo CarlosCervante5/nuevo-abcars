@@ -72,6 +72,23 @@
   min-height: 50px;
 }
 
+.inventory-link {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.inventory-link a {
+  color: var(--ion-color-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.inventory-link a:hover {
+  text-decoration: underline;
+}
+
 .error-message {
   color: var(--ion-color-danger);
   margin-top: 16px;

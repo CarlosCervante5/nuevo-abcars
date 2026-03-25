@@ -41,6 +41,8 @@ import InternalPhotos from './pages/photos/InternalPhotos';
 import VehicleList from './pages/manager/VehicleList';
 import VehicleDetail from './pages/manager/VehicleDetail';
 import VehiclePhotos from './pages/manager/VehiclePhotos';
+import PublicInventoryList from './pages/inventory/PublicInventoryList';
+import PublicVehicleDetail from './pages/inventory/PublicVehicleDetail';
 import { connectivityService } from './services/connectivityService';
 import { processOfflineQueue } from './services/offlineSync';
 
@@ -137,6 +139,12 @@ const App: React.FC = () => {
           <Route exact path="/manager/vehicles/:vehicleUuid/photos">
             {isAuthenticated ? <VehiclePhotos /> : <Redirect to="/login" />}
           </Route>
+          <Route exact path="/inventory">
+            <PublicInventoryList />
+          </Route>
+          <Route exact path="/inventory/:vehicleUuid">
+            <PublicVehicleDetail />
+          </Route>
           <Route exact path="/">
             {isAuthenticated ? (
               (() => {
@@ -156,7 +164,7 @@ const App: React.FC = () => {
                 return <Redirect to="/valuations" />;
               })()
             ) : (
-              <Redirect to="/login" />
+              <Redirect to="/inventory" />
             )}
           </Route>
         </IonRouterOutlet>

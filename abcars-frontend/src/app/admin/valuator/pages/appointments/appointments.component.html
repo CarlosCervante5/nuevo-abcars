@@ -1,14 +1,17 @@
 <!-- <app-new-nav></app-new-nav> -->
-<app-overview [overview]="itemOverview" [url_index]="'/admin/valuator'" [hideModules]="true"></app-overview>
-<div class="container mx-auto px-4 pt-24">
+<app-overview [overview]="itemOverview" [url_index]="baseUrl" [hideModules]="true"></app-overview>
+<div class="container mx-auto px-6 lg:px-8 pt-24">
     <div class="w-full mt-5 mb-5">
         <!-- Header -->
         <div class="mb-3">
             <div class="w-full">
+                <a [routerLink]="[baseUrl]" class="valuator-back-link">
+                    <i class="fi fi-rr-arrow-left"></i> Regresar a Overview
+                </a>
                 <h4 class="appointments-page-title">Solicitudes Citas de valuación</h4>
                 <nav class="appointments-breadcrumb" aria-label="breadcrumb">
                     <ol class="appointments-breadcrumb-list">
-                        <li class="appointments-breadcrumb-item" [routerLink]="['/admin/valuator']">Overview</li>
+                        <li class="appointments-breadcrumb-item" [routerLink]="[baseUrl]">Overview</li>
                         <li class="appointments-breadcrumb-item appointments-breadcrumb-item-active" aria-current="page">Citas de valuación</li>
                     </ol>
                     <div class="flex justify-end p-3">
@@ -19,16 +22,15 @@
         </div>
 
         <!-- Search Input -->
-        <div class="flex flex-wrap mb-3 appointments-search-bar">
-            <div class="w-full mb-2">
-                <input 
-                    type="text"
-                    [(ngModel)]="palabra_busqueda" 
-                    (keyup)="searchKeyboard()" 
-                    placeholder="Buscar por nombre, apellidos, marca, modelo, vin, año"
-                    class="appointments-search-input"
-                >
-            </div>
+        <div class="appointments-search-wrap">
+            <i class="fi fi-rr-search appointments-search-icon"></i>
+            <input 
+                type="text"
+                [(ngModel)]="palabra_busqueda" 
+                (keyup)="searchKeyboard()" 
+                placeholder="Buscar por nombre, apellidos, marca, modelo, vin, año"
+                class="appointments-search-input"
+            >
         </div>
 
              <mat-accordion class="custom-panel">
@@ -176,13 +178,13 @@
                                   Opciones
                                </button>
                               <mat-menu #menu="matMenu">
-                                <a mat-menu-item [routerLink]="['/admin/valuator/checklist/', row.uuid]">
+                                <a mat-menu-item [routerLink]="[baseUrl, 'checklist', row.uuid]">
                                   Comenzar
                                 </a>
                                 <a mat-menu-item (click)="openDownloadValuation(row.uuid)" *ngIf="row.status === 'valuated' || row.status === 'complete_file' ">
                                   Descargar Valuación
                                 </a>
-                                <a mat-menu-item [routerLink]="['/admin/valuator/quote-request/', row.uuid]" *ngIf="row.status === 'checklist_ready' && row.status_parts === 'parts_done' || row.status === 'valuated' ">
+                                <a mat-menu-item [routerLink]="[baseUrl, 'quote-request', row.uuid]" *ngIf="row.status === 'checklist_ready' && row.status_parts === 'parts_done' || row.status === 'valuated' ">
                                   Valuar
                                 </a>
                                 <a mat-menu-item (click)="openBottomSheetDocumentation(row.uuid, row.acquisition_pdf)" *ngIf="row.status === 'checklist_ready' && row.status_parts === 'parts_done' || row.status === 'valuated' || row.status === 'complete_file' ">
@@ -199,5 +201,7 @@
                 <mat-paginator [pageSize]="10" [length]="length" [pageIndex]="page - 1" (page)="paginationChange($event)"></mat-paginator>
             </div>
         </div>
+
+        <footer class="admin-view-footer">© {{ currentYear }} ABCars.mx - Todos los derechos reservados.</footer>
     </div>
 </div>

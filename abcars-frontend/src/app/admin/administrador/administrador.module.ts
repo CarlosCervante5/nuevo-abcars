@@ -12,6 +12,7 @@ import { DealershipsMapComponent } from './pages/dealerships-map/dealerships-map
 import { AnalyticsComponent } from './pages/analytics/analytics.component';
 import { ApiInfoComponent } from './pages/api-info/api-info.component';
 import { DocumentationComponent } from './pages/documentation/documentation.component';
+import { AssistantComponent } from './pages/assistant/assistant.component';
 import { AddUserComponent } from './components/add-user/add-user.component';
 import { SkCubeComponent } from "@components/sk-cube/sk-cube.component";
 import { MatFormFieldModule } from "@angular/material/form-field";
@@ -29,6 +30,7 @@ import { NewNavComponent } from "src/app/shared/versiones-nav/new-nav/new-nav.co
         AnalyticsComponent,
         ApiInfoComponent,
         DocumentationComponent,
+        AssistantComponent,
         AddUserComponent,
         UpdateUserComponent
     ],

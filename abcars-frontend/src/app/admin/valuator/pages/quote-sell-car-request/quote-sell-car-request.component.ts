@@ -34,6 +34,12 @@ export class QuoteSellCarRequestComponent implements OnInit {
     // References Overview para el encabezado
     public itemOverview: Overview;
 
+    private role = localStorage.getItem('role') || '';
+
+    get baseUrl(): string {
+        return this.role === 'seller' ? '/admin/seller' : '/admin/valuator';
+    }
+
     constructor(
         private _formBuilder: UntypedFormBuilder,
         private _activatedRoute: ActivatedRoute,
@@ -41,6 +47,9 @@ export class QuoteSellCarRequestComponent implements OnInit {
         private _updateQuoteValuationService: UpdateQuoteValuationService,
         private _router: Router
     ) {
+        const base = this.role === 'seller' ? '/admin/seller' : '/admin/valuator';
+        const roleLabel = this.role === 'seller' ? 'Vendedor' : 'Valuator';
+
         // Inicializar itemOverview
         try {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -48,7 +57,7 @@ export class QuoteSellCarRequestComponent implements OnInit {
                 user: {
                     name: user.name || user.nickname || 'Usuario',
                     surname: user.surname || '',
-                    role: 'Valuator',
+                    role: roleLabel,
                     email: user.email || '',
                     picturepath: ''
                 },
@@ -56,7 +65,7 @@ export class QuoteSellCarRequestComponent implements OnInit {
                     {
                         title: 'Citas valuación',
                         icon: 'fi fi-rr-car',
-                        permalink: '/admin/valuator/appointment'
+                        permalink: base + '/appointment'
                     }
                 ]
             };
@@ -66,7 +75,7 @@ export class QuoteSellCarRequestComponent implements OnInit {
                 user: {
                     name: 'Usuario',
                     surname: '',
-                    role: 'Valuator',
+                    role: roleLabel,
                     email: '',
                     picturepath: ''
                 },
@@ -74,7 +83,7 @@ export class QuoteSellCarRequestComponent implements OnInit {
                     {
                         title: 'Citas valuación',
                         icon: 'fi fi-rr-car',
-                        permalink: '/admin/valuator/appointment'
+                        permalink: base + '/appointment'
                     }
                 ]
             };
@@ -255,7 +264,7 @@ export class QuoteSellCarRequestComponent implements OnInit {
             body_work_painting_cost, estimated_total, trade_in_final, final_offer, status, comments, take_type)
                 .subscribe({
                     next: () => {
-                        this._router.navigateByUrl('/admin/valuator/appointment');
+                        this._router.navigate([this.baseUrl, 'appointment']);
                         Swal.fire({
                             icon: 'success',
                             title: 'Alta registro',

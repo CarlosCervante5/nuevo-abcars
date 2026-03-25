@@ -44,6 +44,11 @@ const routes: Routes = [
     canActivate: [ValuatorGuard],
     canLoad: [ValuatorGuard]
   },
+  { path: 'seller',
+    loadChildren: () => import('./valuator/valuator.module').then( m => m.ValuatorModule ),
+    canActivate: [ValuatorGuard],
+    canLoad: [ValuatorGuard]
+  },
   { path: 'technician',
     loadChildren: () => import('./technician/technician.module').then( m => m.TechnicianModule ),
     canActivate: [TechnicianGuard],

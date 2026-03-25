@@ -96,6 +96,9 @@
     </div>
 </nav>
 
+<!-- Asistente flotante (solo administrator y super_admin) -->
+<app-assistant-floating *ngIf="role === 'administrator' || role === 'super_admin'"></app-assistant-floating>
+
 <div class="container mx-auto px-6 lg:px-8 pt-24" *ngIf="!hideModules">
     <!-- Seller / Admin / Marketing Dashboard - diseño mejorado con tarjetas (evita círculo amarillo y muestra flecha VER MÁS) -->
     <div class="seller-dashboard" *ngIf="useModuleCardsLayout">

@@ -11,6 +11,7 @@ export const vehicleService = {
     status?: string;
     brand?: string;
     model?: string;
+    body_names?: string;
     min_price?: number;
     max_price?: number;
   }): Promise<VehicleSearchResponse> {
@@ -18,11 +19,13 @@ export const vehicleService = {
     
     // El backend usa 'paginate' en lugar de 'per_page'
     if (params.per_page) queryParams.append('paginate', params.per_page.toString());
+    if (params.page) queryParams.append('page', params.page.toString());
     // El backend usa 'keyword' en lugar de 'search'
     if (params.search) queryParams.append('keyword', params.search);
     if (params.status) queryParams.append('status', params.status);
     if (params.brand) queryParams.append('brand_names', params.brand);
     if (params.model) queryParams.append('model_names', params.model);
+    if (params.body_names) queryParams.append('body_names', params.body_names);
     if (params.min_price || params.max_price) {
       const prices = [];
       if (params.min_price) prices.push(params.min_price);

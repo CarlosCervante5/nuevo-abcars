@@ -27,6 +27,8 @@ export class AppointmentManagerComponent {
   public length: number  = 0;
 
   public valuators: User[] = [];
+  public isSeller: boolean = false;
+  public currentYear: number = new Date().getFullYear();
 
   // References Overview para el encabezado
   public itemOverview: Overview;
@@ -37,17 +39,19 @@ export class AppointmentManagerComponent {
     // Inicializar itemOverview
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
+      this.isSeller = localStorage.getItem('role') === 'seller';
+      const roleLabel = this.isSeller ? 'Vendedor' : 'Valuation Manager';
       this.itemOverview = {
         user: {
           name: user.name || user.nickname || 'Usuario',
           surname: user.surname || '',
-          role: 'Valuation Manager',
+          role: roleLabel,
           email: user.email || '',
           picturepath: ''
         },
         pages: [
           {
-            title: 'Citas externas de valuación',
+            title: this.isSeller ? 'Mis referidos' : 'Citas externas de valuación',
             icon: 'fi fi-rr-calendar',
             permalink: '/admin/appointment_manager/assing-valuations'
           }
@@ -55,17 +59,18 @@ export class AppointmentManagerComponent {
       };
     } catch (error) {
       // Fallback si hay error al parsear
+      this.isSeller = localStorage.getItem('role') === 'seller';
       this.itemOverview = {
         user: {
           name: 'Usuario',
           surname: '',
-          role: 'Valuation Manager',
+          role: this.isSeller ? 'Vendedor' : 'Valuation Manager',
           email: '',
           picturepath: ''
         },
         pages: [
           {
-            title: 'Citas externas de valuación',
+            title: this.isSeller ? 'Mis referidos' : 'Citas externas de valuación',
             icon: 'fi fi-rr-calendar',
             permalink: '/admin/appointment_manager/assing-valuations'
           }

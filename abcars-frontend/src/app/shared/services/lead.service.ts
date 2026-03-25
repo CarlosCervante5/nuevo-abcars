@@ -66,6 +66,7 @@ export interface ValuationFormData {
   model: string;
   year: number;
   mileage: number;
+  referrer_uuid?: string;
 }
 
 export interface LeadResponse {

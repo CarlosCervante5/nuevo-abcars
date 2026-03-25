@@ -113,14 +113,18 @@ export class LoginComponent implements OnInit {
 
                 // Lista de roles válidos con vistas
                 const validRoles = [
-                    'client', 'administrator', 'marketing', 'blog_manager', 
+                    'client', 'administrator', 'super_admin', 'marketing', 'blog_manager', 
                     'gestor', 'receptionist', 'valuator', 'technician', 
                     'appointment_manager', 'bodywork_paint_technician', 
-                    'spare_parts', 'valuation_manager'
+                    'spare_parts', 'valuation_manager', 'seller'
                 ];
 
                 if( loginResponse.data.role === 'client') {
                     this._router.navigateByUrl('/auth/mi-cuenta');
+                } else if (loginResponse.data.role === 'seller') {
+                    this._router.navigateByUrl('/admin/seller');
+                } else if (loginResponse.data.role === 'super_admin') {
+                    this._router.navigateByUrl('/admin/administrator');
                 } else if (validRoles.includes(loginResponse.data.role)) {
                     this._router.navigateByUrl(`/admin/${loginResponse.data.role}`);
                 } else {
