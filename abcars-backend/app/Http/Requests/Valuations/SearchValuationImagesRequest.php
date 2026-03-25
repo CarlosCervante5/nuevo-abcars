@@ -23,4 +23,13 @@ class SearchValuationImagesRequest extends FormRequest
         ];
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('group_name')) {
+            $this->merge([
+                'group_name' => strtolower((string) $this->input('group_name')),
+            ]);
+        }
+    }
+
 }

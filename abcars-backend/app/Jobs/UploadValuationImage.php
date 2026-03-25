@@ -13,6 +13,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class UploadValuationImage implements ShouldQueue
 {
@@ -59,7 +60,7 @@ class UploadValuationImage implements ShouldQueue
                 'sort_id' => $this->sort_id,
             ]);
 
-            $name = time() . '_' . $this->sort_id;
+            $name = time() . '_' . $this->sort_id . '_' . Str::lower(Str::random(8));
 
             $cloudinary_file = $cloudinary->uploadApi()->upload(storage_path('app/' . $this->path), [
                 'public_id' => $name,
