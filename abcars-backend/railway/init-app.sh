@@ -13,6 +13,7 @@ php artisan migrate --force
 php artisan db:seed --class=RolesPermissionsSeeder --force
 php artisan db:seed --class=DealershipsSeeder --force
 php artisan db:seed --class=VehiclesDemoSeeder --force
+php artisan db:seed --class=InventoryFromLocalSeeder --force
 php artisan db:seed --class=DeliveryPhotosSeeder --force
 
 # Seeders exclusivos para entornos no productivos (sandbox/local).
