@@ -19,17 +19,27 @@ class AppointmentManagerSeeder extends Seeder
 
         $role = Role::findByName('appointment_manager');
 
-        // Create demo users
-        $user = User::factory()->create([
-            'nickname' => 'Asigna_Cita_Valuacion',
-            'email' => 'corina@abcars.mx',
-            'password' => 'CorinaEstebanes%2024%%'
-        ]);
-        $user->assignRole($role);
+        $user = User::firstOrCreate(
+            ['email' => 'corina@abcars.mx'],
+            ['nickname' => 'Asigna_Cita_Valuacion', 'password' => 'CorinaEstebanes%2024%%']
+        );
 
-        $user->userProfile()->create([
-            'name' => 'Corina',
-            'last_name' => 'Estebanes'
-        ]);
+        if ($user->wasRecentlyCreated) {
+            $user->assignRole($role);
+            $user->userProfile()->create([
+                'name' => 'Corina',
+                'last_name' => 'Estebanes'
+            ]);
+        } else {
+            if (! $user->hasRole('appointment_manager')) {
+                $user->assignRole($role);
+            }
+            if (! $user->userProfile) {
+                $user->userProfile()->create([
+                    'name' => 'Corina',
+                    'last_name' => 'Estebanes'
+                ]);
+            }
+        }
     }
 }

@@ -39,4 +39,19 @@ return [
         'key' => env('OPENAI_API_KEY'),
     ],
 
+    /*
+    | Destinatarios de notificación de citas de valuación.
+    */
+    'valuation' => [
+        'puebla_mail' => env('VALUATION_PUEBLA_MAIL', ''),
+        'hidalgo_mail' => env('VALUATION_HIDALGO_MAIL', ''),
+    ],
+
+    /*
+    | Correo de prueba tras deploy (Railway).
+    */
+    'deploy_mail_test' => [
+        'to' => env('MAIL_DEPLOY_TEST_TO', ''),
+    ],
+
 ];

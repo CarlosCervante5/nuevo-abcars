@@ -14,10 +14,15 @@ class ValuationCheckpointsSeeder extends Seeder
      */
     public function run(): void
     {
+        $table = env('DB_TABLE_PREFIX', '') . 'valuation_checkpoints';
+        if (DB::table($table)->exists()) {
+            return;
+        }
+
         // Llenar 100 puntos de la valuación
 
         // Inicia Mecánica y Eléctrica
-        DB::table(env('DB_TABLE_PREFIX', '') . 'valuation_checkpoints')->insert([
+        DB::table($table)->insert([
             [
                 'uuid' => Uuid::uuid4(),
                 'sort_id' => 0,
