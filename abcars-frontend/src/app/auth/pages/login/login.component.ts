@@ -111,6 +111,9 @@ export class LoginComponent implements OnInit {
                 // Guardar el perfil por separado
                 localStorage.setItem('profile', JSON.stringify( loginResponse.data.profile));
 
+                // Limpiar historial del chat público al iniciar sesión
+                sessionStorage.removeItem('abcars_chat_history');
+
                 // Lista de roles válidos con vistas
                 const validRoles = [
                     'client', 'administrator', 'super_admin', 'marketing', 'blog_manager', 

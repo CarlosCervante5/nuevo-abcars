@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PublicAssistantService, ChatMessage, AssistantResponse } from '@services/public-assistant.service';
@@ -15,23 +15,42 @@ const WELCOME_MESSAGE = '¡Hola! Soy el asistente virtual de ABCars. Puedo ayuda
   styleUrls: ['./chat-widget.component.css'],
   encapsulation: ViewEncapsulation.None
 })
-export class ChatWidgetComponent implements OnInit, AfterViewChecked {
+export class ChatWidgetComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef<HTMLDivElement>;
 
   isOpen: boolean = false;
   messages: ChatMessage[] = [];
   isLoading: boolean = false;
   currentMessage: string = '';
+  isLoggedIn: boolean = false;
 
   private welcomeShown: boolean = false;
   private shouldScrollToBottom: boolean = false;
+  private authCheckInterval: any;
 
   constructor(private publicAssistantService: PublicAssistantService) {}
 
   ngOnInit(): void {
+    this.isLoggedIn = !!localStorage.getItem('user_token');
     this.loadHistory();
     if (this.messages.length > 0) {
       this.welcomeShown = true;
+    }
+    // Check auth every 2 seconds instead of every change detection cycle
+    this.authCheckInterval = setInterval(() => {
+      const loggedIn = !!localStorage.getItem('user_token');
+      if (loggedIn !== this.isLoggedIn) {
+        this.isLoggedIn = loggedIn;
+        if (loggedIn) {
+          this.isOpen = false;
+        }
+      }
+    }, 2000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.authCheckInterval) {
+      clearInterval(this.authCheckInterval);
     }
   }
 
@@ -75,6 +94,8 @@ export class ChatWidgetComponent implements OnInit, AfterViewChecked {
     this.saveHistory();
 
     const history = this.messages.slice(0, -1);
+
+    console.log('Sending to API:', { message: text, conversation_history: history.map(m => ({ role: m.role, content: m.content })) });
 
     this.publicAssistantService.sendMessage(text, history).subscribe({
       next: (res: AssistantResponse) => {

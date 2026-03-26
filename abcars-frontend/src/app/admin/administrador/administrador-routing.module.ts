@@ -20,6 +20,10 @@ const routes: Routes = [
   { path: 'assistant', component: AssistantComponent },
   { path: 'api-info', component: ApiInfoComponent },
   { path: 'documentation', component: DocumentationComponent },
+  {
+    path: 'analytics-dashboard',
+    loadComponent: () => import('./pages/analytics-dashboard/analytics-dashboard.component').then(m => m.AnalyticsDashboardComponent)
+  },
 ];
 
 @NgModule({

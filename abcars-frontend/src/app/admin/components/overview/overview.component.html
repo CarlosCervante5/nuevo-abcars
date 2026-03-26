@@ -207,7 +207,7 @@
                           [class.disabled]="!page.permalink && !page.action"
                           *ngFor="let page of overview?.pages">
                             <div class="card-module-body">
-                                <div class="card-module-icon" *ngIf="page.icon">
+                                <div class="card-module-icon" *ngIf="page.icon" [attr.data-color]="page.iconColor || 'blue'">
                                     <i [class]="page.icon"></i>
                                 </div>
                                 <h4>{{ page.title }}</h4>

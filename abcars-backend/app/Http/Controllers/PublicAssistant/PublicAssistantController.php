@@ -22,9 +22,9 @@ class PublicAssistantController extends Controller
     {
         $validated = $request->validate([
             'message' => 'required|string|max:500',
-            'conversation_history' => 'nullable|array|max:20',
-            'conversation_history.*.role' => 'required_with:conversation_history|string|in:user,assistant',
-            'conversation_history.*.content' => 'required_with:conversation_history|string|max:1000',
+            'conversation_history' => 'nullable|array',
+            'conversation_history.*.role' => 'nullable|string|in:user,assistant',
+            'conversation_history.*.content' => 'nullable|string|max:2000',
         ]);
 
         $apiKey = config('services.openai.key', env('OPENAI_API_KEY'));
@@ -61,6 +61,10 @@ RESTRICCIONES:
 - NO tienes acceso a datos internos, usuarios, valuaciones, estadísticas ni información administrativa
 - Si te preguntan algo fuera de tu ámbito, responde amablemente que solo puedes ayudar con información de vehículos disponibles y gestión de citas
 - Responde SIEMPRE en español, de forma clara, amigable y concisa
+
+FINANCIAMIENTO:
+- Si el visitante pregunta por financiamiento, crédito, simulador de crédito o solicitud de financiamiento, dirígelo al formulario con este link: {FRONTEND_URL}/financiamiento
+- Ejemplo: "Puedes simular tu crédito y solicitar financiamiento directamente aquí: [Solicitar financiamiento]({FRONTEND_URL}/financiamiento)"
 
 FORMATO DE RESPUESTA PARA VEHÍCULOS:
 Cuando muestres vehículos, usa EXACTAMENTE este formato markdown para cada uno:

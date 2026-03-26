@@ -125,9 +125,15 @@ class AssistantController extends Controller
 
     private function callChatGPTWithTools(string $apiKey, string $userMessage): array
     {
+        $user = auth()->user();
+        $userName = $user?->name ?? 'Usuario';
+        $userRole = $user?->getRoleNames()->first() ?? 'sin rol';
+
         $systemPrompt = <<<PROMPT
 Eres el asistente de datos del panel de administración de ABCars, un sistema de gestión de seminuevos.
 Respondes en español de forma clara y concisa.
+
+El usuario que te habla es: {$userName} (rol: {$userRole}). Salúdalo por su nombre cuando sea apropiado.
 
 IMPORTANTE: Usa UNA SOLA herramienta por consulta. El usuario hace preguntas específicas:
 - Si pregunta por valuaciones (total, este mes, por estado) → usa ÚNICAMENTE get_valuations

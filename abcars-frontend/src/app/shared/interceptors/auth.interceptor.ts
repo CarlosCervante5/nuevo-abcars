@@ -23,7 +23,8 @@ export class AuthInterceptor implements HttpInterceptor {
       '/api/auth/login',
       '/api/auth/register',
       '/api/auth/recover_account',
-      '/api/auth/reset_password'
+      '/api/auth/reset_password',
+      '/api/public-assistant/'
     ];
 
     const isExcluded = excludedEndpoints.some(endpoint => req.url.includes(endpoint));

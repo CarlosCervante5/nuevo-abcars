@@ -34,6 +34,7 @@ use App\Http\Controllers\Vehicles\VehicleBrandController;
 use App\Http\Controllers\Vehicles\VehicleController;
 use App\Http\Controllers\Vehicles\VehicleImageController;
 use App\Http\Controllers\Analytics\AnalyticsController;
+use App\Http\Controllers\Analytics\AdminAnalyticsDashboardController;
 use App\Http\Controllers\Assistant\AssistantController;
 use Illuminate\Support\Facades\Route;
 
@@ -297,13 +298,25 @@ Route::prefix('analytics')->group(function () {
 
 // Fin Segmento Analytics
 
+// Segmento Analytics Dashboard (admin)
+Route::prefix('admin/analytics')->middleware(['auth:sanctum', 'role:administrator|super_admin'])->group(function () {
+    Route::get('/dealerships', [AdminAnalyticsDashboardController::class, 'dealerships']);
+    Route::get('/top-sold', [AdminAnalyticsDashboardController::class, 'topSold']);
+    Route::get('/recent-sold', [AdminAnalyticsDashboardController::class, 'recentSold']);
+    Route::get('/most-requested', [AdminAnalyticsDashboardController::class, 'mostRequested']);
+    Route::get('/most-valuated', [AdminAnalyticsDashboardController::class, 'mostValuated']);
+    Route::get('/longest-inventory', [AdminAnalyticsDashboardController::class, 'longestInventory']);
+    Route::get('/price-history', [AdminAnalyticsDashboardController::class, 'priceHistory']);
+});
+// Fin Segmento Analytics Dashboard
+
 // Segmento Asistente (solo administrator y super_admin)
 Route::prefix('assistant')->middleware(['auth:sanctum', 'role:administrator|super_admin'])->group(function () {
     Route::post('/query', [AssistantController::class, 'query']);
 });
 
 // Segmento Asistente Público (sin autenticación)
-Route::prefix('public-assistant')->middleware(['bandwidth_usage', 'throttle:20,1'])->group(function () {
+Route::prefix('public-assistant')->middleware(['bandwidth_usage'])->group(function () {
     Route::post('/query', [\App\Http\Controllers\PublicAssistant\PublicAssistantController::class, 'query']);
 });
 
