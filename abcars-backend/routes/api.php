@@ -458,6 +458,12 @@ Route::prefix('quizzes')->middleware('bandwidth_usage')->group(function () {
 
 // Fin Customer Quizzes
 
+// Segmento Seller
+Route::prefix('seller')->middleware(['auth:sanctum'])->group(function () {
+    Route::get('/referral-stats', [\App\Http\Controllers\Seller\SellerReferralController::class, 'stats']);
+});
+// Fin Segmento Seller
+
 // Segmento Appointments
 
 Route::prefix('appointment')->middleware('bandwidth_usage')->group(function () {

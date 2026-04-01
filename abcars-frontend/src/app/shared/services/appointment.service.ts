@@ -78,13 +78,16 @@ export class AppointmentService {
   //   return this._http.get<ValuationAppointments>(`${ this.baseUrl }/api/valuations/search`, {headers, params} );
   // }
 
-  public getExternalDates(page:number){
+  public getExternalDates(page:number, keyword: string = ''){
     let user_token = localStorage.getItem('user_token');
     let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
     let params = new HttpParams(); 
 
     if (page) {
     params = params.set('page', page.toString());
+    }
+    if (keyword.length > 0) {
+      params = params.set('keyword', keyword);
     }
     return this._http.post<AppointmentResponse>(`${this.baseUrl}/api/appointment/search`, null ,{headers: headers, params});
   }

@@ -81,6 +81,18 @@
                                 <span>Compartir</span>
                             </button>
                             <button 
+                                *ngIf="showShareColumn"
+                                type="button" 
+                                class="inventory-view-btn inventory-view-btn-share"
+                                style="background-color: #25D366; color: #fff;"
+                                (click)="shareVehicleWhatsApp(element, $event)"
+                                matTooltip="Compartir por WhatsApp"
+                                title="Compartir por WhatsApp"
+                            >
+                                <i class="fi fi-brands-whatsapp"></i>
+                                <span>WhatsApp</span>
+                            </button>
+                            <button 
                                 type="button" 
                                 class="inventory-view-btn inventory-view-btn-photos"
                                 (click)="downloadPhotos(element, $event)"

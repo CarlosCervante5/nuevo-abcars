@@ -115,6 +115,21 @@ export class InventoryViewComponent {
         });
     }
 
+    shareVehicleWhatsApp(vehicle: Vehicle, event: Event): void {
+        event.stopPropagation();
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const uuid = user?.uuid;
+        if (!uuid) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo obtener tu identificador.' });
+            return;
+        }
+        const vehicleUrl = this._referralService.buildVehicleReferralUrl(vehicle.uuid, uuid);
+        const vehicleName = vehicle.name || 'este vehículo';
+        const message = `¡Hola! Te comparto ${vehicleName} de ABCars. Míralo aquí: ${vehicleUrl}`;
+        const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        window.open(waUrl, '_blank');
+    }
+
     public getVehicles(page: number) {
         this._vehicleService.getVehicles(page, this.palabra_busqueda, this.pageSize, this.relationship_names)
             .subscribe({

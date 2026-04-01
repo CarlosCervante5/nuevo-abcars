@@ -74,10 +74,13 @@ class AppointmentController extends Controller
 
             if (!empty($data['keyword'])) {
                 $keyword = '%' . $data['keyword'] . '%';
-                
-                $query->orWhere('app_abcars_customers.name', 'LIKE', $keyword)
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('app_abcars_customers.name', 'LIKE', $keyword)
                       ->orWhere('app_abcars_customers.last_name', 'LIKE', $keyword)
-                      ->orWhere('app_abcars_customers.phone_1', 'LIKE', $keyword);
+                      ->orWhere('app_abcars_customers.phone_1', 'LIKE', $keyword)
+                      ->orWhere('app_abcars_customer_vehicles.brand_name', 'LIKE', $keyword)
+                      ->orWhere('app_abcars_customer_vehicles.model_name', 'LIKE', $keyword);
+                });
             }
 
             $appointments = $query->groupBy(
