@@ -10,30 +10,33 @@ return new class extends Migration
     {
         $prefix = env('DB_TABLE_PREFIX', '');
 
-        Schema::create($prefix . 'analytics_page_views', function (Blueprint $table) {
-            $table->id();
-            $table->string('path', 500);
-            $table->string('referrer', 500)->nullable();
-            $table->string('user_agent', 500)->nullable();
-            $table->string('ip', 45)->nullable();
-            $table->string('session_id', 100)->nullable();
-            $table->date('view_date');
-            $table->timestamps();
-        });
+        $pageViews = $prefix . 'analytics_page_views';
+        if (! Schema::hasTable($pageViews)) {
+            Schema::create($pageViews, function (Blueprint $table) {
+                $table->id();
+                $table->string('path', 500);
+                $table->string('referrer', 500)->nullable();
+                $table->string('user_agent', 500)->nullable();
+                $table->string('ip', 45)->nullable();
+                $table->string('session_id', 100)->nullable();
+                $table->date('view_date');
+                $table->timestamps();
+                $table->index('view_date');
+                $table->index('path');
+            });
+        }
 
-        Schema::create($prefix . 'analytics_form_submissions', function (Blueprint $table) {
-            $table->id();
-            $table->string('form_type', 50);
-            $table->json('metadata')->nullable();
-            $table->string('ip', 45)->nullable();
-            $table->string('user_agent', 500)->nullable();
-            $table->timestamps();
-        });
-
-        Schema::table($prefix . 'analytics_page_views', function (Blueprint $table) use ($prefix) {
-            $table->index('view_date');
-            $table->index('path');
-        });
+        $formSubmissions = $prefix . 'analytics_form_submissions';
+        if (! Schema::hasTable($formSubmissions)) {
+            Schema::create($formSubmissions, function (Blueprint $table) {
+                $table->id();
+                $table->string('form_type', 50);
+                $table->json('metadata')->nullable();
+                $table->string('ip', 45)->nullable();
+                $table->string('user_agent', 500)->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     public function down(): void
