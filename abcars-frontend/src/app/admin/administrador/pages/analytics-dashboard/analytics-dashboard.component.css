@@ -1,0 +1,23 @@
+::ng-deep .filter-field .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+::ng-deep .filter-field {
+  width: 200px;
+}
+
+::ng-deep .filter-field .mdc-notched-outline__leading,
+::ng-deep .filter-field .mdc-notched-outline__notch,
+::ng-deep .filter-field .mdc-notched-outline__trailing {
+  border-color: #e5e7eb !important;
+}
+
+::ng-deep .filter-field .mat-mdc-select-value {
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  ::ng-deep .filter-field {
+    width: 100%;
+  }
+}

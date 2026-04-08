@@ -319,11 +319,12 @@ class PublicAssistantToolsService
         $parsedDate = null;
         try {
             $parsedDate = Carbon::parse($scheduledDate);
-            if ($parsedDate->isPast()) {
-                $errors[] = 'La fecha de la cita debe ser una fecha futura.';
+            if ($parsedDate->isPast() || $parsedDate->isToday()) {
+                $tomorrow = Carbon::tomorrow()->format('d/m/Y');
+                $errors[] = "Por el momento no tenemos citas disponibles para hoy. Puedes agendar a partir de mañana ({$tomorrow}).";
             }
         } catch (\Exception $e) {
-            $errors[] = 'La fecha proporcionada no es válida.';
+            $errors[] = 'La fecha proporcionada no es válida. Usa el formato: YYYY-MM-DD HH:mm (ejemplo: 2026-03-28 10:00).';
         }
 
         $dealership = Dealership::whereRaw('LOWER(name) = ?', [strtolower(trim($dealershipName))])->first();

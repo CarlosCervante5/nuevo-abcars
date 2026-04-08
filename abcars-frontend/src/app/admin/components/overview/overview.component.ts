@@ -27,6 +27,8 @@ export class OverviewComponent implements OnInit {
     @Input() url_index?: String;
     @Input() hideModules: boolean = false; // Para ocultar la sección "Mis Modulos"
     @Input() referralLink?: string; // Link de referido para mostrar junto al título (sellers)
+    @Input() referralStats: { total_referrals: number; month_referrals: number; converted_referrals: number } | null = null;
+    @Input() statsLoading: boolean = false;
 
     // References    
     public image_path: string = '';
@@ -142,5 +144,13 @@ export class OverviewComponent implements OnInit {
 
     openExternal(url: string): void {
         if (url) window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    shareWhatsApp(): void {
+        if (this.referralLink) {
+            const message = `¡Hola! Te comparto el catálogo de vehículos de ABCars. Encuentra tu próximo auto aquí: ${this.referralLink}`;
+            const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
     }
 }

@@ -17,6 +17,9 @@
             type="text" 
             placeholder="Buscar por nombre, teléfono, marca, modelo..."
             class="appointment-manager-input"
+            [(ngModel)]="searchKeyword"
+            (ngModelChange)="onSearchInput()"
+            (keydown.enter)="onSearch()"
         >
     </div>
     

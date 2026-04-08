@@ -92,6 +92,13 @@ export class DashboardAdminComponent {
         iconColor: 'purple'
       },
       {
+        title: 'Analytics Dashboard',
+        icon: 'fi fi-rr-chart-histogram',
+        permalink: '/admin/administrator/analytics-dashboard',
+        description: 'Métricas de negocio: ventas, solicitudes, valuaciones e inventario.',
+        iconColor: 'amber'
+      },
+      {
         title: 'Fotos de entregas',
         icon: 'fi fi-rr-gift',
         permalink: '/admin/gestor/delivery-photos',

@@ -1,10 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { GralResponse, Overview } from '@interfaces/admin.interfaces';
 import { AppointmentResponse,DatDates, DatoTables, ValuatorsResponse, User } from '@interfaces/getAppointments.interface';
 import { AppointmentService } from '@services/appointment.service';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -13,7 +15,7 @@ import Swal from 'sweetalert2';
     styleUrls: ['./appointment-manager.component.css'],
     standalone: false
 })
-export class AppointmentManagerComponent {
+export class AppointmentManagerComponent implements OnInit, OnDestroy {
   public data !: DatDates[];
   public datostable: DatoTables[] = [];
   public displayedColumns: string[] = ['id', 'brand', 'model', 'name', 'last_name', 'phone1', 'date', 'subsidiary', 'valuator'];
@@ -29,6 +31,9 @@ export class AppointmentManagerComponent {
   public valuators: User[] = [];
   public isSeller: boolean = false;
   public currentYear: number = new Date().getFullYear();
+  public searchKeyword: string = '';
+  private searchSubject = new Subject<string>();
+  private searchSubscription?: Subscription;
 
   // References Overview para el encabezado
   public itemOverview: Overview;
@@ -82,8 +87,31 @@ export class AppointmentManagerComponent {
     this.getValuators();
   }
 
+  ngOnInit(): void {
+    this.searchSubscription = this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe((keyword: string) => {
+      this.page = 1;
+      this.getData(this.page);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.searchSubscription?.unsubscribe();
+  }
+
+  onSearch(): void {
+    this.page = 1;
+    this.getData(this.page);
+  }
+
+  onSearchInput(): void {
+    this.searchSubject.next(this.searchKeyword);
+  }
+
   public getData (page:number){
-    this._appointmentService.getExternalDates(page)
+    this._appointmentService.getExternalDates(page, this.searchKeyword)
     .subscribe({
       next: (response: AppointmentResponse) =>{
         this.data = response.data.appointments.data;

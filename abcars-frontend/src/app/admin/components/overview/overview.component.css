@@ -33,13 +33,19 @@
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 50%;
-    background: var(--abcars-primary, #f59e0b);
+    background: #3b82f6;
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 0.75rem;
 }
+
+.card-module-icon[data-color="blue"] { background: #3b82f6; }
+.card-module-icon[data-color="purple"] { background: #8b5cf6; }
+.card-module-icon[data-color="green"] { background: #10b981; }
+.card-module-icon[data-color="amber"] { background: #f59e0b; }
+.card-module-icon[data-color="red"] { background: #ef4444; }
 
 .card-module-icon i {
     font-size: 1.125rem;

@@ -19,6 +19,7 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { UpdateUserComponent } from './components/update-user/update-user.component';
 import { NewNavComponent } from "src/app/shared/versiones-nav/new-nav/new-nav.component";
+import { AnalyticsDashboardComponent } from "./pages/analytics-dashboard/analytics-dashboard.component";
 
 @NgModule({
     declarations: [
@@ -44,7 +45,8 @@ import { NewNavComponent } from "src/app/shared/versiones-nav/new-nav/new-nav.co
         MatFormFieldModule,
         MatInputModule,
         FormsModule,
-        NewNavComponent
+        NewNavComponent,
+        AnalyticsDashboardComponent
     ]
   })
   export class AdministradorModule { }
