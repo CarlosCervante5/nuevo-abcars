@@ -15,6 +15,7 @@ $allowedOrigins = $corsEnv
         'https://honest-art-production-20e5.up.railway.app',
         'https://vigilant-renewal-production-d135.up.railway.app',
         'https://abcars.mx',
+        'https://www.abcars.mx',
         'http://localhost:4200',
         'http://localhost:4201',
         'http://localhost:5173',
