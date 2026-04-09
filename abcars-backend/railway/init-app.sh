@@ -10,15 +10,16 @@ php artisan view:cache
 php artisan migrate --force
 
 # Run seeders (idempotentes: firstOrCreate evita duplicados)
+# Producción: solo lo mínimo; el inventario viene del dump real, no de seeders demo.
 php artisan db:seed --class=RolesPermissionsSeeder --force
 php artisan db:seed --class=DealershipsSeeder --force
-php artisan db:seed --class=VehiclesDemoSeeder --force
-php artisan db:seed --class=InventoryFromLocalSeeder --force
 php artisan db:seed --class=DeliveryPhotosSeeder --force
 
 # Seeders exclusivos para entornos no productivos (sandbox/local).
 # Requiere APP_ENV=sandbox en Railway Sandbox.
 if [ "${APP_ENV}" = "sandbox" ] || [ "${APP_ENV}" = "local" ]; then
+  php artisan db:seed --class=VehiclesDemoSeeder --force
+  php artisan db:seed --class=InventoryFromLocalSeeder --force
   php artisan db:seed --class=ValuatorsSeeder --force
   php artisan db:seed --class=TechnicianSeeder --force
   php artisan db:seed --class=PartsManagerSeeder --force
