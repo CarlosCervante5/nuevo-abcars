@@ -331,58 +331,17 @@
     </div>
   </section>
 
-  <!-- CTA Final -->
-  <section class="py-16 bg-gradient-to-r from-gray-900 to-gray-800 text-white">
+  <!-- Nuestras Sucursales (datos desde BD vía /api/dealerships/search) -->
+  <section *ngIf="homeDealerships.length > 0" class="py-16 bg-gradient-to-r from-gray-900 to-gray-800 text-white">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="section-title-large !text-white">Nuestras Sucursales</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <!-- MATRIZ -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg flex flex-col gap-2">
+        <div *ngFor="let d of homeDealerships" class="bg-gray-800 rounded-xl p-6 shadow-lg flex flex-col gap-2">
           <h3 class="text-xl font-bold text-primary-500 mb-1 flex items-center gap-2">
-            <svg class="w-5 h-5 text-primary-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            VENTAS MATRIZ
+            <svg class="w-5 h-5 text-primary-500 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            <span>{{ branchPublicTitle(d) }}</span>
           </h3>
-          <p class="text-base text-gray-200">Blvrd Esteban de Antuñano 1314<br>Obrera Textil José Abascal<br>72130 Puebla, Pue.</p>
-        </div>
-        <!-- SERDAN -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg flex flex-col gap-2">
-          <h3 class="text-xl font-bold text-primary-500 mb-1 flex items-center gap-2">
-            <svg class="w-5 h-5 text-primary-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            VENTAS SERDAN
-          </h3>
-          <p class="text-base text-gray-200">Boulevard Hermanos Serdán 241<br>Ampliación Aquiles Serdán<br>Puebla, Pue.</p>
-        </div>
-        <!-- TLAXCALA -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg flex flex-col gap-2">
-          <h3 class="text-xl font-bold text-primary-500 mb-1 flex items-center gap-2">
-            <svg class="w-5 h-5 text-primary-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            VENTAS SUCURSAL TLAXCALA
-          </h3>
-          <p class="text-base text-gray-200">Carr. Federal Puebla - Tlaxcala Km 18.5<br>Barrio de Guardia<br>90740 Zacatelco, Tlax.</p>
-        </div>
-        <!-- SERVICE, BODY & PAINT -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg flex flex-col gap-2">
-          <h3 class="text-xl font-bold text-primary-500 mb-1 flex items-center gap-2">
-            <svg class="w-5 h-5 text-primary-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            SERVICE, BODY & PAINT
-          </h3>
-          <p class="text-base text-gray-200">Av. 31 Pte. 4110 Ampliación Reforma Sur<br>C.P. 72160, Puebla, Pue.</p>
-        </div>
-        <!-- HIDALGO -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg flex flex-col gap-2">
-          <h3 class="text-xl font-bold text-primary-500 mb-1 flex items-center gap-2">
-            <svg class="w-5 h-5 text-primary-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            VENTAS SUCURSAL HIDALGO
-          </h3>
-          <p class="text-base text-gray-200">Vial, La Paz 113, Adolfo López Mateos<br>42094 Pachuca de Soto, Hgo.</p>
-        </div>
-        <!-- CHOLULA -->
-        <div class="bg-gray-800 rounded-xl p-6 shadow-lg flex flex-col gap-2">
-          <h3 class="text-xl font-bold text-primary-500 mb-1 flex items-center gap-2">
-            <svg class="w-5 h-5 text-primary-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            VENTAS SUCURSAL CHOLULA
-          </h3>
-          <p class="text-base text-gray-200">Lateral Norte Recta a Cholula no. 1408 San Andres Choula<br>72819 Puebla, Pue.</p>
+          <p class="text-base text-gray-200 whitespace-pre-line">{{ d.address || (d.location + ' · ' + d.name) }}</p>
         </div>
       </div>
     </div>

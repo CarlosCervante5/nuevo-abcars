@@ -3,59 +3,66 @@
 namespace Database\Seeders;
 
 use App\Models\Dealership;
+use App\Models\Valuations\VehicleValuation;
+use App\Models\Vehicle;
 use Illuminate\Database\Seeder;
 
 class DealershipsSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
-     * Crea sucursales de prueba para el sistema.
+     * Sucursales reales ABCars (alineadas con el home).
+     * Elimina el resto de sucursales y desasocia vehículos (hay que reasignar en admin si aplica).
      */
     public function run(): void
     {
+        Vehicle::query()->update(['dealership_id' => null]);
+        VehicleValuation::query()->update(['dealership_id' => null]);
+
+        foreach (Dealership::withTrashed()->get() as $d) {
+            $d->forceDelete();
+        }
+
         $sucursales = [
             [
-                'name' => 'vecsa hidalgo',
-                'location' => 'pachuca',
-                'description' => 'Sucursal principal en Pachuca, Hidalgo',
-            ],
-            [
-                'name' => 'vecsa pachuca',
-                'location' => 'pachuca',
-                'description' => 'Sucursal Pachuca centro',
-            ],
-            [
-                'name' => 'abcars cdmx',
-                'location' => 'ciudad de méxico',
-                'description' => 'Sucursal en Ciudad de México',
-            ],
-            [
-                'name' => 'abcars querétaro',
-                'location' => 'querétaro',
-                'description' => 'Sucursal en Querétaro',
-            ],
-            [
-                'name' => 'abcars puebla',
+                'name' => 'ventas matriz',
                 'location' => 'puebla',
-                'description' => 'Sucursal en Puebla',
+                'description' => 'VENTAS MATRIZ',
+                'address' => "Blvrd Esteban de Antuñano 1314\nObrera Textil José Abascal\n72130 Puebla, Pue.",
             ],
             [
-                'name' => 'abcars toluca',
-                'location' => 'toluca',
-                'description' => 'Sucursal en Toluca, Estado de México',
+                'name' => 'ventas serdan',
+                'location' => 'puebla',
+                'description' => 'VENTAS SERDAN',
+                'address' => "Boulevard Hermanos Serdán 241\nAmpliación Aquiles Serdán\nPuebla, Pue.",
+            ],
+            [
+                'name' => 'ventas sucursal tlaxcala',
+                'location' => 'zacatelco',
+                'description' => 'VENTAS SUCURSAL TLAXCALA',
+                'address' => "Carr. Federal Puebla - Tlaxcala Km 18.5\nBarrio de Guardia\n90740 Zacatelco, Tlax.",
+            ],
+            [
+                'name' => 'service body paint',
+                'location' => 'puebla',
+                'description' => 'SERVICE, BODY & PAINT',
+                'address' => "Av. 31 Pte. 4110 Ampliación Reforma Sur\nC.P. 72160, Puebla, Pue.",
+            ],
+            [
+                'name' => 'ventas sucursal hidalgo',
+                'location' => 'pachuca',
+                'description' => 'VENTAS SUCURSAL HIDALGO',
+                'address' => "Vial, La Paz 113, Adolfo López Mateos\n42094 Pachuca de Soto, Hgo.",
+            ],
+            [
+                'name' => 'ventas sucursal cholula',
+                'location' => 'puebla',
+                'description' => 'VENTAS SUCURSAL CHOLULA',
+                'address' => "Lateral Norte Recta a Cholula no. 1408 San Andres Choula\n72819 Puebla, Pue.",
             ],
         ];
 
-        foreach ($sucursales as $sucursal) {
-            Dealership::firstOrCreate(
-                [
-                    'name' => $sucursal['name'],
-                    'location' => $sucursal['location'],
-                ],
-                [
-                    'description' => $sucursal['description'],
-                ]
-            );
+        foreach ($sucursales as $row) {
+            Dealership::create($row);
         }
     }
 }

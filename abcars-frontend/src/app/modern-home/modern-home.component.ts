@@ -14,6 +14,7 @@ import { CampaingService } from '../shared/services/campaing.service';
 import { CompraTuAutoService } from '@services/compra-tu-auto.service';
 import { DeliveryPhotosService, DeliveryPhoto } from '@services/delivery-photos.service';
 import { Vehicle as ApiVehicle, Brand } from '../shared/interfaces/vehicle_data.interface';
+import { Dealership } from '../shared/interfaces/admin.interfaces';
 import { FALLBACK_HERO_IMAGE } from '../shared/constants/fallback-media';
 
 interface Vehicle {
@@ -144,6 +145,9 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
     }
   ];
 
+  /** Sucursales reales para el bloque «Nuestras Sucursales» (API /dealerships/search). */
+  homeDealerships: Dealership[] = [];
+
   deliveryPhotos: DeliveryPhoto[] = [];
   deliveryPhotosLoading = false;
   deliveryCarouselSlidesPerView = 4;
@@ -175,8 +179,48 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
     this.loadActivePromotions();
     this.loadInventoryBrands();
     this.loadInventoryLocations();
+    this.loadHomeDealerships();
     // Cargar fotos de entregas para el carrusel
     this.loadDeliveryPhotos();
+  }
+
+  /** Orden fijo como en el home histórico (Matriz → … → Cholula). */
+  private readonly homeDealershipOrder: Record<string, number> = {
+    'ventas matriz': 1,
+    'ventas serdan': 2,
+    'ventas sucursal tlaxcala': 3,
+    'service body paint': 4,
+    'ventas sucursal hidalgo': 5,
+    'ventas sucursal cholula': 6,
+  };
+
+  loadHomeDealerships(): void {
+    this.vehicleService.searchDealerships().subscribe({
+      next: (res) => {
+        const list = res?.data;
+        if (!Array.isArray(list)) {
+          this.homeDealerships = [];
+          return;
+        }
+        this.homeDealerships = [...list].sort((a, b) => {
+          const na = (a.name || '').toLowerCase().trim();
+          const nb = (b.name || '').toLowerCase().trim();
+          return (this.homeDealershipOrder[na] ?? 99) - (this.homeDealershipOrder[nb] ?? 99);
+        });
+      },
+      error: () => {
+        this.homeDealerships = [];
+      }
+    });
+  }
+
+  /** Título público: campo description del seeder; si no, nombre en mayúsculas. */
+  branchPublicTitle(d: Dealership): string {
+    const t = (d.description || '').trim();
+    if (t) {
+      return t;
+    }
+    return (d.name || '').toUpperCase();
   }
 
   @HostListener('window:resize')
@@ -199,6 +243,7 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
     }
     this.loadDeliveryPhotos(this.deliveryPhotosCurrentPage);
     this.loadMainBanner();
+    this.loadHomeDealerships();
   }
 
   loadDeliveryPhotos(page = 1) {
