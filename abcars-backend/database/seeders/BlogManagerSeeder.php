@@ -17,51 +17,26 @@ class BlogManagerSeeder extends Seeder
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $role = Role::create(['name' => 'blog_manager']);
+        $role = Role::firstOrCreate(['name' => 'blog_manager']);
 
-        // Create demo users
-        $user = User::factory()->create([
-            'nickname' => 'blog_manager',
-            'email' => 'blog_manager@abcars.mx',
-            'password' => 'BlogManager%2025%%'
-        ]);
-        $user->assignRole($role);
+        $blogUsers = [
+            ['email' => 'blog_manager@abcars.mx', 'nickname' => 'blog_manager', 'password' => 'BlogManager%2025%%'],
+            ['email' => 'jesus_manager@abcars.mx', 'nickname' => 'jesus_blog', 'password' => 'JesusManager%2025%%'],
+            ['email' => 'lupita_manager@abcars.mx', 'nickname' => 'lupita_blog', 'password' => 'LupitaManager%2025%%'],
+            ['email' => 'karen_manager@abcars.mx', 'nickname' => 'karen_blog', 'password' => 'KarenManager%2025%%'],
+            ['email' => 'antonio_manager@abcars.mx', 'nickname' => 'tono_blog', 'password' => 'AntonioManager%2025%%'],
+        ];
 
+        foreach ($blogUsers as $attrs) {
+            $user = User::firstOrCreate(
+                ['email' => $attrs['email']],
+                [
+                    'nickname' => $attrs['nickname'],
+                    'password' => $attrs['password'],
+                ]
+            );
+            $user->assignRole($role);
+        }
 
-        // Create demo users
-        $user = User::factory()->create([
-            'nickname' => 'jesus_blog',
-            'email' => 'jesus_manager@abcars.mx',
-            'password' => 'JesusManager%2025%%'
-        ]);
-        $user->assignRole($role);
-
-
-        // Create demo users
-        $user = User::factory()->create([
-            'nickname' => 'lupita_blog',
-            'email' => 'lupita_manager@abcars.mx',
-            'password' => 'LupitaManager%2025%%'
-        ]);
-        $user->assignRole($role);
-
-
-        // Create demo users
-        $user = User::factory()->create([
-            'nickname' => 'karen_blog',
-            'email' => 'karen_manager@abcars.mx',
-            'password' => 'KarenManager%2025%%'
-        ]);
-        $user->assignRole($role);
-
-        // Create demo users
-        $user = User::factory()->create([
-            'nickname' => 'tono_blog',
-            'email' => 'antonio_manager@abcars.mx',
-            'password' => 'AntonioManager%2025%%'
-        ]);
-
-        $user->assignRole($role);
-        
     }
 }

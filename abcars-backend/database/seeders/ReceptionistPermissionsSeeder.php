@@ -17,33 +17,31 @@ class ReceptionistPermissionsSeeder extends Seeder
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $role6 = Role::create(['name' => 'receptionist']);
+        $role6 = Role::firstOrCreate(['name' => 'receptionist']);
 
-        // create demo users
-        $user = User::factory()->create([
-            'nickname' => 'Ivonne_Recepcion',
-            'email' => 'ivonne@abcars.mx',
-            'password' => 'IvonneSalinas%2024%%'
-        ]);
+        $user = User::firstOrCreate(
+            ['email' => 'ivonne@abcars.mx'],
+            ['nickname' => 'Ivonne_Recepcion', 'password' => 'IvonneSalinas%2024%%']
+        );
         $user->assignRole($role6);
+        if ($user->wasRecentlyCreated) {
+            $user->userProfile()->create([
+                'name' => 'Ivonne',
+                'last_name' => 'Salinas',
+            ]);
+        }
 
-        $user->userProfile()->create([
-            'name' => 'Ivonne',
-            'last_name' => 'Salinas'
-        ]);
-
-        // create demo users
-        $user = User::factory()->create([
-            'nickname' => 'Valeria.Recepcion',
-            'email' => 'valeria@abcars.mx',
-            'password' => 'ValeriaGalicia%2024%%'
-        ]);
+        $user = User::firstOrCreate(
+            ['email' => 'valeria@abcars.mx'],
+            ['nickname' => 'Valeria.Recepcion', 'password' => 'ValeriaGalicia%2024%%']
+        );
         $user->assignRole($role6);
-
-        $user->userProfile()->create([
-            'name' => 'Valeria',
-            'last_name' => 'Galicia'
-        ]);
+        if ($user->wasRecentlyCreated) {
+            $user->userProfile()->create([
+                'name' => 'Valeria',
+                'last_name' => 'Galicia',
+            ]);
+        }
 
     }
 }
