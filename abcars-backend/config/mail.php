@@ -1,7 +1,8 @@
 <?php
 
-$mailMarketingUser = env('MAIL_USERNAME_MARKETING');
-$mailMarketingPass = env('MAIL_PASSWORD_MARKETING');
+use Illuminate\Support\Env;
+$mailMarketingUser = Env::get('MAIL_USERNAME_MARKETING');
+$mailMarketingPass = Env::get('MAIL_PASSWORD_MARKETING');
 
 return [
 
@@ -17,7 +18,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'marketing'),
+    'default' => Env::get('MAIL_MAILER', 'marketing'),
 
     /*
     |--------------------------------------------------------------------------
@@ -42,27 +43,27 @@ return [
 
         'logs' => [
             'transport' => 'smtp',
-            'url' => env('MAIL_URL'),
-            'host' => env('MAIL_HOST', '127.0.0.1'),
-            'port' => env('MAIL_PORT', 2525),
-            'encryption' => env('MAIL_ENCRYPTION', 'tls'),
-            'username' => env('MAIL_USERNAME_LOG'),
-            'password' => env('MAIL_PASSWORD_LOG'),
-            'timeout' => env('MAIL_TIMEOUT', 10),
-            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+            'url' => Env::get('MAIL_URL'),
+            'host' => Env::get('MAIL_HOST', '127.0.0.1'),
+            'port' => Env::get('MAIL_PORT', 2525),
+            'encryption' => Env::get('MAIL_ENCRYPTION', 'tls'),
+            'username' => Env::get('MAIL_USERNAME_LOG'),
+            'password' => Env::get('MAIL_PASSWORD_LOG'),
+            'timeout' => Env::get('MAIL_TIMEOUT', 10),
+            'local_domain' => Env::get('MAIL_EHLO_DOMAIN', parse_url(Env::get('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
         'marketing' => [
             'transport' => 'smtp',
-            'url' => env('MAIL_URL'),
-            'host' => env('MAIL_HOST', '127.0.0.1'),
-            'port' => env('MAIL_PORT', 2525),
-            'encryption' => env('MAIL_ENCRYPTION', 'tls'),
+            'url' => Env::get('MAIL_URL'),
+            'host' => Env::get('MAIL_HOST', '127.0.0.1'),
+            'port' => Env::get('MAIL_PORT', 2525),
+            'encryption' => Env::get('MAIL_ENCRYPTION', 'tls'),
             // Brevo/docs suelen usar MAIL_USERNAME + MAIL_PASSWORD; el mailer default es "marketing".
-            'username' => ($mailMarketingUser !== null && $mailMarketingUser !== '') ? $mailMarketingUser : env('MAIL_USERNAME'),
-            'password' => ($mailMarketingPass !== null && $mailMarketingPass !== '') ? $mailMarketingPass : env('MAIL_PASSWORD'),
-            'timeout' => env('MAIL_TIMEOUT', 10),
-            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+            'username' => ($mailMarketingUser !== null && $mailMarketingUser !== '') ? $mailMarketingUser : Env::get('MAIL_USERNAME'),
+            'password' => ($mailMarketingPass !== null && $mailMarketingPass !== '') ? $mailMarketingPass : Env::get('MAIL_PASSWORD'),
+            'timeout' => Env::get('MAIL_TIMEOUT', 10),
+            'local_domain' => Env::get('MAIL_EHLO_DOMAIN', parse_url(Env::get('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
         'ses' => [
@@ -71,7 +72,7 @@ return [
 
         'postmark' => [
             'transport' => 'postmark',
-            // 'message_stream_id' => env('POSTMARK_MESSAGE_STREAM_ID'),
+            // 'message_stream_id' => Env::get('POSTMARK_MESSAGE_STREAM_ID'),
             // 'client' => [
             //     'timeout' => 5,
             // ],
@@ -83,12 +84,12 @@ return [
 
         'sendmail' => [
             'transport' => 'sendmail',
-            'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
+            'path' => Env::get('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
         ],
 
         'log' => [
             'transport' => 'log',
-            'channel' => env('MAIL_LOG_CHANNEL'),
+            'channel' => Env::get('MAIL_LOG_CHANNEL'),
         ],
 
         'array' => [
@@ -125,8 +126,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'address' => Env::get('MAIL_FROM_ADDRESS', 'hello@example.com'),
+        'name' => Env::get('MAIL_FROM_NAME', 'Example'),
     ],
 
 ];

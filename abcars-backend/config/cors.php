@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Env;
 /*
 |--------------------------------------------------------------------------
 | CORS Allowed Origins
@@ -7,11 +8,11 @@
 | Con supports_credentials=true no se puede usar '*'. Debe ser explícito.
 | CORS_ALLOWED_ORIGINS: lista separada por comas (ej: https://app.com,https://app2.com)
 */
-$corsEnv = env('CORS_ALLOWED_ORIGINS');
+$corsEnv = Env::get('CORS_ALLOWED_ORIGINS');
 $allowedOrigins = $corsEnv
     ? array_map('trim', explode(',', $corsEnv))
     : array_values(array_filter([
-        env('FRONTEND_URL'),
+        Env::get('FRONTEND_URL'),
         'https://honest-art-production-20e5.up.railway.app',
         'https://vigilant-renewal-production-d135.up.railway.app',
         'https://abcars.mx',

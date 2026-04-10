@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Env;
 return [
 
     /*
@@ -15,43 +16,43 @@ return [
     */
 
     'postmark' => [
-        'token' => env('POSTMARK_TOKEN'),
+        'token' => Env::get('POSTMARK_TOKEN'),
     ],
 
     'ses' => [
-        'key' => env('AWS_ACCESS_KEY_ID'),
-        'secret' => env('AWS_SECRET_ACCESS_KEY'),
-        'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+        'key' => Env::get('AWS_ACCESS_KEY_ID'),
+        'secret' => Env::get('AWS_SECRET_ACCESS_KEY'),
+        'region' => Env::get('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
     'resend' => [
-        'key' => env('RESEND_KEY'),
+        'key' => Env::get('RESEND_KEY'),
     ],
 
     'slack' => [
         'notifications' => [
-            'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
-            'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
+            'bot_user_oauth_token' => Env::get('SLACK_BOT_USER_OAUTH_TOKEN'),
+            'channel' => Env::get('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
 
     'openai' => [
-        'key' => env('OPENAI_API_KEY'),
+        'key' => Env::get('OPENAI_API_KEY'),
     ],
 
     /*
     | Destinatarios de notificación de citas de valuación.
     */
     'valuation' => [
-        'puebla_mail' => env('VALUATION_PUEBLA_MAIL', ''),
-        'hidalgo_mail' => env('VALUATION_HIDALGO_MAIL', ''),
+        'puebla_mail' => Env::get('VALUATION_PUEBLA_MAIL', ''),
+        'hidalgo_mail' => Env::get('VALUATION_HIDALGO_MAIL', ''),
     ],
 
     /*
     | Correo de prueba tras deploy (Railway).
     */
     'deploy_mail_test' => [
-        'to' => env('MAIL_DEPLOY_TEST_TO', ''),
+        'to' => Env::get('MAIL_DEPLOY_TEST_TO', ''),
     ],
 
 ];

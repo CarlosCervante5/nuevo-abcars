@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Env;
 use Laravel\Sanctum\Sanctum;
 
 return [
@@ -15,7 +16,7 @@ return [
     |
     */
 
-    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
+    'stateful' => explode(',', Env::get('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s',
         'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
         Sanctum::currentApplicationUrlWithPort()
@@ -46,7 +47,7 @@ return [
     |
     */
 
-    'expiration' => env('SANCTUM_STATEFUL_EXPIRATION', 60),
+    'expiration' => Env::get('SANCTUM_STATEFUL_EXPIRATION', 60),
 
     /*
     |--------------------------------------------------------------------------
@@ -61,7 +62,7 @@ return [
     |
     */
 
-    'token_prefix' => env('SANCTUM_TOKEN_PREFIX', ''),
+    'token_prefix' => Env::get('SANCTUM_TOKEN_PREFIX', ''),
 
     /*
     |--------------------------------------------------------------------------
