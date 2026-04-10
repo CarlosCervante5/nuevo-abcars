@@ -64,7 +64,7 @@ import { FALLBACK_HERO_IMAGE } from '../../shared/constants/fallback-media';
             <span class="text-base font-bold text-primary-500">MXN {{ getContadoPrice() | number }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-500">Pago mensual · Pago desde</span>
+            <span class="text-sm text-gray-500">Pago mensual desde</span>
             <span class="text-base font-bold text-gray-900">MXN {{ getMonthlyPayment() | number }}</span>
           </div>
         </div>
