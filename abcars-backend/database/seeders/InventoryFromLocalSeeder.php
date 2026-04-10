@@ -3,8 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Dealership;
-use App\Models\Valuations\VehicleValuation;
-use App\Models\Vehicle;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
@@ -378,6 +376,7 @@ class InventoryFromLocalSeeder extends Seeder
      */
     private function purgeNonCanonicalDealerships(): void
     {
+        $prefix = env('DB_TABLE_PREFIX', '');
         $allowed = [
             'ventas matriz',
             'ventas serdan',
@@ -392,8 +391,8 @@ class InventoryFromLocalSeeder extends Seeder
             if (in_array($n, $allowed, true)) {
                 continue;
             }
-            Vehicle::query()->where('dealership_id', $d->id)->update(['dealership_id' => null]);
-            VehicleValuation::query()->where('dealership_id', $d->id)->update(['dealership_id' => null]);
+            DB::table($prefix . 'vehicles')->where('dealership_id', $d->id)->update(['dealership_id' => null]);
+            DB::table($prefix . 'vehicle_valuations')->where('dealership_id', $d->id)->update(['dealership_id' => null]);
             $d->forceDelete();
         }
     }

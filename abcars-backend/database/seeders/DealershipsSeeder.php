@@ -3,9 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Dealership;
-use App\Models\Valuations\VehicleValuation;
-use App\Models\Vehicle;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DealershipsSeeder extends Seeder
 {
@@ -15,8 +14,10 @@ class DealershipsSeeder extends Seeder
      */
     public function run(): void
     {
-        Vehicle::query()->update(['dealership_id' => null]);
-        VehicleValuation::query()->update(['dealership_id' => null]);
+        // Incluye filas con soft delete: Eloquent::query() las excluye y la FK sigue bloqueando el DELETE.
+        $prefix = env('DB_TABLE_PREFIX', '');
+        DB::table($prefix . 'vehicles')->update(['dealership_id' => null]);
+        DB::table($prefix . 'vehicle_valuations')->update(['dealership_id' => null]);
 
         foreach (Dealership::withTrashed()->get() as $d) {
             $d->forceDelete();
