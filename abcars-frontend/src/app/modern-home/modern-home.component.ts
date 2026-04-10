@@ -95,12 +95,13 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
   private readonly locationsMaxPages = 25;
   private locationsRequestSeq = 0;
 
-  // Imagen del banner principal del Hero (sin flash: no se pinta hasta resolver API + precarga)
+  // Hero: última URL remota en localStorage → pinta al instante (HTTP cache del navegador); sin caché → default ya, sin bloque negro
   heroImagePath: string = 'assets/images/bg_hero.jpg';
   showHeroText: boolean = true;
-  /** false hasta saber si hay banner remoto y tener la imagen lista (o caer al default). */
+  /** Tras init siempre true (default o URL en caché). */
   heroBannerReady = false;
   private heroBannerLoadGen = 0;
+  private readonly heroBannerStorageKey = 'abcars_hero_main_banner_v1';
 
   // Filtros rápidos
   quickFilters: QuickFilter[] = [
@@ -165,7 +166,10 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.updateDeliveryCarouselSlides();
-    // Cargar banner principal del Hero
+    this.hydrateHeroBannerFromStorage();
+    if (!this.heroBannerReady) {
+      this.applyDefaultHeroBanner();
+    }
     this.loadMainBanner();
     // Cargar promociones primero, los vehículos se cargarán cuando las promociones estén listas
     this.loadActivePromotions();
@@ -194,6 +198,7 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
       return;
     }
     this.loadDeliveryPhotos(this.deliveryPhotosCurrentPage);
+    this.loadMainBanner();
   }
 
   loadDeliveryPhotos(page = 1) {
@@ -233,7 +238,6 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
   }
 
   loadMainBanner(): void {
-    this.heroBannerReady = false;
     const gen = ++this.heroBannerLoadGen;
 
     this.compraTuAutoService.loadMainBanner('Imagen banner principal').subscribe({
@@ -242,35 +246,106 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
           return;
         }
         const url = (resp?.data?.image_path || '').trim();
-        if (url) {
-          const img = new Image();
-          img.onload = () => {
-            if (gen !== this.heroBannerLoadGen) {
-              return;
-            }
-            this.heroImagePath = url;
-            this.showHeroText = false;
-            this.heroBannerReady = true;
-          };
-          img.onerror = () => {
-            if (gen !== this.heroBannerLoadGen) {
-              return;
-            }
-            this.applyDefaultHeroBanner();
-          };
-          img.src = url;
-        } else {
+
+        if (!url || !this.isPersistableBannerImageUrl(url)) {
+          this.clearHeroBannerStorage();
           this.applyDefaultHeroBanner();
+          return;
         }
+
+        if (this.heroImagePath === url && this.heroBannerReady && !this.showHeroText) {
+          this.persistHeroBannerUrl(url);
+          return;
+        }
+
+        const img = new Image();
+        img.onload = () => {
+          if (gen !== this.heroBannerLoadGen) {
+            return;
+          }
+          this.heroImagePath = url;
+          this.showHeroText = false;
+          this.heroBannerReady = true;
+          this.persistHeroBannerUrl(url);
+        };
+        img.onerror = () => {
+          if (gen !== this.heroBannerLoadGen) {
+            return;
+          }
+          this.clearHeroBannerStorage();
+          this.applyDefaultHeroBanner();
+        };
+        img.src = url;
       },
       error: (error) => {
         if (gen !== this.heroBannerLoadGen) {
           return;
         }
         console.warn('Error al cargar el banner principal, usando imagen por defecto:', error);
+        if (this.heroBannerReady && !this.showHeroText && this.isPersistableBannerImageUrl(this.heroImagePath)) {
+          return;
+        }
+        this.clearHeroBannerStorage();
         this.applyDefaultHeroBanner();
       }
     });
+  }
+
+  private hydrateHeroBannerFromStorage(): void {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(this.heroBannerStorageKey);
+      if (!raw) {
+        return;
+      }
+      const parsed = JSON.parse(raw) as { url?: string };
+      const url = (parsed?.url || '').trim();
+      if (!url || !this.isPersistableBannerImageUrl(url)) {
+        this.clearHeroBannerStorage();
+        return;
+      }
+      this.heroImagePath = url;
+      this.showHeroText = false;
+      this.heroBannerReady = true;
+    } catch {
+      this.clearHeroBannerStorage();
+    }
+  }
+
+  private persistHeroBannerUrl(url: string): void {
+    if (typeof localStorage === 'undefined' || !this.isPersistableBannerImageUrl(url)) {
+      return;
+    }
+    try {
+      localStorage.setItem(this.heroBannerStorageKey, JSON.stringify({ url, savedAt: Date.now() }));
+    } catch {
+      /* quota / privado */
+    }
+  }
+
+  private clearHeroBannerStorage(): void {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+    try {
+      localStorage.removeItem(this.heroBannerStorageKey);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  /** URL absoluta, protocolo-relativo, o ruta absoluta en el mismo sitio (p. ej. /storage/...). */
+  private isPersistableBannerImageUrl(url: string): boolean {
+    const u = url.trim();
+    if (!u) {
+      return false;
+    }
+    if (/^https?:\/\//i.test(u) || u.startsWith('//')) {
+      return true;
+    }
+    return u.startsWith('/');
   }
 
   private applyDefaultHeroBanner(): void {

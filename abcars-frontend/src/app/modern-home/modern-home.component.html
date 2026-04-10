@@ -3,27 +3,15 @@
   <!-- Header Superior -->
   <app-home-nav></app-home-nav>
 
-  <!-- Hero: sin flash del default — placeholder hasta API + precarga; luego banner custom o default -->
+  <!-- Hero: URL en localStorage + HTTP cache del navegador = sin bloque negro; 1ª visita = default hasta API -->
   <section
     class="relative h-[500px] bg-center bg-no-repeat"
-    [ngClass]="
-      !heroBannerReady
-        ? 'bg-zinc-900'
-        : showHeroText
-          ? 'bg-cover'
-          : 'bg-contain'
-    "
-    [style.background-image]="
-      heroBannerReady
-        ? showHeroText
-          ? 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.4)), url(\'' + heroImagePath + '\')'
-          : 'url(\'' + heroImagePath + '\')'
-        : 'none'
-    "
+    [ngClass]="showHeroText ? 'bg-cover' : 'bg-contain'"
+    [style.background-image]="showHeroText ? 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.4)), url(\'' + heroImagePath + '\')' : 'url(\'' + heroImagePath + '\')'"
   >
-    <div *ngIf="heroBannerReady && !showHeroText" class="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/60 to-transparent z-[5] pointer-events-none" aria-hidden="true"></div>
+    <div *ngIf="!showHeroText" class="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/60 to-transparent z-[5] pointer-events-none" aria-hidden="true"></div>
     <div class="relative z-10 flex flex-col justify-center h-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-8" *ngIf="heroBannerReady && showHeroText">
+      <div class="text-center mb-8" *ngIf="showHeroText">
         <h1 class="hero-title">
           El Seminuevo que buscas<br>al precio que quieres
         </h1>
