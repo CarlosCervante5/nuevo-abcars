@@ -1331,14 +1331,17 @@ export class InventoryComponent implements OnInit {
       const itemColor = (item.exterior_color || '').toLowerCase();
       const matchesColor = selectedColors.length === 0 || selectedColors.some(color => itemColor.includes(color.toLowerCase()));
 
-      // Filtro de sucursal (usar apiDealershipLocation que ya está declarada arriba)
+      // Filtro de sucursal (misma etiqueta que en el home: location o name)
       const selectedSucursales = Object.keys(this.filters.selectedSucursales).filter(key => this.filters.selectedSucursales[key]);
-      const matchesSucursal = selectedSucursales.length === 0 || (
-        !!apiDealershipLocation &&
-        selectedSucursales.some(
-          (sel) => sel.trim().toLowerCase() === (apiDealershipLocation as string).trim().toLowerCase()
-        )
-      );
+      const sucursalLabel = (
+        (item.apiData as any)?.dealership?.location?.trim() ||
+        (item.apiData as any)?.dealership?.name?.trim() ||
+        ''
+      ).trim();
+      const matchesSucursal =
+        selectedSucursales.length === 0 ||
+        (!!sucursalLabel &&
+          selectedSucursales.some((sel) => sel.trim().toLowerCase() === sucursalLabel.toLowerCase()));
 
       return matchesSearch && matchesPrice && matchesBrand && matchesModel && matchesLocation && matchesYear && matchesMileage && matchesBody && matchesTransmission && matchesColor && matchesSucursal;
     });
@@ -1445,11 +1448,11 @@ export class InventoryComponent implements OnInit {
     this.brands = Array.from(brands).sort();
     this.availableBrands = this.brands;
     
-    // Extraer sucursales únicas (misma ciudad con distinta capitalización = una sola entrada)
+    // Extraer sucursales únicas (ciudad o nombre de sucursal si no hay location en BD)
     const sucursalesByKey = new Map<string, string>();
     this.sampleVehicles.forEach(v => {
-      const dealershipLocation = (v.apiData as any)?.dealership?.location;
-      const trimmed = dealershipLocation?.trim();
+      const d = (v.apiData as any)?.dealership;
+      const trimmed = (d?.location?.trim() || d?.name?.trim() || '').trim();
       if (!trimmed) {
         return;
       }

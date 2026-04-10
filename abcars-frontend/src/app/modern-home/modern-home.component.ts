@@ -761,12 +761,31 @@ export class ModernHomeComponent implements OnInit {
       has_images: false
     };
     const acc = new Map<string, string>();
+    /** Con marca/modelo/precio solo tienen sentido ciudades donde hay stock que cumple el filtro. */
+    const hasInventoryFilters = !!(
+      this.selectedBrand ||
+      this.selectedModel ||
+      this.selectedPriceRange
+    );
 
     const finish = () => {
       if (seq !== this.locationsRequestSeq) {
         return;
       }
       this.applyLocationOptionsFromMap(acc);
+    };
+
+    const mergeDealershipApiRows = (rows: { location?: string; name?: string }[]) => {
+      for (const d of rows) {
+        const label = (d?.location?.trim() || d?.name?.trim() || '').trim();
+        if (!label) {
+          continue;
+        }
+        const key = label.toLowerCase();
+        if (!acc.has(key)) {
+          acc.set(key, label);
+        }
+      }
     };
 
     const fetchPage = (page: number) => {
@@ -790,7 +809,26 @@ export class ModernHomeComponent implements OnInit {
       });
     };
 
-    fetchPage(1);
+    if (!hasInventoryFilters) {
+      this.vehicleService.searchDealerships().subscribe({
+        next: (res) => {
+          if (seq !== this.locationsRequestSeq) {
+            return;
+          }
+          const list = res?.data ?? [];
+          mergeDealershipApiRows(Array.isArray(list) ? list : []);
+          fetchPage(1);
+        },
+        error: () => {
+          if (seq !== this.locationsRequestSeq) {
+            return;
+          }
+          fetchPage(1);
+        }
+      });
+    } else {
+      fetchPage(1);
+    }
   }
 
   private applyLocationOptionsFromMap(acc: Map<string, string>): void {
