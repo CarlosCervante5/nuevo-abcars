@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { VehicleService } from '@services/vehicle.service';
 import { Brand, BrandsResponse } from '@interfaces/vehicle_data.interface';
+import { Dealership } from '@interfaces/admin.interfaces';
+import { sortDealershipsForPublic, branchPublicTitle } from '../../utils/public-dealerships';
 
 @Component({
   selector: 'app-modern-footer',
@@ -131,6 +133,17 @@ import { Brand, BrandsResponse } from '@interfaces/vehicle_data.interface';
           </div>
         </div>
 
+        <!-- Nuestras sucursales (API, mismo orden que el home) -->
+        <div *ngIf="footerDealerships.length" class="mt-12 pt-8 border-t border-gray-800">
+          <h4 class="text-lg font-bold text-white mb-6">Nuestras sucursales</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+            <div *ngFor="let d of footerDealerships; trackBy: trackByDealership" class="text-sm">
+              <p class="text-yellow-400 font-semibold mb-1">{{ branchPublicTitle(d) }}</p>
+              <p class="text-gray-400 whitespace-pre-line leading-relaxed">{{ d.address }}</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Línea divisoria y enlaces legales -->
         <div class="mt-4 pt-3 border-t border-gray-700">
           <div class="flex flex-col md:flex-row justify-between items-baseline">
@@ -160,11 +173,14 @@ export class ModernFooterComponent implements OnInit {
   currentYear = new Date().getFullYear();
   availableBrands: Brand[] = [];
   maxBrandsToShow = 6;
+  footerDealerships: Dealership[] = [];
+  readonly branchPublicTitle = branchPublicTitle;
 
   constructor(private vehicleService: VehicleService) {}
 
   ngOnInit(): void {
     this.loadBrands();
+    this.loadFooterDealerships();
   }
 
   private loadBrands(): void {
@@ -176,6 +192,26 @@ export class ModernFooterComponent implements OnInit {
         this.availableBrands = [];
       }
     });
+  }
+
+  private loadFooterDealerships(): void {
+    this.vehicleService.searchDealerships().subscribe({
+      next: (res) => {
+        const list = res?.data;
+        if (!Array.isArray(list)) {
+          this.footerDealerships = [];
+          return;
+        }
+        this.footerDealerships = sortDealershipsForPublic(list);
+      },
+      error: () => {
+        this.footerDealerships = [];
+      }
+    });
+  }
+
+  trackByDealership(index: number, d: Dealership): number {
+    return d.id ?? index;
   }
 
   trackByBrand(index: number, brand: Brand): string {

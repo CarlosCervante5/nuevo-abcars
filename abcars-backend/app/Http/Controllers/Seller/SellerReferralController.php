@@ -43,10 +43,13 @@ class SellerReferralController extends Controller
                     'converted_referrals' => $convertedReferrals,
                 ],
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            report($e);
+
             return response()->json([
                 'status' => 500,
                 'message' => 'Error al obtener estadísticas',
+                ...(config('app.debug') ? ['error' => $e->getMessage()] : []),
             ], 500);
         }
     }

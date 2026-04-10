@@ -1,7 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Location } from '@angular/common';
 import { DarkNavComponent } from '../../shared/components/dark-nav/dark-nav.component';
 import { ModernFooterComponent } from '../../shared/components/modern-footer/modern-footer.component';
@@ -48,7 +48,7 @@ interface MediaItem {
 @Component({
   selector: 'app-vehicle-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, ModernFooterComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ModernFooterComponent],
   template: `
     <div class="min-h-screen bg-gray-50">
       
@@ -755,6 +755,29 @@ interface MediaItem {
                   {{ term }} meses
                 </option>
               </select>
+            </div>
+          </div>
+
+          <!-- Misma validación que el flujo de 3 pasos: sin esto siempre fallaba «Casillas requeridas» -->
+          <div class="mt-6 space-y-3 border-t border-gray-100 pt-4">
+            <p class="text-xs font-medium text-gray-600">Autorizaciones *</p>
+            <div class="flex items-start gap-2">
+              <input type="checkbox" id="financing-simple-terms" [(ngModel)]="termsAccepted" class="mt-1 shrink-0">
+              <label for="financing-simple-terms" class="text-xs text-gray-600 leading-snug">
+                Acepto los <a [routerLink]="['/externals/terminos-y-condiciones']" class="text-blue-600 hover:underline" (click)="$event.stopPropagation()">términos y condiciones</a> del financiamiento.
+              </label>
+            </div>
+            <div class="flex items-start gap-2">
+              <input type="checkbox" id="financing-simple-privacy" [(ngModel)]="privacyAccepted" class="mt-1 shrink-0">
+              <label for="financing-simple-privacy" class="text-xs text-gray-600 leading-snug">
+                Autorizo el uso de mis datos personales para el procesamiento de mi solicitud.
+              </label>
+            </div>
+            <div class="flex items-start gap-2">
+              <input type="checkbox" id="financing-simple-contact" [(ngModel)]="contactAccepted" class="mt-1 shrink-0">
+              <label for="financing-simple-contact" class="text-xs text-gray-600 leading-snug">
+                Autorizo que me contacten por teléfono, email o WhatsApp para dar seguimiento.
+              </label>
             </div>
           </div>
         </div>
@@ -2781,6 +2804,9 @@ export class VehicleDetailComponent implements OnInit {
 
   closeFinancingModal() {
     this.showFinancingModal = false;
+    this.termsAccepted = false;
+    this.privacyAccepted = false;
+    this.contactAccepted = false;
   }
 
   // Métodos para manejar los pasos del formulario
@@ -2901,6 +2927,9 @@ export class VehicleDetailComponent implements OnInit {
       const availableTerms = this.getAvailableTermsByYear(this.vehicle?.year || 0);
       this.financingFormData.term_months = availableTerms.length > 0 ? availableTerms[0] : 12; // Primer término disponible
     }
+    this.termsAccepted = false;
+    this.privacyAccepted = false;
+    this.contactAccepted = false;
     this.showFinancingModal = true;
   }
 

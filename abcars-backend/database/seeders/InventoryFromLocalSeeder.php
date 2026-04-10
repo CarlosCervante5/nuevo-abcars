@@ -2,6 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Dealership;
+use App\Models\Valuations\VehicleValuation;
+use App\Models\Vehicle;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
@@ -11,22 +14,53 @@ class InventoryFromLocalSeeder extends Seeder
     /**
      * Seed del inventario completo exportado desde local.
      * Incluye: dealerships, brands, models, versions, bodies, vehicles e images.
-     * Usa firstOrCreate/updateOrCreate para ser idempotente.
+     * Sucursales: solo las 6 reales del home (mismo criterio que DealershipsSeeder).
      */
     public function run(): void
     {
         $prefix = env('DB_TABLE_PREFIX', '');
         $now = now()->format('Y-m-d H:i:s');
 
-        // ── 1. Dealerships (solo únicos por nombre+location) ──
+        $this->purgeNonCanonicalDealerships();
+
+        // ── 1. Dealerships (las 6 oficiales; actualiza texto/dirección si ya existían) ──
         $dealerships = [
-            ['name' => 'abcars puebla', 'location' => 'puebla, méxico', 'description' => 'Concesionario principal en Puebla con amplia gama de vehículos seminuevos y nuevos'],
-            ['name' => 'abcars hidalgo', 'location' => 'hidalgo, méxico', 'description' => 'Sucursal especializada en vehículos premium y de lujo'],
-            ['name' => 'abcars cdmx', 'location' => 'ciudad de méxico', 'description' => 'Sede principal con la mayor variedad de inventario'],
-            ['name' => 'vecsa hidalgo', 'location' => 'pachuca', 'description' => 'Sucursal principal en Pachuca, Hidalgo'],
-            ['name' => 'vecsa pachuca', 'location' => 'pachuca', 'description' => 'Sucursal Pachuca centro'],
-            ['name' => 'abcars querétaro', 'location' => 'querétaro', 'description' => 'Sucursal en Querétaro'],
-            ['name' => 'abcars toluca', 'location' => 'toluca', 'description' => 'Sucursal en Toluca, Estado de México'],
+            [
+                'name' => 'ventas matriz',
+                'location' => 'puebla',
+                'description' => 'VENTAS MATRIZ',
+                'address' => "Blvrd Esteban de Antuñano 1314\nObrera Textil José Abascal\n72130 Puebla, Pue.",
+            ],
+            [
+                'name' => 'ventas serdan',
+                'location' => 'puebla',
+                'description' => 'VENTAS SERDAN',
+                'address' => "Boulevard Hermanos Serdán 241\nAmpliación Aquiles Serdán\nPuebla, Pue.",
+            ],
+            [
+                'name' => 'ventas sucursal tlaxcala',
+                'location' => 'zacatelco',
+                'description' => 'VENTAS SUCURSAL TLAXCALA',
+                'address' => "Carr. Federal Puebla - Tlaxcala Km 18.5\nBarrio de Guardia\n90740 Zacatelco, Tlax.",
+            ],
+            [
+                'name' => 'service body paint',
+                'location' => 'puebla',
+                'description' => 'SERVICE, BODY & PAINT',
+                'address' => "Av. 31 Pte. 4110 Ampliación Reforma Sur\nC.P. 72160, Puebla, Pue.",
+            ],
+            [
+                'name' => 'ventas sucursal hidalgo',
+                'location' => 'pachuca',
+                'description' => 'VENTAS SUCURSAL HIDALGO',
+                'address' => "Vial, La Paz 113, Adolfo López Mateos\n42094 Pachuca de Soto, Hgo.",
+            ],
+            [
+                'name' => 'ventas sucursal cholula',
+                'location' => 'puebla',
+                'description' => 'VENTAS SUCURSAL CHOLULA',
+                'address' => "Lateral Norte Recta a Cholula no. 1408 San Andres Choula\n72819 Puebla, Pue.",
+            ],
         ];
 
         $dealershipIds = [];
@@ -36,6 +70,12 @@ class InventoryFromLocalSeeder extends Seeder
                 ->whereNull('deleted_at')
                 ->first();
             if ($existing) {
+                DB::table($prefix . 'dealerships')->where('id', $existing->id)->update([
+                    'location' => $d['location'],
+                    'description' => $d['description'],
+                    'address' => $d['address'],
+                    'updated_at' => $now,
+                ]);
                 $dealershipIds[$d['name']] = $existing->id;
             } else {
                 $id = DB::table($prefix . 'dealerships')->insertGetId(array_merge($d, [
@@ -144,7 +184,7 @@ class InventoryFromLocalSeeder extends Seeder
                 'list_price' => 300000, 'offer_price' => null, 'mileage' => 63626,
                 'transmission' => 'automatic', 'fuel_type' => 'gasoline', 'cylinders' => 4,
                 'interior_color' => 'negro', 'exterior_color' => 'rojo', 'category' => 'pre_owned',
-                'type' => 'car', 'model_key' => 'chevrolet_trax_2020', 'dealership' => 'abcars puebla', 'body' => 'suv',
+                'type' => 'car', 'model_key' => 'chevrolet_trax_2020', 'dealership' => 'ventas matriz', 'body' => 'suv',
                 'image' => 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1000&q=80',
             ],
             [
@@ -154,7 +194,7 @@ class InventoryFromLocalSeeder extends Seeder
                 'list_price' => 1850000, 'offer_price' => null, 'mileage' => 36035,
                 'transmission' => 'automatic', 'fuel_type' => 'gasoline', 'cylinders' => 8,
                 'interior_color' => 'naranja', 'exterior_color' => 'azul', 'category' => 'pre_owned',
-                'type' => 'car', 'model_key' => 'bmw_x5_2022', 'dealership' => 'abcars hidalgo', 'body' => 'suv',
+                'type' => 'car', 'model_key' => 'bmw_x5_2022', 'dealership' => 'ventas sucursal hidalgo', 'body' => 'suv',
                 'image' => 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1000&q=80',
             ],
             [
@@ -164,7 +204,7 @@ class InventoryFromLocalSeeder extends Seeder
                 'list_price' => 340000, 'offer_price' => 330000, 'mileage' => 134925,
                 'transmission' => 'cvt', 'fuel_type' => 'gasoline', 'cylinders' => 4,
                 'interior_color' => 'negro', 'exterior_color' => 'rojo', 'category' => 'pre_owned',
-                'type' => 'car', 'model_key' => 'honda_civic_2019', 'dealership' => 'abcars puebla', 'body' => 'sedan',
+                'type' => 'car', 'model_key' => 'honda_civic_2019', 'dealership' => 'ventas matriz', 'body' => 'sedan',
                 'image' => 'https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&w=1000&q=80',
             ],
             [
@@ -174,7 +214,7 @@ class InventoryFromLocalSeeder extends Seeder
                 'list_price' => 280000, 'offer_price' => null, 'mileage' => 45000,
                 'transmission' => 'cvt', 'fuel_type' => 'gasoline', 'cylinders' => 4,
                 'interior_color' => 'negro', 'exterior_color' => 'blanco', 'category' => 'pre_owned',
-                'type' => 'car', 'model_key' => 'nissan_sentra_2021', 'dealership' => 'abcars puebla', 'body' => 'sedan',
+                'type' => 'car', 'model_key' => 'nissan_sentra_2021', 'dealership' => 'ventas matriz', 'body' => 'sedan',
                 'image' => 'https://images.unsplash.com/photo-1609521263047-f8f205293f24?auto=format&fit=crop&w=1000&q=80',
             ],
             [
@@ -184,7 +224,7 @@ class InventoryFromLocalSeeder extends Seeder
                 'list_price' => 320000, 'offer_price' => 310000, 'mileage' => 52000,
                 'transmission' => 'cvt', 'fuel_type' => 'gasoline', 'cylinders' => 4,
                 'interior_color' => 'negro', 'exterior_color' => 'gris', 'category' => 'pre_owned',
-                'type' => 'car', 'model_key' => 'toyota_corolla_2020', 'dealership' => 'abcars cdmx', 'body' => 'sedan',
+                'type' => 'car', 'model_key' => 'toyota_corolla_2020', 'dealership' => 'ventas matriz', 'body' => 'sedan',
                 'image' => 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=1000&q=80',
             ],
             [
@@ -194,7 +234,7 @@ class InventoryFromLocalSeeder extends Seeder
                 'list_price' => 520000, 'offer_price' => null, 'mileage' => 28000,
                 'transmission' => 'automatic', 'fuel_type' => 'gasoline', 'cylinders' => 4,
                 'interior_color' => 'beige', 'exterior_color' => 'azul', 'category' => 'pre_owned',
-                'type' => 'car', 'model_key' => 'ford_escape_2022', 'dealership' => 'abcars hidalgo', 'body' => 'suv',
+                'type' => 'car', 'model_key' => 'ford_escape_2022', 'dealership' => 'ventas sucursal hidalgo', 'body' => 'suv',
                 'image' => 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1000&q=80',
             ],
             [
@@ -204,7 +244,7 @@ class InventoryFromLocalSeeder extends Seeder
                 'list_price' => 240000, 'offer_price' => null, 'mileage' => 78000,
                 'transmission' => 'automatic', 'fuel_type' => 'gasoline', 'cylinders' => 4,
                 'interior_color' => 'negro', 'exterior_color' => 'rojo', 'category' => 'pre_owned',
-                'type' => 'car', 'model_key' => 'hyundai_elantra_2019', 'dealership' => 'abcars puebla', 'body' => 'sedan',
+                'type' => 'car', 'model_key' => 'hyundai_elantra_2019', 'dealership' => 'ventas matriz', 'body' => 'sedan',
                 'image' => 'https://images.unsplash.com/photo-1617469767053-d3b523a0b982?auto=format&fit=crop&w=1000&q=80',
             ],
             [
@@ -214,7 +254,7 @@ class InventoryFromLocalSeeder extends Seeder
                 'list_price' => 450000, 'offer_price' => null, 'mileage' => 35000,
                 'transmission' => 'automatic', 'fuel_type' => 'gasoline', 'cylinders' => 4,
                 'interior_color' => 'rojo', 'exterior_color' => 'negro', 'category' => 'pre_owned',
-                'type' => 'car', 'model_key' => 'mazda_cx-5_2021', 'dealership' => 'abcars cdmx', 'body' => 'suv',
+                'type' => 'car', 'model_key' => 'mazda_cx-5_2021', 'dealership' => 'ventas matriz', 'body' => 'suv',
                 'image' => 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1000&q=80',
             ],
             [
@@ -224,7 +264,7 @@ class InventoryFromLocalSeeder extends Seeder
                 'list_price' => 290000, 'offer_price' => 285000, 'mileage' => 61000,
                 'transmission' => 'automatic', 'fuel_type' => 'gasoline', 'cylinders' => 4,
                 'interior_color' => 'negro', 'exterior_color' => 'blanco', 'category' => 'pre_owned',
-                'type' => 'car', 'model_key' => 'volkswagen_jetta_2020', 'dealership' => 'abcars hidalgo', 'body' => 'sedan',
+                'type' => 'car', 'model_key' => 'volkswagen_jetta_2020', 'dealership' => 'ventas sucursal hidalgo', 'body' => 'sedan',
                 'image' => 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=1000&q=80',
             ],
             [
@@ -234,7 +274,7 @@ class InventoryFromLocalSeeder extends Seeder
                 'list_price' => 390000, 'offer_price' => null, 'mileage' => 25000,
                 'transmission' => 'automatic', 'fuel_type' => 'gasoline', 'cylinders' => 4,
                 'interior_color' => 'negro', 'exterior_color' => 'gris', 'category' => 'pre_owned',
-                'type' => 'car', 'model_key' => 'kia_sportage_2022', 'dealership' => 'abcars cdmx', 'body' => 'suv',
+                'type' => 'car', 'model_key' => 'kia_sportage_2022', 'dealership' => 'ventas matriz', 'body' => 'suv',
                 'image' => 'https://images.unsplash.com/photo-1609521263047-f8f205293f24?auto=format&fit=crop&w=1000&q=80',
             ],
             [
@@ -244,7 +284,7 @@ class InventoryFromLocalSeeder extends Seeder
                 'list_price' => 420000, 'offer_price' => null, 'mileage' => 40000,
                 'transmission' => 'cvt', 'fuel_type' => 'gasoline', 'cylinders' => 4,
                 'interior_color' => 'beige', 'exterior_color' => 'azul', 'category' => 'pre_owned',
-                'type' => 'car', 'model_key' => 'honda_accord_2021', 'dealership' => 'abcars puebla', 'body' => 'sedan',
+                'type' => 'car', 'model_key' => 'honda_accord_2021', 'dealership' => 'ventas matriz', 'body' => 'sedan',
                 'image' => 'https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&w=1000&q=80',
             ],
             [
@@ -254,7 +294,7 @@ class InventoryFromLocalSeeder extends Seeder
                 'list_price' => 380000, 'offer_price' => null, 'mileage' => 55000,
                 'transmission' => 'automatic', 'fuel_type' => 'gasoline', 'cylinders' => 4,
                 'interior_color' => 'negro', 'exterior_color' => 'blanco', 'category' => 'pre_owned',
-                'type' => 'car', 'model_key' => 'chevrolet_equinox_2020', 'dealership' => 'abcars hidalgo', 'body' => 'suv',
+                'type' => 'car', 'model_key' => 'chevrolet_equinox_2020', 'dealership' => 'ventas sucursal hidalgo', 'body' => 'suv',
                 'image' => 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1000&q=80',
             ],
             [
@@ -264,7 +304,7 @@ class InventoryFromLocalSeeder extends Seeder
                 'list_price' => 350000, 'offer_price' => 340000, 'mileage' => 42000,
                 'transmission' => 'cvt', 'fuel_type' => 'gasoline', 'cylinders' => 4,
                 'interior_color' => 'gris', 'exterior_color' => 'negro', 'category' => 'pre_owned',
-                'type' => 'car', 'model_key' => 'mitsubishi_outlander_2021', 'dealership' => 'abcars cdmx', 'body' => 'suv',
+                'type' => 'car', 'model_key' => 'mitsubishi_outlander_2021', 'dealership' => 'ventas matriz', 'body' => 'suv',
                 'image' => 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1000&q=80',
             ],
         ];
@@ -331,5 +371,30 @@ class InventoryFromLocalSeeder extends Seeder
         }
 
         echo "InventoryFromLocalSeeder: {$vehicleCount} vehículos creados.\n";
+    }
+
+    /**
+     * Elimina sucursales que no son las 6 del sitio (ej. demo cdmx, querétaro, vecsa).
+     */
+    private function purgeNonCanonicalDealerships(): void
+    {
+        $allowed = [
+            'ventas matriz',
+            'ventas serdan',
+            'ventas sucursal tlaxcala',
+            'service body paint',
+            'ventas sucursal hidalgo',
+            'ventas sucursal cholula',
+        ];
+
+        foreach (Dealership::withTrashed()->get() as $d) {
+            $n = mb_strtolower(trim((string) $d->name), 'UTF-8');
+            if (in_array($n, $allowed, true)) {
+                continue;
+            }
+            Vehicle::query()->where('dealership_id', $d->id)->update(['dealership_id' => null]);
+            VehicleValuation::query()->where('dealership_id', $d->id)->update(['dealership_id' => null]);
+            $d->forceDelete();
+        }
     }
 }

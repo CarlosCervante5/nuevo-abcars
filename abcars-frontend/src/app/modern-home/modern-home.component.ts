@@ -15,6 +15,7 @@ import { CompraTuAutoService } from '@services/compra-tu-auto.service';
 import { DeliveryPhotosService, DeliveryPhoto } from '@services/delivery-photos.service';
 import { Vehicle as ApiVehicle, Brand } from '../shared/interfaces/vehicle_data.interface';
 import { Dealership } from '../shared/interfaces/admin.interfaces';
+import { sortDealershipsForPublic, branchPublicTitle } from '../shared/utils/public-dealerships';
 import { FALLBACK_HERO_IMAGE } from '../shared/constants/fallback-media';
 
 interface Vehicle {
@@ -184,15 +185,7 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
     this.loadDeliveryPhotos();
   }
 
-  /** Orden fijo como en el home histórico (Matriz → … → Cholula). */
-  private readonly homeDealershipOrder: Record<string, number> = {
-    'ventas matriz': 1,
-    'ventas serdan': 2,
-    'ventas sucursal tlaxcala': 3,
-    'service body paint': 4,
-    'ventas sucursal hidalgo': 5,
-    'ventas sucursal cholula': 6,
-  };
+  readonly branchPublicTitle = branchPublicTitle;
 
   loadHomeDealerships(): void {
     this.vehicleService.searchDealerships().subscribe({
@@ -202,25 +195,12 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
           this.homeDealerships = [];
           return;
         }
-        this.homeDealerships = [...list].sort((a, b) => {
-          const na = (a.name || '').toLowerCase().trim();
-          const nb = (b.name || '').toLowerCase().trim();
-          return (this.homeDealershipOrder[na] ?? 99) - (this.homeDealershipOrder[nb] ?? 99);
-        });
+        this.homeDealerships = sortDealershipsForPublic(list);
       },
       error: () => {
         this.homeDealerships = [];
       }
     });
-  }
-
-  /** Título público: campo description del seeder; si no, nombre en mayúsculas. */
-  branchPublicTitle(d: Dealership): string {
-    const t = (d.description || '').trim();
-    if (t) {
-      return t;
-    }
-    return (d.name || '').toUpperCase();
   }
 
   @HostListener('window:resize')
