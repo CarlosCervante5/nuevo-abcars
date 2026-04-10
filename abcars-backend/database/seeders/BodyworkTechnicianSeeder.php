@@ -17,16 +17,22 @@ class BodyworkTechnicianSeeder extends Seeder
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $role = Role::findByName('bodywork_paint_technician');
+        $role = Role::firstOrCreate(['name' => 'bodywork_paint_technician']);
 
-        // Create demo users
-        $user = User::factory()->create([
-            'nickname' => 'bodywork_technician',
-            'email' => 'bodywork_technician@abcars.mx',
-            'password' => 'BodyworkTechnician%2024%%'
-        ]);
-        
-        $user->assignRole($role);
-        
+        $user = User::firstOrCreate(
+            ['email' => 'bodywork_technician@abcars.mx'],
+            ['nickname' => 'bodywork_technician', 'password' => 'BodyworkTechnician%2024%%']
+        );
+
+        if (! $user->hasRole('bodywork_paint_technician')) {
+            $user->assignRole($role);
+        }
+
+        if (! $user->userProfile) {
+            $user->userProfile()->create([
+                'name' => 'Técnico',
+                'last_name' => 'Hojalatería y pintura',
+            ]);
+        }
     }
 }
