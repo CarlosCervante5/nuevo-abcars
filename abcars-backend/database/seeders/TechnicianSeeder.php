@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use Database\Seeders\Support\SeededUser;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -50,10 +50,11 @@ class TechnicianSeeder extends Seeder
         ];
 
         foreach ($technicians as $tech) {
-            $user = User::firstOrCreate(
-                ['email' => $tech['email']],
-                ['nickname' => $tech['nickname'], 'password' => $tech['password']]
-            );
+            $user = SeededUser::findExistingOrCreate([
+                'email' => $tech['email'],
+                'nickname' => $tech['nickname'],
+                'password' => $tech['password'],
+            ]);
 
             if (! $user->hasRole('technician')) {
                 $user->assignRole($role);

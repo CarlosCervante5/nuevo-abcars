@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use Database\Seeders\Support\SeededUser;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -19,50 +19,26 @@ class ValuatorsSeeder extends Seeder
 
         $role = Role::findByName('valuator');
 
-        // Usuarios demo (idempotente: redeploys no duplican nickname/email)
-        $user = User::firstOrCreate(
-            ['email' => 'cesar_fuentes@abcars.mx'],
-            ['nickname' => 'cesar_fuentes', 'password' => 'CesarFuentes%2024%%']
-        );
-        if ($user->wasRecentlyCreated) {
-            $user->assignRole($role);
-            $user->userProfile()->create([
-                'name' => 'Cesar',
-                'last_name' => 'Fuentes',
-            ]);
-        } else {
-            if (! $user->hasRole('valuator')) {
-                $user->assignRole($role);
-            }
-            if (! $user->userProfile) {
-                $user->userProfile()->create([
-                    'name' => 'Cesar',
-                    'last_name' => 'Fuentes',
-                ]);
-            }
-        }
+        $this->seedValuator($role, 'cesar_fuentes@abcars.mx', 'cesar_fuentes', 'CesarFuentes%2024%%', 'Cesar', 'Fuentes');
+        $this->seedValuator($role, 'fabian_tapia@abcars.mx', 'fabian_tapia', 'FabianTapia%2024%%', 'Fabian', 'Tapia');
 
-        $user = User::firstOrCreate(
-            ['email' => 'fabian_tapia@abcars.mx'],
-            ['nickname' => 'fabian_tapia', 'password' => 'FabianTapia%2024%%']
-        );
-        if ($user->wasRecentlyCreated) {
-            $user->assignRole($role);
-            $user->userProfile()->create([
-                'name' => 'Fabian',
-                'last_name' => 'Tapia',
-            ]);
-        } else {
-            if (! $user->hasRole('valuator')) {
-                $user->assignRole($role);
-            }
-            if (! $user->userProfile) {
-                $user->userProfile()->create([
-                    'name' => 'Fabian',
-                    'last_name' => 'Tapia',
-                ]);
-            }
-        }
+    }
 
+    private function seedValuator($role, string $email, string $nickname, string $password, string $name, string $lastName): void
+    {
+        $user = SeededUser::findExistingOrCreate([
+            'email' => $email,
+            'nickname' => $nickname,
+            'password' => $password,
+        ]);
+        if (! $user->hasRole('valuator')) {
+            $user->assignRole($role);
+        }
+        if (! $user->userProfile) {
+            $user->userProfile()->create([
+                'name' => $name,
+                'last_name' => $lastName,
+            ]);
+        }
     }
 }

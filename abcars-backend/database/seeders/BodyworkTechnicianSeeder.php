@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use Database\Seeders\Support\SeededUser;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -19,10 +19,11 @@ class BodyworkTechnicianSeeder extends Seeder
 
         $role = Role::firstOrCreate(['name' => 'bodywork_paint_technician']);
 
-        $user = User::firstOrCreate(
-            ['email' => 'bodywork_technician@abcars.mx'],
-            ['nickname' => 'bodywork_technician', 'password' => 'BodyworkTechnician%2024%%']
-        );
+        $user = SeededUser::findExistingOrCreate([
+            'email' => 'bodywork_technician@abcars.mx',
+            'nickname' => 'bodywork_technician',
+            'password' => 'BodyworkTechnician%2024%%',
+        ]);
 
         if (! $user->hasRole('bodywork_paint_technician')) {
             $user->assignRole($role);

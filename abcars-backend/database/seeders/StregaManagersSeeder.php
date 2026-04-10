@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use Database\Seeders\Support\SeededUser;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -27,10 +27,11 @@ class StregaManagersSeeder extends Seeder
         ];
 
         foreach ($managers as $row) {
-            $user = User::firstOrCreate(
-                ['email' => $row['email']],
-                ['nickname' => $row['nickname'], 'password' => $row['password']]
-            );
+            $user = SeededUser::findExistingOrCreate([
+                'email' => $row['email'],
+                'nickname' => $row['nickname'],
+                'password' => $row['password'],
+            ]);
 
             if (! $user->hasRole('strega-manager')) {
                 $user->assignRole($role);

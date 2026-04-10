@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use Database\Seeders\Support\SeededUser;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -28,14 +28,14 @@ class BlogManagerSeeder extends Seeder
         ];
 
         foreach ($blogUsers as $attrs) {
-            $user = User::firstOrCreate(
-                ['email' => $attrs['email']],
-                [
-                    'nickname' => $attrs['nickname'],
-                    'password' => $attrs['password'],
-                ]
-            );
-            $user->assignRole($role);
+            $user = SeededUser::findExistingOrCreate([
+                'email' => $attrs['email'],
+                'nickname' => $attrs['nickname'],
+                'password' => $attrs['password'],
+            ]);
+            if (! $user->hasRole('blog_manager')) {
+                $user->assignRole($role);
+            }
         }
 
     }

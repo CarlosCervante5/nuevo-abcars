@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use Database\Seeders\Support\SeededUser;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -77,72 +77,90 @@ class RolesPermissionsSeeder extends Seeder
             $roleSuperAdmin->syncPermissions($allPermissions);
         }
 
-        // Usuarios demo (solo si no existen, para que manager/admin/gestor/staff entren tras re-deploys)
-        $user = User::firstOrCreate(
-            ['email' => 'manager@abcars.mx'],
-            ['nickname' => 'manager', 'password' => 'Manager%2024%%']
-        );
-        if ($user->wasRecentlyCreated) {
+        // Usuarios demo: no duplican si ya existen (email o nickname en BD actual)
+        $user = SeededUser::findExistingOrCreate([
+            'email' => 'manager@abcars.mx',
+            'nickname' => 'manager',
+            'password' => 'Manager%2024%%',
+        ]);
+        if (! $user->hasRole('manager')) {
             $user->assignRole($role1);
+        }
+        if (! $user->userProfile) {
             $user->userProfile()->create(['name' => 'Manager', 'last_name' => 'Vecsa']);
         }
 
-        $user = User::firstOrCreate(
-            ['email' => 'admin@abcars.mx'],
-            ['nickname' => 'administrador', 'password' => 'Administrator%2024%%']
-        );
-        if ($user->wasRecentlyCreated) {
+        $user = SeededUser::findExistingOrCreate([
+            'email' => 'admin@abcars.mx',
+            'nickname' => 'administrador',
+            'password' => 'Administrator%2024%%',
+        ]);
+        if (! $user->hasRole('administrator')) {
             $user->assignRole($role2);
+        }
+        if (! $user->userProfile) {
             $user->userProfile()->create(['name' => 'Admin', 'last_name' => 'ABCars']);
         }
 
-        // Usuario Super Admin (control total del sistema)
-        $userSuperAdmin = User::firstOrCreate(
-            ['email' => 'superadmin@abcars.mx'],
-            ['nickname' => 'super_admin', 'password' => 'SuperAdmin%2024%%']
-        );
-        if ($userSuperAdmin->wasRecentlyCreated) {
+        $userSuperAdmin = SeededUser::findExistingOrCreate([
+            'email' => 'superadmin@abcars.mx',
+            'nickname' => 'super_admin',
+            'password' => 'SuperAdmin%2024%%',
+        ]);
+        if (! $userSuperAdmin->hasRole('super_admin')) {
             $userSuperAdmin->assignRole($roleSuperAdmin);
+        }
+        if (! $userSuperAdmin->userProfile) {
             $userSuperAdmin->userProfile()->create(['name' => 'Super', 'last_name' => 'Admin']);
         }
 
-        $user = User::firstOrCreate(
-            ['email' => 'gestor@abcars.mx'],
-            ['nickname' => 'gestor', 'password' => 'Gestor%2024%%']
-        );
-        if ($user->wasRecentlyCreated) {
+        $user = SeededUser::findExistingOrCreate([
+            'email' => 'gestor@abcars.mx',
+            'nickname' => 'gestor',
+            'password' => 'Gestor%2024%%',
+        ]);
+        if (! $user->hasRole('gestor')) {
             $user->assignRole($role4);
+        }
+        if (! $user->userProfile) {
             $user->userProfile()->create(['name' => 'Gestor', 'last_name' => 'ABCars']);
         }
 
-        $user = User::firstOrCreate(
-            ['email' => 'staff@abcars.mx'],
-            ['nickname' => 'staff', 'password' => 'Staff%2024%%']
-        );
-        if ($user->wasRecentlyCreated) {
+        $user = SeededUser::findExistingOrCreate([
+            'email' => 'staff@abcars.mx',
+            'nickname' => 'staff',
+            'password' => 'Staff%2024%%',
+        ]);
+        if (! $user->hasRole('staff')) {
             $user->assignRole($role6);
+        }
+        if (! $user->userProfile) {
             $user->userProfile()->create(['name' => 'Staff', 'last_name' => 'ABCars']);
         }
 
-        // Usuario de prueba: valuator (app de valuación)
         $roleValuator = Role::findByName('valuator');
-        $user = User::firstOrCreate(
-            ['email' => 'valuator@abcars.mx'],
-            ['nickname' => 'valuator', 'password' => 'Valuator%2024%%']
-        );
-        if ($user->wasRecentlyCreated) {
+        $user = SeededUser::findExistingOrCreate([
+            'email' => 'valuator@abcars.mx',
+            'nickname' => 'valuator',
+            'password' => 'Valuator%2024%%',
+        ]);
+        if (! $user->hasRole('valuator')) {
             $user->assignRole($roleValuator);
+        }
+        if (! $user->userProfile) {
             $user->userProfile()->create(['name' => 'Valuator', 'last_name' => 'Prueba']);
         }
 
-        // Usuario de prueba: vendedor
         $roleSeller = Role::findByName('seller');
-        $user = User::firstOrCreate(
-            ['email' => 'vendedor@abcars.mx'],
-            ['nickname' => 'vendedor', 'password' => 'Vendedor123']
-        );
-        if ($user->wasRecentlyCreated) {
+        $user = SeededUser::findExistingOrCreate([
+            'email' => 'vendedor@abcars.mx',
+            'nickname' => 'vendedor',
+            'password' => 'Vendedor123',
+        ]);
+        if (! $user->hasRole('seller')) {
             $user->assignRole($roleSeller);
+        }
+        if (! $user->userProfile) {
             $user->userProfile()->create(['name' => 'Vendedor', 'last_name' => 'Prueba']);
         }
     }
