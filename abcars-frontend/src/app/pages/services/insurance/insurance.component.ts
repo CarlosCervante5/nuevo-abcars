@@ -7,7 +7,7 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
 import { VehicleService } from '../../../shared/services/vehicle.service';
 import { Brand, BrandsResponse } from '../../../shared/interfaces/vehicle_data.interface';
 import { StregaService } from '../../../shared/services/strega.service';
-import { Dealership } from '../../../shared/interfaces/admin.interfaces';
+import { Dealership, DealerShipResponse } from '../../../shared/interfaces/admin.interfaces';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -33,10 +33,7 @@ export class InsuranceComponent implements OnInit {
 
   insuranceForm: FormGroup;
   isSubmitting: boolean = false;
-  dealerships: Dealership[] = [
-    { name: 'Chevrolet Balderrama Serdán (puebla)', location: '', description: null, created_at: new Date() },
-    { name: 'VECSA pachuca', location: '', description: null, created_at: new Date() }
-  ];
+  dealerships: Dealership[] = [];
 
   constructor(
     private vehicleService: VehicleService,
@@ -55,6 +52,20 @@ export class InsuranceComponent implements OnInit {
 
   ngOnInit() {
     this.getBrands();
+    this.loadDealerships();
+  }
+
+  private loadDealerships(): void {
+    this.vehicleService.searchDealerships().subscribe({
+      next: (res: DealerShipResponse) => {
+        if (res.status === 200 && Array.isArray(res.data)) {
+          this.dealerships = res.data;
+        }
+      },
+      error: () => {
+        this.dealerships = [];
+      }
+    });
   }
 
   getBrands(): void {

@@ -4,7 +4,7 @@
       <!-- Card Body -->
       <div class="card-body">
         <h4 class="fw-bold card-title text-truncate">
-          {{ vehicle.carmodel.brand.name | titlecase }}
+          {{ vehicle.carmodel.brand.name | uppercase }}
           <p class="fw-light">{{ vehicle.name | titlecase }}</p>
         </h4>
         <p class="card-text">{{ vehicle.yearModel }} • {{ vehicle.km | number }} km • {{ vehicle.transmission | titlecase }}</p>          
@@ -12,7 +12,7 @@
     </div>
 
     <div class="col-6 col-xl-5">
-      <img class="img-fluid py-4" [src]="vehicle_image" alt="{{ vehicle.carmodel.brand.name | titlecase }} {{ vehicle.name | titlecase }}">
+      <img class="img-fluid py-4" [src]="vehicle_image" alt="{{ vehicle.carmodel.brand.name | uppercase }} {{ vehicle.name | titlecase }}">
     </div>
   </div>
 

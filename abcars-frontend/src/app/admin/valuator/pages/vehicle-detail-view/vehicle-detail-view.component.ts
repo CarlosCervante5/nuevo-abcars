@@ -100,7 +100,7 @@ export class VehicleDetailViewComponent implements OnInit {
     getTypeLabel(type: string): string {
         const map: Record<string, string> = {
             car: 'Auto',
-            moto: 'Motocicleta',
+            moto: 'Motocicletas',
             truck: 'Camión',
             other: 'Otro'
         };

@@ -34,6 +34,8 @@
         user:  UserL;
         role: string;
         profile: CustomerProfile;
+        /** Nombres de permisos Spatie (ej. manage main banner) */
+        permissions?: string[];
     }
 
     export interface UserL {

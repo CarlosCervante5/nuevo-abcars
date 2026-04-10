@@ -8,6 +8,9 @@ import { AdministradorGuard } from './administrador/guards/administrador.guard';
 import { AppointmentManagerGuard } from './appointment-manager/guards/appointment_manager.guard';
 import { BlogManagerGuard } from './blog-manager/guards/blog-manager.guard';
 import { TechnicianGuard } from './technician/guards/technician.guard';
+import { ValuationManagerGuard } from './valuator_manager/guards/valuation-manager.guard';
+import { BodyworkPaintTechnicianGuard } from './bodywork-paint-technician/guards/bodywork-paint-technician.guard';
+import { SparePartsGuard } from './spare-parts/guards/spare-parts.guard';
 
 
 const routes: Routes = [  
@@ -54,8 +57,10 @@ const routes: Routes = [
     canActivate: [TechnicianGuard],
     canLoad: [TechnicianGuard]
   },
-  { path: 'valuation_manager', 
-    loadChildren: () => import('./valuator_manager/valuator-manager.module').then( m => m.ValuatorManagerModule)
+  { path: 'valuation_manager',
+    loadChildren: () => import('./valuator_manager/valuator-manager.module').then( m => m.ValuatorManagerModule),
+    canActivate: [ValuationManagerGuard],
+    canLoad: [ValuationManagerGuard]
   },
   { path: 'appointment_manager',
     loadChildren: () => import('./appointment-manager/appointment-manager.module').then( m => m.AppointmentManagerModule ),
@@ -68,10 +73,14 @@ const routes: Routes = [
     canLoad: [AdministradorGuard],
   },
   { path: 'bodywork_paint_technician',
-    loadChildren: () => import('./bodywork-paint-technician/bodywork-paint-technician.module').then( m => m.BodyworkPaintTechnicianModule)
+    loadChildren: () => import('./bodywork-paint-technician/bodywork-paint-technician.module').then( m => m.BodyworkPaintTechnicianModule),
+    canActivate: [BodyworkPaintTechnicianGuard],
+    canLoad: [BodyworkPaintTechnicianGuard]
   },
   { path: 'spare_parts',
-    loadChildren: () => import('./spare-parts/spare-parts.module').then(m => m.SparePartsModule)
+    loadChildren: () => import('./spare-parts/spare-parts.module').then(m => m.SparePartsModule),
+    canActivate: [SparePartsGuard],
+    canLoad: [SparePartsGuard]
   },
   { path: '**', redirectTo: '404' }
 ];

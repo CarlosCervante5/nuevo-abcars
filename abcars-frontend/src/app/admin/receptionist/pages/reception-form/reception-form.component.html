@@ -322,7 +322,7 @@
                                 <mat-label>Marca que busca</mat-label>
 
                                 <mat-select placeholder="Seleccionar una Marca" formControlName="brand">
-                                    <mat-option *ngFor="let brand of brands" (click)="getModelsByBrand(brand.name)" value="{{brand.name}}">{{ brand.name | titlecase }}</mat-option>
+                                    <mat-option *ngFor="let brand of brands" (click)="getModelsByBrand(brand.name)" value="{{brand.name}}">{{ brand.name | uppercase }}</mat-option>
                                 </mat-select>
 
                                 <mat-hint *ngIf="brandInvalid">Seleccione una marca.</mat-hint>
@@ -384,7 +384,7 @@
                             <mat-form-field appearance="outline">
                                 <mat-label>Marca segunda opción</mat-label>
                                 <mat-select placeholder="Seleccionar una Marca" formControlName="brandSecondOption">
-                                    <mat-option *ngFor="let brand of brands" (click)="getSecondModels(brand.name)" value="{{brand.name}}">{{ brand.name | titlecase }}</mat-option> <!---->
+                                    <mat-option *ngFor="let brand of brands" (click)="getSecondModels(brand.name)" value="{{brand.name}}">{{ brand.name | uppercase }}</mat-option> <!---->
                                 </mat-select>
                             </mat-form-field>
                         </div>

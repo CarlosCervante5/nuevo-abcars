@@ -88,4 +88,25 @@ class Dealership extends Model
     {
         return $this->hasMany(Vehicle::class, 'dealership_id');
     }
+
+    /**
+     * Sucursales ordenadas sin duplicados lógicos (mismo nombre + ubicación, ignorando mayúsculas/espacios).
+     * Si existen filas duplicadas en BD, se conserva la de id menor.
+     *
+     * @return \Illuminate\Support\Collection<int, self>
+     */
+    public static function listOrderedUnique(): \Illuminate\Support\Collection
+    {
+        return static::query()
+            ->orderBy('name')
+            ->orderBy('id')
+            ->get()
+            ->unique(function (self $d) {
+                $name = mb_strtolower(trim((string) $d->name), 'UTF-8');
+                $loc = mb_strtolower(trim((string) $d->location), 'UTF-8');
+
+                return $name."\0".$loc;
+            })
+            ->values();
+    }
 }

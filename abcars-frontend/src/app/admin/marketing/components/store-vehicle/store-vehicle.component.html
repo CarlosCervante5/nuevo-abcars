@@ -1,442 +1,575 @@
-<div class="container mx-auto px-4 py-4">
-    <div class="w-full mb-6">
-        <h1 class="store-vehicle-title">Crear vehículo</h1>
-        <p class="store-vehicle-subtitle">Por favor, ingrese la información del vehículo.</p>
+<div class="store-vehicle-shell">
+  <header class="store-vehicle-topbar">
+    <div class="store-vehicle-topbar-text">
+      <h1 class="store-vehicle-title store-vehicle-title--left">Crear vehículo</h1>
+      <p class="store-vehicle-subtitle store-vehicle-subtitle--left">
+        Completa los datos y, al guardar, podrás subir y ordenar imágenes en la misma ventana.
+      </p>
     </div>
+    <button
+      type="button"
+      mat-icon-button
+      class="store-vehicle-close"
+      (click)="close()"
+      aria-label="Cerrar"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
 
-    <div class="w-full">
+  <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="store-vehicle-tabs" animationDuration="200ms">
+    <mat-tab label="Datos del vehículo">
+      <div class="store-vehicle-tab-body">
+        <div *ngIf="vehicleCreated" class="store-vehicle-banner">
+          <mat-icon>check_circle</mat-icon>
+          <span>Vehículo creado. Pasa a <strong>Imágenes</strong> para las fotos o pulsa <strong>Finalizar</strong>.</span>
+        </div>
+
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
-            <!-- Nombre del vehículo -->
-            <div class="store-vehicle-form-field mb-4">
-                <label class="store-vehicle-label">Nombre del vehículo: <span style="color: red;">*</span></label>
-                <input 
-                    type="text" 
-                    formControlName="name" 
-                    placeholder="Nuevo nombre" 
-                    minlength="1" 
-                    maxlength="191" 
-                    required
-                    class="store-vehicle-input"
-                    [class.store-vehicle-input-error]="nameInvalid"
-                >
-                <span *ngIf="nameInvalid" class="store-vehicle-hint">Escribe el nuevo nombre del vehículo.</span>
+          <!-- Nombre del vehículo -->
+          <div class="store-vehicle-form-field mb-4">
+            <label class="store-vehicle-label">Nombre del vehículo: <span style="color: red;">*</span></label>
+            <input
+              type="text"
+              formControlName="name"
+              placeholder="Nuevo nombre"
+              minlength="1"
+              maxlength="191"
+              required
+              class="store-vehicle-input"
+              [class.store-vehicle-input-error]="nameInvalid"
+            />
+            <span *ngIf="nameInvalid" class="store-vehicle-hint">Escribe el nuevo nombre del vehículo.</span>
+          </div>
+
+          <!-- Descripción -->
+          <div class="store-vehicle-form-field mb-4">
+            <label class="store-vehicle-label">Descripción de la unidad: <span style="color: red;">*</span></label>
+            <textarea
+              formControlName="description"
+              placeholder="Nueva descripción"
+              rows="5"
+              required
+              class="store-vehicle-input store-vehicle-textarea"
+              [class.store-vehicle-input-error]="descriptionInvalid"
+            ></textarea>
+            <span *ngIf="descriptionInvalid" class="store-vehicle-hint">Escribe la nueva oportunidad del vehículo.</span>
+          </div>
+
+          <!-- Grid de campos -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <!-- VIN -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Vin del vehículo <span style="color: red;">*</span></label>
+              <input
+                type="text"
+                formControlName="vin"
+                placeholder="CXD..."
+                minlength="1"
+                maxlength="17"
+                required
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="vinInvalid"
+              />
+              <span *ngIf="vinInvalid" class="store-vehicle-hint">Escribe el VIN del vehículo.</span>
             </div>
 
-            <!-- Descripción -->
-            <div class="store-vehicle-form-field mb-4">
-                <label class="store-vehicle-label">Descripción de la unidad: <span style="color: red;">*</span></label>
-                <textarea 
-                    formControlName="description" 
-                    placeholder="Nueva descripción"
-                    rows="5"
-                    required
-                    class="store-vehicle-input store-vehicle-textarea"
-                    [class.store-vehicle-input-error]="descriptionInvalid"
-                ></textarea>
-                <span *ngIf="descriptionInvalid" class="store-vehicle-hint">Escribe la nueva oportunidad del vehículo.</span>
+            <!-- Sucursal -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Sucursal del vehículo <span style="color: red;">*</span></label>
+              <input
+                type="text"
+                formControlName="dealership_name"
+                placeholder="Nueva sucursal"
+                minlength="1"
+                maxlength="191"
+                required
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="dealershipInvalid"
+              />
+              <span *ngIf="dealershipInvalid" class="store-vehicle-hint">Escribe la nueva sucursal del vehículo.</span>
             </div>
 
-            <!-- Grid de campos -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <!-- VIN -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Vin del vehículo <span style="color: red;">*</span></label>
-                    <input 
-                        type="text" 
-                        formControlName="vin" 
-                        placeholder="CXD..." 
-                        minlength="1" 
-                        maxlength="17" 
-                        required
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="vinInvalid"
-                    >
-                    <span *ngIf="vinInvalid" class="store-vehicle-hint">Escribe el VIN del vehículo.</span>
-                </div>
-
-                <!-- Sucursal -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Sucursal del vehículo <span style="color: red;">*</span></label>
-                    <input 
-                        type="text" 
-                        formControlName="dealership_name" 
-                        placeholder="Nueva sucursal" 
-                        minlength="1" 
-                        maxlength="191" 
-                        required
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="dealershipInvalid"
-                    >
-                    <span *ngIf="dealershipInvalid" class="store-vehicle-hint">Escribe la nueva sucursal del vehículo.</span>
-                </div>
-
-                <!-- Ubicación -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Ubicación del vehículo <span style="color: red;">*</span></label>
-                    <input 
-                        type="text" 
-                        formControlName="location" 
-                        placeholder="Nueva ubicación" 
-                        minlength="1" 
-                        maxlength="191" 
-                        required
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="locationInvalid"
-                    >
-                    <span *ngIf="locationInvalid" class="store-vehicle-hint">Escribe la nueva ubicación del vehículo.</span>
-                </div>
-
-                <!-- Fecha de compra -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Fecha de compra <span style="color: red;">*</span></label>
-                    <input 
-                        type="date" 
-                        formControlName="purchase_date" 
-                        minlength="1" 
-                        maxlength="191" 
-                        required
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="purchaseDateInvalid"
-                    >
-                    <span *ngIf="purchaseDateInvalid" class="store-vehicle-hint">Escribe la nueva fecha de compra.</span>
-                </div>
-
-                <!-- Precio de venta -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Precio de venta <span style="color: red;">*</span></label>
-                    <input 
-                        type="number" 
-                        formControlName="sale_price" 
-                        minlength="1" 
-                        maxlength="191" 
-                        required
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="salePriceInvalid"
-                    >
-                    <span *ngIf="salePriceInvalid" class="store-vehicle-hint">Escribe el nuevo precio de venta.</span>
-                </div>
-
-                <!-- Precio de lista -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Precio de lista <span style="color: red;">*</span></label>
-                    <input 
-                        type="number" 
-                        formControlName="list_price" 
-                        minlength="1" 
-                        maxlength="191" 
-                        required
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="listPriceInvalid"
-                    >
-                    <span *ngIf="listPriceInvalid" class="store-vehicle-hint">Escribe el nuevo precio de lista.</span>
-                </div>
-
-                <!-- Tipo de vehículo -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Tipo de vehículo: <span style="color: red;">*</span></label>
-                    <select 
-                        formControlName="type"
-                        class="store-vehicle-input"
-                        required
-                    >
-                        <option value="">Seleccione tipo</option>
-                        <option value="car">Auto</option>
-                        <option value="moto">Motocicleta</option>
-                        <option value="truck">Camión</option>
-                        <option value="other">Otro</option>
-                    </select>
-                </div>
-
-                <!-- Categoría -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Categoría de vehículo: <span style="color: red;">*</span></label>
-                    <select 
-                        formControlName="category"
-                        class="store-vehicle-input"
-                        required
-                    >
-                        <option value="">Seleccione categoría</option>
-                        <option value="new">Nuevo</option>
-                        <option value="pre_owned">Seminuevo</option>
-                        <option value="demo">Demo</option>
-                    </select>
-                </div>
-
-                <!-- Cilindros -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Número de cilindros: <span style="color: red;">*</span></label>
-                    <input 
-                        type="number" 
-                        formControlName="cylinders" 
-                        minlength="1" 
-                        maxlength="5" 
-                        required
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="cylindersInvalid"
-                    >
-                    <span *ngIf="cylindersInvalid" class="store-vehicle-hint">Escribe el nuevo número de cilindros.</span>
-                </div>
-
-                <!-- Color exterior -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Color exterior: <span style="color: red;">*</span></label>
-                    <input 
-                        type="text" 
-                        formControlName="exterior_color" 
-                        minlength="1" 
-                        maxlength="191" 
-                        required
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="colorExtInvalid"
-                    >
-                    <span *ngIf="colorExtInvalid" class="store-vehicle-hint">Escribe el nuevo color exterior.</span>
-                </div>
-
-                <!-- Color interior -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Color interior: <span style="color: red;">*</span></label>
-                    <input 
-                        type="text" 
-                        formControlName="interior_color" 
-                        minlength="1" 
-                        maxlength="191" 
-                        required
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="colorIntInvalid"
-                    >
-                    <span *ngIf="colorIntInvalid" class="store-vehicle-hint">Escribe el nuevo color interior.</span>
-                </div>
-
-                <!-- Estatus -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Estatus del vehículo: <span style="color: red;">*</span></label>
-                    <select 
-                        formControlName="page_status"
-                        class="store-vehicle-input"
-                        required
-                    >
-                        <option value="">Seleccione estatus</option>
-                        <option value="active">Activo</option>
-                        <option value="inactive">Inactivo</option>
-                        <option value="sale">Vendido</option>
-                    </select>
-                </div>
-
-                <!-- Transmisión -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Transmisión: <span style="color: red;">*</span></label>
-                    <select 
-                        formControlName="transmission"
-                        class="store-vehicle-input"
-                        required
-                    >
-                        <option value="">Seleccione transmisión</option>
-                        <option value="automatic">Automático</option>
-                        <option value="manual">Manual</option>
-                        <option value="semiautomatic">Semi-automática</option>
-                        <option value="cvt">CVT</option>
-                        <option value="triptronic">Triptronic</option>
-                        <option value="dual-clutch">Dual-clutch</option>
-                    </select>
-                </div>
-
-                <!-- Tipo de combustible -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Tipo de combustible: <span style="color: red;">*</span></label>
-                    <select 
-                        formControlName="fuel_type"
-                        class="store-vehicle-input"
-                        required
-                    >
-                        <option value="">Seleccione combustible</option>
-                        <option value="gasoline">Gasolina</option>
-                        <option value="diesel">Diesel</option>
-                        <option value="electric">Eléctrico</option>
-                        <option value="hybrid">Híbrido</option>
-                        <option value="hydrogen">Hidrógeno</option>
-                        <option value="natural_gas">Gas Natural</option>
-                    </select>
-                </div>
-
-                <!-- Kilometraje -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Kilometraje: <span style="color: red;">*</span></label>
-                    <input 
-                        type="number" 
-                        formControlName="mileage" 
-                        minlength="1" 
-                        maxlength="191" 
-                        required
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="kmInvalid"
-                    >
-                    <span *ngIf="kmInvalid" class="store-vehicle-hint">Actualiza el kilometraje.</span>
-                </div>
-
-                <!-- Marca -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Marca <span style="color: red;">*</span></label>
-                    <input 
-                        type="text" 
-                        formControlName="brand" 
-                        [matAutocomplete]="autoBrand"
-                        required
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="brandInvalid"
-                    >
-                    <mat-autocomplete #autoBrand="matAutocomplete" (optionSelected)="onBrandSelected($event)">
-                        <mat-option *ngFor="let brand of filteredBrands | async" [value]="brand.name">
-                            {{ brand.name }}
-                        </mat-option>
-                    </mat-autocomplete>
-                    <span *ngIf="brandInvalid" class="store-vehicle-hint">Escribe la marca del vehículo.</span>
-                </div>
-
-                <!-- Modelo -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Modelo <span style="color: red;">*</span></label>
-                    <input 
-                        type="text" 
-                        formControlName="model" 
-                        [matAutocomplete]="autoModel"
-                        required
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="modelInvalid"
-                    >
-                    <mat-autocomplete #autoModel="matAutocomplete" (optionSelected)="onModelSelected($event)">
-                        <mat-option *ngFor="let model of filteredModels | async" [value]="model">
-                            {{ model.name }}
-                        </mat-option>
-                    </mat-autocomplete>
-                    <span *ngIf="modelInvalid" class="store-vehicle-hint">Escribe el modelo del vehículo.</span>
-                </div>
-
-                <!-- Año -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Año del modelo <span style="color: red;">*</span></label>
-                    <input 
-                        type="text" 
-                        formControlName="year" 
-                        placeholder="Nuevo año" 
-                        minlength="1" 
-                        maxlength="191" 
-                        required
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="yearModelInvalid"
-                    >
-                    <span *ngIf="yearModelInvalid" class="store-vehicle-hint">Escribe el nuevo año del modelo.</span>
-                </div>
-
-                <!-- Versión -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Versión <span style="color: red;">*</span></label>
-                    <input 
-                        type="text" 
-                        formControlName="version" 
-                        [matAutocomplete]="autoVersion"
-                        required
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="versionInvalid"
-                    >
-                    <mat-autocomplete #autoVersion="matAutocomplete" (optionSelected)="onVersionSelected($event)">
-                        <mat-option *ngFor="let version of filteredVersions | async" [value]="version.name">
-                            {{ version.name }}
-                        </mat-option>
-                    </mat-autocomplete>
-                    <span *ngIf="versionInvalid" class="store-vehicle-hint">Escribe la versión del vehículo.</span>
-                </div>
-
-                <!-- Carrocería -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Carocería <span style="color: red;">*</span></label>
-                    <input 
-                        type="text" 
-                        formControlName="body" 
-                        [matAutocomplete]="autoBody"
-                        required
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="bodyInvalid"
-                    >
-                    <mat-autocomplete #autoBody="matAutocomplete" (optionSelected)="onBodySelected($event)">
-                        <mat-option *ngFor="let body of filteredBodies | async" [value]="body.name">
-                            {{ body.name }}
-                        </mat-option>
-                    </mat-autocomplete>
-                    <span *ngIf="bodyInvalid" class="store-vehicle-hint">Escribe la carrocería del vehículo.</span>
-                </div>
-
-                <!-- Precio de oferta -->
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Precio de oferta:</label>
-                    <input 
-                        type="number" 
-                        formControlName="offer_price" 
-                        minlength="1" 
-                        maxlength="191"
-                        class="store-vehicle-input"
-                        [class.store-vehicle-input-error]="form.get('offer_price')?.hasError('lessThanOrEqualToZero') && form.get('offer_price')?.touched || form.get('offer_price')?.hasError('greaterThanSalePrice') && form.get('offer_price')?.touched || form.get('offer_price')?.hasError('notANumber') && form.get('offer_price')?.touched"
-                    >
-                    <span *ngIf="form.get('offer_price')?.hasError('lessThanOrEqualToZero') && form.get('offer_price')?.touched" class="store-vehicle-hint">
-                        El precio de oferta debe ser mayor a cero.
-                    </span>
-                    <span *ngIf="form.get('offer_price')?.hasError('greaterThanSalePrice') && form.get('offer_price')?.touched" class="store-vehicle-hint">
-                        El precio de oferta debe ser menor al precio de venta.
-                    </span>
-                    <span *ngIf="form.get('offer_price')?.hasError('notANumber') && form.get('offer_price')?.touched" class="store-vehicle-hint">
-                        El precio de oferta debe ser un número válido.
-                    </span>
-                </div>
+            <!-- Ubicación -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Ubicación del vehículo <span style="color: red;">*</span></label>
+              <input
+                type="text"
+                formControlName="location"
+                placeholder="Nueva ubicación"
+                minlength="1"
+                maxlength="191"
+                required
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="locationInvalid"
+              />
+              <span *ngIf="locationInvalid" class="store-vehicle-hint">Escribe la nueva ubicación del vehículo.</span>
             </div>
 
-            <!-- Campaña (2 columnas) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div class="store-vehicle-form-field">
-                    <label class="store-vehicle-label">Campaña</label>
-                    <div class="store-vehicle-chip-container">
-                        <div class="store-vehicle-chips">
-                            <span *ngFor="let camp of camps" class="store-vehicle-chip">
-                                {{camp}}
-                                <button type="button" class="store-vehicle-chip-remove" (click)="remove(camp)" [attr.aria-label]="'remove ' + camp">
-                                    ×
-                                </button>
-                            </span>
-                        </div>
-                        <input 
-                            type="text" 
-                            formControlName="campaign_2" 
-                            [matAutocomplete]="autoCampaign"
-                            class="store-vehicle-input"
-                            placeholder="Agregar campaña"
-                            (keydown.enter)="$event.preventDefault(); addCampaign()"
-                        >
-                        <mat-autocomplete #autoCampaign="matAutocomplete" (optionSelected)="onCampaignSelected($event)">
-                            <mat-option *ngFor="let camp of filteredCampaigns | async" [value]="camp.name" [id]="camp.uuid">
-                                {{ camp.name }}
-                            </mat-option>
-                        </mat-autocomplete>
-                    </div>
+            <!-- Fecha de compra -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Fecha de compra <span style="color: red;">*</span></label>
+              <input
+                type="date"
+                formControlName="purchase_date"
+                minlength="1"
+                maxlength="191"
+                required
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="purchaseDateInvalid"
+              />
+              <span *ngIf="purchaseDateInvalid" class="store-vehicle-hint">Escribe la nueva fecha de compra.</span>
+            </div>
+
+            <!-- Precio de venta -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Precio de venta <span style="color: red;">*</span></label>
+              <input
+                type="number"
+                formControlName="sale_price"
+                minlength="1"
+                maxlength="191"
+                required
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="salePriceInvalid"
+              />
+              <span *ngIf="salePriceInvalid" class="store-vehicle-hint">Escribe el nuevo precio de venta.</span>
+            </div>
+
+            <!-- Precio de lista -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Precio de lista <span style="color: red;">*</span></label>
+              <input
+                type="number"
+                formControlName="list_price"
+                minlength="1"
+                maxlength="191"
+                required
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="listPriceInvalid"
+              />
+              <span *ngIf="listPriceInvalid" class="store-vehicle-hint">Escribe el nuevo precio de lista.</span>
+            </div>
+
+            <!-- Tipo de vehículo -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Tipo de vehículo: <span style="color: red;">*</span></label>
+              <select formControlName="type" class="store-vehicle-input" required>
+                <option value="">Seleccione tipo</option>
+                <option value="car">Auto</option>
+                <option value="moto">Motocicletas</option>
+                <option value="truck">Camión</option>
+                <option value="other">Otro</option>
+              </select>
+            </div>
+
+            <!-- Categoría -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Categoría de vehículo: <span style="color: red;">*</span></label>
+              <select formControlName="category" class="store-vehicle-input" required>
+                <option value="">Seleccione categoría</option>
+                <option value="new">Nuevo</option>
+                <option value="pre_owned">Seminuevo</option>
+                <option value="demo">Demo</option>
+              </select>
+            </div>
+
+            <!-- Cilindros -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Número de cilindros: <span style="color: red;">*</span></label>
+              <input
+                type="number"
+                formControlName="cylinders"
+                minlength="1"
+                maxlength="5"
+                required
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="cylindersInvalid"
+              />
+              <span *ngIf="cylindersInvalid" class="store-vehicle-hint">Escribe el nuevo número de cilindros.</span>
+            </div>
+
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Cilindrada (cc)</label>
+              <input
+                type="number"
+                formControlName="engine_displacement_cc"
+                min="0"
+                max="9999"
+                class="store-vehicle-input"
+                placeholder="Opcional, ej. 650"
+              />
+            </div>
+
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Peso en orden de marcha (kg)</label>
+              <input
+                type="number"
+                formControlName="wet_weight_kg"
+                min="0"
+                class="store-vehicle-input"
+                placeholder="Opcional"
+              />
+            </div>
+
+            <!-- Color exterior -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Color exterior: <span style="color: red;">*</span></label>
+              <input
+                type="text"
+                formControlName="exterior_color"
+                minlength="1"
+                maxlength="191"
+                required
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="colorExtInvalid"
+              />
+              <span *ngIf="colorExtInvalid" class="store-vehicle-hint">Escribe el nuevo color exterior.</span>
+            </div>
+
+            <!-- Color interior -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Color interior: <span style="color: red;">*</span></label>
+              <input
+                type="text"
+                formControlName="interior_color"
+                minlength="1"
+                maxlength="191"
+                required
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="colorIntInvalid"
+              />
+              <span *ngIf="colorIntInvalid" class="store-vehicle-hint">Escribe el nuevo color interior.</span>
+            </div>
+
+            <!-- Estatus -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Estatus del vehículo: <span style="color: red;">*</span></label>
+              <select formControlName="page_status" class="store-vehicle-input" required>
+                <option value="">Seleccione estatus</option>
+                <option value="active">Activo</option>
+                <option value="inactive">Inactivo</option>
+                <option value="sale">Vendido</option>
+              </select>
+            </div>
+
+            <!-- Transmisión -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Transmisión: <span style="color: red;">*</span></label>
+              <select formControlName="transmission" class="store-vehicle-input" required>
+                <option value="">Seleccione transmisión</option>
+                <option value="automatic">Automático</option>
+                <option value="manual">Manual</option>
+                <option value="semiautomatic">Semi-automática</option>
+                <option value="cvt">CVT</option>
+                <option value="triptronic">Triptronic</option>
+                <option value="dual-clutch">Dual-clutch</option>
+              </select>
+            </div>
+
+            <!-- Tipo de combustible -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Tipo de combustible: <span style="color: red;">*</span></label>
+              <select formControlName="fuel_type" class="store-vehicle-input" required>
+                <option value="">Seleccione combustible</option>
+                <option value="gasoline">Gasolina</option>
+                <option value="diesel">Diesel</option>
+                <option value="electric">Eléctrico</option>
+                <option value="hybrid">Híbrido</option>
+                <option value="hydrogen">Hidrógeno</option>
+                <option value="natural_gas">Gas Natural</option>
+              </select>
+            </div>
+
+            <!-- Kilometraje -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Kilometraje: <span style="color: red;">*</span></label>
+              <input
+                type="number"
+                formControlName="mileage"
+                minlength="1"
+                maxlength="191"
+                required
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="kmInvalid"
+              />
+              <span *ngIf="kmInvalid" class="store-vehicle-hint">Actualiza el kilometraje.</span>
+            </div>
+
+            <!-- Marca -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Marca <span style="color: red;">*</span></label>
+              <input
+                type="text"
+                formControlName="brand"
+                [matAutocomplete]="autoBrand"
+                required
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="brandInvalid"
+              />
+              <mat-autocomplete #autoBrand="matAutocomplete" (optionSelected)="onBrandSelected($event)">
+                <mat-option *ngFor="let brand of filteredBrands | async" [value]="brand.name">
+                  {{ brand.name | uppercase }}
+                </mat-option>
+              </mat-autocomplete>
+              <span *ngIf="brandInvalid" class="store-vehicle-hint">Escribe la marca del vehículo.</span>
+            </div>
+
+            <!-- Modelo -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Modelo <span style="color: red;">*</span></label>
+              <input
+                type="text"
+                formControlName="model"
+                [matAutocomplete]="autoModel"
+                required
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="modelInvalid"
+              />
+              <mat-autocomplete #autoModel="matAutocomplete" (optionSelected)="onModelSelected($event)">
+                <mat-option *ngFor="let model of filteredModels | async" [value]="model">
+                  {{ model.name }}
+                </mat-option>
+              </mat-autocomplete>
+              <span *ngIf="modelInvalid" class="store-vehicle-hint">Escribe el modelo del vehículo.</span>
+            </div>
+
+            <!-- Año -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Año del modelo <span style="color: red;">*</span></label>
+              <input
+                type="text"
+                formControlName="year"
+                placeholder="Nuevo año"
+                minlength="1"
+                maxlength="191"
+                required
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="yearModelInvalid"
+              />
+              <span *ngIf="yearModelInvalid" class="store-vehicle-hint">Escribe el nuevo año del modelo.</span>
+            </div>
+
+            <!-- Versión -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Versión <span style="color: red;">*</span></label>
+              <input
+                type="text"
+                formControlName="version"
+                [matAutocomplete]="autoVersion"
+                required
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="versionInvalid"
+              />
+              <mat-autocomplete #autoVersion="matAutocomplete" (optionSelected)="onVersionSelected($event)">
+                <mat-option *ngFor="let version of filteredVersions | async" [value]="version.name">
+                  {{ version.name }}
+                </mat-option>
+              </mat-autocomplete>
+              <span *ngIf="versionInvalid" class="store-vehicle-hint">Escribe la versión del vehículo.</span>
+            </div>
+
+            <!-- Carrocería -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Carocería <span style="color: red;">*</span></label>
+              <input
+                type="text"
+                formControlName="body"
+                [matAutocomplete]="autoBody"
+                required
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="bodyInvalid"
+              />
+              <mat-autocomplete #autoBody="matAutocomplete" (optionSelected)="onBodySelected($event)">
+                <mat-option *ngFor="let body of filteredBodies | async" [value]="body.name">
+                  {{ body.name }}
+                </mat-option>
+              </mat-autocomplete>
+              <span *ngIf="bodyInvalid" class="store-vehicle-hint">Escribe la carrocería del vehículo.</span>
+            </div>
+
+            <!-- Precio de oferta -->
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Precio de oferta:</label>
+              <input
+                type="number"
+                formControlName="offer_price"
+                minlength="1"
+                maxlength="191"
+                class="store-vehicle-input"
+                [class.store-vehicle-input-error]="
+                  (form.get('offer_price')?.hasError('lessThanOrEqualToZero') && form.get('offer_price')?.touched) ||
+                  (form.get('offer_price')?.hasError('greaterThanSalePrice') && form.get('offer_price')?.touched) ||
+                  (form.get('offer_price')?.hasError('notANumber') && form.get('offer_price')?.touched)
+                "
+              />
+              <span *ngIf="form.get('offer_price')?.hasError('lessThanOrEqualToZero') && form.get('offer_price')?.touched" class="store-vehicle-hint">
+                El precio de oferta debe ser mayor a cero.
+              </span>
+              <span *ngIf="form.get('offer_price')?.hasError('greaterThanSalePrice') && form.get('offer_price')?.touched" class="store-vehicle-hint">
+                El precio de oferta debe ser menor al precio de venta.
+              </span>
+              <span *ngIf="form.get('offer_price')?.hasError('notANumber') && form.get('offer_price')?.touched" class="store-vehicle-hint">
+                El precio de oferta debe ser un número válido.
+              </span>
+            </div>
+          </div>
+
+          <!-- Campaña -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="store-vehicle-form-field">
+              <label class="store-vehicle-label">Campaña</label>
+              <div class="store-vehicle-chip-container">
+                <div class="store-vehicle-chips">
+                  <span *ngFor="let camp of camps" class="store-vehicle-chip">
+                    {{ camp }}
+                    <button
+                      type="button"
+                      class="store-vehicle-chip-remove"
+                      (click)="remove(camp)"
+                      [disabled]="vehicleCreated"
+                      [attr.aria-label]="'remove ' + camp"
+                    >
+                      ×
+                    </button>
+                  </span>
                 </div>
+                <input
+                  type="text"
+                  formControlName="campaign_2"
+                  [matAutocomplete]="autoCampaign"
+                  class="store-vehicle-input"
+                  placeholder="Agregar campaña"
+                  (keydown.enter)="$event.preventDefault(); addCampaign()"
+                />
+                <mat-autocomplete #autoCampaign="matAutocomplete" (optionSelected)="onCampaignSelected($event)">
+                  <mat-option *ngFor="let camp of filteredCampaigns | async" [value]="camp.name" [id]="camp.uuid">
+                    {{ camp.name }}
+                  </mat-option>
+                </mat-autocomplete>
+              </div>
             </div>
+          </div>
 
-            <!-- Botones -->
-            <div class="w-full mt-6 mb-3 text-center">
-                <button 
-                    type="submit" 
-                    class="store-vehicle-btn store-vehicle-btn-primary" 
-                    [disabled]="form.invalid || button"
-                >
-                    <span *ngIf="!button">Crear</span>
-                    <span *ngIf="button" class="store-vehicle-spinner"></span>
-                </button>
+          <div class="w-full mt-6 mb-3 text-center store-vehicle-actions">
+            <button
+              *ngIf="!vehicleCreated"
+              type="submit"
+              class="store-vehicle-btn store-vehicle-btn-primary"
+              [disabled]="form.invalid || button"
+            >
+              <span *ngIf="!button">Crear vehículo</span>
+              <span *ngIf="button">Guardando…</span>
+            </button>
 
-                <button 
-                    type="button" 
-                    class="store-vehicle-btn store-vehicle-btn-secondary" 
-                    (click)="close()"
-                >
-                    Cancelar
-                </button>
-            </div>
+            <button *ngIf="vehicleCreated" type="button" class="store-vehicle-btn store-vehicle-btn-secondary" (click)="selectedTabIndex = 1">
+              Ir a imágenes
+            </button>
+
+            <button type="button" class="store-vehicle-btn store-vehicle-btn-secondary" (click)="close()">
+              {{ vehicleCreated ? 'Finalizar' : 'Cancelar' }}
+            </button>
+          </div>
         </form>
-    </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Imágenes" [disabled]="!createdUuid">
+      <ng-template matTabContent>
+        <div class="store-vehicle-tab-body store-vehicle-tab-body--images">
+          <p *ngIf="!createdUuid" class="uv-images-hint">Crea el vehículo en la primera pestaña para habilitar fotos.</p>
+
+          <ng-container *ngIf="createdUuid">
+            <section class="uv-images-upload" aria-label="Subir imágenes">
+              <h2 class="uv-images-section-title">Agregar fotos</h2>
+              <p class="uv-images-hint">PNG, JPG, JPEG o WebP. Varias a la vez.</p>
+              <label class="uv-images-drop">
+                <input type="file" accept=".png,.jpg,.jpeg,.webp" multiple (change)="assignImageFiles($event)" />
+                <mat-icon class="uv-images-drop-icon">cloud_upload</mat-icon>
+                <span class="uv-images-drop-text">Toca o arrastra archivos aquí</span>
+              </label>
+              <div class="uv-images-upload-actions">
+                <button
+                  type="button"
+                  class="store-vehicle-btn store-vehicle-btn-primary"
+                  (click)="uploadNewImages()"
+                  [disabled]="imageUploadDisabled || imageUploadLoading"
+                >
+                  <span *ngIf="!imageUploadLoading">Subir imágenes</span>
+                  <span *ngIf="imageUploadLoading">Subiendo…</span>
+                </button>
+              </div>
+              <mat-progress-bar *ngIf="imageUploadLoading" mode="indeterminate"></mat-progress-bar>
+            </section>
+
+            <section class="uv-images-gallery" aria-label="Galería y orden">
+              <div class="uv-images-gallery-head">
+                <h2 class="uv-images-section-title">Galería (arrastra para reordenar)</h2>
+                <p class="uv-images-hint">La primera imagen es la portada en el listado.</p>
+              </div>
+
+              <div *ngIf="imagesForSlider.length === 0" class="uv-images-empty">
+                <mat-icon>hide_image</mat-icon>
+                <p>Aún no hay imágenes. Sube fotos arriba.</p>
+              </div>
+
+              <div
+                cdkDropList
+                class="uv-images-list"
+                (cdkDropListDropped)="drop($event)"
+                *ngIf="imagesForSlider.length > 0"
+              >
+                <div class="uv-images-row" *ngFor="let image of imagesForSlider; let i = index" cdkDrag>
+                  <div class="uv-images-row-inner">
+                    <input
+                      type="checkbox"
+                      [(ngModel)]="image.selected"
+                      class="uv-images-check"
+                      [ngModelOptions]="{ standalone: true }"
+                    />
+                    <span class="uv-images-pos">#{{ i + 1 }}</span>
+                    <div class="uv-images-meta">
+                      <span class="uv-images-meta-label">Público</span>
+                      <span class="uv-images-meta-val">{{ image.path_public || '—' }}</span>
+                    </div>
+                    <img class="uv-images-thumb" [src]="image.path" alt="" />
+                    <button
+                      type="button"
+                      class="uv-images-trash"
+                      (click)="deleteImageAt(image.id, i)"
+                      matTooltip="Eliminar imagen"
+                      aria-label="Eliminar imagen"
+                    >
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="uv-images-footer" *ngIf="imagesForSlider.length > 0">
+                <button
+                  type="button"
+                  class="store-vehicle-btn store-vehicle-btn-primary"
+                  (click)="saveImageOrder()"
+                  [disabled]="imagesOrderSaving"
+                >
+                  <span *ngIf="!imagesOrderSaving">Guardar orden</span>
+                  <span *ngIf="imagesOrderSaving">Guardando…</span>
+                </button>
+              </div>
+            </section>
+
+            <div class="store-vehicle-finish-wrap">
+              <button type="button" class="store-vehicle-btn store-vehicle-btn-primary" (click)="finishAndClose()">
+                Finalizar y cerrar
+              </button>
+              <button type="button" class="store-vehicle-btn store-vehicle-btn-secondary" (click)="selectedTabIndex = 0">
+                Volver a datos
+              </button>
+            </div>
+          </ng-container>
+        </div>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
 </div>

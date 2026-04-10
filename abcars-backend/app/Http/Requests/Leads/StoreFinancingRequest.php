@@ -32,6 +32,7 @@ class StoreFinancingRequest extends FormRequest
             'company' => 'nullable|string',
             'job_tenure' => 'nullable|string',
             'comments' => 'nullable|string',
+            'vehicle_of_interest' => 'nullable|string|max:500',
             'vehicle_brand' => 'nullable|string',
             'vehicle_model' => 'nullable|string',
             'vehicle_year' => 'nullable|integer',

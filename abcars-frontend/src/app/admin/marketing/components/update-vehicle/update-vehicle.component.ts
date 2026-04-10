@@ -3,13 +3,15 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { AbstractControl, FormControl, FormGroup, UntypedFormBuilder, ValidatorFn, Validators } from '@angular/forms';
 import { VehicleService } from '@services/vehicle.service';
+import { ImagesService } from '@services/images.service';
 import Swal from "sweetalert2";
 import { MatChipInputEvent } from '@angular/material/chips';
 import { Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
-import {UpdateVehicle,  FullDetailResponse, BrandsResponse, Brand, Line, LinesResponse, Model, Body, ModelsResponse, VersionsResponse, Version, BodiesResponse, VehicleUpdateResponse, GralResponse} from '@interfaces/vehicle_data.interface';
+import {UpdateVehicle,  FullDetailResponse, BrandsResponse, Brand, Model, Body, ModelsResponse, VersionsResponse, Version, BodiesResponse, VehicleUpdateResponse, GralResponse, ImageOrder} from '@interfaces/vehicle_data.interface';
 import { GetcampaingResponse } from '@interfaces/admin.interfaces';
 // import { CampaingService } from 'src/app/admin/gestor/services/campaing.service';
 import { AdminService } from '@services/admin.service';
@@ -17,6 +19,7 @@ import { AdminService } from '@services/admin.service';
 import {reload} from '@helpers/session.helper';
 import { Router } from '@angular/router';
 
+type ImageRow = ImageOrder & { selected?: boolean };
 
 @Component({
     selector: 'app-update-vehicle',
@@ -32,6 +35,17 @@ export class UpdateVehicleComponent implements OnInit {
   public form!: FormGroup;
 
   public button: boolean = false;
+
+  /** Pestaña inicial: 0 datos, 1 imágenes (desde accesos rápidos en la tabla). */
+  selectedTabIndex = 0;
+
+  imageFiles: File[] = [];
+  imageUploadDisabled = true;
+  imageUploadLoading = false;
+  imagesForSlider: ImageRow[] = [];
+  imagesOrderSaving = false;
+  /** Si hubo cambios en imágenes sin cerrar, al cerrar se notifica reload al listado. */
+  private imagesDirty = false;
 
   public camps: string[] = [];
   public id_camp: string[] = [];
@@ -62,14 +76,18 @@ export class UpdateVehicleComponent implements OnInit {
   filteredBodies: Observable<Body[]> = of([]);
 
   constructor(
-    @Inject(MAT_BOTTOM_SHEET_DATA) public data: any,
+    @Inject(MAT_BOTTOM_SHEET_DATA) public data: { uuid: string; initialTab?: number },
     private _formBuilder: UntypedFormBuilder,
     private _vehicleService:VehicleService,
     private _campaignService:AdminService,
-    private _bottomSheetRef: MatBottomSheetRef<any>,
+    private _imagesService: ImagesService,
+    private _bottomSheetRef: MatBottomSheetRef<{ reload?: boolean } | undefined>,
     private _router: Router 
   ) {
-      this.vehicle_uuid =  data.uuid;    
+      this.vehicle_uuid = data.uuid;
+      if (data.initialTab === 1) {
+        this.selectedTabIndex = 1;
+      }
       this.formInit();
   }
 
@@ -217,6 +235,8 @@ export class UpdateVehicleComponent implements OnInit {
               type: this.vehicle.type,
               category: this.vehicle.category,
               cylinders: this.vehicle.cylinders,
+              engine_displacement_cc: this.vehicle.engine_displacement_cc ?? '',
+              wet_weight_kg: this.vehicle.wet_weight_kg ?? '',
               interior_color: this.vehicle.interior_color,
               exterior_color: this.vehicle.exterior_color,
               page_status: this.vehicle.page_status,
@@ -232,9 +252,139 @@ export class UpdateVehicleComponent implements OnInit {
             });
 
             this.filters();
+            this.syncImagesFromVehicle();
           }, 500);
         }
       });
+  }
+
+  private syncImagesFromVehicle(): void {
+    this.imagesForSlider = [];
+    const imgs = this.vehicle?.images ?? [];
+    for (let i = 0; i < imgs.length; i++) {
+      const img = imgs[i] as unknown as Record<string, unknown>;
+      const uuidVal = img['uuid'];
+      const id = typeof uuidVal === 'string' ? uuidVal : String(uuidVal ?? '');
+      this.imagesForSlider.push({
+        id,
+        sort_id: String(img['sort_id'] ?? i + 1),
+        path: String(img['service_image_url'] ?? img['path'] ?? ''),
+        path_public: String(img['service_public_id'] ?? ''),
+        external_website: (img['external_website'] as string) ?? 'no',
+        selected: false
+      });
+    }
+  }
+
+  refreshImagesFromApi(): void {
+    this._vehicleService.getVehicle(this.vehicle_uuid).subscribe({
+      next: (res: FullDetailResponse) => {
+        this.vehicle.images = res.data.images;
+        this.syncImagesFromVehicle();
+      }
+    });
+  }
+
+  assignImageFiles(event: Event): void {
+    const el = event.currentTarget as HTMLInputElement;
+    const list = el.files;
+    if (list?.length) {
+      this.imageFiles = Array.from(list);
+      this.imageUploadDisabled = false;
+    } else {
+      this.imageFiles = [];
+      this.imageUploadDisabled = true;
+    }
+  }
+
+  uploadNewImages(): void {
+    if (!this.imageFiles.length) {
+      return;
+    }
+    this.imageUploadLoading = true;
+    this.imageUploadDisabled = true;
+    this._imagesService.setImage(this.vehicle_uuid, this.imageFiles).subscribe({
+      next: () => {
+        this.imageUploadLoading = false;
+        this.imageFiles = [];
+        this.imageUploadDisabled = true;
+        this.imagesDirty = true;
+        Swal.fire({
+          icon: 'success',
+          title: 'Imágenes subidas',
+          showConfirmButton: false,
+          timer: 2000
+        });
+        this.refreshImagesFromApi();
+      },
+      error: (err: unknown) => {
+        this.imageUploadLoading = false;
+        this.imageUploadDisabled = this.imageFiles.length === 0;
+        reload(err, this._router);
+      }
+    });
+  }
+
+  drop(event: CdkDragDrop<ImageRow[]>): void {
+    const selectedImages = this.imagesForSlider.filter((image) => image.selected);
+    if (selectedImages.length > 0) {
+      const remaining = this.imagesForSlider.filter((image) => !image.selected);
+      const insertIndex = event.currentIndex;
+      this.imagesForSlider = [
+        ...remaining.slice(0, insertIndex),
+        ...selectedImages,
+        ...remaining.slice(insertIndex)
+      ];
+    } else {
+      moveItemInArray(this.imagesForSlider, event.previousIndex, event.currentIndex);
+    }
+  }
+
+  saveImageOrder(): void {
+    if (this.imagesForSlider.length === 0) {
+      return;
+    }
+    this.imagesOrderSaving = true;
+    this._imagesService.changeOrder(this.imagesForSlider).subscribe({
+      next: (resp) => {
+        this.imagesOrderSaving = false;
+        this.imagesDirty = true;
+        Swal.fire({
+          icon: 'success',
+          title: resp.message,
+          showConfirmButton: false,
+          timer: 2000
+        });
+        this.refreshImagesFromApi();
+      },
+      error: (err: unknown) => {
+        this.imagesOrderSaving = false;
+        reload(err, this._router);
+      }
+    });
+  }
+
+  deleteImageAt(vehicleImageUuid: string, index: number): void {
+    Swal.fire({
+      title: '¿Eliminar esta imagen?',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      confirmButtonColor: '#b91c1c'
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
+      this._imagesService.deleteImage(vehicleImageUuid).subscribe({
+        next: (resp) => {
+          this.imagesForSlider.splice(index, 1);
+          this.imagesDirty = true;
+          Swal.fire(resp.message, '', 'success');
+        },
+        error: (err: unknown) => {
+          reload(err, this._router);
+        }
+      });
+    });
   }
 
   public getBrands(): void {
@@ -322,6 +472,8 @@ export class UpdateVehicleComponent implements OnInit {
           type:           ['', [Validators.required]],
           category:       ['', [Validators.required]],
           cylinders:      ['', [Validators.required]],
+          engine_displacement_cc: [''],
+          wet_weight_kg:  [''],
           interior_color: ['', [Validators.required]],
           exterior_color: ['', [Validators.required]],
           transmission:   ['', [Validators.required]],
@@ -353,6 +505,7 @@ export class UpdateVehicleComponent implements OnInit {
             timer: 2000
           });
 
+          this.imagesDirty = false;
           this._bottomSheetRef.dismiss(
             {reload: true}
           );
@@ -373,6 +526,7 @@ export class UpdateVehicleComponent implements OnInit {
               timer: 2000
             });
 
+            this.imagesDirty = false;
             this._bottomSheetRef.dismiss(
               {reload: true}
             );
@@ -518,7 +672,7 @@ export class UpdateVehicleComponent implements OnInit {
   }
 
   public close():void {
-    this._bottomSheetRef.dismiss();
+    this._bottomSheetRef.dismiss(this.imagesDirty ? { reload: true } : undefined);
   }
 
   

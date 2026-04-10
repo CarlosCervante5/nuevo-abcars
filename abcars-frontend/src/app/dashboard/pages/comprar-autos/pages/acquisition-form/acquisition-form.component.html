@@ -177,7 +177,7 @@
                             <div class="details-bg">
                                 <img class="rounded-circle" src="assets/icons/abcars-icons/details-vehicle/marca.svg" width="32" height="32" alt="Icon Brand Vehicle" />
                                 <span class="detail-text">Marca</span>
-                                <span class="detail-content fw-bold">{{ vehicle != undefined ? (vehicle.carmodel.brand.name | titlecase) : '' }}</span>
+                                <span class="detail-content fw-bold">{{ vehicle != undefined ? (vehicle.carmodel.brand.name | uppercase) : '' }}</span>
                             </div>
                         </div>
 

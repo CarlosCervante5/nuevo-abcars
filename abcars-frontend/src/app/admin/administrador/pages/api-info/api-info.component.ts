@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@environments/environment';
-import { Overview } from '@interfaces/admin.interfaces';
-
 @Component({
   selector: 'app-api-info',
   templateUrl: './api-info.component.html',
@@ -14,17 +12,6 @@ export class ApiInfoComponent implements OnInit {
   loading = true;
   error: string | null = null;
   baseUrl = environment.baseUrl;
-  private user = JSON.parse(localStorage.getItem('user')!);
-  public itemOverview: Overview = {
-    user: {
-      name: this.user.name,
-      surname: this.user.surname,
-      role: localStorage.getItem('role') === 'super_admin' ? 'Super Admin' : 'Admin',
-      email: this.user.email,
-      picturepath: ''
-    },
-    pages: []
-  };
 
   constructor(private http: HttpClient) {}
 

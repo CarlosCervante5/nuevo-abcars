@@ -22,10 +22,7 @@ import Swal from 'sweetalert2';
 })
 export class ValuationComponent implements OnInit {
   brands: Brand[] = [];
-  dealerships: Dealership[] = [
-    { name: 'Chevrolet Balderrama Serdán (puebla)', location: '', description: null, created_at: new Date() },
-    { name: 'VECSA pachuca', location: '', description: null, created_at: new Date() }
-  ];
+  dealerships: Dealership[] = [];
   models: Model[] = [];
   valuationForm: FormGroup;
   isSubmitting: boolean = false;
@@ -58,8 +55,7 @@ export class ValuationComponent implements OnInit {
   ngOnInit() {
     this.referralService.captureFromUrl();
     this.getBrands();
-    // Sucursales ahora están hardcodeadas, no se cargan dinámicamente
-    // this.getDealerships();
+    this.getDealerships();
   }
 
   getBrands(): void {
@@ -74,12 +70,15 @@ export class ValuationComponent implements OnInit {
   }
 
   getDealerships(): void {
-    this.adminService.getDealerships().subscribe({
+    this.vehicleService.searchDealerships().subscribe({
       next: (response: DealerShipResponse) => {
-        this.dealerships = response.data;
+        if (response.status === 200 && Array.isArray(response.data)) {
+          this.dealerships = response.data;
+        }
       },
       error: (error) => {
         console.error('Error al cargar sucursales:', error);
+        this.dealerships = [];
       }
     });
   }

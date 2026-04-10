@@ -403,7 +403,7 @@
                   [ngClass]="(serviceForm.get('city')?.invalid && serviceForm.get('city')?.touched) ? 'form-request-input-error' : 'form-request-input'"
                 >
                   <option value="">Selecciona sucursal</option>
-                  <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+                  <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name | titlecase }}<ng-container *ngIf="dealership.location"> — {{ dealership.location | titlecase }}</ng-container></option>
                 </select>
                 <p *ngIf="serviceForm.get('city')?.invalid && serviceForm.get('city')?.touched" class="form-error-message">
                   La sucursal es requerida

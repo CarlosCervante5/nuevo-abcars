@@ -29,7 +29,9 @@ export class DashboardComponent {
       {
         title: 'Fotos de entregas',
         icon: 'fi fi-rr-gift',
-        permalink: '/admin/gestor/delivery-photos'
+        permalink: '/admin/gestor/delivery-photos',
+        requiredPermissions: ['manage delivery photos'],
+        requiredRoles: ['gestor', 'administrator', 'super_admin']
       },
       // {
       //   title: 'Eventos',

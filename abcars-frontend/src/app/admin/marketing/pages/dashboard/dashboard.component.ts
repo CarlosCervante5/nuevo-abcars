@@ -29,13 +29,17 @@ export class DashboardComponent {
         title: 'Vehículos',
         icon: 'fi fi-rr-car',
         permalink: '/admin/marketing/vehicles',
-        iconColor: 'blue'
+        iconColor: 'blue',
+        requiredRoles: ['marketing', 'administrator', 'super_admin'],
+        requiredPermissions: ['list all vehicles', 'create vehicles', 'update vehicles', 'delete vehicles']
       },
       {
         title: 'Banner principal',
         icon: 'fi fi-rr-picture',
         action: () => this.openBannerBottomSheet(),
-        iconColor: 'amber'
+        iconColor: 'amber',
+        requiredPermissions: ['manage main banner'],
+        requiredRoles: ['marketing']
       },
     ]
   };

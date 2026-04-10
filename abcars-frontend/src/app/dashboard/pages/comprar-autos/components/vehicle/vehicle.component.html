@@ -24,7 +24,7 @@
     <div class="card-body font-generic">
             <div class="row">
                 <div class="col-12">
-                    <p class="card-text" style="font-weight: 700; font-size: larger;">{{ vehicle.brand.name| titlecase }} {{ vehicle.model.name | titlecase }}</p>
+                    <p class="card-text" style="font-weight: 700; font-size: larger;"><span class="text-uppercase">{{ vehicle.brand.name }}</span> {{ vehicle.model.name | titlecase }}</p>
                     <p class="card-text" style="font-size: medium;">{{ vehicle.mileage | number }} km • {{ vehicle.model.year }} • {{ vehicle.dealership.location }}</p>
                     <hr style="border: 1px solid #707070; margin-top: 10px;">
                     <div class="divider mt-2 mb-2"></div>

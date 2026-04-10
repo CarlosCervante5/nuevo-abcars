@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AdminService } from '@services/admin.service';
-import { Dealership, DealerShipResponse, Overview } from '@interfaces/admin.interfaces';
+import { Dealership, DealerShipResponse } from '@interfaces/admin.interfaces';
 import { GralResponse } from '@interfaces/vehicle_data.interface';
 import Swal from 'sweetalert2';
 
@@ -11,18 +11,6 @@ import Swal from 'sweetalert2';
   standalone: false
 })
 export class AdminDealershipsComponent implements OnInit {
-  private user = JSON.parse(localStorage.getItem('user')!);
-  public itemOverview: Overview = {
-    user: {
-      name: this.user.name,
-      surname: this.user.surname,
-      role: localStorage.getItem('role') === 'super_admin' ? 'Super Admin' : 'Admin',
-      email: this.user.email,
-      picturepath: ''
-    },
-    pages: []
-  };
-
   dealerships: Dealership[] = [];
   loading = true;
   editingId: number | null = null;

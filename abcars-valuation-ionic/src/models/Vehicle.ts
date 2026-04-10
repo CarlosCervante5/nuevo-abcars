@@ -12,6 +12,8 @@ export interface Vehicle {
   fuel_type?: string;
   category?: string;
   cylinders?: number;
+  engine_displacement_cc?: number | null;
+  wet_weight_kg?: number | null;
   interior_color?: string;
   exterior_color?: string;
   transmission?: string;
@@ -78,6 +80,8 @@ export interface CreateVehicleRequest {
   type: 'car' | 'moto' | 'truck' | 'other';
   category: 'new' | 'pre_owned' | 'demo';
   cylinders: number;
+  engine_displacement_cc?: number | null;
+  wet_weight_kg?: number | null;
   interior_color: string;
   exterior_color: string;
   transmission: 'manual' | 'automatic' | 'semiautomatic' | 'cvt' | 'triptronic' | 'dual-clutch';

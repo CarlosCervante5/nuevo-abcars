@@ -3,7 +3,7 @@ import { CommonModule } from "@angular/common";
 import { AdminModule } from "../admin.module";
 import { AngularMaterialModule } from "src/app/angular-material/angular-material.module";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { DashboardAdminComponent } from "./pages/dashboard/dashboardAdmin.component";
+import { AdminShellComponent } from "./components/admin-shell/admin-shell.component";
 import { AdministradorRoutingModule } from "./administrador-routing.module";
 import { AdminUsersComponent } from './pages/admin-users/admin-users.component';
 import { AdminPermisosComponent } from './pages/admin-permisos/admin-permisos.component';
@@ -19,16 +19,21 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { UpdateUserComponent } from './components/update-user/update-user.component';
 import { NewNavComponent } from "src/app/shared/versiones-nav/new-nav/new-nav.component";
-import { AnalyticsDashboardComponent } from "./pages/analytics-dashboard/analytics-dashboard.component";
+import { AdminHomeDashboardComponent } from "./pages/admin-home-dashboard/admin-home-dashboard.component";
+import { VehicleInventoryModule } from "../marketing/vehicle-inventory.module";
+import { AppointmentAssignmentsModule } from "../appointment-manager/appointment-assignments.module";
+import { ValuatorAppointmentsPageModule } from "../valuator/valuator-appointments-page.module";
+import { DeliveryPhotosPageModule } from "../gestor/delivery-photos-page.module";
+import { PromotionsPageModule } from "../gestor/promotions-page.module";
+import { AdminMainBannerComponent } from "./pages/admin-main-banner/admin-main-banner.component";
 
 @NgModule({
     declarations: [
-        DashboardAdminComponent,
+        AdminShellComponent,
         AdminUsersComponent,
         AdminPermisosComponent,
         AdminDealershipsComponent,
         DealershipsMapComponent,
-        AnalyticsComponent,
         ApiInfoComponent,
         DocumentationComponent,
         AssistantComponent,
@@ -46,7 +51,14 @@ import { AnalyticsDashboardComponent } from "./pages/analytics-dashboard/analyti
         MatInputModule,
         FormsModule,
         NewNavComponent,
-        AnalyticsDashboardComponent
+        AdminHomeDashboardComponent,
+        AnalyticsComponent,
+        VehicleInventoryModule,
+        AppointmentAssignmentsModule,
+        ValuatorAppointmentsPageModule,
+        DeliveryPhotosPageModule,
+        PromotionsPageModule,
+        AdminMainBannerComponent
     ]
   })
   export class AdministradorModule { }

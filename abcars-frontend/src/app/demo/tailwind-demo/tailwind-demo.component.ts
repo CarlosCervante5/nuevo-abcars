@@ -5,6 +5,7 @@ import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { ModernNavComponent } from '../../shared/components/modern-nav/modern-nav.component';
 import { ModernFooterComponent } from '../../shared/components/modern-footer/modern-footer.component';
 import { VehicleCardTailwindComponent } from '../vehicle-card-tailwind/vehicle-card-tailwind.component';
+import { FALLBACK_HERO_IMAGE } from '../../shared/constants/fallback-media';
 
 @Component({
   selector: 'app-tailwind-demo',
@@ -200,7 +201,7 @@ export class TailwindDemoComponent implements OnInit {
       model: 'X5',
       year: 2023,
       price: 1250000,
-      image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=500&h=300&fit=crop',
+      image: FALLBACK_HERO_IMAGE,
       fuel: 'Gasolina',
       transmission: 'Automática',
       mileage: 15000,
@@ -217,7 +218,7 @@ export class TailwindDemoComponent implements OnInit {
       model: 'C-Class',
       year: 2022,
       price: 950000,
-      image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=500&h=300&fit=crop',
+      image: FALLBACK_HERO_IMAGE,
       fuel: 'Gasolina',
       transmission: 'Automática',
       mileage: 25000,
@@ -234,7 +235,7 @@ export class TailwindDemoComponent implements OnInit {
       model: 'A4',
       year: 2024,
       price: 780000,
-      image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=500&h=300&fit=crop',
+      image: FALLBACK_HERO_IMAGE,
       fuel: 'Gasolina',
       transmission: 'Automática',
       mileage: 0,

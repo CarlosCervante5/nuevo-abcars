@@ -5,9 +5,10 @@ import { Router } from '@angular/router';
 // Services
 import { AccountService } from 'src/app/auth/pages/account/services/account.service';
 import { AuthService } from 'src/app/auth/services/auth.service';
+import { AdminPermissionService } from '@services/admin-permission.service';
 
 // Interfaces
-import { Overview } from '@interfaces/admin.interfaces';
+import { Overview, OverviewPages } from '@interfaces/admin.interfaces';
 
 // SweetAlert2
 import Swal from 'sweetalert2';
@@ -40,26 +41,36 @@ export class OverviewComponent implements OnInit {
 
     get isSellerDashboard(): boolean {
         const role = this.overview?.user?.role;
-        return (role === 'Vendedor' || role === 'Seller Dashboard') && !this.hideModules && !!this.overview?.pages?.length;
+        return (role === 'Vendedor' || role === 'Seller Dashboard') && !this.hideModules && this.modulePages.length > 0;
     }
 
     get isAdminDashboard(): boolean {
         const role = this.overview?.user?.role;
-        return (role === 'Admin' || role === 'Super Admin') && !this.hideModules && !!this.overview?.pages?.length;
+        return (role === 'Admin' || role === 'Super Admin') && !this.hideModules && this.modulePages.length > 0;
     }
 
     /** Usa las tarjetas modernas (Mis Módulos) con ícono por color y enlace "VER MÁS" con flecha para Admin, Seller y Marketing. */
     get useModuleCardsLayout(): boolean {
         const role = this.overview?.user?.role;
         return (role === 'Admin' || role === 'Super Admin' || role === 'Marketing' || role === 'Vendedor' || role === 'Seller Dashboard')
-            && !this.hideModules && !!this.overview?.pages?.length;
+            && !this.hideModules && this.modulePages.length > 0;
+    }
+
+    /** Páginas visibles según permisos Spatie (login) y rol. */
+    get modulePages(): OverviewPages[] {
+        const pages = this.overview?.pages;
+        if (!pages?.length) {
+            return [];
+        }
+        return pages.filter((p) => this._adminPermission.canShowOverviewPage(p));
     }
 
     constructor(
         private _accountService: AccountService, 
         private titleService: Title,
         private _authService: AuthService,
-        private _router: Router
+        private _router: Router,
+        private _adminPermission: AdminPermissionService
     ) {}
     
     ngOnInit(): void {   

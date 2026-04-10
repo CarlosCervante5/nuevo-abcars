@@ -13,7 +13,8 @@ import { VehicleService } from '../shared/services/vehicle.service';
 import { CampaingService } from '../shared/services/campaing.service';
 import { CompraTuAutoService } from '@services/compra-tu-auto.service';
 import { DeliveryPhotosService, DeliveryPhoto } from '@services/delivery-photos.service';
-import { Vehicle as ApiVehicle } from '../shared/interfaces/vehicle_data.interface';
+import { Vehicle as ApiVehicle, Brand } from '../shared/interfaces/vehicle_data.interface';
+import { FALLBACK_HERO_IMAGE } from '../shared/constants/fallback-media';
 
 interface Vehicle {
   id?: number;
@@ -83,8 +84,16 @@ export class ModernHomeComponent implements OnInit {
   loadError: string = '';
   activePromotionImages: string[] = [];
   
-  // Marcas del inventario completo (no solo del Showroom)
-  availableBrandsFromInventory: string[] = [];
+  /** Catálogo de marcas (API) para filtrar sobre todo el inventario */
+  inventoryBrands: Brand[] = [];
+  /** Modelos únicos de la marca seleccionada (API line_models) */
+  inventoryModelNames: string[] = [];
+  /** Ubicaciones (ciudad) de sucursales que tienen al menos un vehículo activo; respeta marca / modelo / precio seleccionados */
+  inventoryLocationOptions: string[] = [];
+  loadingLocations = false;
+  private readonly locationsPageSize = 200;
+  private readonly locationsMaxPages = 25;
+  private locationsRequestSeq = 0;
 
   // Imagen del banner principal del Hero
   heroImagePath: string = 'assets/images/bg_hero.jpg';
@@ -153,8 +162,8 @@ export class ModernHomeComponent implements OnInit {
     this.loadMainBanner();
     // Cargar promociones primero, los vehículos se cargarán cuando las promociones estén listas
     this.loadActivePromotions();
-    // Cargar marcas del inventario completo
-    this.loadBrandsFromInventory();
+    this.loadInventoryBrands();
+    this.loadInventoryLocations();
     // Cargar fotos de entregas para el carrusel
     this.loadDeliveryPhotos();
   }
@@ -294,7 +303,7 @@ export class ModernHomeComponent implements OnInit {
             
         return {
           uuid: v.uuid,
-          brand: this.capitalizeFirst(v.brand?.name || 'Sin marca'),
+          brand: (v.brand?.name || 'Sin marca').toUpperCase(),
           model: this.capitalizeFirst(v.model?.name || v.line?.name || 'Sin modelo'),
           year: v.model?.year || new Date().getFullYear(),
           price: v.sale_price || v.list_price || 0,
@@ -415,13 +424,13 @@ export class ModernHomeComponent implements OnInit {
         return item.imageUrl;
       }
     }
-    return 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=600&q=80';
+    return FALLBACK_HERO_IMAGE;
   }
 
   onBannerImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     if (img) {
-      img.src = 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=600&q=80';
+      img.src = FALLBACK_HERO_IMAGE;
     }
   }
 
@@ -621,8 +630,10 @@ export class ModernHomeComponent implements OnInit {
     this.activeFilters = [];
     this.selectedBrand = '';
     this.selectedModel = '';
+    this.inventoryModelNames = [];
     this.selectedPriceRange = '';
     this.searchLocation = '';
+    this.loadInventoryLocations();
     this.selectedCategory = 'all';
     // Comentado: ya no filtra en el Showroom
     // this.applyFilters();
@@ -656,50 +667,140 @@ export class ModernHomeComponent implements OnInit {
   }
 
   getAvailableModels(): string[] {
-    const models = this.vehicles
-      .filter(this.isVehicle)
-      .filter((v: any) => !this.selectedBrand || (v as Vehicle).brand === this.selectedBrand)
-      .map((v: any) => (v as Vehicle).model)
-      .filter(Boolean) as string[];
-
-    return Array.from(new Set(models));
+    return this.inventoryModelNames;
   }
 
-  getAvailableBrands(): string[] {
-    // Usar marcas del inventario completo, no solo del Showroom
-    if (this.availableBrandsFromInventory.length > 0) {
-      return this.availableBrandsFromInventory;
+  onHomeBrandChange(): void {
+    this.selectedModel = '';
+    this.inventoryModelNames = [];
+    this.loadInventoryLocations();
+    if (!this.selectedBrand) {
+      return;
     }
-    // Fallback: si aún no se han cargado, devolver array vacío
-    return [];
-  }
-  
-  loadBrandsFromInventory() {
-    // Cargar todos los vehículos activos del inventario para extraer las marcas
-    // Usar un número grande para obtener todos los vehículos
-    this.vehicleService.searchVehicles({}, 1, 10000).subscribe({
-      next: (response) => {
-        if (response.status === 200 && response.data && response.data.data) {
-          const apiVehicles = response.data.data;
-          
-          // Extraer marcas únicas de todos los vehículos activos
-          const brandsSet = new Set<string>();
-          
-          apiVehicles.forEach((v: any) => {
-            if (v.brand && v.brand.name) {
-              const brandName = this.capitalizeFirst(v.brand.name);
-              brandsSet.add(brandName);
-            }
-          });
-          
-          // Convertir Set a Array y ordenar alfabéticamente
-          this.availableBrandsFromInventory = Array.from(brandsSet).sort();
-        }
+    this.vehicleService.getModelsByBrand(this.selectedBrand).subscribe({
+      next: (res) => {
+        const list = res?.data?.line_models || [];
+        const names = list
+          .map((m: { name: string }) => (m.name || '').trim())
+          .filter(Boolean);
+        this.inventoryModelNames = Array.from(new Set(names)).sort((a, b) =>
+          a.localeCompare(b, 'es', { sensitivity: 'base' })
+        );
       },
-      error: (error) => {
-        console.error('Error al cargar marcas del inventario:', error);
-        // En caso de error, mantener array vacío
-        this.availableBrandsFromInventory = [];
+      error: () => {
+        this.inventoryModelNames = [];
+      }
+    });
+  }
+
+  /** Al cambiar modelo o precio, actualizar ubicaciones según vehículos que cumplan filtros */
+  onHomeLocationFiltersChange(): void {
+    this.loadInventoryLocations();
+  }
+
+  /**
+   * Filtros de inventario alineados con `VehicleService.searchVehicles` para poblar ubicaciones.
+   */
+  private buildHomeSearchFiltersForLocations(): Record<string, string | number> {
+    const f: Record<string, string | number> = {};
+    if (this.selectedBrand) {
+      f['brand'] = this.selectedBrand;
+    }
+    if (this.selectedModel) {
+      f['model'] = this.selectedModel;
+    }
+    if (this.selectedPriceRange) {
+      if (this.selectedPriceRange === '2000000') {
+        f['priceFrom'] = 2000000;
+      } else {
+        const cap = Number(this.selectedPriceRange);
+        if (!Number.isNaN(cap) && cap > 0) {
+          f['priceTo'] = cap;
+        }
+      }
+    }
+    return f;
+  }
+
+  private mergeDealershipLocationsFromVehicles(
+    vehicles: ApiVehicle[],
+    into: Map<string, string>
+  ): void {
+    for (const v of vehicles) {
+      const d = v.dealership;
+      // Muchas sucursales tienen `location` vacío en BD; el inventario público usa a menudo el nombre.
+      const label = (d?.location?.trim() || d?.name?.trim() || '').trim();
+      if (!label) {
+        continue;
+      }
+      const key = label.toLowerCase();
+      if (!into.has(key)) {
+        into.set(key, label);
+      }
+    }
+  }
+
+  loadInventoryLocations(): void {
+    const seq = ++this.locationsRequestSeq;
+    this.loadingLocations = true;
+    const filters = {
+      ...this.buildHomeSearchFiltersForLocations(),
+      has_images: false
+    };
+    const acc = new Map<string, string>();
+
+    const finish = () => {
+      if (seq !== this.locationsRequestSeq) {
+        return;
+      }
+      this.applyLocationOptionsFromMap(acc);
+    };
+
+    const fetchPage = (page: number) => {
+      this.vehicleService.searchVehicles(filters, page, this.locationsPageSize).subscribe({
+        next: (response) => {
+          if (seq !== this.locationsRequestSeq) {
+            return;
+          }
+          if (response.status === 200 && response.data) {
+            const rows = response.data.data || [];
+            this.mergeDealershipLocationsFromVehicles(rows, acc);
+            const lastPage = response.data.last_page ?? 1;
+            if (page < lastPage && page < this.locationsMaxPages) {
+              fetchPage(page + 1);
+              return;
+            }
+          }
+          finish();
+        },
+        error: () => finish()
+      });
+    };
+
+    fetchPage(1);
+  }
+
+  private applyLocationOptionsFromMap(acc: Map<string, string>): void {
+    this.inventoryLocationOptions = Array.from(acc.values()).sort((a, b) =>
+      a.localeCompare(b, 'es', { sensitivity: 'base' })
+    );
+    this.loadingLocations = false;
+    const sel = (this.searchLocation || '').trim();
+    if (sel && !this.inventoryLocationOptions.some((x) => x.toLowerCase() === sel.toLowerCase())) {
+      this.searchLocation = '';
+    }
+  }
+
+  loadInventoryBrands(): void {
+    this.vehicleService.getBrands().subscribe({
+      next: (res) => {
+        const list = res?.data?.vehicle_brands || [];
+        this.inventoryBrands = [...list].sort((a, b) =>
+          (a.name || '').localeCompare(b.name || '', 'es', { sensitivity: 'base' })
+        );
+      },
+      error: () => {
+        this.inventoryBrands = [];
       }
     });
   }
@@ -736,30 +837,24 @@ export class ModernHomeComponent implements OnInit {
   }
 
   performSearch() {
-    // Navegar al inventario con los filtros seleccionados
-    const queryParams: any = {};
-    
+    const queryParams: Record<string, string> = {};
+
     if (this.selectedBrand) {
-      queryParams.brand = this.selectedBrand;
+      queryParams['brand'] = this.selectedBrand;
     }
-    
     if (this.selectedModel) {
-      queryParams.model = this.selectedModel;
+      queryParams['model'] = this.selectedModel;
     }
-    
     if (this.selectedPriceRange) {
-      queryParams.price = this.selectedPriceRange;
+      queryParams['price'] = this.selectedPriceRange;
     }
-    
-    if (this.searchLocation) {
-      queryParams.location = this.searchLocation;
+    if (this.searchLocation.trim()) {
+      queryParams['location'] = this.searchLocation.trim();
     }
-    
-    if (this.searchTerm) {
-      queryParams.search = this.searchTerm;
+    if (this.searchTerm.trim()) {
+      queryParams['search'] = this.searchTerm.trim();
     }
-    
-    // Navegar al inventario con los query params
+
     this.router.navigate(['/inventario'], { queryParams });
   }
 

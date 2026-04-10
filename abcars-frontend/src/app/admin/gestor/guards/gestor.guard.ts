@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { AccountService } from '../../../auth/pages/account/services/account.service';
-import { validateRoleGuard } from '@helpers/guard.helper';
+import { validateRoleOrPermissionGuard } from '@helpers/guard.helper';
 
 @Injectable({
   providedIn: 'root'
@@ -15,10 +15,20 @@ export class GestorGuard  {
   ) { }
 
   canActivate(): Observable<boolean> | boolean {
-    return validateRoleGuard(['gestor', 'administrator', 'super_admin'], this._accountService, this._router);
+    return validateRoleOrPermissionGuard(
+      ['gestor', 'administrator', 'super_admin'],
+      ['manage delivery photos'],
+      this._accountService,
+      this._router
+    );
   }
 
   canLoad(): Observable<boolean> | boolean {
-    return validateRoleGuard(['gestor', 'administrator', 'super_admin'], this._accountService, this._router);
+    return validateRoleOrPermissionGuard(
+      ['gestor', 'administrator', 'super_admin'],
+      ['manage delivery photos'],
+      this._accountService,
+      this._router
+    );
   }
 }

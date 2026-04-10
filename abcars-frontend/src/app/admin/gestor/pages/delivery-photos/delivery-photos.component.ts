@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { DeliveryPhotosService, DeliveryPhoto } from '@services/delivery-photos.service';
 import { Overview } from '@interfaces/admin.interfaces';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -11,6 +12,9 @@ import Swal from 'sweetalert2';
   standalone: false
 })
 export class DeliveryPhotosComponent implements OnInit {
+  /** Dentro de AdminShell (/admin/administrator/delivery-photos). */
+  embedInShell = false;
+
   itemOverview: Overview;
   photos: DeliveryPhoto[] = [];
   loading = false;
@@ -26,7 +30,8 @@ export class DeliveryPhotosComponent implements OnInit {
 
   constructor(
     private deliveryPhotosService: DeliveryPhotosService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private route: ActivatedRoute
   ) {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     this.itemOverview = {
@@ -45,6 +50,13 @@ export class DeliveryPhotosComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.embedInShell = this.route.snapshot.data['embedInShell'] === true;
+    if (this.embedInShell) {
+      const p = this.itemOverview.pages.find((x) => x.permalink?.includes('delivery-photos'));
+      if (p) {
+        p.permalink = '/admin/administrator/delivery-photos';
+      }
+    }
     this.loadPhotos();
   }
 

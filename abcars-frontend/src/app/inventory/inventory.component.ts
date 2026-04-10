@@ -9,6 +9,7 @@ import { VehicleService } from '../shared/services/vehicle.service';
 import { CampaingService } from '../shared/services/campaing.service';
 import { ReferralService } from '../shared/services/referral.service';
 import { Vehicle as ApiVehicle } from '../shared/interfaces/vehicle_data.interface';
+import { FALLBACK_HERO_IMAGE } from '../shared/constants/fallback-media';
 
 // Extender Vehicle para incluir apiData
 interface VehicleWithApiData extends Vehicle {
@@ -83,7 +84,7 @@ interface VehicleWithApiData extends Vehicle {
                       <div class="space-y-2">
                         <label *ngFor="let brand of availableBrands" class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
                           <input type="checkbox" [value]="brand" [(ngModel)]="filters.selectedBrands[brand]" (change)="applyFilters()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
-                          <span class="text-sm text-gray-700">{{ brand }}</span>
+                          <span class="text-sm text-gray-700 uppercase">{{ brand }}</span>
                         </label>
                       </div>
                     </div>
@@ -449,7 +450,7 @@ interface VehicleWithApiData extends Vehicle {
               <div class="space-y-2">
                 <label *ngFor="let brand of availableBrands" class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
                   <input type="checkbox" [value]="brand" [(ngModel)]="filters.selectedBrands[brand]" (change)="applyFilters()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
-                  <span class="text-sm text-gray-700">{{ brand }}</span>
+                  <span class="text-sm text-gray-700 uppercase">{{ brand }}</span>
                 </label>
               </div>
             </div>
@@ -757,6 +758,12 @@ export class InventoryComponent implements OnInit {
     this.loadActivePromotions();
   }
 
+  /** True si el usuario llegó desde el buscador del home (u otra entrada con query). */
+  private hasInboundQueryFilters(): boolean {
+    const p = this.route.snapshot.queryParams;
+    return !!(p['brand'] || p['model'] || p['location'] || p['price'] || p['search']);
+  }
+
   loadActivePromotions() {
     // Llamar al endpoint público sin headers de autenticación
     this.campaingService.getCampaingPublic().subscribe({
@@ -790,9 +797,7 @@ export class InventoryComponent implements OnInit {
             }
           } else {
             // Si los vehículos aún no se han cargado, cargarlos ahora que las promociones están listas
-            // Si hay filtros desde home (brand/model) o searchTerm (pero no solo location), usarlos
-            // Si solo viene location, cargar todos y filtrar localmente
-            if (this.homeBrand || (this.searchTerm && this.searchTerm.trim() && !this.homeLocation)) {
+            if (this.hasInboundQueryFilters()) {
               this.loadVehicles(1, true);
             } else {
               this.loadVehicles();
@@ -801,9 +806,7 @@ export class InventoryComponent implements OnInit {
         } else {
           // Si no hay promociones, cargar vehículos de todas formas
           if (this.sampleVehicles.length === 0) {
-            // Si hay filtros desde home (brand/model) o searchTerm (pero no solo location), usarlos
-            // Si solo viene location, cargar todos y filtrar localmente
-            if (this.homeBrand || (this.searchTerm && this.searchTerm.trim() && !this.homeLocation)) {
+            if (this.hasInboundQueryFilters()) {
               this.loadVehicles(1, true);
             } else {
               this.loadVehicles();
@@ -815,7 +818,11 @@ export class InventoryComponent implements OnInit {
         this.activePromotionImages = [];
         // Si hay error, cargar vehículos de todas formas
         if (this.sampleVehicles.length === 0) {
-          this.loadVehicles();
+          if (this.hasInboundQueryFilters()) {
+            this.loadVehicles(1, true);
+          } else {
+            this.loadVehicles();
+          }
         }
       }
     });
@@ -829,38 +836,41 @@ export class InventoryComponent implements OnInit {
     // Preparar filtros para la búsqueda
     const filters: any = {};
     
-    // Detectar si hay filtros desde home para cargar todos los vehículos filtrados de una vez
     const hasHomeFilters = !!(this.homeBrand || this.homeModel || this.homeLocation);
-    
-    // Detectar si se está buscando por año (también necesita cargar todos los resultados de una vez)
-    const isYearSearch = useSearchTerm && this.searchTerm && this.searchTerm.trim() && this.isYear(this.searchTerm);
-    
-    // Solo aplicar filtros si NO se están limpiando (es decir, si hay filtros activos)
-    // Si vienen brand y model desde home (query params), usar parámetros específicos
+
+    const isYearSearch =
+      useSearchTerm && this.searchTerm && this.searchTerm.trim() && this.isYear(this.searchTerm);
+
+    const priceParam = this.route.snapshot.queryParams['price'];
+    const priceFromQuery = priceParam != null && priceParam !== '' ? Number(priceParam) : NaN;
+    const hasQueryPrice = !Number.isNaN(priceFromQuery) && priceFromQuery > 0;
+
     if (this.homeBrand && this.homeModel) {
       filters.brand = this.homeBrand;
       filters.model = this.homeModel;
     } else if (this.homeBrand) {
-      // Si solo viene brand, usar parámetro brand
       filters.brand = this.homeBrand;
     } else if (useSearchTerm && this.searchTerm && this.searchTerm.trim() && !this.homeLocation) {
-      // Si el término de búsqueda es un año, usar filtro de año en lugar de keyword
       if (this.isYear(this.searchTerm)) {
         const year = parseInt(this.searchTerm.trim(), 10);
         filters.yearFrom = year;
         filters.yearTo = year;
       } else {
-        // Si viene searchTerm (modelo solo o término de búsqueda) pero NO solo location, usar keyword
-        // Si solo viene location, no usar keyword (se filtrará localmente)
         filters.keyword = this.searchTerm.trim();
       }
     }
-    // Si no hay ningún filtro, filters queda vacío y se cargan todos los vehículos
 
-    // Si hay filtros de home o búsqueda por año, cargar todos los vehículos filtrados (paginate = 100) en página 1
-    // Si no hay filtros especiales, usar paginación normal del servidor
-    const hasSpecialFilters = hasHomeFilters || isYearSearch;
-    const paginate = hasSpecialFilters ? 100 : this.pageSize;
+    if (hasQueryPrice) {
+      filters.priceFrom = 0;
+      filters.priceTo = priceFromQuery;
+    }
+
+    const hasSpecialFilters =
+      hasHomeFilters ||
+      isYearSearch ||
+      hasQueryPrice ||
+      (useSearchTerm && !!(this.searchTerm && this.searchTerm.trim()));
+    const paginate = hasSpecialFilters ? 500 : this.pageSize;
     const serverPage = hasSpecialFilters ? 1 : page;
 
     this.vehicleService.searchVehicles(filters, serverPage, paginate).subscribe({
@@ -951,7 +961,7 @@ export class InventoryComponent implements OnInit {
         year: 2021,
         brand: { name: 'BMW' },
         model: { name: 'X5 M', year: 2021 },
-        first_image: { service_image_url: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80' }
+        first_image: { service_image_url: FALLBACK_HERO_IMAGE }
       },
       {
         uuid: '2',
@@ -962,7 +972,7 @@ export class InventoryComponent implements OnInit {
         year: 2022,
         brand: { name: 'Mercedes-Benz' },
         model: { name: 'C300', year: 2022 },
-        first_image: { service_image_url: 'https://images.unsplash.com/photo-1563694983011-6f4d90358083?auto=format&fit=crop&w=800&q=80' }
+        first_image: { service_image_url: FALLBACK_HERO_IMAGE }
       },
       {
         uuid: '3',
@@ -973,7 +983,7 @@ export class InventoryComponent implements OnInit {
         year: 2021,
         brand: { name: 'Porsche' },
         model: { name: '911 GT3', year: 2021 },
-        first_image: { service_image_url: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=800&q=80' }
+        first_image: { service_image_url: FALLBACK_HERO_IMAGE }
       },
       {
         uuid: '4',
@@ -984,7 +994,7 @@ export class InventoryComponent implements OnInit {
         year: 2020,
         brand: { name: 'Audi' },
         model: { name: 'RS6', year: 2020 },
-        first_image: { service_image_url: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=800&q=80' }
+        first_image: { service_image_url: FALLBACK_HERO_IMAGE }
       },
        {
         uuid: '5',
@@ -995,7 +1005,7 @@ export class InventoryComponent implements OnInit {
         year: 2020,
         brand: { name: 'Chevrolet' },
         model: { name: 'Trax', year: 2020 },
-        first_image: { service_image_url: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80' }
+        first_image: { service_image_url: FALLBACK_HERO_IMAGE }
       },
       {
         uuid: '6',
@@ -1006,7 +1016,7 @@ export class InventoryComponent implements OnInit {
         year: 2021,
         brand: { name: 'Honda' },
         model: { name: 'Civic', year: 2021 },
-        first_image: { service_image_url: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80' }
+        first_image: { service_image_url: FALLBACK_HERO_IMAGE }
       },
        {
         uuid: '7',
@@ -1017,7 +1027,7 @@ export class InventoryComponent implements OnInit {
         year: 2023,
         brand: { name: 'Toyota' },
         model: { name: 'Camry', year: 2023 },
-        first_image: { service_image_url: 'https://images.unsplash.com/photo-1621135802920-133df287f89c?auto=format&fit=crop&w=800&q=80' }
+        first_image: { service_image_url: FALLBACK_HERO_IMAGE }
       },
       {
         uuid: '8',
@@ -1028,7 +1038,7 @@ export class InventoryComponent implements OnInit {
         year: 2022,
         brand: { name: 'Ford' },
         model: { name: 'Mustang', year: 2022 },
-        first_image: { service_image_url: 'https://images.unsplash.com/photo-1580414053435-2b5d2e1dd6c8?auto=format&fit=crop&w=800&q=80' }
+        first_image: { service_image_url: FALLBACK_HERO_IMAGE }
       },
       {
         uuid: '9',
@@ -1039,7 +1049,7 @@ export class InventoryComponent implements OnInit {
         year: 2020,
         brand: { name: 'Volkswagen' },
         model: { name: 'Golf GTI', year: 2020 },
-        first_image: { service_image_url: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=800&q=80' }
+        first_image: { service_image_url: FALLBACK_HERO_IMAGE }
       }
     ];
 
@@ -1165,13 +1175,13 @@ export class InventoryComponent implements OnInit {
         return item.imageUrl;
       }
     }
-    return 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=600&q=80';
+    return FALLBACK_HERO_IMAGE;
   }
 
   onBannerImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     if (img) {
-      img.src = 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=600&q=80';
+      img.src = FALLBACK_HERO_IMAGE;
     }
   }
 
@@ -1323,7 +1333,12 @@ export class InventoryComponent implements OnInit {
 
       // Filtro de sucursal (usar apiDealershipLocation que ya está declarada arriba)
       const selectedSucursales = Object.keys(this.filters.selectedSucursales).filter(key => this.filters.selectedSucursales[key]);
-      const matchesSucursal = selectedSucursales.length === 0 || (apiDealershipLocation && selectedSucursales.includes(apiDealershipLocation.trim()));
+      const matchesSucursal = selectedSucursales.length === 0 || (
+        !!apiDealershipLocation &&
+        selectedSucursales.some(
+          (sel) => sel.trim().toLowerCase() === (apiDealershipLocation as string).trim().toLowerCase()
+        )
+      );
 
       return matchesSearch && matchesPrice && matchesBrand && matchesModel && matchesLocation && matchesYear && matchesMileage && matchesBody && matchesTransmission && matchesColor && matchesSucursal;
     });
@@ -1430,15 +1445,22 @@ export class InventoryComponent implements OnInit {
     this.brands = Array.from(brands).sort();
     this.availableBrands = this.brands;
     
-    // Extraer sucursales únicas de los vehículos
-    const sucursales = new Set<string>();
+    // Extraer sucursales únicas (misma ciudad con distinta capitalización = una sola entrada)
+    const sucursalesByKey = new Map<string, string>();
     this.sampleVehicles.forEach(v => {
       const dealershipLocation = (v.apiData as any)?.dealership?.location;
-      if (dealershipLocation && dealershipLocation.trim()) {
-        sucursales.add(dealershipLocation.trim());
+      const trimmed = dealershipLocation?.trim();
+      if (!trimmed) {
+        return;
+      }
+      const key = trimmed.toLowerCase();
+      if (!sucursalesByKey.has(key)) {
+        sucursalesByKey.set(key, trimmed);
       }
     });
-    this.availableSucursales = Array.from(sucursales).sort();
+    this.availableSucursales = Array.from(sucursalesByKey.values()).sort((a, b) =>
+      a.localeCompare(b, 'es', { sensitivity: 'base' })
+    );
     
     // Inicializar checkboxes
     this.availableBrands.forEach(brand => {

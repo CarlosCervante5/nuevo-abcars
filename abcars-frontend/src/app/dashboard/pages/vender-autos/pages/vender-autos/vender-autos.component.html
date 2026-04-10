@@ -81,7 +81,7 @@
                                         <input matInput type="text" formControlName="brand_name" [matAutocomplete]="autoBrand">
                                         <mat-autocomplete #autoBrand="matAutocomplete" (optionSelected)="onBrandSelected($event)">
                                             <mat-option *ngFor="let brand of filteredBrands | async" [value]="brand.name">
-                                                {{ brand.name}}
+                                                {{ brand.name | uppercase }}
                                             </mat-option>
                                         </mat-autocomplete>
                                         <mat-hint *ngIf="brandInvalid">Escribe la marca del vehículo.</mat-hint>

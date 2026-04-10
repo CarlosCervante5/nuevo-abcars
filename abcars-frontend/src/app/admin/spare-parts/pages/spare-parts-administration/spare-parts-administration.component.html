@@ -49,7 +49,7 @@
                     
                     <ng-container matColumnDef="brandName">
                         <th class="th__table" mat-header-cell *matHeaderCellDef mat-sort-header>Marca</th>
-                        <td mat-cell *matCellDef="let row"> {{ row.vehicle.brand.name }} </td>
+                        <td mat-cell *matCellDef="let row"> {{ row.vehicle.brand.name | uppercase }} </td>
                     </ng-container>
 
                     <ng-container matColumnDef="modelName">

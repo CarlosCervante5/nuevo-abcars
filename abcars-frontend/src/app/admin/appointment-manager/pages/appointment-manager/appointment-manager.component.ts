@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
+import { ActivatedRoute } from '@angular/router';
 import { PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { GralResponse, Overview } from '@interfaces/admin.interfaces';
@@ -16,6 +16,9 @@ import Swal from 'sweetalert2';
     standalone: false
 })
 export class AppointmentManagerComponent implements OnInit, OnDestroy {
+  /** true dentro de AdminShell (/admin/administrator/assing-valuations). */
+  embedInShell = false;
+
   public data !: DatDates[];
   public datostable: DatoTables[] = [];
   public displayedColumns: string[] = ['id', 'brand', 'model', 'name', 'last_name', 'phone1', 'date', 'subsidiary', 'valuator'];
@@ -27,6 +30,7 @@ export class AppointmentManagerComponent implements OnInit, OnDestroy {
   public page: number = 1;
   public pageIndex: number = 1;
   public length: number  = 0;
+  public loading = false;
 
   public valuators: User[] = [];
   public isSeller: boolean = false;
@@ -40,6 +44,7 @@ export class AppointmentManagerComponent implements OnInit, OnDestroy {
 
   constructor (
     private _appointmentService: AppointmentService,
+    private _route: ActivatedRoute
   ){
     // Inicializar itemOverview
     try {
@@ -88,6 +93,14 @@ export class AppointmentManagerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.embedInShell = this._route.snapshot.data['embedInShell'] === true;
+    const permalink = this.embedInShell
+      ? '/admin/administrator/assing-valuations'
+      : '/admin/appointment_manager/assing-valuations';
+    if (this.itemOverview?.pages?.[0]) {
+      this.itemOverview.pages[0].permalink = permalink;
+    }
+
     this.searchSubscription = this.searchSubject.pipe(
       debounceTime(400),
       distinctUntilChanged()
@@ -110,33 +123,46 @@ export class AppointmentManagerComponent implements OnInit, OnDestroy {
     this.searchSubject.next(this.searchKeyword);
   }
 
-  public getData (page:number){
-    this._appointmentService.getExternalDates(page, this.searchKeyword)
-    .subscribe({
-      next: (response: AppointmentResponse) =>{
+  clearSearch(): void {
+    this.searchKeyword = '';
+    this.page = 1;
+    this.getData(1);
+  }
+
+  refreshList(): void {
+    this.getData(this.page);
+  }
+
+  public getData(page: number) {
+    this.loading = true;
+    this._appointmentService.getExternalDates(page, this.searchKeyword).subscribe({
+      next: (response: AppointmentResponse) => {
         this.data = response.data.appointments.data;
         this.length = response.data.appointments.total;
         this.pageIndex = response.data.appointments.current_page;
         const datosR = this.data.map((dato, index) => ({
-          index:                ((this.pageIndex-1) * this.paginate)+(index+1),
-          brand:                dato.vehicle_brandname,
-          model:                dato.vehicle_modelname,
-          name:                 dato.customer_name,
-          last_name:            dato.customer_lastname,
-          phone1:               dato.phone_1,
-          date:                 dato.appointment_scheduled_date,
-          dealership_name:      dato.dealership_name,
-          appointment_type:     dato.appointment_type,
-          appointment_uuid:     dato.appointment_uuid,
-          valuator_name:        dato.valuator_name,
-          valuator_last_name:   dato.valuator_last_name,
-          id:                   dato.valuator_uuid,
+          index: ((this.pageIndex - 1) * this.paginate) + (index + 1),
+          brand: dato.vehicle_brandname,
+          model: dato.vehicle_modelname,
+          name: dato.customer_name,
+          last_name: dato.customer_lastname,
+          phone1: dato.phone_1,
+          date: dato.appointment_scheduled_date,
+          dealership_name: dato.dealership_name,
+          appointment_type: dato.appointment_type,
+          appointment_uuid: dato.appointment_uuid,
+          valuator_name: dato.valuator_name,
+          valuator_last_name: dato.valuator_last_name,
+          id: dato.valuator_uuid
         }));
         this.datostable = datosR;
-
         this.dataSource.data = this.datostable;
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
       }
-    })
+    });
   }
 
   public paginationChange(event: PageEvent) {
@@ -151,6 +177,16 @@ export class AppointmentManagerComponent implements OnInit, OnDestroy {
           this.valuators = response.data.users;
       }
     })
+  }
+
+  /** El API puede devolver `user_profile` null; evita fallos en el `<option>`. */
+  valuatorLabel(valuator: User): string {
+    const p = valuator.user_profile;
+    const full = [p?.name, p?.last_name].filter(Boolean).join(' ').trim();
+    if (full) {
+      return full;
+    }
+    return (valuator.nickname || valuator.email || valuator.uuid || 'Usuario').trim();
   }
 
   onValuatorChange(event: Event, uuid:string) {

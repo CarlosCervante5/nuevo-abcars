@@ -28,19 +28,28 @@ class RolesPermissionsSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'update users']);
         Permission::firstOrCreate(['name' => 'delete users']);
 
+        // Contenido público / home
+        Permission::firstOrCreate(['name' => 'manage main banner']);
+        Permission::firstOrCreate(['name' => 'manage delivery photos']);
+        // Formularios del sitio, métricas y tablero admin (solicitudes / envíos)
+        Permission::firstOrCreate(['name' => 'view analytics dashboard']);
+        // CRM Strega (oportunidades / leads internos)
+        Permission::firstOrCreate(['name' => 'view opportunities']);
+        Permission::firstOrCreate(['name' => 'manage opportunities']);
+
         // Roles (idempotente)
         $role1 = Role::firstOrCreate(['name' => 'manager']);
         $role1->givePermissionTo(['create vehicles', 'update vehicles', 'delete vehicles']);
 
         $role2 = Role::firstOrCreate(['name' => 'administrator']);
-        $role2->givePermissionTo(['list users', 'create users', 'update users', 'delete users']);
 
         Role::firstOrCreate(['name' => 'client']);
 
         $role4 = Role::firstOrCreate(['name' => 'gestor']);
-        $role4->givePermissionTo('list all vehicles');
+        $role4->givePermissionTo(['list all vehicles', 'manage delivery photos']);
 
         $role5 = Role::firstOrCreate(['name' => 'marketing']);
+        $role5->givePermissionTo(['manage main banner']);
         $role6 = Role::firstOrCreate(['name' => 'staff']);
         Role::firstOrCreate(['name' => 'valuator']);
         Role::firstOrCreate(['name' => 'technician']);
@@ -50,12 +59,21 @@ class RolesPermissionsSeeder extends Seeder
         Role::firstOrCreate(['name' => 'strega-seller']);
         Role::firstOrCreate(['name' => 'strega-manager']);
         Role::firstOrCreate(['name' => 'strega-administrator']);
-        Role::firstOrCreate(['name' => 'appointment_manager']);
+        $roleAppointment = Role::firstOrCreate(['name' => 'appointment_manager']);
+        $roleAppointment->givePermissionTo(['view analytics dashboard']);
 
-        // Super Admin: todos los permisos (control total del sistema)
+        Role::firstOrCreate(['name' => 'valuation_manager']);
+
+        foreach (['strega-seller', 'strega-manager', 'strega-administrator'] as $stregaRoleName) {
+            $stregaRole = Role::firstOrCreate(['name' => $stregaRoleName]);
+            $stregaRole->givePermissionTo(['view opportunities', 'manage opportunities']);
+        }
+
+        // Administrator y super_admin: todos los permisos registrados (gestión completa del panel)
         $allPermissions = Permission::all()->pluck('name')->toArray();
         $roleSuperAdmin = Role::firstOrCreate(['name' => 'super_admin']);
         if (!empty($allPermissions)) {
+            $role2->syncPermissions($allPermissions);
             $roleSuperAdmin->syncPermissions($allPermissions);
         }
 
@@ -65,7 +83,7 @@ class RolesPermissionsSeeder extends Seeder
             ['nickname' => 'manager', 'password' => 'Manager%2024%%']
         );
         if ($user->wasRecentlyCreated) {
-            $user->assignRole($role5);
+            $user->assignRole($role1);
             $user->userProfile()->create(['name' => 'Manager', 'last_name' => 'Vecsa']);
         }
 

@@ -29,7 +29,7 @@
                 </div>
 
                 <h1 class="vehicle-detail-view-title">{{ vehicle.name }}</h1>
-                <p class="vehicle-detail-view-subtitle">{{ vehicle.brand?.name }} {{ vehicle.model?.name }} {{ vehicle.version?.name }} · {{ vehicle.model?.year }}</p>
+                <p class="vehicle-detail-view-subtitle">{{ vehicle.brand?.name | uppercase }} {{ vehicle.model?.name }} {{ vehicle.version?.name }} · {{ vehicle.model?.year }}</p>
 
                 <!-- Galería de imágenes -->
                 <div class="vehicle-detail-view-gallery mb-8" *ngIf="vehicle.images?.length || vehicle.first_image">
@@ -89,7 +89,7 @@
                     <div class="vehicle-detail-view-grid">
                         <div class="vehicle-detail-view-field">
                             <span class="vehicle-detail-view-label">Marca</span>
-                            <span class="vehicle-detail-view-value">{{ vehicle.brand?.name || '-' }}</span>
+                            <span class="vehicle-detail-view-value">{{ (vehicle.brand?.name || '-') | uppercase }}</span>
                         </div>
                         <div class="vehicle-detail-view-field">
                             <span class="vehicle-detail-view-label">Modelo</span>

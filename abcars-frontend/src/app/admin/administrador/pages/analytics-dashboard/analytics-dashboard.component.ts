@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
@@ -48,6 +48,8 @@ interface SectionState<T> {
   styleUrls: ['./analytics-dashboard.component.css']
 })
 export class AnalyticsDashboardComponent implements OnInit {
+  /** true cuando se muestra debajo de Analytics (sitio + formularios). */
+  @Input() embeddedInParent = false;
 
   // Filter state
   selectedPeriod = 30;

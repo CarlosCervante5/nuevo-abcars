@@ -1,17 +1,27 @@
 <!-- <app-new-nav></app-new-nav> -->
-<app-overview [overview]="itemOverview" [url_index]="baseUrl" [hideModules]="true"></app-overview>
-<div class="container mx-auto px-6 lg:px-8 pt-24">
+<app-overview
+  *ngIf="!embedInShell"
+  [overview]="itemOverview"
+  [url_index]="baseUrl"
+  [hideModules]="true"
+></app-overview>
+<div [ngClass]="embedInShell ? 'container mx-auto px-4 lg:px-8 pt-2 pb-8' : 'container mx-auto px-6 lg:px-8 pt-24'">
     <div class="w-full mt-5 mb-5">
         <!-- Header -->
         <div class="mb-3">
             <div class="w-full">
-                <a [routerLink]="[baseUrl]" class="valuator-back-link">
+                <a *ngIf="!embedInShell" [routerLink]="[baseUrl]" class="valuator-back-link">
                     <i class="fi fi-rr-arrow-left"></i> Regresar a Overview
                 </a>
                 <h4 class="appointments-page-title">Solicitudes Citas de valuación</h4>
                 <nav class="appointments-breadcrumb" aria-label="breadcrumb">
                     <ol class="appointments-breadcrumb-list">
-                        <li class="appointments-breadcrumb-item" [routerLink]="[baseUrl]">Overview</li>
+                        <li
+                          class="appointments-breadcrumb-item"
+                          [routerLink]="embedInShell ? ['/admin/administrator'] : [baseUrl]"
+                        >
+                          {{ embedInShell ? 'Panel' : 'Overview' }}
+                        </li>
                         <li class="appointments-breadcrumb-item appointments-breadcrumb-item-active" aria-current="page">Citas de valuación</li>
                     </ol>
                     <div class="flex justify-end p-3">

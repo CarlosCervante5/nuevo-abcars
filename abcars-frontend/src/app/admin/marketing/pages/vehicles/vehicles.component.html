@@ -1,159 +1,233 @@
-<app-overview [overview]="itemOverview" [url_index]="'/admin/marketing'" [hideModules]="true"></app-overview>
-<div class="container mx-auto px-4 pt-24">
-    <div class="w-full mt-5 mb-5">
-        <!-- Header Section -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <!-- Title and Breadcrumb -->
-            <div class="vehicles-header-section">
-                <h4 class="vehicles-page-title">Administrar Vehículos</h4>
-                <nav class="vehicles-breadcrumb" aria-label="breadcrumb">
-                    <ol class="vehicles-breadcrumb-list">
-                        <li class="vehicles-breadcrumb-item" [routerLink]="['/admin/marketing']">Overview</li>
-                        <li class="vehicles-breadcrumb-item vehicles-breadcrumb-item-active" aria-current="page">Vehículos</li>
-                    </ol>
-                </nav>
-            </div>
-        
-            <!-- Create Vehicle Button -->
-            <div class="vehicles-action-section vehicles-action-section-centered">
-                <button type="button" class="vehicles-btn vehicles-btn-primary w-full" (click)="openStoreVehicleSheet()">
-                    Crear vehículo
-                </button>
-            </div>
-        
-            <!-- CSV Upload Section -->
-            <div class="vehicles-action-section">
-                <label class="vehicles-file-upload">
-                    <input type="file" accept=".csv" required (change)="selectCsv($event)">
-                    <span class="vehicles-file-upload-text">{{ load_vehicle_message }}</span>
-                </label>
-                <button 
-                    type="button" 
-                    class="vehicles-btn vehicles-btn-primary w-full mt-2" 
-                    [disabled]="disabled" 
-                    (click)="uploadCsv()"
-                >
-                    Subir
-                </button>
-            </div>
-        
-            <!-- Bulk Actions Section -->
-            <div class="vehicles-action-section">
-                <span class="vehicles-selected-count">
-                    Seleccionados: ( {{ this.vehicle_uuids.length }} )
-                </span>
-                <div class="vehicles-bulk-actions">
-                    <button 
-                        type="button" 
-                        class="vehicles-btn vehicles-btn-primary"
-                        [disabled]="this.vehicle_uuids.length === 0"
-                        (click)="deleteSelectedVehicles()" 
-                        [matTooltip]="'Elimina seleccionados'"
-                    >
-                        <img src="assets/icons-fontawesome/trash-solid.svg" alt="Eliminar" width="17px" height="17px">
-                    </button>
-                    <button 
-                        type="button" 
-                        class="vehicles-btn vehicles-btn-icon vehicles-btn-icon-success"
-                        [disabled]="this.vehicle_uuids.length === 0"
-                        (click)="changeStatus('active')"
-                        [matTooltip]="'Activa seleccionados'"
-                    >
-                        <img src="assets/icons-fontawesome/power-off-solid-green.svg" alt="Activar" width="20px" height="20px">
-                    </button>
-                    <button 
-                        type="button" 
-                        class="vehicles-btn vehicles-btn-icon vehicles-btn-icon-danger"
-                        [disabled]="this.vehicle_uuids.length === 0"
-                        (click)="changeStatus('inactive')"
-                        [matTooltip]="'Desactiva seleccionados'"
-                    >
-                        <img src="assets/icons-fontawesome/power-off-solid-red.svg" alt="Desactivar" width="20px" height="20px">
-                    </button>
-                </div>
-            </div>
-        </div>
-    
-        <!-- Search Input -->
-        <div class="flex flex-wrap mb-3 vehicles-search-bar">
-            <div class="w-full mb-2">
-                <input 
-                    type="text"
-                    [(ngModel)]="palabra_busqueda" 
-                    (keyup.enter)="getVehicles(1)" 
-                    placeholder="Buscar por vin, marca, modelo, año..."
-                    class="vehicles-search-input"
-                >
-            </div>
-        </div>
-    
-        <!-- Table -->
-        <div class="row">
-            <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 mb-2">
-                <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef> Status </th>
-                    <td mat-cell *matCellDef="let element">
-                        <img *ngIf="element.page_status == 'active'" src="assets/icons-fontawesome/power-off-solid-green.svg" alt="flecha" width="24px" height="24px">
-                        <img *ngIf="element.page_status != 'active'" src="assets/icons-fontawesome/power-off-solid-red.svg" alt="flecha" width="24px" height="24px">
-                    </td>
-                </ng-container>
+<app-overview
+  *ngIf="!embedInShell"
+  [overview]="itemOverview"
+  [url_index]="'/admin/marketing'"
+  [hideModules]="true"
+></app-overview>
 
-                <ng-container matColumnDef="nameVehicle">
-                    <th mat-header-cell *matHeaderCellDef> Vehículo </th>
-                    <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-                </ng-container>
-
-                <ng-container matColumnDef="vin">
-                    <th mat-header-cell *matHeaderCellDef> VIN </th>
-                    <td mat-cell *matCellDef="let element"> {{element.vin}} </td>
-                </ng-container>
-
-                <ng-container matColumnDef="km">
-                    <th mat-header-cell *matHeaderCellDef> Km </th>
-                    <td mat-cell *matCellDef="let element" style="min-width: 140px; white-space: nowrap"> {{element.mileage | number }} km </td>
-                </ng-container>
-
-                <ng-container matColumnDef="price">
-                    <th mat-header-cell *matHeaderCellDef> Precio </th>
-                    <td mat-cell *matCellDef="let element" style="min-width: 140px; white-space: nowrap"> {{element.sale_price | currency:'$ ':'symbol':'1.2-2'}} </td>
-                </ng-container>
-
-                <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef> Acciones</th>
-                    <td mat-cell *matCellDef="let element"> 
-                        <!-- <button mat-icon-button (click)="( element.uuid )">
-                            <mat-icon>add_a_photo</mat-icon>
-                            <mat-icon>flip_camera_ios</mat-icon>
-                            <mat-icon>delete</mat-icon>
-                            <mat-icon>edit</mat-icon>
-                        </button> -->
-                        <app-a-vehicle [vehicle]="element" (reload)="procesaPropagar($event)" (remove_vehicle_uuid)="removeVehicle_uuid($event)" (add_vehicle_uuid)="addVehicle_uuid($event)"></app-a-vehicle>
-                    </td>
-                </ng-container>
-
-                <ng-container matColumnDef="image">
-                    <th mat-header-cell *matHeaderCellDef>Imagen</th>
-                    <td mat-cell *matCellDef="let element"> 
-                        <img mat-card-image [src]="element.first_image ? image(element.first_image.service_image_url) : image(null)" class="card-img-top fade-in-image card-image" alt="{{ element.name | titlecase }}">
-                    </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
-        </div>
-    
-        <!-- Pagination -->
-        <div class="w-full mb-5">
-            <mat-paginator 
-                [length]="length" 
-                [pageSize]="pageSize" 
-                [pageSizeOptions]="pageSizeOptions" 
-                [pageIndex]="pageIndex - 1" 
-                aria-label="Select page" 
-                (page)="paginationChange($event)" 
-                #paginador
-            ></mat-paginator>
-        </div>
+<div
+  class="inv-page"
+  [class.inv-page--shell]="embedInShell"
+  [ngClass]="embedInShell ? 'pt-4 pb-8 px-4' : 'container mx-auto px-4 pt-24'"
+>
+  <header class="inv-hero">
+    <div class="inv-hero-text">
+      <h1 class="inv-hero-title">Inventario de vehículos</h1>
+      <p class="inv-hero-sub">
+        Busca, filtra por estado y gestiona unidades, imágenes y precios desde un solo lugar.
+      </p>
+      <nav class="inv-breadcrumb" aria-label="breadcrumb">
+        <ol class="inv-breadcrumb-list">
+          <li
+            class="inv-breadcrumb-item"
+            [routerLink]="embedInShell ? ['/admin/administrator'] : ['/admin/marketing']"
+          >
+            {{ embedInShell ? 'Panel' : 'Overview' }}
+          </li>
+          <li class="inv-breadcrumb-item inv-breadcrumb-item--current" aria-current="page">
+            Vehículos
+          </li>
+        </ol>
+      </nav>
     </div>
+  </header>
+
+  <section class="inv-card inv-card--toolbar" aria-label="Acciones principales">
+    <div class="inv-toolbar-row inv-toolbar-row--wrap">
+      <button type="button" class="inv-btn inv-btn--primary" (click)="openStoreVehicleSheet()">
+        <mat-icon class="inv-btn-mat-icon" aria-hidden="true">add</mat-icon>
+        Crear vehículo
+      </button>
+      <div class="inv-csv-block">
+        <label class="inv-file-label">
+          <input type="file" accept=".csv" (change)="selectCsv($event)" />
+          <span class="inv-file-label-text">{{ load_vehicle_message }}</span>
+        </label>
+        <button
+          type="button"
+          class="inv-btn inv-btn--secondary"
+          [disabled]="disabled"
+          (click)="uploadCsv()"
+        >
+          Subir CSV
+        </button>
+      </div>
+      <div class="inv-bulk">
+        <span class="inv-bulk-count">{{ vehicle_uuids.length }} seleccionados</span>
+        <button
+          type="button"
+          class="inv-btn inv-btn--ghost inv-btn--sm"
+          [disabled]="vehicle_uuids.length === 0"
+          (click)="deleteSelectedVehicles()"
+          matTooltip="Eliminar seleccionados"
+        >
+          <mat-icon class="inv-btn-mat-icon" aria-hidden="true">delete</mat-icon>
+        </button>
+        <button
+          type="button"
+          class="inv-btn inv-btn--success inv-btn--sm"
+          [disabled]="vehicle_uuids.length === 0"
+          (click)="changeStatus('active')"
+          matTooltip="Activar seleccionados"
+        >
+          <mat-icon class="inv-btn-mat-icon" aria-hidden="true">check_circle</mat-icon>
+        </button>
+        <button
+          type="button"
+          class="inv-btn inv-btn--danger inv-btn--sm"
+          [disabled]="vehicle_uuids.length === 0"
+          (click)="changeStatus('inactive')"
+          matTooltip="Desactivar seleccionados"
+        >
+          <mat-icon class="inv-btn-mat-icon" aria-hidden="true">power_settings_new</mat-icon>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="inv-card inv-card--filters" aria-label="Filtros">
+    <div class="inv-filters-grid">
+      <div class="inv-search-field">
+        <mat-icon class="inv-search-field-mat-icon" aria-hidden="true">search</mat-icon>
+        <input
+          type="search"
+          [(ngModel)]="palabra_busqueda"
+          (keyup.enter)="applyFilters()"
+          placeholder="VIN, marca, modelo, año…"
+          class="inv-search-field-input"
+          autocomplete="off"
+        />
+      </div>
+      <div class="inv-filter-actions">
+        <button type="button" class="inv-btn inv-btn--amber" (click)="applyFilters()">Buscar</button>
+        <button type="button" class="inv-btn inv-btn--ghost" (click)="clearFilters()">Limpiar</button>
+      </div>
+      <div class="inv-status-chips" role="group" aria-label="Estado en inventario">
+        <span class="inv-status-label">Estado</span>
+        <button
+          type="button"
+          class="inv-chip"
+          [class.inv-chip--active]="statusFilter === 'all'"
+          (click)="setStatusFilter('all')"
+        >
+          Todos
+        </button>
+        <button
+          type="button"
+          class="inv-chip"
+          [class.inv-chip--active]="statusFilter === 'active'"
+          (click)="setStatusFilter('active')"
+        >
+          Activos
+        </button>
+        <button
+          type="button"
+          class="inv-chip"
+          [class.inv-chip--active]="statusFilter === 'inactive'"
+          (click)="setStatusFilter('inactive')"
+        >
+          Inactivos
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="inv-card inv-card--table" aria-label="Listado">
+    <div class="inv-table-loading" *ngIf="loading">
+      <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+      <span>Cargando inventario…</span>
+    </div>
+
+    <div class="inv-empty" *ngIf="!loading && length === 0">
+      <mat-icon class="inv-empty-mat-icon" aria-hidden="true">search_off</mat-icon>
+      <p class="inv-empty-title">Sin resultados</p>
+      <p class="inv-empty-text">Prueba otra búsqueda, cambia el filtro de estado o limpia los filtros.</p>
+      <button type="button" class="inv-btn inv-btn--ghost" (click)="clearFilters()">Limpiar filtros</button>
+    </div>
+
+    <div class="inv-table-wrap" *ngIf="!loading && length > 0">
+      <table mat-table [dataSource]="dataSource" class="inv-mat-table">
+        <ng-container matColumnDef="image">
+          <th mat-header-cell *matHeaderCellDef>Foto</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="inv-thumb-wrap">
+              <img
+                [src]="element.first_image ? image(element.first_image.service_image_url) : image(null)"
+                class="inv-thumb"
+                alt=""
+              />
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let element">
+            <span
+              class="inv-badge"
+              [class.inv-badge--active]="element.page_status === 'active'"
+              [class.inv-badge--inactive]="element.page_status !== 'active'"
+            >
+              {{ element.page_status === 'active' ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="nameVehicle">
+          <th mat-header-cell *matHeaderCellDef>Vehículo</th>
+          <td mat-cell *matCellDef="let element">
+            <span class="inv-cell-name">{{ element.name }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="vin">
+          <th mat-header-cell *matHeaderCellDef>VIN</th>
+          <td mat-cell *matCellDef="let element">
+            <code class="inv-cell-vin">{{ element.vin }}</code>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="km">
+          <th mat-header-cell *matHeaderCellDef class="inv-cell-num">Km</th>
+          <td mat-cell *matCellDef="let element" class="inv-cell-num">
+            {{ element.mileage | number }} km
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef class="inv-cell-num">Precio</th>
+          <td mat-cell *matCellDef="let element" class="inv-cell-num">
+            {{ element.sale_price | currency : '$ ' : 'symbol' : '1.2-2' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let element">
+            <app-a-vehicle
+              [vehicle]="element"
+              (reload)="procesaPropagar($event)"
+              (remove_vehicle_uuid)="removeVehicle_uuid($event)"
+              (add_vehicle_uuid)="addVehicle_uuid($event)"
+            ></app-a-vehicle>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="inv-data-row"></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      *ngIf="!loading && length > 0"
+      class="inv-paginator"
+      [length]="length"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndex - 1"
+      showFirstLastButtons
+      aria-label="Paginación del inventario"
+      (page)="paginationChange($event)"
+    ></mat-paginator>
+  </section>
 </div>

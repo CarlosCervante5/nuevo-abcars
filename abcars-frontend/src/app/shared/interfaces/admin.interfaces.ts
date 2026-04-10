@@ -26,6 +26,10 @@ export interface OverviewPages {
     action?: () => void;
     description?: string;
     iconColor?: 'blue' | 'purple' | 'green' | 'amber';
+    /** Visible si el usuario tiene alguno de estos permisos (o es administrator/super_admin). */
+    requiredPermissions?: string[];
+    /** Visible si el rol coincide (útil junto con requiredPermissions). */
+    requiredRoles?: string[];
 }
 /**GESTOR */
 //PROMOTIONS

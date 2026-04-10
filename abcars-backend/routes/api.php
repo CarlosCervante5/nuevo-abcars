@@ -238,16 +238,23 @@ Route::prefix('vehicles')->middleware('bandwidth_usage')->group(function () {
     Route::get('preowned_xml', [VehicleController::class, 'preownedXML']);
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/', [VehicleController::class, 'store']);
-        Route::post('/create', [VehicleController::class, 'create']);
-        Route::post('/update', [VehicleController::class, 'update']);
-        Route::post('/status', [VehicleController::class, 'status']);
-        Route::post('/delete', [VehicleController::class, 'delete']);
-        Route::post('/restore', [VehicleController::class, 'restore']);
-        Route::post('/csv_upload', [VehicleController::class, 'csvUpload']);
-        Route::post('/delete-batch', [VehicleController::class, 'deleteBatch']);
-        Route::post('/inverse_delete_batch', [VehicleController::class, 'inverseDeleteBatch']);
-        Route::post('/status-batch', [VehicleController::class, 'statusBatch']);
+        // Permisos Spatie + administrator/super_admin (alineado con RolesPermissionsSeeder)
+        Route::middleware('role_or_permission:super_admin|administrator|create vehicles')->group(function () {
+            Route::post('/', [VehicleController::class, 'store']);
+            Route::post('/create', [VehicleController::class, 'create']);
+            Route::post('/csv_upload', [VehicleController::class, 'csvUpload']);
+        });
+        Route::middleware('role_or_permission:super_admin|administrator|update vehicles')->group(function () {
+            Route::post('/update', [VehicleController::class, 'update']);
+            Route::post('/status', [VehicleController::class, 'status']);
+            Route::post('/restore', [VehicleController::class, 'restore']);
+            Route::post('/inverse_delete_batch', [VehicleController::class, 'inverseDeleteBatch']);
+            Route::post('/status-batch', [VehicleController::class, 'statusBatch']);
+        });
+        Route::middleware('role_or_permission:super_admin|administrator|delete vehicles')->group(function () {
+            Route::post('/delete', [VehicleController::class, 'delete']);
+            Route::post('/delete-batch', [VehicleController::class, 'deleteBatch']);
+        });
     });
 
 });
@@ -258,12 +265,14 @@ Route::prefix('vehicles')->middleware('bandwidth_usage')->group(function () {
 // Segmento Imágenes de Vehículos
 
 Route::prefix('vehicle_images')->middleware(['bandwidth_usage', 'auth:sanctum'])->group(function () {
-    
-    Route::post('/', [VehicleImageController::class, 'store']);
-    Route::post('/sort_update', [VehicleImageController::class, 'sortUpdate']);
-    Route::post('/delete', [VehicleImageController::class, 'delete']);
-    Route::post('/delete_batch', [VehicleImageController::class, 'deleteBatch']);
-
+    Route::middleware('role_or_permission:super_admin|administrator|create vehicles|update vehicles')->group(function () {
+        Route::post('/', [VehicleImageController::class, 'store']);
+        Route::post('/sort_update', [VehicleImageController::class, 'sortUpdate']);
+    });
+    Route::middleware('role_or_permission:super_admin|administrator|delete vehicles')->group(function () {
+        Route::post('/delete', [VehicleImageController::class, 'delete']);
+        Route::post('/delete_batch', [VehicleImageController::class, 'deleteBatch']);
+    });
 });
 
 // Fin Segmento Imágenes de Vehículos
@@ -293,13 +302,19 @@ Route::prefix('leads')->middleware('bandwidth_usage')->group(function () {
 Route::prefix('analytics')->group(function () {
     Route::post('/page-view', [AnalyticsController::class, 'trackPageView']);
     Route::get('/stats', [AnalyticsController::class, 'getStats'])
-        ->middleware(['auth:sanctum', 'role:administrator|super_admin']);
+        ->middleware([
+            'auth:sanctum',
+            'role_or_permission:super_admin|administrator|view analytics dashboard',
+        ]);
 });
 
 // Fin Segmento Analytics
 
 // Segmento Analytics Dashboard (admin)
-Route::prefix('admin/analytics')->middleware(['auth:sanctum', 'role:administrator|super_admin'])->group(function () {
+Route::prefix('admin/analytics')->middleware([
+    'auth:sanctum',
+    'role_or_permission:super_admin|administrator|view analytics dashboard',
+])->group(function () {
     Route::get('/dealerships', [AdminAnalyticsDashboardController::class, 'dealerships']);
     Route::get('/top-sold', [AdminAnalyticsDashboardController::class, 'topSold']);
     Route::get('/recent-sold', [AdminAnalyticsDashboardController::class, 'recentSold']);
@@ -592,7 +607,10 @@ Route::prefix('banner')->middleware('bandwidth_usage')->group(function () {
 
     Route::post('/search', [MainBannerController::class, 'search']);
 
-    Route:: middleware('auth:sanctum')->group(function () {
+    Route::middleware([
+        'auth:sanctum',
+        'role_or_permission:super_admin|administrator|marketing|manage main banner',
+    ])->group(function () {
         Route::post('/', [MainBannerController::class, 'store']);
     });
 });
@@ -602,7 +620,10 @@ Route::prefix('banner')->middleware('bandwidth_usage')->group(function () {
 // Segmento Fotos de Entregas (carrusel home)
 Route::prefix('delivery-photos')->middleware('bandwidth_usage')->group(function () {
     Route::get('/', [DeliveryPhotoController::class, 'index']);
-    Route::middleware(['auth:sanctum', 'role:administrator|gestor|super_admin'])->group(function () {
+    Route::middleware([
+        'auth:sanctum',
+        'role_or_permission:super_admin|administrator|gestor|manage delivery photos',
+    ])->group(function () {
         Route::post('/', [DeliveryPhotoController::class, 'store']);
         Route::delete('/{uuid}', [DeliveryPhotoController::class, 'destroy']);
     });
@@ -617,41 +638,44 @@ Route::prefix('strega')->middleware('bandwidth_usage')->group(function () {
 
     Route::post('/public_create', [OpportunityController::class, 'public_create']);
 
-    // Segmento leads
+    // Segmento leads (CRM): lectura vs edición vía permisos Spatie
     Route::prefix('leads')->middleware('auth:sanctum')->group(function () {
-    
-        Route::get('/search_administrator', [OpportunityController::class, 'searchAdministrator']);
-        Route::get('/search_manager', [OpportunityController::class, 'searchLeadsManager']);
-        Route::get('/search_seller', [OpportunityController::class, 'searchSeller']);
+        Route::middleware([
+            'role_or_permission:super_admin|administrator|strega-administrator|strega-manager|strega-seller|view opportunities|manage opportunities',
+        ])->group(function () {
+            Route::get('/search_administrator', [OpportunityController::class, 'searchAdministrator']);
+            Route::get('/search_manager', [OpportunityController::class, 'searchLeadsManager']);
+            Route::get('/search_seller', [OpportunityController::class, 'searchSeller']);
+            Route::get('/dealership_search', [OpportunityController::class, 'dealershipSearch']);
+            Route::get('/type_search', [OpportunityController::class, 'typeSearch']);
+            Route::get('/by_source', [OpportunityController::class, 'bySource']);
+        });
 
-        Route::post('/create', [OpportunityController::class, 'create']);
-        Route::post('/detail', [OpportunityController::class, 'detail']);
-        Route::post('/update', [OpportunityController::class, 'update']);
-
-        Route::post('/csv_upload', [OpportunityController::class, 'csvUpload']);
-        Route::get('/dealership_search', [OpportunityController::class, 'dealershipSearch']);
-        Route::get('/type_search', [OpportunityController::class, 'typeSearch']);
-
-        Route::post('/attatch_manager', [OpportunityController::class, 'attatchManager']);
-
-        Route::post('/first_attempt', [OpportunityController::class, 'firstAttempt']);
-
-        Route::get('/by_source', [OpportunityController::class, 'bySource']);
-
+        Route::middleware([
+            'role_or_permission:super_admin|administrator|strega-administrator|strega-manager|strega-seller|manage opportunities',
+        ])->group(function () {
+            Route::post('/create', [OpportunityController::class, 'create']);
+            Route::post('/detail', [OpportunityController::class, 'detail']);
+            Route::post('/update', [OpportunityController::class, 'update']);
+            Route::post('/csv_upload', [OpportunityController::class, 'csvUpload']);
+            Route::post('/attatch_manager', [OpportunityController::class, 'attatchManager']);
+            Route::post('/first_attempt', [OpportunityController::class, 'firstAttempt']);
+        });
     });
 
-    Route::prefix('appointments')->middleware('auth:sanctum')->group(function () {
-    
+    Route::prefix('appointments')->middleware([
+        'auth:sanctum',
+        'role_or_permission:super_admin|administrator|strega-administrator|strega-manager|strega-seller|view opportunities|manage opportunities',
+    ])->group(function () {
         Route::get('/search_manager', [OpportunityController::class, 'searchAppointmentsManager']);
-
         Route::post('/follow_attempt', [OpportunityController::class, 'followAttempt']);
-
     });
 
-    Route::prefix('activities')->middleware('auth:sanctum')->group( function () {
-
+    Route::prefix('activities')->middleware([
+        'auth:sanctum',
+        'role_or_permission:super_admin|administrator|strega-administrator|strega-manager|strega-seller|manage opportunities',
+    ])->group(function () {
         Route::post('/create', [TrackingController::class, 'create']);
-
     });
 
     // Fin segmento leads

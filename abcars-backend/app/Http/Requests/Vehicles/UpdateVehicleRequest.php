@@ -35,6 +35,8 @@ class UpdateVehicleRequest extends FormRequest
             'type' => 'nullable|in:car,moto,truck,other',
             'category' => 'nullable|in:new,pre_owned,demo',
             'cylinders' => 'nullable|integer',
+            'engine_displacement_cc' => 'nullable|integer|min:0|max:9999',
+            'wet_weight_kg' => 'nullable|integer|min:0|max:999999',
             'interior_color' => 'nullable|max:255|string',
             'exterior_color' => 'nullable|max:255|string',
             'transmission' => 'nullable|in:manual,automatic,semiautomatic,cvt,triptronic,dual-clutch',

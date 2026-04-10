@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { PageEvent } from '@angular/material/paginator';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatTableDataSource } from '@angular/material/table';
@@ -24,11 +25,16 @@ import { Overview } from '@interfaces/admin.interfaces';
     styleUrls: ['./vehicles.component.css'],
     standalone: false
 })
-export class VehiclesComponent {
+export class VehiclesComponent implements OnInit {
+  /** true cuando la vista va dentro de AdminShell (/admin/administrator/vehicles). */
+  embedInShell = false;
   // MatPaginator Inputs
   public length: number = 0;
   public pageSize: number = 12;
-  public pageSizeOptions: number[] = [15, 30, 45, 60, 150];
+  public pageSizeOptions: number[] = [12, 15, 30, 45, 60, 150];
+
+  /** Filtro de estado enviado al API (listado admin). */
+  public statusFilter: 'all' | 'active' | 'inactive' = 'all';
 
   // MatPaginator Output
   pageEvent!: PageEvent;
@@ -55,14 +61,15 @@ export class VehiclesComponent {
 
   // Table
   public dataSource!: MatTableDataSource<Vehicle>;
-  public displayedColumns: string[] = ['status', 'nameVehicle', 'vin', 'km', 'price', 'actions', 'image'];
+  public displayedColumns: string[] = ['image', 'status', 'nameVehicle', 'vin', 'km', 'price', 'actions'];
 
   constructor(
     private _vehicleService: VehicleService,
     private _compraTuAutoService: CompraTuAutoService,
     private _bottomSheet: MatBottomSheet,
     private _snackBar: MatSnackBar,
-    private _router: Router
+    private _router: Router,
+    private _route: ActivatedRoute
   ) {
     // Inicializar itemOverview
     try {
@@ -105,26 +112,64 @@ export class VehiclesComponent {
     // Inicializar dataSource
     this.dataSource = new MatTableDataSource<Vehicle>([]);
     this.getVehicles(1);
-  }    
+  }
 
+  ngOnInit(): void {
+    this.embedInShell = this._route.snapshot.data['embedInShell'] === true;
+    const permalink = this.embedInShell
+      ? '/admin/administrator/vehicles'
+      : '/admin/marketing/vehicles';
+    if (this.itemOverview?.pages?.[0]) {
+      this.itemOverview.pages[0].permalink = permalink;
+    }
+  }
 
     /**
      * Get vehicles
      */
-    public getVehicles(page: number) {    
-
-        this._vehicleService.getVehicles( page , this.palabra_busqueda, this.pageSize, this.relationship_names)
-        .subscribe({
+    public getVehicles(page: number) {
+        this.loading = true;
+        this._vehicleService
+          .getVehicles(
+            page,
+            this.palabra_busqueda,
+            this.pageSize,
+            this.relationship_names,
+            this.statusFilter
+          )
+          .subscribe({
             next: (response: SearchResponse) => {
-                this.vehicles = response.data.data;
-                this.dataSource = new MatTableDataSource(this.vehicles);                                                
-                this.length = response.data.total;
-
+              this.vehicles = response.data.data;
+              this.dataSource = new MatTableDataSource(this.vehicles);
+              this.length = response.data.total;
+              this.loading = false;
             },
-            error: (error:any) => {
+            error: (error: unknown) => {
+              this.loading = false;
               reload(error, this._router);
             }
-        });
+          });
+    }
+
+    applyFilters(): void {
+      this.pageIndex = 1;
+      this.getVehicles(1);
+    }
+
+    clearFilters(): void {
+      this.palabra_busqueda = '';
+      this.statusFilter = 'all';
+      this.pageIndex = 1;
+      this.getVehicles(1);
+    }
+
+    setStatusFilter(mode: 'all' | 'active' | 'inactive'): void {
+      if (this.statusFilter === mode) {
+        return;
+      }
+      this.statusFilter = mode;
+      this.pageIndex = 1;
+      this.getVehicles(1);
     }
 
     /**
@@ -323,7 +368,9 @@ export class VehiclesComponent {
     }
 
     openStoreVehicleSheet(): void {
-      const bottomSheetRef = this._bottomSheet.open(StoreVehicleComponent);
+      const bottomSheetRef = this._bottomSheet.open(StoreVehicleComponent, {
+        panelClass: 'store-vehicle-wide-sheet'
+      });
 
       bottomSheetRef.afterDismissed().subscribe((dataFromChild) => {      
         if(dataFromChild != undefined && dataFromChild.reload === true ){        

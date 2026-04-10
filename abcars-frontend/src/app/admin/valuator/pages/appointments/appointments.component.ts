@@ -12,7 +12,7 @@ import { DocumentationVehicleComponent } from '../../components/documentation-ve
 // Servicios
 import { AppointmentService } from '@services/appointment.service';
 import { ValuationAppointments, VehicleValuations } from '@interfaces/getAppointments.interface';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {reload} from '../../../../shared/helpers/session.helper';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -31,6 +31,8 @@ const THUMBUP_ICON =
     standalone: false
 })
 export class AppointmentsComponent implements OnInit {
+  /** Dentro de AdminShell (/admin/administrator/valuation-appointments). */
+  embedInShell = false;
 
   public length: number = 0;
   public page: number = 1;
@@ -57,7 +59,8 @@ export class AppointmentsComponent implements OnInit {
   constructor(
     private _bottomSheet: MatBottomSheet,
     private _appointmentService: AppointmentService,
-    private _router: Router
+    private _router: Router,
+    private _route: ActivatedRoute
   ) {
     const iconRegistry = inject(MatIconRegistry);
     const sanitizer = inject(DomSanitizer)
@@ -107,6 +110,13 @@ export class AppointmentsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.embedInShell = this._route.snapshot.data['embedInShell'] === true;
+    const permalink = this.embedInShell
+      ? '/admin/administrator/valuation-appointments'
+      : `${this.baseUrl}/appointment`;
+    if (this.itemOverview?.pages?.[0]) {
+      this.itemOverview.pages[0].permalink = permalink;
+    }
     this.getAppointments(this.page);
     this.scrollTop();
   }

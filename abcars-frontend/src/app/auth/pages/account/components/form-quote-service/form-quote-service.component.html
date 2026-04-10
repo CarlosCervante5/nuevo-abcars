@@ -32,7 +32,7 @@
                             <mat-select 
                                 placeholder="Seleccionar su vehículo"                                
                                 required>
-                                <mat-option *ngFor="let vehicle of vehicles" (click)="setVehicle(vehicle)" value="{{ vehicle }}">{{ vehicle.carmodel.brand.name | titlecase }} - {{ vehicle.name | titlecase }}</mat-option>                                        
+                                <mat-option *ngFor="let vehicle of vehicles" (click)="setVehicle(vehicle)" value="{{ vehicle }}">{{ vehicle.carmodel.brand.name | uppercase }} - {{ vehicle.name | titlecase }}</mat-option>                                        
                             </mat-select>
                             <mat-hint *ngIf="brandInvalid">Seleccione el vehículo para su servicio</mat-hint>
                         </mat-form-field>

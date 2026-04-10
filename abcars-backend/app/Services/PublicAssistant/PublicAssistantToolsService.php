@@ -39,10 +39,12 @@ class PublicAssistantToolsService
 
     private const TYPE_MAP = [
         'car'   => 'Auto',
+        'moto'  => 'Motocicletas',
         'suv'   => 'SUV',
         'truck' => 'Camioneta',
         'van'   => 'Van',
         'sedan' => 'Sedán',
+        'other' => 'Otro',
     ];
 
     public function execute(string $toolName, array $arguments): array
@@ -272,6 +274,8 @@ class PublicAssistantToolsService
             'categoria'      => self::CATEGORY_MAP[$vehicle->category] ?? $vehicle->category,
             'tipo'           => self::TYPE_MAP[$vehicle->type] ?? $vehicle->type,
             'cilindros'      => $vehicle->cylinders,
+            'cilindrada_cc'  => $vehicle->engine_displacement_cc,
+            'peso_kg'        => $vehicle->wet_weight_kg,
             'traccion'       => $vehicle->drive_train,
             'descripcion'    => $vehicle->description,
             'sucursal'       => $vehicle->dealership?->name,

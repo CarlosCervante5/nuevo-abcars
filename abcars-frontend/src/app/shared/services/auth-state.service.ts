@@ -52,10 +52,11 @@ export class AuthStateService {
     }
   }
 
-  public setAuthState(token: string, user: AuthUser, role: string): void {
+  public setAuthState(token: string, user: AuthUser, role: string, permissions: string[] = []): void {
     localStorage.setItem('user_token', token);
     localStorage.setItem('user', JSON.stringify(user));
     localStorage.setItem('role', role);
+    localStorage.setItem('permissions', JSON.stringify(Array.isArray(permissions) ? permissions : []));
     
     // Guardar timestamp de inicio de sesión para calcular expiración
     const sessionStartTime = Date.now();
@@ -73,6 +74,7 @@ export class AuthStateService {
     localStorage.removeItem('user_token');
     localStorage.removeItem('user');
     localStorage.removeItem('role');
+    localStorage.removeItem('permissions');
     localStorage.removeItem('profile');
     localStorage.removeItem('session_start_time');
 

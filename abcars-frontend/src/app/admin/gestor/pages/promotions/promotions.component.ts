@@ -1,5 +1,5 @@
-
-import { Component , Output, EventEmitter} from '@angular/core';
+import { Component, Output, EventEmitter, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { LoadImagesPromoComponent } from '../../components/load-images-promo/load-images-promo.component';
 import { environment } from '@environments/environment';
@@ -26,7 +26,9 @@ interface Brand{
     styleUrls: ['./promotions.component.css'],
     standalone: false
 })
-export class PromotionsComponent {
+export class PromotionsComponent implements OnInit {
+  /** Dentro de AdminShell (/admin/administrator/promotions). */
+  embedInShell = false;
 
   public baseUrl: string = environment.baseUrl;
   @Output() reload = new EventEmitter<Boolean>();
@@ -38,7 +40,8 @@ export class PromotionsComponent {
   constructor(
     private _bottomSheet: MatBottomSheet,
     private _campaingService: CampaingService,
-    private _router: Router
+    private _router: Router,
+    private _route: ActivatedRoute
   ) {
     // Inicializar itemOverview
     try {
@@ -81,6 +84,13 @@ export class PromotionsComponent {
     
     // this.promotionsByBrand(this.brands);
     this.showcampaing();
+  }
+
+  ngOnInit(): void {
+    this.embedInShell = this._route.snapshot.data['embedInShell'] === true;
+    if (this.embedInShell && this.itemOverview?.pages?.[0]) {
+      this.itemOverview.pages[0].permalink = '/admin/administrator/promotions';
+    }
   }
 
   public campaigns: Campaign[] = [];

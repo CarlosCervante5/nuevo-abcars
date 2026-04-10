@@ -1,10 +1,20 @@
-<app-overview [overview]="itemOverview" [url_index]="'/admin/gestor'" [hideModules]="true"></app-overview>
-<div class="container mx-auto px-4 pt-24">
+<app-overview
+  *ngIf="!embedInShell"
+  [overview]="itemOverview"
+  [url_index]="'/admin/gestor'"
+  [hideModules]="true"
+></app-overview>
+<div [ngClass]="embedInShell ? 'container mx-auto px-4 pt-2 pb-8' : 'container mx-auto px-4 pt-24'">
   <div class="w-full mt-5 mb-5">
     <h4 class="delivery-photos-title">Fotos de Entregas</h4>
     <nav class="delivery-photos-breadcrumb" aria-label="breadcrumb">
       <ol class="delivery-photos-breadcrumb-list">
-        <li class="delivery-photos-breadcrumb-item" [routerLink]="['/admin/gestor/']">Overview</li>
+        <li
+          class="delivery-photos-breadcrumb-item"
+          [routerLink]="embedInShell ? ['/admin/administrator'] : ['/admin/gestor/']"
+        >
+          {{ embedInShell ? 'Panel' : 'Overview' }}
+        </li>
         <li class="delivery-photos-breadcrumb-item delivery-photos-breadcrumb-item-active" aria-current="page">Fotos de entregas</li>
       </ol>
     </nav>

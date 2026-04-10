@@ -1,11 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HomeNavComponent } from '../../../shared/components/home-nav/home-nav.component';
 import { ModernFooterComponent } from '../../../shared/components/modern-footer/modern-footer.component';
 import { StregaService } from '../../../shared/services/strega.service';
-import { Dealership } from '../../../shared/interfaces/admin.interfaces';
+import { VehicleService } from '../../../shared/services/vehicle.service';
+import { Dealership, DealerShipResponse } from '../../../shared/interfaces/admin.interfaces';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -15,17 +16,15 @@ import Swal from 'sweetalert2';
   templateUrl: './technical-service.component.html',
   styleUrls: ['./technical-service.component.css']
 })
-export class TechnicalServiceComponent {
+export class TechnicalServiceComponent implements OnInit {
   serviceForm: FormGroup;
   isSubmitting: boolean = false;
-  dealerships: Dealership[] = [
-    { name: 'Chevrolet Balderrama Serdán (puebla)', location: '', description: null, created_at: new Date() },
-    { name: 'VECSA pachuca', location: '', description: null, created_at: new Date() }
-  ];
+  dealerships: Dealership[] = [];
 
   constructor(
     private fb: FormBuilder,
-    private stregaService: StregaService
+    private stregaService: StregaService,
+    private vehicleService: VehicleService
   ) {
     this.serviceForm = this.fb.group({
       name: ['', Validators.required],
@@ -40,6 +39,19 @@ export class TechnicalServiceComponent {
       preferredDate: [''],
       preferredTime: [''],
       city: ['', Validators.required]
+    });
+  }
+
+  ngOnInit(): void {
+    this.vehicleService.searchDealerships().subscribe({
+      next: (res: DealerShipResponse) => {
+        if (res.status === 200 && Array.isArray(res.data)) {
+          this.dealerships = res.data;
+        }
+      },
+      error: () => {
+        this.dealerships = [];
+      }
     });
   }
 

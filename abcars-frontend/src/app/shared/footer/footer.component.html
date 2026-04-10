@@ -67,7 +67,7 @@
                     class="enlance_footer" 
                     *ngFor="let vehicle of vehicles"
                     (click)="redirectStockVehicle(vehicle.carmodel.brand.name, vehicle.carmodel.name)">
-                    {{ vehicle.carmodel.brand.name | titlecase }} {{ vehicle.carmodel.name | titlecase }} /
+                    {{ vehicle.carmodel.brand.name | uppercase }} {{ vehicle.carmodel.name | titlecase }} /
                 </a>
             </p>
         </div>

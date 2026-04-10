@@ -18,7 +18,8 @@ class VehicleService
 
     protected $vehicleKeys = [
         'name', 'description', 'vin', 'page_status', 'purchase_date', 'sale_price', 
-        'list_price', 'offer_price', 'mileage', 'type', 'category', 'cylinders', 
+        'list_price', 'offer_price', 'mileage', 'type', 'category', 'cylinders',
+        'engine_displacement_cc', 'wet_weight_kg',
         'interior_color', 'exterior_color', 'transmission', 'drive_train', 'fuel_type', 'spec_sheet'
     ];
 

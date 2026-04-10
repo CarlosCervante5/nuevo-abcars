@@ -9,6 +9,8 @@ import { VehicleService } from '../../shared/services/vehicle.service';
 import { LeadService } from '../../shared/services/lead.service';
 import { ReferralService } from '../../shared/services/referral.service';
 import { Vehicle as ApiVehicle } from '../../shared/interfaces/vehicle_data.interface';
+import { Dealership, DealerShipResponse } from '../../shared/interfaces/admin.interfaces';
+import { FALLBACK_HERO_IMAGE } from '../../shared/constants/fallback-media';
 import Swal from 'sweetalert2';
 
 interface Vehicle {
@@ -70,7 +72,7 @@ interface MediaItem {
               <div *ngIf="vehicle" class="hidden lg:flex items-center">
                 <div class="h-6 w-px bg-gray-300 mx-4"></div>
                 <div>
-                  <h1 class="text-xl lg:text-2xl font-bold text-gray-900">{{ vehicle.brand }} {{ vehicle.model }}</h1>
+                  <h1 class="text-xl lg:text-2xl font-bold text-gray-900"><span class="uppercase">{{ vehicle.brand }}</span> {{ vehicle.model }}</h1>
                   <p class="text-sm text-gray-600">{{ vehicle.year }} • {{ getEngineInfo() }}</p>
                 </div>
               </div>
@@ -259,12 +261,12 @@ interface MediaItem {
               <nav class="flex text-sm text-gray-500 mb-4">
                 <a (click)="goBack()" class="hover:text-gray-700 cursor-pointer">Catálogo</a>
                 <span class="mx-2">/</span>
-                <span class="text-gray-900">{{ vehicle.brand }} {{ vehicle.model }}</span>
+                <span class="text-gray-900"><span class="uppercase">{{ vehicle.brand }}</span> {{ vehicle.model }}</span>
               </nav>
               
               <div class="flex items-start justify-between">
                 <div>
-                  <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{{ vehicle.brand }}</h1>
+                  <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2 uppercase">{{ vehicle.brand }}</h1>
                   <p class="text-xl lg:text-2xl text-gray-600 mb-4">{{ vehicle.model }} {{ getEngineInfo() }}</p>
                 </div>
               </div>
@@ -289,7 +291,7 @@ interface MediaItem {
                         <span class="font-semibold text-gray-900">MXN {{ getDownPayment() | number }}</span>
                       </div>
                       <div class="flex justify-between items-center">
-                        <span class="text-gray-600">Mensualidad ({{ getMaxAvailableTerm(vehicle?.year) }} meses)</span>
+                        <span class="text-gray-600">Pago desde · Mensualidad ({{ getMaxAvailableTerm(vehicle?.year) }} meses)</span>
                         <span class="font-semibold text-gray-900">MXN {{ getMonthlyFinancingForDetails() | number }}</span>
                       </div>
                     </div>
@@ -552,7 +554,7 @@ interface MediaItem {
                       <span class="font-semibold text-gray-900">MXN {{ getDownPayment() | number }}</span>
                     </div>
                     <div class="flex justify-between items-center">
-                      <span class="text-gray-600">Mensualidad ({{ getMaxAvailableTerm(vehicle?.year) }} meses)</span>
+                      <span class="text-gray-600">Pago desde · Mensualidad ({{ getMaxAvailableTerm(vehicle?.year) }} meses)</span>
                       <span class="font-semibold text-gray-900">MXN {{ getMonthlyFinancingForDetails() | number }}</span>
                     </div>
                   </div>
@@ -726,7 +728,7 @@ interface MediaItem {
                 required
               >
                 <option value="">Selecciona sucursal</option>
-                <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+                <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name | titlecase }}<ng-container *ngIf="dealership.location"> — {{ dealership.location | titlecase }}</ng-container></option>
               </select>
             </div>
             
@@ -894,7 +896,7 @@ interface MediaItem {
               required
             >
               <option value="">Selecciona sucursal</option>
-              <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+              <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name | titlecase }}<ng-container *ngIf="dealership.location"> — {{ dealership.location | titlecase }}</ng-container></option>
             </select>
           </div>
           
@@ -1024,7 +1026,7 @@ interface MediaItem {
                 required
               >
                 <option value="">Selecciona sucursal</option>
-                <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+                <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name | titlecase }}<ng-container *ngIf="dealership.location"> — {{ dealership.location | titlecase }}</ng-container></option>
               </select>
             </div>
             
@@ -1428,7 +1430,7 @@ interface MediaItem {
             <div class="space-y-2 text-sm">
               <div class="flex justify-between">
                 <span>Vehículo:</span>
-                <span class="font-semibold">{{ vehicle?.brand }} {{ vehicle?.model }} {{ vehicle?.year }}</span>
+                <span class="font-semibold"><span class="uppercase">{{ vehicle?.brand }}</span> {{ vehicle?.model }} {{ vehicle?.year }}</span>
               </div>
               <div class="flex justify-between">
                 <span>Precio:</span>
@@ -1439,7 +1441,7 @@ interface MediaItem {
                 <span class="font-semibold">MXN {{ getFinancingDownPayment() | number }}</span>
               </div>
               <div class="flex justify-between">
-                <span>Mensualidad ({{ getFinancingSelectedTerm() }} meses):</span>
+                <span>Pago desde · Mensualidad ({{ getFinancingSelectedTerm() }} meses):</span>
                 <span class="font-semibold text-blue-600">MXN {{ getFinancingMonthlyPayment() | number }}</span>
               </div>
             </div>
@@ -1488,7 +1490,7 @@ interface MediaItem {
                 required
               >
                 <option value="">Selecciona sucursal</option>
-                <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+                <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name | titlecase }}<ng-container *ngIf="dealership.location"> — {{ dealership.location | titlecase }}</ng-container></option>
               </select>
             </div>
           </div>
@@ -1595,10 +1597,10 @@ interface MediaItem {
             <div class="space-y-2 text-sm">
               <div class="flex justify-between">
                 <span>Vehículo:</span>
-                <span class="font-semibold">{{ vehicle?.brand }} {{ vehicle?.model }} {{ vehicle?.year }}</span>
+                <span class="font-semibold"><span class="uppercase">{{ vehicle?.brand }}</span> {{ vehicle?.model }} {{ vehicle?.year }}</span>
               </div>
               <div class="flex justify-between">
-                <span>Mensualidad:</span>
+                <span>Pago desde · Mensualidad:</span>
                 <span class="font-semibold text-green-600">MXN {{ getFinancingMonthlyPayment() | number }}</span>
               </div>
               <div class="flex justify-between">
@@ -1976,10 +1978,7 @@ export class VehicleDetailComponent implements OnInit {
   termsAccepted = false;
   privacyAccepted = false;
   contactAccepted = false;
-  dealerships = [
-    { name: 'Chevrolet Balderrama Serdán (puebla)' },
-    { name: 'VECSA pachuca' }
-  ];
+  dealerships: Dealership[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -1992,9 +1991,23 @@ export class VehicleDetailComponent implements OnInit {
 
   ngOnInit() {
     this.referralService.captureFromUrl(this.route);
+    this.loadDealerships();
     this.route.params.subscribe(params => {
       this.vehicleId = params['id'];
       this.loadVehicle();
+    });
+  }
+
+  private loadDealerships(): void {
+    this.vehicleService.searchDealerships().subscribe({
+      next: (res: DealerShipResponse) => {
+        if (res.status === 200 && Array.isArray(res.data)) {
+          this.dealerships = res.data;
+        }
+      },
+      error: () => {
+        this.dealerships = [];
+      }
     });
   }
 
@@ -2009,7 +2022,7 @@ export class VehicleDetailComponent implements OnInit {
             // Mapear datos de la API al formato del componente
             this.vehicle = {
               uuid: apiVehicle.uuid,
-              brand: this.capitalizeFirst(apiVehicle.brand?.name || 'Sin marca'),
+              brand: (apiVehicle.brand?.name || 'Sin marca').toUpperCase(),
               model: this.capitalizeFirst(apiVehicle.model?.name || apiVehicle.line?.name || 'Sin modelo'),
               year: apiVehicle.model?.year || new Date().getFullYear(),
               price: apiVehicle.sale_price || apiVehicle.list_price || 0,
@@ -2136,18 +2149,18 @@ export class VehicleDetailComponent implements OnInit {
     }
     
     const brandImages: { [key: string]: string } = {
-      'BMW': 'https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-      'Mercedes-Benz': 'https://images.unsplash.com/photo-1563694983011-6f4d90358083?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-      'Mercedes': 'https://images.unsplash.com/photo-1563694983011-6f4d90358083?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-      'Audi': 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-      'Honda': 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-      'Toyota': 'https://images.unsplash.com/photo-1621135802920-133df287f89c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-      'Chevrolet': 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-      'Porsche': 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-      'Ford': 'https://images.unsplash.com/photo-1580414053435-2b5d2e1dd6c8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+      'BMW': FALLBACK_HERO_IMAGE,
+      'Mercedes-Benz': FALLBACK_HERO_IMAGE,
+      'Mercedes': FALLBACK_HERO_IMAGE,
+      'Audi': FALLBACK_HERO_IMAGE,
+      'Honda': FALLBACK_HERO_IMAGE,
+      'Toyota': FALLBACK_HERO_IMAGE,
+      'Chevrolet': FALLBACK_HERO_IMAGE,
+      'Porsche': FALLBACK_HERO_IMAGE,
+      'Ford': FALLBACK_HERO_IMAGE
     };
     
-    return brandImages[this.vehicle?.brand || ''] || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80';
+    return brandImages[this.vehicle?.brand || ''] || FALLBACK_HERO_IMAGE;
   }
 
   // Método para obtener las imágenes de la galería
@@ -2161,36 +2174,36 @@ export class VehicleDetailComponent implements OnInit {
     const galleryImages: { [key: string]: string[] } = {
       'BMW': [
         baseImage,
-        'https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1563720223185-11003d516935?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+        FALLBACK_HERO_IMAGE,
+        FALLBACK_HERO_IMAGE,
+        FALLBACK_HERO_IMAGE,
+        FALLBACK_HERO_IMAGE,
+        FALLBACK_HERO_IMAGE
       ],
       'Mercedes-Benz': [
         baseImage,
-        'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1563694983011-6f4d90358083?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+        FALLBACK_HERO_IMAGE,
+        FALLBACK_HERO_IMAGE,
+        FALLBACK_HERO_IMAGE,
+        FALLBACK_HERO_IMAGE,
+        FALLBACK_HERO_IMAGE
       ],
       'Porsche': [
         baseImage,
-        'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1563720223185-11003d516935?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+        FALLBACK_HERO_IMAGE,
+        FALLBACK_HERO_IMAGE,
+        FALLBACK_HERO_IMAGE,
+        FALLBACK_HERO_IMAGE,
+        FALLBACK_HERO_IMAGE
       ]
     };
     
     return galleryImages[brand] || [
       baseImage,
-      'https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1563720223185-11003d516935?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+      FALLBACK_HERO_IMAGE,
+      FALLBACK_HERO_IMAGE,
+      FALLBACK_HERO_IMAGE,
+      FALLBACK_HERO_IMAGE
     ];
   }
 
@@ -2244,6 +2257,12 @@ export class VehicleDetailComponent implements OnInit {
     }
     if (this.vehicle?.cylinders !== undefined && this.vehicle.cylinders !== null) {
       specs.push({ label: 'Cilindros', value: this.vehicle.cylinders.toString() });
+    }
+    if (apiVehicle?.engine_displacement_cc != null && apiVehicle.engine_displacement_cc > 0) {
+      specs.push({ label: 'Cilindrada', value: `${apiVehicle.engine_displacement_cc} cc` });
+    }
+    if (apiVehicle?.wet_weight_kg != null && apiVehicle.wet_weight_kg > 0) {
+      specs.push({ label: 'Peso en orden de marcha', value: `${apiVehicle.wet_weight_kg} kg` });
     }
     if (this.vehicle?.exterior_color) {
       specs.push({ label: 'Color exterior', value: this.formatColor(this.vehicle.exterior_color) });
@@ -2993,14 +3012,30 @@ export class VehicleDetailComponent implements OnInit {
   }
 
   formatVehicleType(): string {
-    const type = this.vehicle?.apiData?.type || this.vehicle?.status;
+    const api = this.vehicle?.apiData;
     const typeMap: { [key: string]: string } = {
-      'car': 'Automóvil',
-      'new': 'Nuevo',
-      'pre_owned': 'Seminuevo',
-      'demo': 'Demostrador'
+      car: 'Automóvil',
+      moto: 'Motocicletas',
+      truck: 'Camión',
+      other: 'Otro',
     };
-    return typeMap[type || ''] || 'Seminuevo';
+    const categoryMap: { [key: string]: string } = {
+      new: 'Nuevo',
+      pre_owned: 'Seminuevo',
+      demo: 'Demostrador',
+    };
+    const typeLabel = api?.type ? typeMap[api.type] : '';
+    const catLabel = api?.category ? categoryMap[api.category] : '';
+    if (typeLabel && catLabel) {
+      return `${typeLabel} (${catLabel})`;
+    }
+    if (typeLabel) {
+      return typeLabel;
+    }
+    if (catLabel) {
+      return catLabel;
+    }
+    return '-';
   }
 
   formatBodyType(): string {

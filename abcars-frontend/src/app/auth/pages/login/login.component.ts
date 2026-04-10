@@ -105,7 +105,8 @@ export class LoginComponent implements OnInit {
                 this._authService.setAuthState(
                     loginResponse.data.token,
                     loginResponse.data.user,
-                    loginResponse.data.role
+                    loginResponse.data.role,
+                    loginResponse.data.permissions ?? []
                 );
                 
                 // Guardar el perfil por separado

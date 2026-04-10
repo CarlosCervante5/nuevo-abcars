@@ -55,8 +55,8 @@ export class AuthService {
     /**
      * Set authentication state
      */
-    public setAuthState(token: string, user: any, role: string): void {
-        this._authStateService.setAuthState(token, user, role);
+    public setAuthState(token: string, user: any, role: string, permissions: string[] = []): void {
+        this._authStateService.setAuthState(token, user, role, permissions);
     }
 
     /**

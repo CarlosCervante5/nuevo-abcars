@@ -57,6 +57,8 @@ class Vehicle extends Model
         'fuel_type',
         'category',
         'cylinders',
+        'engine_displacement_cc',
+        'wet_weight_kg',
         'interior_color',
         'exterior_color',
         'transmission',

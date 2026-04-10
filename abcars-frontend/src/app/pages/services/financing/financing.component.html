@@ -45,6 +45,32 @@
             <h2 class="section-title">Simulador de crédito</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="md:col-span-2">
+                <label class="form-label">Vehículo de interés</label>
+                <select
+                  [(ngModel)]="selectedInventoryUuid"
+                  (ngModelChange)="onInventoryVehicleSelect($event)"
+                  class="form-input mb-3"
+                  [disabled]="loadingInventorySelect"
+                >
+                  <option value="">
+                    {{ loadingInventorySelect ? 'Cargando inventario…' : '— Elegir del inventario (opcional) —' }}
+                  </option>
+                  <option *ngFor="let opt of inventorySelectOptions" [value]="opt.uuid">{{ opt.label }}</option>
+                </select>
+                <input
+                  type="text"
+                  [(ngModel)]="calculatorData.vehicleOfInterest"
+                  (input)="onVehicleInterestTextInput()"
+                  class="form-input"
+                  placeholder="Si no está en la lista: marca, modelo, año o enlace al anuncio"
+                  autocomplete="off"
+                >
+                <p class="mt-1 text-xs text-gray-500">
+                  Opcional. Si eliges del inventario, actualizamos el precio del simulador con el del anuncio.
+                </p>
+              </div>
+
               <div>
                 <label class="form-label">Precio del vehículo</label>
                 <input 
@@ -107,7 +133,7 @@
                 </div>
                 <div class="text-center">
                   <div class="summary-amount">MXN {{ getMonthlyPayment() | number:'1.2-2' }}</div>
-                  <div class="summary-label">Mensualidad</div>
+                  <div class="summary-label">Pago desde · Mensualidad</div>
                 </div>
                 <div class="text-center">
                   <div class="summary-amount">MXN {{ getTotalAmount() | number:'1.2-2' }}</div>
@@ -273,7 +299,7 @@
           
           <!-- Formulario de solicitud -->
           <div class="bg-white rounded-3xl p-6 shadow-sm sticky top-8">
-            <h3 class="form-request-title">Solicitar Financiamiento</h3>
+            <h3 class="form-request-title">Solicitar Cotización</h3>
             
             <form [formGroup]="financingForm" (ngSubmit)="onSubmitFinancing()" class="space-y-4">
               <div>
@@ -340,7 +366,7 @@
                   [ngClass]="(financingForm.get('city')?.invalid && financingForm.get('city')?.touched) ? 'form-request-input-error' : 'form-request-input'"
                 >
                   <option value="">Selecciona sucursal</option>
-                  <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+                  <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name | titlecase }}<ng-container *ngIf="dealership.location"> — {{ dealership.location | titlecase }}</ng-container></option>
                 </select>
                 <p *ngIf="financingForm.get('city')?.invalid && financingForm.get('city')?.touched" class="form-error-message">
                   La sucursal es requerida
@@ -358,7 +384,7 @@
               </div>
               
               <div>
-                <label class="form-request-label">Mensualidad</label>
+                <label class="form-request-label">Pago desde · Mensualidad</label>
                 <input 
                   type="text" 
                   [value]="getFormattedMonthlyPayment()"
@@ -392,7 +418,7 @@
                 [disabled]="isSubmitting"
                 class="form-submit-btn"
               >
-                <span *ngIf="!isSubmitting">Simular crédito</span>
+                <span *ngIf="!isSubmitting">Solicitar Cotización</span>
                 <span *ngIf="isSubmitting">Enviando...</span>
               </button>
             </form>

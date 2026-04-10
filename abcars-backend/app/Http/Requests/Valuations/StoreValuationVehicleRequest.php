@@ -37,6 +37,8 @@ class StoreValuationVehicleRequest extends FormRequest
             'mileage' => 'required|integer',
             'type' => 'required|in:car,moto,truck,other',
             'cylinders' => 'required|integer',
+            'engine_displacement_cc' => 'nullable|integer|min:0|max:9999',
+            'wet_weight_kg' => 'nullable|integer|min:0|max:999999',
             'exterior_color' => 'required|max:255|string',
             'transmission' => 'required|in:manual,automatic,semiautomatic,cvt,triptronic,dual-clutch,others',
             'drive_train' => 'nullable|max:255|string',

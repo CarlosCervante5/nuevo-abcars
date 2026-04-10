@@ -1,0 +1,33 @@
+<div class="home-dash">
+  <div class="home-dash-hero">
+    <h2 class="home-dash-hero-title">Resumen del panel</h2>
+    <p class="home-dash-hero-text">
+      Usa el menú lateral para acceder a inventario, usuarios y el resto de módulos. Abajo tienes el analytics detallado del sitio.
+    </p>
+    <div class="home-dash-actions">
+      <a
+        routerLink="/admin/administrator/analytics"
+        fragment="metricas-negocio"
+        class="home-dash-btn home-dash-btn--primary"
+      >
+        Métricas de negocio
+      </a>
+      <a
+        *ngIf="showInventory"
+        routerLink="/admin/administrator/vehicles"
+        class="home-dash-btn home-dash-btn--ghost"
+      >
+        Ir al inventario
+      </a>
+    </div>
+  </div>
+
+  <app-analytics *ngIf="showMetrics" [embedded]="true"></app-analytics>
+
+  <div *ngIf="!showMetrics" class="home-dash-note">
+    <p>
+      No tienes permiso para ver métricas agregadas del sitio. Si necesitas acceso, pide el permiso
+      <strong>view analytics dashboard</strong> al administrador.
+    </p>
+  </div>
+</div>

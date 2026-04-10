@@ -98,7 +98,8 @@ class AuthController extends Controller
                     'created_at' => $user->created_at,
                 ],
                 'role' => $profileData['role'],
-                'profile' =>  $profileData['profile']
+                'profile' => $profileData['profile'],
+                'permissions' => $user->getAllPermissions()->pluck('name')->values()->all(),
             ]);
 
         } catch (\Exception $e) {
@@ -134,7 +135,8 @@ class AuthController extends Controller
                     'created_at' => $user->created_at,
                 ],
                 'role' => $profileData['role'],
-                'profile' =>  $profileData['profile']
+                'profile' => $profileData['profile'],
+                'permissions' => $user->getAllPermissions()->pluck('name')->values()->all(),
             ]);
 
         } catch (\Exception $e) {

@@ -61,7 +61,7 @@
                       placeholder="Escribe o selecciona una marca"
                     >
                     <datalist id="brands-list">
-                      <option *ngFor="let brand of brands" [value]="brand.name">
+                      <option *ngFor="let brand of brands" [value]="brand.name">{{ brand.name | uppercase }}</option>
                     </datalist>
                     <p *ngIf="valuationForm.get('brand')?.invalid && valuationForm.get('brand')?.touched" class="form-error-message">
                       La marca es requerida
@@ -278,7 +278,7 @@
                   [ngClass]="valuationForm.get('city')?.invalid && valuationForm.get('city')?.touched ? 'form-request-input-error' : 'form-request-input'"
                 >
                   <option value="">Selecciona sucursal</option>
-                  <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+                  <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name | titlecase }}<ng-container *ngIf="dealership.location"> — {{ dealership.location | titlecase }}</ng-container></option>
                 </select>
                 <p *ngIf="valuationForm.get('city')?.invalid && valuationForm.get('city')?.touched" class="form-error-message">
                   La sucursal es requerida

@@ -144,6 +144,8 @@ export interface Vehicle {
     type:           string;
     category:       string;
     cylinders:      number;
+    engine_displacement_cc?: number | null;
+    wet_weight_kg?: number | null;
     interior_color: string;
     exterior_color: string;
     transmission:   string;
@@ -178,6 +180,8 @@ export interface VehicleForm {
     type:           string;
     category:       string;
     cylinders:      number;
+    engine_displacement_cc?: number | null;
+    wet_weight_kg?: number | null;
     interior_color: string;
     exterior_color: string;
     transmission:   string;
@@ -205,6 +209,8 @@ export interface UpdateVehicle {
     type:           string;
     category:       string;
     cylinders:      number;
+    engine_displacement_cc?: number | null;
+    wet_weight_kg?: number | null;
     interior_color: string;
     exterior_color: string;
     transmission:   string;

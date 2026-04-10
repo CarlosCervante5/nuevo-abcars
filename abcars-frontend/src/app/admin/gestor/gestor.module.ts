@@ -2,12 +2,12 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { GestorRoutingModule } from './gestor-routing.module';
+import { DeliveryPhotosPageModule } from './delivery-photos-page.module';
+import { PromotionsPageModule } from './promotions-page.module';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { AdminModule } from '../admin.module';
-import { PromotionsComponent } from './pages/promotions/promotions.component';
 import { ScheduleEventsComponent } from './pages/schedule-events/schedule-events.component';
 import { AngularMaterialModule } from 'src/app/angular-material/angular-material.module';
-import { LoadImagesPromoComponent } from './components/load-images-promo/load-images-promo.component';
 import { UpdateImagesPromoComponent } from './components/update-images-promo/update-images-promo.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LoadVideoComponent } from './components/events/load-video/load-video.component';
@@ -16,10 +16,7 @@ import { CreateEventComponent } from './components/create-event/create-event.com
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EventCardComponent } from './components/event-card/event-card.component';
 import { LoadPrincipalImagesComponent } from './components/load-principal-images/load-principal-images.component';
-import { CreateCampaingComponent } from './components/create-campaing/create-campaing.component';
-import { UpdateImagesComponent } from './components/update-images/update-images.component';
 import { RewardsComponent } from './pages/rewards/rewards.component';
-import { DeliveryPhotosComponent } from './pages/delivery-photos/delivery-photos.component';
 import { AddRewardrComponent } from './components/add-rewardr/add-rewardr.component';
 import { UpdateRewardsComponent } from './components/update-rewards/update-rewards.component';
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
@@ -28,23 +25,20 @@ import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.co
 @NgModule({
   declarations: [
     DashboardComponent,
-    PromotionsComponent,
     ScheduleEventsComponent,
-    LoadImagesPromoComponent,
     UpdateImagesPromoComponent,
     LoadVideoComponent,
     ShowEventComponent,
     CreateEventComponent,
     EventCardComponent,
     LoadPrincipalImagesComponent,
-    CreateCampaingComponent,
-    UpdateImagesComponent,
     RewardsComponent,
     AddRewardrComponent,
-    UpdateRewardsComponent,
-    DeliveryPhotosComponent,
+    UpdateRewardsComponent
   ],
   imports: [
+    DeliveryPhotosPageModule,
+    PromotionsPageModule,
     AngularMaterialModule,
     CommonModule,
     GestorRoutingModule,

@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { Vehicle } from '../../interfaces/vehicle.interface';
+import { FALLBACK_HERO_IMAGE } from '../../shared/constants/fallback-media';
 
 @Component({
   selector: 'app-vehicle-card',
@@ -36,7 +37,7 @@ import { Vehicle } from '../../interfaces/vehicle.interface';
       <div class="p-4 flex-grow flex flex-col">
         <!-- Información del vehículo -->
         <div class="mb-4 flex-grow">
-          <h3 class="text-lg font-bold text-gray-900 mb-1">{{ vehicle.brand }}</h3>
+          <h3 class="text-lg font-bold text-gray-900 mb-1 uppercase">{{ vehicle.brand }}</h3>
           <p class="text-base text-gray-700 mb-3">{{ vehicle.model }}</p>
           
           <!-- Detalles en tabla limpia -->
@@ -63,7 +64,7 @@ import { Vehicle } from '../../interfaces/vehicle.interface';
             <span class="text-base font-bold text-primary-500">MXN {{ getContadoPrice() | number }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-500">Pago mensual</span>
+            <span class="text-sm text-gray-500">Pago mensual · Pago desde</span>
             <span class="text-base font-bold text-gray-900">MXN {{ getMonthlyPayment() | number }}</span>
           </div>
         </div>
@@ -91,18 +92,7 @@ export class VehicleCardComponent {
       return this.vehicle.image_url;
     }
     
-    // Fallback a imágenes por marca solo si no hay imagen de la API
-    const brandImages: { [key: string]: string } = {
-      'BMW': 'https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      'Mercedes-Benz': 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      'Audi': 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      'Porsche': 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      'Toyota': 'https://images.unsplash.com/photo-1549317661-bd32c8ade0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      'Honda': 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      'Chevrolet': 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-    };
-    
-    return brandImages[this.vehicle.brand] || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+    return FALLBACK_HERO_IMAGE;
   }
 
   getContadoPrice(): number {

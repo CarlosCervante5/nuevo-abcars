@@ -1,0 +1,62 @@
+<div class="admin-shell">
+  <div
+    class="admin-shell-backdrop"
+    *ngIf="sidebarOpen"
+    (click)="sidebarOpen = false"
+    aria-hidden="true"
+  ></div>
+
+  <aside class="admin-shell-sidebar" [class.admin-shell-sidebar--open]="sidebarOpen">
+    <div class="admin-shell-brand">
+      <a routerLink="/admin/administrator" class="admin-shell-logo-link" (click)="closeSidebarMobile()">
+        <img src="assets/images/logo.svg" alt="ABCars" class="admin-shell-logo" />
+      </a>
+    </div>
+
+    <nav class="admin-shell-nav" aria-label="Principal">
+      <a
+        *ngFor="let item of visibleNav"
+        [routerLink]="item.routerLink"
+        routerLinkActive="admin-shell-nav-link--active"
+        [routerLinkActiveOptions]="isInicioItem(item) ? { exact: true } : { exact: false }"
+        class="admin-shell-nav-link"
+        (click)="closeSidebarMobile()"
+      >
+        <i [class]="(item.icon || 'fi fi-rr-apps') + ' admin-shell-nav-icon'"></i>
+        <span class="admin-shell-nav-label">{{ item.title }}</span>
+      </a>
+    </nav>
+
+    <div class="admin-shell-user">
+      <img [src]="avatarUrl" alt="" class="admin-shell-avatar" />
+      <div class="admin-shell-user-text">
+        <div class="admin-shell-user-name">{{ userName }}</div>
+        <div class="admin-shell-user-email">{{ userEmail }}</div>
+      </div>
+      <button type="button" class="admin-shell-logout" (click)="logout()" title="Cerrar sesión">
+        <i class="fi fi-rr-sign-out-alt"></i>
+      </button>
+    </div>
+  </aside>
+
+  <div class="admin-shell-main">
+    <header class="admin-shell-header">
+      <button
+        type="button"
+        class="admin-shell-menu-btn"
+        (click)="toggleSidebar()"
+        aria-label="Abrir menú"
+      >
+        <i class="fi fi-rr-menu-burger"></i>
+      </button>
+      <h1 class="admin-shell-title">{{ pageTitle }}</h1>
+      <a routerLink="/" class="admin-shell-site-link">Ir al sitio</a>
+    </header>
+
+    <main class="admin-shell-outlet">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
+
+<app-assistant-floating *ngIf="rawRole === 'administrator' || rawRole === 'super_admin'"></app-assistant-floating>

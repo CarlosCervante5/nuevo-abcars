@@ -127,7 +127,7 @@
             <div class="seller-modules-grid">
                 <div 
                     class="seller-module-card"
-                    *ngFor="let page of overview?.pages; let i = index"
+                    *ngFor="let page of modulePages; let i = index"
                     [routerLink]="(page.permalink && !page.externalUrl) ? [page.permalink] : null"
                     (click)="page.externalUrl ? openExternal(page.externalUrl) : (page.action ? page.action() : null)"
                     [class.cursor-pointer]="!!(page.action || page.permalink || page.externalUrl)"
@@ -211,7 +211,7 @@
                           (click)="page.action ? page.action() : null"
                           [class.cursor-pointer]="page.action"
                           [class.disabled]="!page.permalink && !page.action"
-                          *ngFor="let page of overview?.pages">
+                          *ngFor="let page of modulePages">
                             <div class="card-module-body">
                                 <div class="card-module-icon" *ngIf="page.icon" [attr.data-color]="page.iconColor || 'blue'">
                                     <i [class]="page.icon"></i>

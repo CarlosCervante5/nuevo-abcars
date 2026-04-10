@@ -53,7 +53,7 @@
                   class="form-input"
                 >
                   <option value="">Selecciona marca</option>
-                  <option *ngFor="let brand of brands" [value]="brand.name">{{ brand.name }}</option>
+                  <option *ngFor="let brand of brands" [value]="brand.name">{{ brand.name | uppercase }}</option>
                 </select>
               </div>
               
@@ -381,7 +381,7 @@
                   [ngClass]="(insuranceForm.get('city')?.invalid && insuranceForm.get('city')?.touched) ? 'form-request-input-error' : 'form-request-input'"
                 >
                   <option value="">Selecciona sucursal</option>
-                  <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name }}</option>
+                  <option *ngFor="let dealership of dealerships" [value]="dealership.name">{{ dealership.name | titlecase }}<ng-container *ngIf="dealership.location"> — {{ dealership.location | titlecase }}</ng-container></option>
                 </select>
                 <p *ngIf="insuranceForm.get('city')?.invalid && insuranceForm.get('city')?.touched" class="form-error-message">
                   La sucursal es requerida

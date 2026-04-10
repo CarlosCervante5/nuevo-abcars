@@ -27,6 +27,7 @@ import { ValuationStatisticsOverviewComponent } from './components/valuation-sta
   ],
   exports: [
     OverviewComponent,
+    AssistantFloatingComponent,
     ReactiveFormsModule
   ]
 })

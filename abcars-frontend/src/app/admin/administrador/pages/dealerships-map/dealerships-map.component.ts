@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AdminService } from '@services/admin.service';
-import { Dealership, DealerShipResponse, Overview } from '@interfaces/admin.interfaces';
+import { Dealership, DealerShipResponse } from '@interfaces/admin.interfaces';
 
 @Component({
   selector: 'app-dealerships-map',
@@ -10,18 +10,6 @@ import { Dealership, DealerShipResponse, Overview } from '@interfaces/admin.inte
   standalone: false
 })
 export class DealershipsMapComponent implements OnInit {
-  private user = JSON.parse(localStorage.getItem('user')!);
-  public itemOverview: Overview = {
-    user: {
-      name: this.user.name,
-      surname: this.user.surname,
-      role: localStorage.getItem('role') === 'super_admin' ? 'Super Admin' : 'Admin',
-      email: this.user.email,
-      picturepath: ''
-    },
-    pages: []
-  };
-
   dealerships: Dealership[] = [];
   loading = true;
 

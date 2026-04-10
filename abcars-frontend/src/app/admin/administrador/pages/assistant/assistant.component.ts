@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
 import { AssistantService, AssistantResponse } from '@services/assistant.service';
-import { Overview } from '@interfaces/admin.interfaces';
-
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -18,17 +16,6 @@ export class AssistantComponent {
   messages: ChatMessage[] = [];
   inputText = '';
   loading = false;
-  private user = JSON.parse(localStorage.getItem('user')!);
-  itemOverview: Overview = {
-    user: {
-      name: this.user.name,
-      surname: this.user.surname,
-      role: localStorage.getItem('role') === 'super_admin' ? 'Super Admin' : 'Admin',
-      email: this.user.email,
-      picturepath: ''
-    },
-    pages: []
-  };
 
   constructor(private assistantService: AssistantService) {
     this.messages.push({

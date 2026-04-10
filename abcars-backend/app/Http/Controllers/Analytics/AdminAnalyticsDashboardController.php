@@ -13,6 +13,7 @@ use App\Models\Valuations\VehicleValuation;
 use App\Models\VehicleUpdate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
 class AdminAnalyticsDashboardController extends Controller
@@ -214,34 +215,40 @@ class AdminAnalyticsDashboardController extends Controller
                 ->get()
                 ->keyBy('dealership_name');
 
-            // Count ask_information grouped by dealership_name
+            // Tabla ask_information: migración inicial sin columnas de lead; evitar 500 si aún no se migró
             $askInfoTable = (new AskInformation)->getTable();
-            $askQuery = AskInformation::query()
-                ->whereNotNull('dealership_name')
-                ->whereBetween($askInfoTable . '.created_at', [
-                    $filters['start_date'],
-                    $filters['end_date'],
-                ]);
+            if (! Schema::hasColumn($askInfoTable, 'dealership_name')) {
+                $askInfoCounts = collect();
+            } else {
+                $askQuery = AskInformation::query()
+                    ->whereNotNull('dealership_name')
+                    ->whereBetween($askInfoTable . '.created_at', [
+                        $filters['start_date'],
+                        $filters['end_date'],
+                    ]);
 
-            if ($filters['dealership_id']) {
-                $dealership = $dealership ?? Dealership::find($filters['dealership_id']);
-                if ($dealership) {
-                    $askQuery->where($askInfoTable . '.dealership_name', $dealership->name);
+                if ($filters['dealership_id']) {
+                    $dealership = $dealership ?? Dealership::find($filters['dealership_id']);
+                    if ($dealership) {
+                        $askQuery->where($askInfoTable . '.dealership_name', $dealership->name);
+                    }
                 }
-            }
 
-            $askInfoCounts = $askQuery
-                ->selectRaw('dealership_name, COUNT(*) as ask_info_count')
-                ->groupBy('dealership_name')
-                ->get()
-                ->keyBy('dealership_name');
+                $askInfoCounts = $askQuery
+                    ->selectRaw('dealership_name, COUNT(*) as ask_info_count')
+                    ->groupBy('dealership_name')
+                    ->get()
+                    ->keyBy('dealership_name');
+            }
 
             // Merge both counts
             $allDealerships = $appointmentCounts->keys()->merge($askInfoCounts->keys())->unique();
 
             $results = $allDealerships->map(function ($dealershipName) use ($appointmentCounts, $askInfoCounts) {
-                $apptCount = $appointmentCounts->get($dealershipName)->appointment_count ?? 0;
-                $askCount = $askInfoCounts->get($dealershipName)->ask_info_count ?? 0;
+                $apptRow = $appointmentCounts->get($dealershipName);
+                $askRow = $askInfoCounts->get($dealershipName);
+                $apptCount = (int) ($apptRow?->appointment_count ?? 0);
+                $askCount = (int) ($askRow?->ask_info_count ?? 0);
 
                 return [
                     'dealership_name' => $dealershipName,

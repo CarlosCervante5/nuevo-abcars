@@ -6,6 +6,7 @@ import { FormGroup } from '@angular/forms';
 
 //prueba
 import { GralResponse, BodiesResponse, BrandsResponse, FullDetailResponse, LinesResponse, ModelsResponse, SearchResponse, VersionsResponse, VehicleUpdateResponse, VehicleStoreResponse, MinMaxResponse } from '@interfaces/vehicle_data.interface';
+import { DealerShipResponse } from '@interfaces/admin.interfaces';
 
 
 @Injectable({
@@ -84,7 +85,13 @@ constructor(
     }
     
 
-    public getVehicles( page:number, word:string, paginate: number, relationshipNames: string[]):Observable<SearchResponse>{
+    public getVehicles(
+        page: number,
+        word: string,
+        paginate: number,
+        relationshipNames: string[],
+        statusFilter: 'all' | 'active' | 'inactive' = 'all'
+    ): Observable<SearchResponse> {
         
         let params = new HttpParams(); 
 
@@ -104,7 +111,13 @@ constructor(
           params = params.set('relationship_names', relationshipNames.toString());
         }
 
-        params = params.set('status', 'active,inactive');
+        const statusParam =
+            statusFilter === 'active'
+                ? 'active'
+                : statusFilter === 'inactive'
+                  ? 'inactive'
+                  : 'active,inactive';
+        params = params.set('status', statusParam);
 
         params = params.set('has_images', false);
 
@@ -123,33 +136,43 @@ constructor(
             params = params.set('paginate', paginate.toString());
         }
 
-        // Filtros
+        // Filtros (nombres alineados con SearchVehiclesRequest / VehicleService PHP)
         if (filters.keyword) {
             params = params.set('keyword', filters.keyword);
         }
 
         if (filters.brand) {
-            params = params.set('brand', filters.brand);
+            params = params.set('brand_names', String(filters.brand));
         }
 
         if (filters.model) {
-            params = params.set('model', filters.model);
+            params = params.set('model_names', String(filters.model));
         }
 
-        if (filters.yearFrom) {
-            params = params.set('year_from', filters.yearFrom.toString());
+        if (filters.yearFrom != null && filters.yearTo != null) {
+            const ys: number[] = [];
+            const from = Number(filters.yearFrom);
+            const to = Number(filters.yearTo);
+            for (let y = Math.min(from, to); y <= Math.max(from, to); y++) {
+                ys.push(y);
+            }
+            if (ys.length > 0) {
+                params = params.set('years', ys.join(','));
+            }
+        } else if (filters.yearFrom != null) {
+            params = params.set('years', String(filters.yearFrom));
+        } else if (filters.yearTo != null) {
+            params = params.set('years', String(filters.yearTo));
         }
 
-        if (filters.yearTo) {
-            params = params.set('year_to', filters.yearTo.toString());
-        }
-
-        if (filters.priceFrom) {
-            params = params.set('price_from', filters.priceFrom.toString());
-        }
-
-        if (filters.priceTo) {
-            params = params.set('price_to', filters.priceTo.toString());
+        const priceLo = filters.priceFrom != null ? Number(filters.priceFrom) : null;
+        const priceHi = filters.priceTo != null ? Number(filters.priceTo) : null;
+        if (priceLo != null && !Number.isNaN(priceLo) && priceHi != null && !Number.isNaN(priceHi)) {
+            params = params.set('prices', `${priceLo},${priceHi}`);
+        } else if (priceHi != null && !Number.isNaN(priceHi) && priceHi > 0) {
+            params = params.set('prices', `0,${priceHi}`);
+        } else if (priceLo != null && !Number.isNaN(priceLo) && priceLo >= 0) {
+            params = params.set('prices', String(priceLo));
         }
 
         if (filters.transmission) {
@@ -162,6 +185,12 @@ constructor(
 
         if (filters.type) {
             params = params.set('type', filters.type);
+        }
+
+        // Por defecto el backend (SearchVehiclesRequest) usa has_images=true si no se envía.
+        // Pasar false explícitamente cuando se necesiten todos los activos (p. ej. listar ubicaciones).
+        if (filters.has_images === false) {
+            params = params.set('has_images', '0');
         }
 
         // Relaciones
@@ -185,5 +214,16 @@ constructor(
         };
 
         return this._http.post<SearchResponse>(`${ this.baseUrl }/api/vehicles/random`, data);
+    }
+
+    /**
+     * Catálogo de sucursales para formularios públicos (sin token).
+     * El alta/edición/baja se hace en admin: /admin/administrator/dealerships
+     */
+    public searchDealerships(): Observable<DealerShipResponse> {
+        const headers = new HttpHeaders()
+            .set('content-type', 'application/json')
+            .set('X-Requested-With', 'XMLHttpRequest');
+        return this._http.post<DealerShipResponse>(`${this.baseUrl}/api/dealerships/search`, {}, { headers });
     }
 }

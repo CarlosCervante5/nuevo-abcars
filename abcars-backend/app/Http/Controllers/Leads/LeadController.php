@@ -342,6 +342,9 @@ class LeadController extends Controller
             if (!empty($data['job_tenure'])) {
                 $comments[] = "Antigüedad en el trabajo: " . $data['job_tenure'];
             }
+            if (!empty($data['vehicle_of_interest'])) {
+                $comments[] = 'Vehículo de interés: ' . $data['vehicle_of_interest'];
+            }
             if (!empty($data['down_payment_percentage'])) {
                 $comments[] = "Porcentaje de enganche: " . $data['down_payment_percentage'] . "%";
             }

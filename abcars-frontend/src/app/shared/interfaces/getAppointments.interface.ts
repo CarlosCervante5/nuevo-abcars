@@ -207,7 +207,8 @@ export interface User {
     nickname:   string;
     email:      string;
     created_at: Date;
-    user_profile: UserProfile
+    /** Puede ser null si el usuario aún no completó perfil. */
+    user_profile: UserProfile | null;
 }
 
 export interface UserProfile {

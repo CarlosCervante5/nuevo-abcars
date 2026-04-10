@@ -1,75 +1,67 @@
-.container {
-    margin-top: 80px;
+.inv-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
 }
 
-.card-image {
-    object-fit: scale-down;
-    height: 23rem;        
-    width:auto;
+.inv-act {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.45rem;
+  background: #fff;
+  color: #475569;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
-@media screen and (max-width: 767px) and (min-width: 0px)  {
-    .card-image {
-        object-fit: scale-down;
-        height: 35rem;        
-        width:auto;
-    }
+.inv-act:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
 }
 
-input[type="file"] {
-    display: none;
+.inv-act .mat-icon {
+  font-size: 1.125rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  line-height: 1.125rem;
 }
 
-.custom-file-upload {
-    border: 1px solid #ccc;
-    display: inline-block;
-    padding: 7px 12px;
-    cursor: pointer;
+.inv-act--primary {
+  border-color: #fde68a;
+  background: #fffbeb;
+  color: #a16207;
 }
 
-::ng-deep .margintop {
-    margin-top: 20% !important;
+.inv-act--primary:hover {
+  background: #fef3c7;
+  border-color: #fbbf24;
+  color: #92400e;
+  box-shadow: 0 1px 3px rgba(202, 138, 4, 0.2);
 }
 
-mat-checkbox {
-    bottom: 10px;
+.inv-act--danger {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
 }
 
-mat-card-actions {
-    height: 6.5rem;
+.inv-act--danger:hover {
+  background: #fee2e2;
+  border-color: #f87171;
+  color: #991b1b;
 }
 
-.custom-button {
-    background-color: rgb(230 244 255);
-    color: black;
-    transition: background-color 0.3s ease;
-    font-size: clamp(1.3rem, 2.5vw, 1.25rem);
-    margin: 0.2rem;
-    padding: 2.0rem;
-    border-radius: 1.5rem;
+.inv-act-check {
+  margin-left: 0.25rem;
 }
 
-.title-row {
-    height: 5.5rem;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-    width: 100%;
-}
-
-.subtitle-row {
-    height: 3rem;
-    justify-content: space-between;
-    text-align: center;
-    width: -webkit-fill-available;
-}
-
-.green {
-    font-size: x-large;
-    color: green;
-}
-
-.red {
-    font-size: x-large;
-    color: red;
+::ng-deep .inv-act-check .mdc-checkbox {
+  padding: 0.25rem;
 }

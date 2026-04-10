@@ -43,7 +43,7 @@
                                     <mat-form-field appearance="outline">
                                         <mat-label>Marca del vehículo</mat-label>
                                         <mat-select placeholder="Seleccionar una Marca" formControlName="vehicle_brand" required>
-                                            <mat-option *ngFor="let brand of brands" (onSelected)="getModelsByBrand(brand.name)" value="{{ brand.name }}">{{ brand.name | titlecase }}</mat-option>
+                                            <mat-option *ngFor="let brand of brands" (onSelected)="getModelsByBrand(brand.name)" value="{{ brand.name }}">{{ brand.name | uppercase }}</mat-option>
                                         </mat-select>
                                         <mat-hint *ngIf="fieldInvalid('vehicle_brand')">Seleccione una marca.</mat-hint>
                                     </mat-form-field>

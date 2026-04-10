@@ -15,6 +15,8 @@ export interface FinancingFormData {
   company?: string;
   job_tenure?: string;
   comments?: string;
+  /** Texto libre del simulador (marca, modelo, año, etc.) */
+  vehicle_of_interest?: string;
   vehicle_brand?: string;
   vehicle_model?: string;
   vehicle_year?: number;

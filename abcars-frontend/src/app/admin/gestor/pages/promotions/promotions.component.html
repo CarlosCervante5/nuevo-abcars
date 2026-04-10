@@ -1,13 +1,23 @@
 <!-- <app-new-nav></app-new-nav> -->
-<app-overview [overview]="itemOverview" [url_index]="'/admin/gestor'" [hideModules]="true"></app-overview>
-<div class="container mx-auto px-4 pt-24">
+<app-overview
+  *ngIf="!embedInShell"
+  [overview]="itemOverview"
+  [url_index]="'/admin/gestor'"
+  [hideModules]="true"
+></app-overview>
+<div [ngClass]="embedInShell ? 'container mx-auto px-4 pt-2 pb-8' : 'container mx-auto px-4 pt-24'">
     <div class="w-full mt-5 mb-5">
         <!-- Breadcrumb -->
         <div class="w-full">
             <h4 class="promotions-page-title">Administrar Campañas</h4>
             <nav class="promotions-breadcrumb" aria-label="breadcrumb">
                 <ol class="promotions-breadcrumb-list">
-                    <li class="promotions-breadcrumb-item" [routerLink]="['/admin/gestor/']">Overview</li>
+                    <li
+                      class="promotions-breadcrumb-item"
+                      [routerLink]="embedInShell ? ['/admin/administrator'] : ['/admin/gestor/']"
+                    >
+                      {{ embedInShell ? 'Panel' : 'Overview' }}
+                    </li>
                     <li class="promotions-breadcrumb-item promotions-breadcrumb-item-active" aria-current="page">Campañas</li>
                 </ol>
                 <div class="flex justify-end p-3">

@@ -1,13 +1,12 @@
-<app-overview [overview]="itemOverview" [url_index]="'/admin/administrator'" [hideModules]="true"></app-overview>
-<div class="min-h-screen bg-gray-50">
-  <div class="max-w-7xl mx-auto px-6 lg:px-8 pt-24 pb-12">
+<div class="min-h-0 rounded-xl adm-shell-page">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 py-4 pb-12">
     <div class="bg-white shadow-sm rounded-xl p-6">
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <h1 class="text-2xl font-bold text-gray-900">Roles y permisos</h1>
           <nav class="mt-2 text-sm text-gray-500" aria-label="breadcrumb">
             <ol class="flex flex-wrap items-center gap-2">
-              <li><a class="text-gray-500 hover:text-gray-700" [routerLink]="['/admin/administrator']">Overview</a></li>
+              <li><a class="text-gray-500 hover:text-gray-700" [routerLink]="['/admin/administrator']">Inicio</a></li>
               <li class="text-gray-400">/</li>
               <li class="text-gray-700 font-medium" aria-current="page">Roles y permisos</li>
             </ol>
@@ -59,19 +58,27 @@
               </button>
             </div>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-96 overflow-y-auto">
-            <label
-              *ngFor="let perm of permissions"
-              class="flex items-center gap-2 p-3 rounded-lg border cursor-pointer hover:bg-gray-50"
-            >
-              <input
-                type="checkbox"
-                [checked]="hasPermission(perm.name)"
-                (change)="togglePermission(perm.name)"
-                class="rounded border-gray-300 text-amber-500 focus:ring-amber-500"
-              >
-              <span class="text-sm text-gray-700">{{ perm.name }}</span>
-            </label>
+          <div class="space-y-6 max-h-[28rem] overflow-y-auto pr-1">
+            <div *ngFor="let group of permissionGroupsForView">
+              <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">{{ group.label }}</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <label
+                  *ngFor="let perm of group.items"
+                  class="flex items-start gap-2 p-3 rounded-lg border cursor-pointer hover:bg-gray-50"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="hasPermission(perm.name)"
+                    (change)="togglePermission(perm.name)"
+                    class="rounded border-gray-300 text-amber-500 focus:ring-amber-500 mt-0.5 shrink-0"
+                  >
+                  <span class="text-sm text-gray-800 leading-snug">
+                    {{ permissionLabelEs(perm.name) }}
+                    <span class="block text-[11px] text-gray-400 font-mono mt-0.5">{{ perm.name }}</span>
+                  </span>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -102,7 +102,7 @@
                 >
                 <mat-autocomplete #autoBrand="matAutocomplete" (optionSelected)="onBrandSelected($event)">
                     <mat-option *ngFor="let brand of filteredBrands | async" [value]="brand.name">
-                        {{ brand.name }}
+                        {{ brand.name | uppercase }}
                     </mat-option>
                 </mat-autocomplete>
                 <p *ngIf="brandInvalid" class="mt-2 text-sm text-red-600">

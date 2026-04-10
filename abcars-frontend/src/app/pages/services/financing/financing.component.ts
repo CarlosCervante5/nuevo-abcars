@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -7,8 +7,16 @@ import { ModernFooterComponent } from '../../../shared/components/modern-footer/
 import { VehicleCardTailwindComponent, Vehicle } from '../../../shared/components/vehicle-card-tailwind/vehicle-card-tailwind.component';
 import { LeadService } from '../../../shared/services/lead.service';
 import { VehicleService } from '../../../shared/services/vehicle.service';
-import { Dealership } from '../../../shared/interfaces/admin.interfaces';
+import { Dealership, DealerShipResponse } from '../../../shared/interfaces/admin.interfaces';
+import { Vehicle as ApiVehicle } from '../../../shared/interfaces/vehicle_data.interface';
 import Swal from 'sweetalert2';
+
+/** Opción del select de inventario para el simulador */
+interface FinancingInventoryOption {
+  uuid: string;
+  label: string;
+  sale_price: number;
+}
 
 @Component({
   selector: 'app-financing',
@@ -17,8 +25,9 @@ import Swal from 'sweetalert2';
   templateUrl: './financing.component.html',
   styleUrls: ['./financing.component.css']
 })
-export class FinancingComponent {
+export class FinancingComponent implements OnInit {
   calculatorData = {
+    vehicleOfInterest: '',
     vehiclePrice: 500000,
     downPaymentPercentage: 10,
     termMonths: 60,
@@ -27,16 +36,18 @@ export class FinancingComponent {
 
   financingForm: FormGroup;
   isSubmitting: boolean = false;
-  dealerships: Dealership[] = [
-    { name: 'Chevrolet Balderrama Serdán (puebla)', location: '', description: null, created_at: new Date() },
-    { name: 'VECSA pachuca', location: '', description: null, created_at: new Date() }
-  ];
+  dealerships: Dealership[] = [];
 
   // Propiedades para el carrusel de vehículos
   filteredVehicles: Vehicle[] = [];
   isLoadingVehicles: boolean = false;
   showVehicleCarousel: boolean = false;
   private debounceTimer: any = null;
+
+  /** Vehículos activos para el select "Vehículo de interés" */
+  inventorySelectOptions: FinancingInventoryOption[] = [];
+  loadingInventorySelect = false;
+  selectedInventoryUuid = '';
 
   constructor(
     private fb: FormBuilder,
@@ -50,6 +61,96 @@ export class FinancingComponent {
       email: ['', [Validators.required, Validators.email]],
       city: ['', Validators.required],
       offer_price: ['']
+    });
+  }
+
+  ngOnInit(): void {
+    this.loadDealerships();
+    this.loadInventoryForInterestSelect();
+  }
+
+  private loadInventoryForInterestSelect(): void {
+    this.loadingInventorySelect = true;
+    this.vehicleService.searchVehicles({ has_images: false }, 1, 200).subscribe({
+      next: (response) => {
+        this.loadingInventorySelect = false;
+        if (response.status !== 200 || !response.data?.data) {
+          this.inventorySelectOptions = [];
+          return;
+        }
+        const rows = response.data.data as ApiVehicle[];
+        const opts = rows.map((v) => {
+          const brand = (v.brand?.name || '').trim();
+          const model = (v.model?.name || '').trim();
+          const year = v.model?.year;
+          const price = v.sale_price || 0;
+          const parts = [brand, model, year].filter((p) => p !== '' && p != null);
+          const base = parts.join(' ');
+          const label = `${base} · $${price.toLocaleString('es-MX')}`;
+          return { uuid: v.uuid || '', label, sale_price: price };
+        }).filter((o) => o.uuid);
+        opts.sort((a, b) =>
+          a.label.localeCompare(b.label, 'es', { sensitivity: 'base', numeric: true })
+        );
+        this.inventorySelectOptions = opts;
+      },
+      error: () => {
+        this.loadingInventorySelect = false;
+        this.inventorySelectOptions = [];
+      }
+    });
+  }
+
+  onInventoryVehicleSelect(uuid: string): void {
+    this.selectedInventoryUuid = uuid || '';
+    if (!uuid) {
+      return;
+    }
+    const opt = this.inventorySelectOptions.find((o) => o.uuid === uuid);
+    if (!opt) {
+      return;
+    }
+    this.calculatorData.vehicleOfInterest = opt.label;
+    if (opt.sale_price > 0) {
+      this.calculatorData.vehiclePrice = opt.sale_price;
+    }
+    this.updateCalculations();
+  }
+
+  /** Si el usuario edita el texto manualmente, se desvincula la opción del inventario */
+  onVehicleInterestTextInput(): void {
+    const opt = this.inventorySelectOptions.find((o) => o.uuid === this.selectedInventoryUuid);
+    const expected = (opt?.label || '').trim();
+    const current = (this.calculatorData.vehicleOfInterest || '').trim();
+    if (expected && current === expected) {
+      return;
+    }
+    if (this.selectedInventoryUuid) {
+      this.selectedInventoryUuid = '';
+    }
+  }
+
+  private vehicleOfInterestForSubmit(): string | undefined {
+    if (this.selectedInventoryUuid) {
+      const o = this.inventorySelectOptions.find((x) => x.uuid === this.selectedInventoryUuid);
+      if (o?.label) {
+        return o.label;
+      }
+    }
+    const t = this.calculatorData.vehicleOfInterest?.trim();
+    return t || undefined;
+  }
+
+  private loadDealerships(): void {
+    this.vehicleService.searchDealerships().subscribe({
+      next: (res: DealerShipResponse) => {
+        if (res.status === 200 && Array.isArray(res.data)) {
+          this.dealerships = res.data;
+        }
+      },
+      error: () => {
+        this.dealerships = [];
+      }
     });
   }
 
@@ -188,13 +289,16 @@ export class FinancingComponent {
     const totalAmount = this.getTotalAmount();
 
     // Preparar datos para enviar
+    const comments = `El enganche: $${downPayment.toLocaleString()} MXN Mensualidad: $${monthlyPayment.toLocaleString()} MXN Total a pagar: $${totalAmount.toLocaleString()} MXN`;
+
     const formData = {
       name: this.financingForm.value.name,
       last_name: this.financingForm.value.last_name || '',
       phone: this.financingForm.value.phone,
       email: this.financingForm.value.email,
       city: this.financingForm.value.city || '',
-      comments: `El enganche: $${downPayment.toLocaleString()} MXN Mensualidad: $${monthlyPayment.toLocaleString()} MXN Total a pagar: $${totalAmount.toLocaleString()} MXN`,
+      comments,
+      vehicle_of_interest: this.vehicleOfInterestForSubmit(),
       vehicle_price: this.calculatorData.vehiclePrice,
       down_payment: downPayment,
       down_payment_percentage: this.calculatorData.downPaymentPercentage,
@@ -217,6 +321,8 @@ export class FinancingComponent {
         }).then(() => {
           // Limpiar formulario después del éxito
           this.financingForm.reset();
+          this.selectedInventoryUuid = '';
+          this.calculatorData.vehicleOfInterest = '';
         });
       },
       error: (error) => {

@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { FALLBACK_HERO_IMAGE } from '../../constants/fallback-media';
 
 @Component({
   selector: 'app-banner-generic',
@@ -22,5 +23,5 @@ export class BannerGenericComponent {
   @Input() title: string = '¡Promoción Especial!';
   @Input() description: string = 'Solicita tu crédito automotriz con tasa preferencial y estrena auto este mes.';
   @Input() buttonText: string = 'Ver promoción';
-  @Input() imageUrl: string = 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=600&q=80';
+  @Input() imageUrl: string = FALLBACK_HERO_IMAGE;
 } 

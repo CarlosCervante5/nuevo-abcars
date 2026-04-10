@@ -580,9 +580,14 @@ export class AdminService {
     }
 
     public getDealerships(){
-        let user_token = localStorage.getItem('user_token');
-        let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
-        return this._http.post<DealerShipResponse>(`${this.baseUrl}/api/dealerships/search` , {}, { headers });
+        let headers = new HttpHeaders()
+            .set('content-type', 'application/json')
+            .set('X-Requested-With', 'XMLHttpRequest');
+        const user_token = localStorage.getItem('user_token');
+        if (user_token) {
+            headers = headers.set('Authorization', `Bearer ${user_token}`);
+        }
+        return this._http.post<DealerShipResponse>(`${this.baseUrl}/api/dealerships/search`, {}, { headers });
     }
 
     public getDealershipsList(){

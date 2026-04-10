@@ -8,7 +8,7 @@
                     <div class="col-lg-12 p-3 d-flex" style="justify-content: space-between; display: flex;">
                         <!-- Esto es para ambas pantallas-->
                         <div style="display: block; flex-basis: min-content;">
-                            <span style="font-size:medium;" class="ellipsis">{{vehicle.brand.name}}: </span>
+                            <span style="font-size:medium;" class="ellipsis text-uppercase">{{vehicle.brand.name}}: </span>
                             <span><b style="font-size:medium;" class="ellipsis">{{vehicle.model.name}}</b></span>
                         </div>
 
@@ -38,7 +38,7 @@
                                 <li class="breadcrumb-item" aria-current="page">
                                     <p class="text-truncate"
                                         [routerLink]="[pathStockBrand]">
-                                        {{ vehicle != undefined ? (vehicle.brand.name | titlecase) : ''}}
+                                        {{ vehicle != undefined ? (vehicle.brand.name | uppercase) : ''}}
                                     </p>
                                 </li>
 
@@ -251,7 +251,7 @@
                                                                         width="32" height="32" alt="Icon Brand Vehicle" />
                                                                     <span class="detail-text">Marca</span>
                                                                     <span
-                                                                        class="detail-content fw-bold">{{ vehicle != undefined ? (vehicle.brand.name | titlecase) : '' }}</span>
+                                                                        class="detail-content fw-bold">{{ vehicle != undefined ? (vehicle.brand.name | uppercase) : '' }}</span>
                                                                 </div>
                                                             </div>
                 

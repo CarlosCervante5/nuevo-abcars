@@ -1,29 +1,25 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { AnalyticsService, AnalyticsStats } from '@services/analytics.service';
-import { Overview } from '@interfaces/admin.interfaces';
+import { AnalyticsDashboardComponent } from '../analytics-dashboard/analytics-dashboard.component';
 
 @Component({
   selector: 'app-analytics',
   templateUrl: './analytics.component.html',
   styleUrls: ['./analytics.component.css'],
-  standalone: false
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule, AnalyticsDashboardComponent]
 })
 export class AnalyticsComponent implements OnInit {
+  /** Si true: sin breadcrumb; pensado para incrustar en el resumen del panel. */
+  @Input() embedded = false;
+
   stats: AnalyticsStats | null = null;
   loading = true;
   error: string | null = null;
   selectedDays = 30;
-  private user = JSON.parse(localStorage.getItem('user')!);
-  public itemOverview: Overview = {
-    user: {
-      name: this.user.name,
-      surname: this.user.surname,
-      role: localStorage.getItem('role') === 'super_admin' ? 'Super Admin' : 'Admin',
-      email: this.user.email,
-      picturepath: ''
-    },
-    pages: []
-  };
 
   constructor(private analyticsService: AnalyticsService) {}
 

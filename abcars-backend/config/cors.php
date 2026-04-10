@@ -45,7 +45,9 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    // «api-docs» es ruta web (web.php), no bajo /api — sin esto el admin Angular no puede leerla por CORS
+    // «api» sin subruta: GET /api (info raíz) no coincide con «api/*»
+    'paths' => ['api', 'api/*', 'api-docs', 'sanctum/csrf-cookie'],
 
     'allowed_methods' => ['*'],
 

@@ -75,7 +75,7 @@ import { Brand, BrandsResponse } from '@interfaces/vehicle_data.interface';
             <ng-container *ngIf="availableBrands.length; else noBrands">
             <ul class="space-y-2">
                 <li *ngFor="let brand of availableBrands | slice:0:maxBrandsToShow; trackBy: trackByBrand">
-                  <a [routerLink]="['/inventario']" [queryParams]="{ brand: brand.name }" class="text-gray-300 hover:text-white transition-colors text-sm">
+                  <a [routerLink]="['/inventario']" [queryParams]="{ brand: brand.name }" class="text-gray-300 hover:text-white transition-colors text-sm uppercase">
                     {{ brand.name }}
                   </a>
                 </li>

@@ -1,7 +1,7 @@
-import { Component, type OnInit } from '@angular/core';
+import { Component, Optional, type OnInit } from '@angular/core';
 import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
+import { Router } from '@angular/router';
 import { LoadBannerImageService } from '@services/load-banner-image.service';
-import { OverviewComponent } from 'src/app/admin/components/overview/overview.component';
 import Swal from 'sweetalert2';
 
 interface Result {
@@ -9,22 +9,27 @@ interface Result {
 }
 @Component({
   selector: 'app-main-banner',
-  // imports: [],
   templateUrl: './main-banner.component.html',
   styleUrl: './main-banner.component.css',
   standalone: false
 })
 export class MainBannerComponent implements OnInit {
-  files:File[] = [];
+  files: File[] = [];
   disabled: Boolean = true;
   loading: Boolean = false;
   result: Result = {
     reload: false
+  };
+
+  /** true cuando se abrió desde MatBottomSheet (marketing). */
+  get isInBottomSheet(): boolean {
+    return this._bottomSheetRef != null;
   }
 
   constructor(
-    private _bottomSheetRef: MatBottomSheetRef<OverviewComponent>,
-    private _loadBannerService:LoadBannerImageService
+    @Optional() private _bottomSheetRef: MatBottomSheetRef<MainBannerComponent> | null,
+    private _loadBannerService: LoadBannerImageService,
+    private _router: Router
   ) {}
 
   ngOnInit(): void { }
@@ -52,31 +57,41 @@ export class MainBannerComponent implements OnInit {
     // const formData = new FormData();
     // formData.append('image', this.files[0]);
     
-    this._loadBannerService.setBannerImage(this.files)
-    .subscribe({
+    this._loadBannerService.setBannerImage(this.files).subscribe({
       next: () => {
         Swal.fire({
           icon: 'success',
-          title: 'Success',
-          text: 'Carga de imagenes de manera correcta',
+          title: 'Listo',
+          text: 'El banner del inicio se actualizó correctamente.',
           showConfirmButton: true,
           confirmButtonColor: '#008bcc',
           timer: 3500
         });
         this.loading = false;
-        this._bottomSheetRef.dismiss(this.result);
+        this.files = [];
+        this.disabled = true;
+        this._bottomSheetRef?.dismiss(this.result);
       },
       error: (err) => {
         console.log('Hubo un error', err);
         this.loading = false;
-        this._bottomSheetRef.dismiss(this.result);
+        this.disabled = this.files.length === 0;
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err?.error?.message || 'No se pudo subir la imagen.'
+        });
+        this._bottomSheetRef?.dismiss(this.result);
       }
     });
     
   }
 
   close() {
-    this._bottomSheetRef.dismiss(this.result);
+    this._bottomSheetRef?.dismiss(this.result);
   }
 
+  goToPanel() {
+    void this._router.navigate(['/admin/administrator']);
+  }
 }

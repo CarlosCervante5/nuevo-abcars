@@ -1,115 +1,157 @@
-<app-overview [overview]="itemOverview" [url_index]="isSeller ? '/admin/seller' : '/admin/appointment_manager'" [hideModules]="true"></app-overview>
-<div class="container mx-auto px-6 lg:px-8 pt-24">
-    <div class="w-full mb-6">
-        <h4 class="appointment-manager-title">{{ isSeller ? 'Solicitudes de mis referidos' : 'Citas externas de valuación' }}</h4>
-        <nav class="appointment-manager-breadcrumb" aria-label="breadcrumb">
-            <ol class="appointment-manager-breadcrumb-list">
-                <li class="appointment-manager-breadcrumb-item" [routerLink]="[isSeller ? '/admin/seller' : '/admin/appointment_manager']">Overview</li>
-                <li class="appointment-manager-breadcrumb-item appointment-manager-breadcrumb-item-active" aria-current="page">{{ isSeller ? 'Solicitudes de mis referidos' : 'Citas externas de valuación' }}</li>
-            </ol>
-        </nav>
-    </div>
+<app-overview
+  *ngIf="!embedInShell"
+  [overview]="itemOverview"
+  [url_index]="isSeller ? '/admin/seller' : '/admin/appointment_manager'"
+  [hideModules]="true"
+></app-overview>
 
-    <!-- Search Input -->
-    <div class="appointment-manager-search-wrap">
-        <i class="fi fi-rr-search appointment-manager-search-icon"></i>
-        <input 
-            type="text" 
-            placeholder="Buscar por nombre, teléfono, marca, modelo..."
-            class="appointment-manager-input"
-            [(ngModel)]="searchKeyword"
-            (ngModelChange)="onSearchInput()"
-            (keydown.enter)="onSearch()"
+<div
+  class="apm-page"
+  [class.apm-page--shell]="embedInShell"
+  [ngClass]="embedInShell ? 'pt-4 pb-8 px-4' : 'container mx-auto px-4 lg:px-8 pt-24 pb-8'"
+>
+  <header class="apm-hero">
+    <h1 class="apm-hero-title">
+      {{ isSeller ? 'Solicitudes de mis referidos' : 'Citas externas de valuación' }}
+    </h1>
+    <p class="apm-hero-sub">
+      Busca por nombre, teléfono o vehículo y asigna valuador a cada cita.
+    </p>
+    <nav class="apm-breadcrumb" aria-label="breadcrumb">
+      <ol class="apm-breadcrumb-list">
+        <li
+          class="apm-breadcrumb-item"
+          [routerLink]="embedInShell ? ['/admin/administrator'] : [isSeller ? '/admin/seller' : '/admin/appointment_manager']"
         >
-    </div>
-    
-    <!-- Update Button -->
-    <div class="w-full mb-4">
-        <button 
-            type="button" 
-            class="appointment-manager-btn appointment-manager-btn-secondary"
-        >
-            Actualizar cambios en la vista
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block ml-2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
+          {{ embedInShell ? 'Panel' : 'Overview' }}
+        </li>
+        <li class="apm-breadcrumb-item apm-breadcrumb-item--current" aria-current="page">
+          {{ isSeller ? 'Solicitudes de mis referidos' : 'Citas externas de valuación' }}
+        </li>
+      </ol>
+    </nav>
+  </header>
+
+  <section class="apm-card apm-card--filters" aria-label="Filtros">
+    <div class="apm-filters-grid">
+      <div class="apm-search-field">
+        <mat-icon class="apm-search-mat-icon" aria-hidden="true">search</mat-icon>
+        <input
+          type="search"
+          [(ngModel)]="searchKeyword"
+          (ngModelChange)="onSearchInput()"
+          (keydown.enter)="onSearch()"
+          placeholder="Nombre, teléfono, marca, modelo…"
+          class="apm-search-input"
+          autocomplete="off"
+        />
+      </div>
+      <div class="apm-filter-actions">
+        <button type="button" class="apm-btn apm-btn--amber" (click)="onSearch()">Buscar</button>
+        <button type="button" class="apm-btn apm-btn--ghost" (click)="clearSearch()">Limpiar</button>
+        <button type="button" class="apm-btn apm-btn--secondary" (click)="refreshList()">
+          <mat-icon class="apm-btn-mat-icon" aria-hidden="true">refresh</mat-icon>
+          Actualizar lista
         </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="apm-card apm-card--table" aria-label="Listado de citas">
+    <div class="apm-loading" *ngIf="loading">
+      <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+      <span>Cargando citas…</span>
     </div>
 
-    <!-- Table -->
-    <div class="w-full">
-        <div class="appointment-manager-table-container">
-            <table mat-table [dataSource]="dataSource" matSort class="appointment-manager-table">
-                <ng-container matColumnDef="id">
-                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
-                    <td class="appointment-manager-td appointment-manager-td-bold" mat-cell *matCellDef="let row">{{row.index}}</td>
-                </ng-container>
-                
-                <ng-container matColumnDef="brand">
-                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Marca</th>
-                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">{{row.brand}}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="model">
-                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Modelo</th>
-                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">{{row.model}}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="name">
-                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Nombre Cliente</th>
-                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">{{row.name}}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="last_name">
-                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Apellidos</th>
-                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">{{row.last_name}}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="phone1">
-                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Teléfono</th>
-                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">{{row.phone1}}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="date">
-                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Cita</th>
-                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">{{ row.appointment_type}}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="subsidiary">
-                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Sucursal</th>
-                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">{{row.dealership_name}}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="valuator">
-                    <th class="appointment-manager-th" mat-header-cell *matHeaderCellDef mat-sort-header>Valuador</th>
-                    <td class="appointment-manager-td" mat-cell *matCellDef="let row">
-                        <select 
-                            class="appointment-manager-select"
-                            (change)="onValuatorChange($event, row.appointment_uuid)"
-                        >
-                            <option value="" [selected]="!row.id">Seleccione al valuador</option>
-                            <option *ngFor="let valuator of valuators" [value]="valuator.uuid" [selected]="row.id === valuator.uuid">
-                                {{valuator.user_profile.name}} {{valuator.user_profile.last_name}}
-                            </option>
-                        </select>
-                    </td>
-                </ng-container>
-                
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-                <tr class="mat-row" *matNoDataRow>
-                    <td class="mat-cell" colspan="9">No hay datos que coincidan con el filtro</td>
-                </tr>
-            </table>
-            <mat-paginator 
-                [pageSize]="paginate" 
-                [length]="length" 
-                [pageIndex]="pageIndex - 1" 
-                (page)="paginationChange($event)"
-                aria-label="Select page of riders"
-            ></mat-paginator>
-        </div>
+    <div class="apm-empty" *ngIf="!loading && length === 0">
+      <mat-icon class="apm-empty-icon" aria-hidden="true">event_busy</mat-icon>
+      <p class="apm-empty-title">Sin resultados</p>
+      <p class="apm-empty-text">No hay citas que coincidan. Prueba otros términos o limpia la búsqueda.</p>
+      <button type="button" class="apm-btn apm-btn--ghost" (click)="clearSearch()">Limpiar búsqueda</button>
     </div>
 
-    <footer class="admin-view-footer">© {{ currentYear }} ABCars.mx - Todos los derechos reservados.</footer>
+    <div class="apm-table-wrap" *ngIf="!loading && length > 0">
+      <table mat-table [dataSource]="dataSource" matSort class="apm-mat-table">
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="apm-th">#</th>
+          <td mat-cell *matCellDef="let row" class="apm-td apm-td-strong">{{ row.index }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="brand">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="apm-th">Marca</th>
+          <td mat-cell *matCellDef="let row" class="apm-td">{{ row.brand }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="model">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="apm-th">Modelo</th>
+          <td mat-cell *matCellDef="let row" class="apm-td">{{ row.model }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="apm-th">Nombre</th>
+          <td mat-cell *matCellDef="let row" class="apm-td apm-td-strong">{{ row.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="last_name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="apm-th">Apellidos</th>
+          <td mat-cell *matCellDef="let row" class="apm-td">{{ row.last_name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="phone1">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="apm-th">Teléfono</th>
+          <td mat-cell *matCellDef="let row" class="apm-td"><code class="apm-phone">{{ row.phone1 }}</code></td>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="apm-th">Cita</th>
+          <td mat-cell *matCellDef="let row" class="apm-td">{{ row.appointment_type }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="subsidiary">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="apm-th">Sucursal</th>
+          <td mat-cell *matCellDef="let row" class="apm-td">{{ row.dealership_name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="valuator">
+          <th mat-header-cell *matHeaderCellDef class="apm-th">Valuador</th>
+          <td mat-cell *matCellDef="let row" class="apm-td">
+            <select
+              class="apm-select"
+              (change)="onValuatorChange($event, row.appointment_uuid)"
+              [attr.aria-label]="'Asignar valuador fila ' + row.index"
+            >
+              <option value="" [selected]="!row.id">Seleccionar…</option>
+              <option
+                *ngFor="let valuator of valuators"
+                [value]="valuator.uuid"
+                [selected]="row.id === valuator.uuid"
+              >
+                {{ valuatorLabel(valuator) }}
+              </option>
+            </select>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="apm-data-row"></tr>
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell apm-td" [attr.colspan]="displayedColumns.length">Sin filas en esta página</td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      *ngIf="!loading && length > 0"
+      class="apm-paginator"
+      [pageSize]="paginate"
+      [length]="length"
+      [pageIndex]="pageIndex - 1"
+      [hidePageSize]="true"
+      showFirstLastButtons
+      aria-label="Paginación de citas"
+      (page)="paginationChange($event)"
+    ></mat-paginator>
+  </section>
+
+  <footer class="apm-footer">© {{ currentYear }} ABCars.mx — Todos los derechos reservados.</footer>
 </div>

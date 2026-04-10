@@ -52,7 +52,7 @@
                         <!-- Brand Column -->
                         <ng-container matColumnDef="brand">
                             <th mat-header-cell *matHeaderCellDef>Marca</th>
-                            <td mat-cell *matCellDef="let row" class="text-truncate">{{ row.brand.name | titlecase }}</td>
+                            <td mat-cell *matCellDef="let row" class="text-truncate">{{ row.brand.name | uppercase }}</td>
                         </ng-container>
                     
                         <!-- Carmodel Column -->
