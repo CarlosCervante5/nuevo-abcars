@@ -32,8 +32,13 @@ class SearchRiderRequest extends FormRequest
     protected function prepareForValidation()
     {
 
+        $type = $this->input('type');
+        if ($type === null || $type === '') {
+            $type = 'valuation';
+        }
+
         $this->merge([
-            'type' => $this->input('type','valuation'),
+            'type' => $type,
             'keyword' => $this->input('keyword', ''),
             'paginate' => $this->input('paginate', 15),
         ]);

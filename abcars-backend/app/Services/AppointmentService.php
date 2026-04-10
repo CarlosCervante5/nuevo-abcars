@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\CustomerAppointment;
 use App\Models\CustomerVehicle;
 use App\Models\LineModel;
+use App\Models\User;
 use App\Models\VehicleBrand;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -41,10 +42,17 @@ class AppointmentService
             'customer_id' => $customer->id
         ];
 
-        if (!empty($data['referrer_uuid'])) {
-            $referrer = \App\Models\User::where('uuid', $data['referrer_uuid'])->first();
+        $referrerUuid = isset($data['referrer_uuid']) ? trim((string) $data['referrer_uuid']) : '';
+        if ($referrerUuid !== '') {
+            $referrer = User::query()
+                ->whereRaw('LOWER(uuid) = ?', [mb_strtolower($referrerUuid, 'UTF-8')])
+                ->first();
             if ($referrer) {
                 $appointmentData['referrer_user_id'] = $referrer->id;
+            } else {
+                Log::warning('Cita pública: referrer_uuid sin usuario en BD', [
+                    'referrer_uuid' => $referrerUuid,
+                ]);
             }
         }
 

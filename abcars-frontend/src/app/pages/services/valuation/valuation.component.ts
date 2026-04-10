@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { HomeNavComponent } from '../../../shared/components/home-nav/home-nav.component';
 import { ModernFooterComponent } from '../../../shared/components/modern-footer/modern-footer.component';
 import { VehicleService } from '../../../shared/services/vehicle.service';
@@ -33,6 +33,7 @@ export class ValuationComponent implements OnInit {
     private appointmentService: AppointmentService,
     private leadService: LeadService,
     private referralService: ReferralService,
+    private route: ActivatedRoute,
     private fb: FormBuilder
   ) {
     this.valuationForm = this.fb.group({
@@ -53,7 +54,7 @@ export class ValuationComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.referralService.captureFromUrl();
+    this.referralService.captureFromUrl(this.route);
     this.getBrands();
     this.getDealerships();
   }
@@ -221,6 +222,9 @@ export class ValuationComponent implements OnInit {
           // Paso 2: Crear la cita de valuación
           this.appointmentService.setExternalAppointmentValuation(appointmentForm).subscribe({
             next: (appointmentResponse) => {
+              if (referrerUuid) {
+                this.referralService.consumeReferrerUuid();
+              }
               // Paso 3: Enviar datos a Google Sheet mediante la API de leads
               const valuationLeadData = {
                 fullName: formValue.fullName || '',

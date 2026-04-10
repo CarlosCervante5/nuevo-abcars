@@ -30,7 +30,8 @@ class StoreAppointmentRequest extends FormRequest
             'mileage' => 'required|integer',
             'scheduled_date' => 'required|max:255|string',
             'dealership_name' => 'required|max:255|string',
-            'referrer_uuid' => 'nullable|string|exists:users,uuid'
+            // Sin exists: si el UUID no coincide (espacios/mayúsculas/typos), la cita igual se crea; el referido se resuelve en AppointmentService.
+            'referrer_uuid' => 'nullable|string|max:64',
         ];
     }
 }

@@ -2303,6 +2303,33 @@ export class VehicleDetailComponent implements OnInit {
       specs.push({ label: 'Tipo de tracción', value: this.formatColor(apiVehicle.drive_train) });
     }
 
+    if (apiVehicle?.type === 'moto') {
+      const dashYesNo = (v: string | null | undefined) =>
+        v === 'yes' ? 'Sí' : v === 'no' ? 'No' : '';
+      if (apiVehicle.motorcycle_brakes?.trim()) {
+        specs.push({ label: 'Frenos', value: apiVehicle.motorcycle_brakes.trim() });
+      }
+      if (apiVehicle.motorcycle_starting_system?.trim()) {
+        specs.push({ label: 'Sistema de arranque', value: apiVehicle.motorcycle_starting_system.trim() });
+      }
+      const dash = dashYesNo(apiVehicle.motorcycle_digital_dashboard ?? undefined);
+      if (dash) {
+        specs.push({ label: 'Tablero digital', value: dash });
+      }
+      if (apiVehicle.motorcycle_engine_cycle?.trim()) {
+        specs.push({ label: 'Motor', value: apiVehicle.motorcycle_engine_cycle.trim() });
+      }
+      if (apiVehicle.motorcycle_power_hp != null && Number(apiVehicle.motorcycle_power_hp) > 0) {
+        specs.push({ label: 'Potencia', value: `${apiVehicle.motorcycle_power_hp} hp` });
+      }
+      if (apiVehicle.motorcycle_max_speed_kmh != null && apiVehicle.motorcycle_max_speed_kmh > 0) {
+        specs.push({ label: 'Velocidad máxima', value: `${apiVehicle.motorcycle_max_speed_kmh} km/h` });
+      }
+      if (apiVehicle.motorcycle_suspension?.trim()) {
+        specs.push({ label: 'Suspensión', value: apiVehicle.motorcycle_suspension.trim() });
+      }
+    }
+
     // Campos existentes en vehicle_specifications
     // if (spec?.engine_type) {
     //   specs.push({ label: 'Tipo de motor', value: this.formatColor(spec.engine_type) });

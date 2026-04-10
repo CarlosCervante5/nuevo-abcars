@@ -37,6 +37,9 @@ class AppointmentController extends Controller
             $data = $request->validated();
             $perPage = (int) ($data['paginate'] ?? 15);
 
+            $authUser = auth()->user();
+            $isSeller = $authUser && $authUser->hasRole('seller');
+
             $query = CustomerAppointment::query()
                 ->with([
                     'customer',
@@ -44,14 +47,15 @@ class AppointmentController extends Controller
                     'valuation.valuator' => function ($q) {
                         $q->with('userProfile');
                     },
-                ])
-                ->when(! empty($data['type']), function ($q) use ($data) {
+                ]);
+
+            // Vendedor: todas las citas atribuidas por referido (cualquier tipo). El filtro type=valuation ocultaba filas si el tipo no coincidía exactamente.
+            if ($isSeller) {
+                $query->where('referrer_user_id', $authUser->id);
+            } else {
+                $query->when(! empty($data['type']), function ($q) use ($data) {
                     $q->where('type', $data['type']);
                 });
-
-            $authUser = auth()->user();
-            if ($authUser && $authUser->hasRole('seller')) {
-                $query->where('referrer_user_id', $authUser->id);
             }
 
             if (! empty($data['keyword'])) {

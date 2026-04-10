@@ -6,6 +6,7 @@ import { RandomVehiclesData, Vehicle } from 'src/app/dashboard/interfaces/random
 
 // Services
 import { HomeService } from 'src/app/dashboard/services/home.service';
+import { ReferralService } from 'src/app/shared/services/referral.service';
 
 @Component({
     selector: 'app-footer',
@@ -15,12 +16,20 @@ import { HomeService } from 'src/app/dashboard/services/home.service';
 })
 
 export class FooterComponent {
+
+  get referralLinkParams(): Record<string, string> {
+    return this._referralService.getReferralLinkQueryParams();
+  }
   
   // References
   public date: number = 0;  
   public vehicles: Vehicle[] = [];
 
-  constructor(private _homeService: HomeService, private _router: Router) { 
+  constructor(
+    private _homeService: HomeService,
+    private _router: Router,
+    private _referralService: ReferralService
+  ) { 
     const d = new Date();
     this.date = d.getFullYear();
 

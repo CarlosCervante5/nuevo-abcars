@@ -20,6 +20,8 @@ class VehicleService
         'name', 'description', 'vin', 'page_status', 'purchase_date', 'sale_price', 
         'list_price', 'offer_price', 'mileage', 'type', 'category', 'cylinders',
         'engine_displacement_cc', 'wet_weight_kg',
+        'motorcycle_brakes', 'motorcycle_starting_system', 'motorcycle_digital_dashboard',
+        'motorcycle_engine_cycle', 'motorcycle_power_hp', 'motorcycle_max_speed_kmh', 'motorcycle_suspension',
         'interior_color', 'exterior_color', 'transmission', 'drive_train', 'fuel_type', 'spec_sheet'
     ];
 

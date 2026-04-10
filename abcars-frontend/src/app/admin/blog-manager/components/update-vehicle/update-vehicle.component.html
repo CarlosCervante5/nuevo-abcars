@@ -148,19 +148,67 @@
                                             </mat-form-field>
                                         </div>
 
-                                        <div class="col-12 col-md-3 paddingInputs">
-                                            <mat-form-field appearance="outline" class="example-full-width">
-                                                <mat-label>Cilindrada (cc)</mat-label>
-                                                <input matInput type="number" formControlName="engine_displacement_cc" min="0" max="9999" placeholder="Opcional">
-                                            </mat-form-field>
-                                        </div>
-
-                                        <div class="col-12 col-md-3 paddingInputs">
-                                            <mat-form-field appearance="outline" class="example-full-width">
-                                                <mat-label>Peso en orden de marcha (kg)</mat-label>
-                                                <input matInput type="number" formControlName="wet_weight_kg" min="0" placeholder="Opcional">
-                                            </mat-form-field>
-                                        </div>
+                                        <ng-container *ngIf="form.get('type')?.value === 'moto'">
+                                            <div class="col-12 paddingInputs"><p class="fw-semibold text-muted mb-0">Detalle de motocicleta</p></div>
+                                            <div class="col-12 col-md-3 paddingInputs">
+                                                <mat-form-field appearance="outline" class="example-full-width">
+                                                    <mat-label>Cilindrada (cc)</mat-label>
+                                                    <input matInput type="number" formControlName="engine_displacement_cc" min="0" max="9999" placeholder="Ej. 169">
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-12 col-md-3 paddingInputs">
+                                                <mat-form-field appearance="outline" class="example-full-width">
+                                                    <mat-label>Peso en orden de marcha (kg)</mat-label>
+                                                    <input matInput type="number" formControlName="wet_weight_kg" min="0" placeholder="Opcional">
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-12 col-md-3 paddingInputs">
+                                                <mat-form-field appearance="outline" class="example-full-width">
+                                                    <mat-label>Frenos (delantero y trasero)</mat-label>
+                                                    <input matInput formControlName="motorcycle_brakes" maxlength="255">
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-12 col-md-3 paddingInputs">
+                                                <mat-form-field appearance="outline" class="example-full-width">
+                                                    <mat-label>Sistema de arranque</mat-label>
+                                                    <input matInput formControlName="motorcycle_starting_system" maxlength="255">
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-12 col-md-3 paddingInputs">
+                                                <mat-form-field appearance="outline" class="example-full-width">
+                                                    <mat-label>Tablero digital</mat-label>
+                                                    <mat-select formControlName="motorcycle_digital_dashboard">
+                                                        <mat-option value="">—</mat-option>
+                                                        <mat-option value="yes">Sí</mat-option>
+                                                        <mat-option value="no">No</mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-12 col-md-3 paddingInputs">
+                                                <mat-form-field appearance="outline" class="example-full-width">
+                                                    <mat-label>Motor (ej. 4 tiempos)</mat-label>
+                                                    <input matInput formControlName="motorcycle_engine_cycle" maxlength="100">
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-12 col-md-3 paddingInputs">
+                                                <mat-form-field appearance="outline" class="example-full-width">
+                                                    <mat-label>Potencia (hp)</mat-label>
+                                                    <input matInput type="number" formControlName="motorcycle_power_hp" min="0" step="0.01">
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-12 col-md-3 paddingInputs">
+                                                <mat-form-field appearance="outline" class="example-full-width">
+                                                    <mat-label>Velocidad máx. (km/h)</mat-label>
+                                                    <input matInput type="number" formControlName="motorcycle_max_speed_kmh" min="0">
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="col-12 col-md-3 paddingInputs">
+                                                <mat-form-field appearance="outline" class="example-full-width">
+                                                    <mat-label>Suspensión</mat-label>
+                                                    <input matInput formControlName="motorcycle_suspension" maxlength="255">
+                                                </mat-form-field>
+                                            </div>
+                                        </ng-container>
 
                                         <div class="col-12 col-md-3 paddingInputs">
                                             <mat-form-field appearance="outline" class="example-full-width">

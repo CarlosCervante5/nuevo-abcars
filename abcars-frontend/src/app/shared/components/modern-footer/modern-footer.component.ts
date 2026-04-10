@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { VehicleService } from '@services/vehicle.service';
+import { ReferralService } from '@services/referral.service';
 import { Brand, BrandsResponse } from '@interfaces/vehicle_data.interface';
 import { Dealership } from '@interfaces/admin.interfaces';
 import { sortDealershipsForPublic, branchPublicTitle } from '../../utils/public-dealerships';
@@ -67,7 +68,7 @@ import { sortDealershipsForPublic, branchPublicTitle } from '../../utils/public-
               <li><a [routerLink]="['/seguros']" class="text-gray-300 hover:text-white transition-colors text-sm">Seguros automotrices</a></li>
               <li><a [routerLink]="['/servicio-tecnico']" class="text-gray-300 hover:text-white transition-colors text-sm">Servicio técnico</a></li>
               <!-- <li><a [routerLink]="['/refacciones']" class="text-gray-300 hover:text-white transition-colors text-sm">Refacciones originales</a></li> -->
-              <li><a [routerLink]="['/valuacion']" class="text-gray-300 hover:text-white transition-colors text-sm">Valuación gratuita</a></li>
+              <li><a [routerLink]="['/valuacion']" [queryParams]="valuationReferralParams" class="text-gray-300 hover:text-white transition-colors text-sm">Valuación gratuita</a></li>
             </ul>
           </div>
 
@@ -176,7 +177,15 @@ export class ModernFooterComponent implements OnInit {
   footerDealerships: Dealership[] = [];
   readonly branchPublicTitle = branchPublicTitle;
 
-  constructor(private vehicleService: VehicleService) {}
+  constructor(
+    private vehicleService: VehicleService,
+    private referralService: ReferralService
+  ) {}
+
+  /** Preserva ?ref= del vendedor al ir a valuación (localStorage comparte entre pestañas). */
+  get valuationReferralParams(): Record<string, string> {
+    return this.referralService.getReferralLinkQueryParams();
+  }
 
   ngOnInit(): void {
     this.loadBrands();

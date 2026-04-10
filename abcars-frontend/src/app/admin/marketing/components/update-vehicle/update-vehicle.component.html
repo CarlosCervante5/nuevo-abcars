@@ -213,28 +213,64 @@
                         <span *ngIf="cylindersInvalid" class="update-vehicle-hint">Escribe el nuevo número de cilindros.</span>
                     </div>
 
-                    <div class="update-vehicle-form-field">
-                        <label class="update-vehicle-label">Cilindrada (cc)</label>
-                        <input
-                            type="number"
-                            formControlName="engine_displacement_cc"
-                            min="0"
-                            max="9999"
-                            class="update-vehicle-input"
-                            placeholder="Opcional, ej. 650"
-                        >
-                    </div>
-
-                    <div class="update-vehicle-form-field">
-                        <label class="update-vehicle-label">Peso en orden de marcha (kg)</label>
-                        <input
-                            type="number"
-                            formControlName="wet_weight_kg"
-                            min="0"
-                            class="update-vehicle-input"
-                            placeholder="Opcional"
-                        >
-                    </div>
+                    <ng-container *ngIf="form.get('type')?.value === 'moto'">
+                        <div class="update-vehicle-form-field">
+                            <p class="update-vehicle-section-title">Detalle de motocicleta</p>
+                        </div>
+                        <div class="update-vehicle-form-field">
+                            <label class="update-vehicle-label">Cilindrada (cc)</label>
+                            <input
+                                type="number"
+                                formControlName="engine_displacement_cc"
+                                min="0"
+                                max="9999"
+                                class="update-vehicle-input"
+                                placeholder="Ej. 169"
+                            >
+                        </div>
+                        <div class="update-vehicle-form-field">
+                            <label class="update-vehicle-label">Peso en orden de marcha (kg)</label>
+                            <input
+                                type="number"
+                                formControlName="wet_weight_kg"
+                                min="0"
+                                class="update-vehicle-input"
+                                placeholder="Opcional"
+                            >
+                        </div>
+                        <div class="update-vehicle-form-field">
+                            <label class="update-vehicle-label">Frenos (delantero y trasero)</label>
+                            <input type="text" formControlName="motorcycle_brakes" class="update-vehicle-input" maxlength="255" placeholder="Ej. Disco delantero y tambor trasero">
+                        </div>
+                        <div class="update-vehicle-form-field">
+                            <label class="update-vehicle-label">Sistema de arranque</label>
+                            <input type="text" formControlName="motorcycle_starting_system" class="update-vehicle-input" maxlength="255" placeholder="Ej. Eléctrico y pedal">
+                        </div>
+                        <div class="update-vehicle-form-field">
+                            <label class="update-vehicle-label">Con tablero digital</label>
+                            <select formControlName="motorcycle_digital_dashboard" class="update-vehicle-input">
+                                <option value="">—</option>
+                                <option value="yes">Sí</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                        <div class="update-vehicle-form-field">
+                            <label class="update-vehicle-label">Motor</label>
+                            <input type="text" formControlName="motorcycle_engine_cycle" class="update-vehicle-input" maxlength="100" placeholder="Ej. 4 tiempos">
+                        </div>
+                        <div class="update-vehicle-form-field">
+                            <label class="update-vehicle-label">Potencia (hp)</label>
+                            <input type="number" formControlName="motorcycle_power_hp" min="0" step="0.01" class="update-vehicle-input" placeholder="Ej. 10">
+                        </div>
+                        <div class="update-vehicle-form-field">
+                            <label class="update-vehicle-label">Velocidad máxima (km/h)</label>
+                            <input type="number" formControlName="motorcycle_max_speed_kmh" min="0" class="update-vehicle-input" placeholder="Ej. 105">
+                        </div>
+                        <div class="update-vehicle-form-field">
+                            <label class="update-vehicle-label">Tipos de suspensión</label>
+                            <input type="text" formControlName="motorcycle_suspension" class="update-vehicle-input" maxlength="255" placeholder="Ej. Delantera, trasera">
+                        </div>
+                    </ng-container>
 
                     <!-- Color exterior -->
                     <div class="update-vehicle-form-field">
