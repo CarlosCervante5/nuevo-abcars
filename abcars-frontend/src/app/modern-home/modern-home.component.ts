@@ -1,4 +1,4 @@
-import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, HostListener } from '@angular/core';
+import { Component, OnDestroy, OnInit, CUSTOM_ELEMENTS_SCHEMA, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -64,7 +64,7 @@ interface QuickFilter {
     ])
   ]
 })
-export class ModernHomeComponent implements OnInit {
+export class ModernHomeComponent implements OnInit, OnDestroy {
   
   // Propiedades de búsqueda
   searchTerm: string = '';
@@ -95,9 +95,12 @@ export class ModernHomeComponent implements OnInit {
   private readonly locationsMaxPages = 25;
   private locationsRequestSeq = 0;
 
-  // Imagen del banner principal del Hero
+  // Imagen del banner principal del Hero (sin flash: no se pinta hasta resolver API + precarga)
   heroImagePath: string = 'assets/images/bg_hero.jpg';
-  showHeroText: boolean = true; // Mostrar texto solo cuando se usa imagen por defecto
+  showHeroText: boolean = true;
+  /** false hasta saber si hay banner remoto y tener la imagen lista (o caer al default). */
+  heroBannerReady = false;
+  private heroBannerLoadGen = 0;
 
   // Filtros rápidos
   quickFilters: QuickFilter[] = [
@@ -155,6 +158,10 @@ export class ModernHomeComponent implements OnInit {
     private compraTuAutoService: CompraTuAutoService,
     private deliveryPhotosService: DeliveryPhotosService
   ) {}
+
+  ngOnDestroy(): void {
+    this.heroBannerLoadGen++;
+  }
 
   ngOnInit() {
     this.updateDeliveryCarouselSlides();
@@ -225,21 +232,51 @@ export class ModernHomeComponent implements OnInit {
     }
   }
 
-  loadMainBanner() {
-    this.compraTuAutoService.loadMainBanner('Imagen banner principal')
-      .subscribe({
-        next: (resp) => {
-          if (resp && resp.data && resp.data.image_path) {
-            this.heroImagePath = resp.data.image_path;
-            this.showHeroText = false; // Ocultar texto cuando se carga imagen dinámica
-          }
-        },
-        error: (error) => {
-          // Si hay error, mantener la imagen por defecto y mostrar el texto
-          console.warn('Error al cargar el banner principal, usando imagen por defecto:', error);
-          // heroImagePath ya tiene el valor por defecto, showHeroText ya es true por defecto
+  loadMainBanner(): void {
+    this.heroBannerReady = false;
+    const gen = ++this.heroBannerLoadGen;
+
+    this.compraTuAutoService.loadMainBanner('Imagen banner principal').subscribe({
+      next: (resp) => {
+        if (gen !== this.heroBannerLoadGen) {
+          return;
         }
-      });
+        const url = (resp?.data?.image_path || '').trim();
+        if (url) {
+          const img = new Image();
+          img.onload = () => {
+            if (gen !== this.heroBannerLoadGen) {
+              return;
+            }
+            this.heroImagePath = url;
+            this.showHeroText = false;
+            this.heroBannerReady = true;
+          };
+          img.onerror = () => {
+            if (gen !== this.heroBannerLoadGen) {
+              return;
+            }
+            this.applyDefaultHeroBanner();
+          };
+          img.src = url;
+        } else {
+          this.applyDefaultHeroBanner();
+        }
+      },
+      error: (error) => {
+        if (gen !== this.heroBannerLoadGen) {
+          return;
+        }
+        console.warn('Error al cargar el banner principal, usando imagen por defecto:', error);
+        this.applyDefaultHeroBanner();
+      }
+    });
+  }
+
+  private applyDefaultHeroBanner(): void {
+    this.heroImagePath = 'assets/images/bg_hero.jpg';
+    this.showHeroText = true;
+    this.heroBannerReady = true;
   }
 
   loadActivePromotions() {
