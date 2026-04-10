@@ -229,8 +229,8 @@
     </div>
   </section>
 
-  <!-- Carrusel de Entregas -->
-  <section *ngIf="deliveryPhotosTotal > 0 || deliveryPhotosLoading" class="py-16 bg-white border-t border-gray-100">
+  <!-- Carrusel de Entregas (visible solo con fotos en API) -->
+  <section *ngIf="deliveryPhotosTotal > 0" class="py-16 bg-white border-t border-gray-100">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
         <h2 class="section-title">El seminuevo que buscabas, <span class="text-primary-500">ya entregado</span></h2>

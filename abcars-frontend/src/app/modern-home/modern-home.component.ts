@@ -180,6 +180,15 @@ export class ModernHomeComponent implements OnInit {
     }
   }
 
+  /** Tras subir fotos en admin, al volver a esta pestaña se actualiza el carrusel sin recargar la página. */
+  @HostListener('document:visibilitychange')
+  onDocumentVisibilityChange(): void {
+    if (typeof document === 'undefined' || document.visibilityState !== 'visible') {
+      return;
+    }
+    this.loadDeliveryPhotos(this.deliveryPhotosCurrentPage);
+  }
+
   loadDeliveryPhotos(page = 1) {
     this.deliveryPhotosLoading = true;
     this.deliveryPhotosService.list(page, this.deliveryPhotosPerPage).subscribe({
@@ -190,6 +199,10 @@ export class ModernHomeComponent implements OnInit {
           this.deliveryPhotosCurrentPage = d.current_page ?? 1;
           this.deliveryPhotosLastPage = d.last_page ?? 1;
           this.deliveryPhotosTotal = d.total ?? 0;
+        } else {
+          this.deliveryPhotos = [];
+          this.deliveryPhotosTotal = 0;
+          this.deliveryPhotosLastPage = 1;
         }
         this.deliveryPhotosLoading = false;
       },
