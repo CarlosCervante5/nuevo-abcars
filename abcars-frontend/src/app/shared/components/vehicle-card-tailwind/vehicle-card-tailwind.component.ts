@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ScrollService } from '../../services/scroll.service';
+import { ReferralService } from '../../services/referral.service';
 
 export interface Vehicle {
   uuid: string;
@@ -115,7 +116,11 @@ export interface Vehicle {
 export class VehicleCardTailwindComponent {
   @Input() vehicle!: Vehicle;
 
-  constructor(private router: Router, private scrollService: ScrollService) {}
+  constructor(
+    private router: Router,
+    private scrollService: ScrollService,
+    private referralService: ReferralService
+  ) {}
 
   formatPrice(price: number): string {
     return new Intl.NumberFormat('es-MX', {
@@ -145,7 +150,10 @@ export class VehicleCardTailwindComponent {
 
   // Navegar al detalle del vehículo
   navigateToDetail(): void {
-    this.router.navigate(['/vehiculo', this.vehicle.uuid]);
+    const ref = this.referralService.getReferrerUuid();
+    this.router.navigate(['/vehiculo', this.vehicle.uuid], {
+      queryParams: ref ? { ref } : {},
+    });
     // Hacer scroll to top después de la navegación
     setTimeout(() => {
       this.scrollService.scrollToTop();

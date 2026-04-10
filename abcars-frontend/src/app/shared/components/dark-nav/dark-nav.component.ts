@@ -4,6 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { ScrollService } from '../../services/scroll.service';
 import { AuthStateService } from '../../services/auth-state.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { ReferralService } from '../../services/referral.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 
@@ -25,9 +26,9 @@ import Swal from 'sweetalert2';
 
           <!-- Desktop Navigation Links -->
           <div class="hidden lg:flex items-center space-x-8">
-            <a [routerLink]="['/inventario']" class="nav-link text-gray-700 hover:text-yellow-600" (click)="scrollToTop()">Vehículos</a>
-            <a [routerLink]="['/servicios']" class="nav-link text-gray-700 hover:text-yellow-600" (click)="scrollToTop()">Servicios</a>
-            <a [routerLink]="['/financiamiento']" class="nav-link text-gray-700 hover:text-yellow-600" (click)="scrollToTop()">Simulador de Crédito</a>
+            <a [routerLink]="['/inventario']" [queryParams]="referralLinkParams" class="nav-link text-gray-700 hover:text-yellow-600" (click)="scrollToTop()">Vehículos</a>
+            <a [routerLink]="['/servicios']" [queryParams]="referralLinkParams" class="nav-link text-gray-700 hover:text-yellow-600" (click)="scrollToTop()">Servicios</a>
+            <a [routerLink]="['/financiamiento']" [queryParams]="referralLinkParams" class="nav-link text-gray-700 hover:text-yellow-600" (click)="scrollToTop()">Simulador de Crédito</a>
           </div>
 
           <!-- Action Buttons Desktop -->
@@ -126,7 +127,8 @@ import Swal from 'sweetalert2';
           <!-- Navigation Links -->
           <nav class="mobile-sidebar-nav">
             <a 
-              [routerLink]="['/inventario']" 
+              [routerLink]="['/inventario']"
+              [queryParams]="referralLinkParams"
               class="mobile-sidebar-item" 
               (click)="closeMobileMenu(); scrollToTop()">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,7 +138,8 @@ import Swal from 'sweetalert2';
             </a>
             
             <a 
-              [routerLink]="['/servicios']" 
+              [routerLink]="['/servicios']"
+              [queryParams]="referralLinkParams"
               class="mobile-sidebar-item" 
               (click)="closeMobileMenu(); scrollToTop()">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,7 +149,8 @@ import Swal from 'sweetalert2';
             </a>
             
             <a 
-              [routerLink]="['/financiamiento']" 
+              [routerLink]="['/financiamiento']"
+              [queryParams]="referralLinkParams"
               class="mobile-sidebar-item" 
               (click)="closeMobileMenu(); scrollToTop()">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -321,8 +325,14 @@ export class DarkNavComponent implements OnInit, OnDestroy {
     private router: Router, 
     private scrollService: ScrollService,
     private authStateService: AuthStateService,
-    private authService: AuthService
+    private authService: AuthService,
+    private referralService: ReferralService
   ) {}
+
+  /** Mantiene ?ref= al navegar (inventario → servicios → valuación). */
+  get referralLinkParams(): Record<string, string> {
+    return this.referralService.getReferralLinkQueryParams();
+  }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event) {
