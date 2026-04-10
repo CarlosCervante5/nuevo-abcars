@@ -11,7 +11,6 @@ use App\Models\CustomerAppointment;
 use App\Models\User;
 use App\Services\AppointmentService;
 use App\Services\ValuationService;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 
@@ -32,79 +31,81 @@ class AppointmentController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function search( SearchRiderRequest $request)
+    public function search(SearchRiderRequest $request)
     {
         try {
-
             $data = $request->validated();
-            
-            $query = DB::table('app_abcars_customer_appointments')
-            ->leftJoin('app_abcars_customers', 'app_abcars_customer_appointments.customer_id', '=', 'app_abcars_customers.id')
-            ->leftJoin('app_abcars_customer_vehicles', 'app_abcars_customer_appointments.vehicle_id', '=', 'app_abcars_customer_vehicles.id')
-            ->leftJoin('app_abcars_vehicle_valuations', 'app_abcars_customer_appointments.id', '=', 'app_abcars_vehicle_valuations.appointment_id')
-            ->leftJoin('app_abcars_user_valuation', 'app_abcars_vehicle_valuations.id', '=', 'app_abcars_user_valuation.valuation_id')
-            ->leftJoin('users', 'app_abcars_user_valuation.user_id', '=', 'users.id')
-            ->leftJoin('app_abcars_user_profiles', 'app_abcars_user_profiles.user_id', '=', 'users.id')
-            ->select(
-                'app_abcars_customers.phone_1 as phone_1',
-                'app_abcars_customers.name as customer_name',
-                'app_abcars_customers.last_name as customer_lastname',
-                'app_abcars_customer_vehicles.brand_name as vehicle_brandname',
-                'app_abcars_customer_vehicles.model_name as vehicle_modelname',
-                'app_abcars_customer_vehicles.mileage as vehicle_mileage',
-                'app_abcars_customer_vehicles.year as vehicle_year',
-                'app_abcars_customer_appointments.uuid as appointment_uuid',
-                'app_abcars_customer_appointments.dealership_name as dealership_name',
-                'app_abcars_customer_appointments.type as appointment_type',
-                'app_abcars_customer_appointments.scheduled_date as appointment_scheduled_date',
-                'app_abcars_user_profiles.name as valuator_name',
-                'app_abcars_user_profiles.last_name as valuator_last_name',
-                'users.uuid as valuator_uuid'
-            );
+            $perPage = (int) ($data['paginate'] ?? 15);
 
-            if (isset($data['type'])) {
-                $query->where('app_abcars_customer_appointments.type', $data['type']);
+            $query = CustomerAppointment::query()
+                ->with([
+                    'customer',
+                    'vehicle',
+                    'valuation.valuator' => function ($q) {
+                        $q->with('userProfile');
+                    },
+                ])
+                ->when(! empty($data['type']), function ($q) use ($data) {
+                    $q->where('type', $data['type']);
+                });
+
+            $authUser = auth()->user();
+            if ($authUser && $authUser->hasRole('seller')) {
+                $query->where('referrer_user_id', $authUser->id);
             }
 
-            // Si el usuario es seller, mostrar solo sus referidos (solicitudes desde sus links)
-            $user = auth()->user();
-            if ($user && $user->hasRole('seller')) {
-                $query->where('app_abcars_customer_appointments.referrer_user_id', $user->id);
-            }
-
-            if (!empty($data['keyword'])) {
+            if (! empty($data['keyword'])) {
                 $keyword = '%' . $data['keyword'] . '%';
                 $query->where(function ($q) use ($keyword) {
-                    $q->where('app_abcars_customers.name', 'LIKE', $keyword)
-                      ->orWhere('app_abcars_customers.last_name', 'LIKE', $keyword)
-                      ->orWhere('app_abcars_customers.phone_1', 'LIKE', $keyword)
-                      ->orWhere('app_abcars_customer_vehicles.brand_name', 'LIKE', $keyword)
-                      ->orWhere('app_abcars_customer_vehicles.model_name', 'LIKE', $keyword);
+                    $q->whereHas('customer', function ($c) use ($keyword) {
+                        $c->where('name', 'LIKE', $keyword)
+                            ->orWhere('last_name', 'LIKE', $keyword)
+                            ->orWhere('phone_1', 'LIKE', $keyword);
+                    })->orWhereHas('vehicle', function ($v) use ($keyword) {
+                        $v->where('brand_name', 'LIKE', $keyword)
+                            ->orWhere('model_name', 'LIKE', $keyword);
+                    });
                 });
             }
 
-            $appointments = $query->groupBy(
-                'app_abcars_customers.phone_1',
-                'app_abcars_customers.name',
-                'app_abcars_customers.last_name',
-                'app_abcars_customer_vehicles.brand_name',
-                'app_abcars_customer_vehicles.model_name',
-                'app_abcars_customer_vehicles.mileage',
-                'app_abcars_customer_vehicles.year',
-                'app_abcars_customer_appointments.type',
-                'app_abcars_customer_appointments.uuid',
-                'app_abcars_customer_appointments.dealership_name',
-                'app_abcars_customer_appointments.scheduled_date',
-                'app_abcars_user_profiles.name',
-                'app_abcars_user_profiles.last_name',
-                'users.uuid',
-            )
-            ->paginate($data['paginate']);
+            $paginator = $query->orderByDesc('id')->paginate($perPage);
 
+            $paginator->setCollection(
+                $paginator->getCollection()->map(function (CustomerAppointment $a) {
+                    $c = $a->customer;
+                    $v = $a->vehicle;
+                    $valuator = $a->valuation?->valuator->first();
+                    $profile = $valuator?->userProfile;
 
-            return ApiResponseHelper::apiSuccess(200, 'Citas obtenidas exitosamente', ['appointments' => $appointments]);
-        } catch (\Exception $e) {
-            return ApiResponseHelper::apiError('Error al obtener la lista de citas', $e->getMessage(), 500, 'GET_APPOINTMENTS_ERROR');
+                    return (object) [
+                        'phone_1' => (string) ($c?->phone_1 ?? ''),
+                        'customer_name' => (string) ($c?->name ?? ''),
+                        'customer_lastname' => (string) ($c?->last_name ?? ''),
+                        'vehicle_brandname' => (string) ($v?->brand_name ?? ''),
+                        'vehicle_modelname' => (string) ($v?->model_name ?? ''),
+                        'vehicle_mileage' => (int) ($v?->mileage ?? 0),
+                        'vehicle_year' => (string) ($v?->year ?? ''),
+                        'appointment_uuid' => (string) ($a->uuid ?? ''),
+                        'dealership_name' => (string) ($a->dealership_name ?? ''),
+                        'appointment_type' => (string) ($a->type ?? ''),
+                        'appointment_scheduled_date' => (string) ($a->scheduled_date ?? ''),
+                        'valuator_name' => (string) ($profile->name ?? ''),
+                        'valuator_last_name' => (string) ($profile->last_name ?? ''),
+                        'valuator_uuid' => (string) ($valuator->uuid ?? ''),
+                    ];
+                })
+            );
+
+            return ApiResponseHelper::apiSuccess(200, 'Citas obtenidas exitosamente', ['appointments' => $paginator]);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return ApiResponseHelper::apiError(
+                'Error al obtener la lista de citas',
+                config('app.debug') ? $e->getMessage() : null,
+                500,
+                'GET_APPOINTMENTS_ERROR'
+            );
         }
     }
 

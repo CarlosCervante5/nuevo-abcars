@@ -9,9 +9,8 @@ php artisan view:cache
 # Run migrations (safe if DB already has data from dump)
 php artisan migrate --force
 
-# Solo roles y permisos (idempotente; usuarios demo respetan email/nickname ya existentes).
-# Inventario, sucursales, fotos demo y catálogos: no se siembran en deploy; usar datos reales en BD.
-php artisan db:seed --class=RolesPermissionsSeeder --force
+# Seeders: no se ejecutan en deploy/Railway. Roles/permisos solo manual si hace falta:
+#   php artisan db:seed --class=RolesPermissionsSeeder --force
 
 # Create storage link for public files (ignores error if already exists)
 php artisan storage:link 2>/dev/null || true

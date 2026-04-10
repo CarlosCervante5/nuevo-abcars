@@ -23,6 +23,7 @@ use App\Models\Valuations\SpareSupplier;
 use App\Models\Valuations\ValuationCheckpoint;
 use App\Models\Valuations\ValuationPart;
 use App\Models\Valuations\ValuationRepair;
+use App\Models\CustomerAppointment;
 use App\Models\Valuations\VehicleValuation;
 use App\Services\UserService;
 use App\Services\ValuationService;
@@ -153,11 +154,17 @@ class ValuationController extends Controller
 
             $user = auth()->user();
 
-            // Si es seller, solo mostrar valuaciones de citas generadas por sus links de referidos
+            $valuationWith = ['appointment.customer', 'appointment.vehicle', 'valuator', 'vehicle'];
+
+            // Si es seller, solo citas con su referrer_user_id (columna ausente en DBs sin migración).
             $baseQuery = $user->hasRole('seller')
-                ? VehicleValuation::with('appointment.customer', 'appointment.vehicle', 'valuator', 'vehicle')
-                    ->whereHas('appointment', fn ($q) => $q->where('referrer_user_id', $user->id))
-                : $user->valuations()->with('appointment.customer', 'appointment.vehicle', 'valuator', 'vehicle');
+                ? (
+                    CustomerAppointment::schemaHasReferrerUserIdColumn()
+                        ? VehicleValuation::with($valuationWith)
+                            ->whereHas('appointment', fn ($q) => $q->where('referrer_user_id', $user->id))
+                        : VehicleValuation::with($valuationWith)->whereRaw('0 = 1')
+                )
+                : $user->valuations()->with($valuationWith);
 
             $valuations = $baseQuery
             ->where(function ($query) use ($data) {
@@ -182,8 +189,15 @@ class ValuationController extends Controller
             
             return ApiResponseHelper::apiSuccess(200, 'Valuaciones obtenidas exitosamente', $valuations);
 
-        } catch (\Exception $e) {
-            return ApiResponseHelper::apiError('Error al obtener la búsqueda de valuaciones', $e->getMessage(), 500, 'GET_VALUATION_SEARCH_ERROR');
+        } catch (\Throwable $e) {
+            report($e);
+
+            return ApiResponseHelper::apiError(
+                'Error al obtener la búsqueda de valuaciones',
+                config('app.debug') ? $e->getMessage() : 'Error interno',
+                500,
+                'GET_VALUATION_SEARCH_ERROR'
+            );
         }
     }
 

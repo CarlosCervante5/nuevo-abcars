@@ -21,6 +21,18 @@ class SellerReferralController extends Controller
 
             $sellerId = $user->id;
 
+            if (! CustomerAppointment::schemaHasReferrerUserIdColumn()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'OK',
+                    'data' => [
+                        'total_referrals' => 0,
+                        'month_referrals' => 0,
+                        'converted_referrals' => 0,
+                    ],
+                ]);
+            }
+
             $totalReferrals = CustomerAppointment::where('referrer_user_id', $sellerId)->count();
 
             $monthReferrals = CustomerAppointment::where('referrer_user_id', $sellerId)

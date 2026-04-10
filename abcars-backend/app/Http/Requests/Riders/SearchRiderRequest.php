@@ -22,9 +22,9 @@ class SearchRiderRequest extends FormRequest
     public function rules()
     {
         return [
-            'type' => 'required|string|nullable',
+            'type' => 'nullable|string',
             'keyword' => 'sometimes|string|nullable',
-            'paginate' => 'sometimes|integer|min:1',
+            'paginate' => 'sometimes|integer|min:1|max:100',
         ];
     }
 

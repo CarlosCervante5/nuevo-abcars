@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Schema;
 use Ramsey\Uuid\Uuid;
 
 class CustomerAppointment extends Model
@@ -94,6 +95,16 @@ class CustomerAppointment extends Model
     public static function findByUuid($uuid, $relationships = [])
     {
         return self::with($relationships)->where('uuid', $uuid)->first();
+    }
+
+    /**
+     * Sandbox/DBs antiguos sin migración de referidos: evita SQL por columna inexistente.
+     */
+    public static function schemaHasReferrerUserIdColumn(): bool
+    {
+        $table = env('DB_TABLE_PREFIX', '') . 'customer_appointments';
+
+        return Schema::hasTable($table) && Schema::hasColumn($table, 'referrer_user_id');
     }
 
     public function customer()

@@ -39,7 +39,9 @@
     },
     "scripts": {
         "migrate-seed": [
-            "@php artisan migrate --force",
+            "@php artisan migrate --force"
+        ],
+        "seed-roles": [
             "@php artisan db:seed --class=RolesPermissionsSeeder --force"
         ],
         "post-autoload-dump": [
