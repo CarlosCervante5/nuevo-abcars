@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService } from '@services/admin.service';
 import { Dealership, DealerShipResponse } from '@interfaces/admin.interfaces';
 import { GralResponse } from '@interfaces/vehicle_data.interface';
@@ -16,10 +17,21 @@ export class AdminDealershipsComponent implements OnInit {
   editingId: number | null = null;
   formData: Partial<Dealership> = {};
   isCreating = false;
+  /** Si la URL trae ?edit=id, abrir el formulario al cargar el listado (p. ej. desde «Ubicaciones»). */
+  private pendingEditId: number | null = null;
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
+    const raw = this.route.snapshot.queryParamMap.get('edit');
+    if (raw != null && raw !== '') {
+      const n = Number(raw);
+      this.pendingEditId = Number.isFinite(n) ? n : null;
+    }
     this.loadDealerships();
   }
 
@@ -29,6 +41,7 @@ export class AdminDealershipsComponent implements OnInit {
       next: (res: DealerShipResponse) => {
         this.dealerships = res.data || [];
         this.loading = false;
+        this.tryOpenPendingEditFromQuery();
       },
       error: () => {
         this.loading = false;
@@ -47,6 +60,23 @@ export class AdminDealershipsComponent implements OnInit {
     this.isCreating = false;
     this.editingId = d.id ?? null;
     this.formData = { ...d };
+  }
+
+  private tryOpenPendingEditFromQuery(): void {
+    if (this.pendingEditId == null) {
+      return;
+    }
+    const d = this.dealerships.find((x) => x.id === this.pendingEditId);
+    this.pendingEditId = null;
+    if (d) {
+      this.startEdit(d);
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { edit: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true
+      });
+    }
   }
 
   cancelForm(): void {

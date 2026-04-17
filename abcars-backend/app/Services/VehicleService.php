@@ -343,6 +343,7 @@ class VehicleService
         $query->with($data['relationship_names']);
         $query->where($this->statusCondition($data['status']));
         $query->where($this->categoriesCondition($data['categories']));
+        $query->where($this->typesCondition($data['vehicle_types'] ?? []));
         $query->where($this->brandsCondition($data['brand_names']));
         // $query->where($this->linesCondition($data['line_names']));
         $query->where($this->modelsCondition($data['model_names'], $data['years']));
@@ -743,6 +744,50 @@ class VehicleService
             } else {
                 $query->where('category', '!=', '');
             }
+        };
+    }
+
+    /**
+     * Filtra por tipo de unidad: car, moto, truck, other (columna vehicles.type).
+     * Valores inválidos se ignoran. Vacío = sin restricción por tipo.
+     * Registros con type null se consideran «auto-like» al filtrar car/truck/other.
+     */
+    public function typesCondition(array $types): \Closure
+    {
+        $allowed = ['car', 'moto', 'truck', 'other'];
+        $normalized = array_values(array_unique(array_intersect(
+            array_map(static fn ($t) => strtolower(trim((string) $t)), $types),
+            $allowed
+        )));
+
+        return function ($query) use ($normalized) {
+            if ($normalized === []) {
+                return;
+            }
+
+            $hasMoto = in_array('moto', $normalized, true);
+            $carLike = array_values(array_intersect(['car', 'truck', 'other'], $normalized));
+
+            if ($hasMoto && $carLike === []) {
+                $query->where('type', 'moto');
+
+                return;
+            }
+
+            if (! $hasMoto && $carLike !== []) {
+                $query->where(function ($q) use ($carLike) {
+                    $q->whereIn('type', $carLike)->orWhereNull('type');
+                });
+
+                return;
+            }
+
+            // moto + autos/camionetas: unión correcta (null solo cuenta como auto-like)
+            $query->where(function ($q) use ($carLike) {
+                $q->where('type', 'moto')->orWhere(function ($q2) use ($carLike) {
+                    $q2->whereIn('type', $carLike)->orWhereNull('type');
+                });
+            });
         };
     }
 

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AssistantService, AssistantResponse } from '@services/assistant.service';
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -92,10 +93,22 @@ export class AssistantComponent {
         });
         this.loading = false;
       },
-      error: () => {
+      error: (err: unknown) => {
+        const body = err instanceof HttpErrorResponse ? err.error : null;
+        const fromApi =
+          body &&
+          typeof body === 'object' &&
+          'response' in body &&
+          typeof (body as { response: unknown }).response === 'string'
+            ? (body as { response: string }).response
+            : null;
         this.messages.push({
           role: 'assistant',
-          content: 'Error al consultar. Verifica tu conexión e intenta de nuevo.'
+          content:
+            fromApi ||
+            (err instanceof HttpErrorResponse && err.status === 401
+              ? 'Sesión expirada o sin permiso. Vuelve a iniciar sesión como administrador.'
+              : 'Error al consultar. Verifica conexión, que el backend esté en marcha y OPENAI_API_KEY en .env del servidor.')
         });
         this.loading = false;
       }

@@ -9,7 +9,7 @@ register();
 import { VehicleCardComponent } from './vehicle-card/vehicle-card.component';
 import { HomeNavComponent } from '../shared/components/home-nav/home-nav.component';
 import { ModernFooterComponent } from '../shared/components/modern-footer/modern-footer.component';
-import { VehicleService } from '../shared/services/vehicle.service';
+import { VehicleService, resolveVehicleTypesFilter } from '../shared/services/vehicle.service';
 import { CampaingService } from '../shared/services/campaing.service';
 import { CompraTuAutoService } from '@services/compra-tu-auto.service';
 import { DeliveryPhotosService, DeliveryPhoto } from '@services/delivery-photos.service';
@@ -75,6 +75,10 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
   selectedModel: string = '';
   selectedPriceRange: string = '';
   searchLocation: string = '';
+  /** Buscador avanzado: incluir autos/camionetas (car, truck, other en API). */
+  includeVehicleAuto = true;
+  /** Incluir motocicletas (type=moto). */
+  includeVehicleMoto = true;
   sortBy: string = 'newest';
   activeFilters: string[] = [];
   
@@ -848,6 +852,15 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
     this.loadInventoryLocations();
   }
 
+  /** Autos/motos: al menos uno activo; actualiza opciones de ubicación. */
+  onHomeVehicleTypesChange(): void {
+    if (!this.includeVehicleAuto && !this.includeVehicleMoto) {
+      this.includeVehicleAuto = true;
+      this.includeVehicleMoto = true;
+    }
+    this.loadInventoryLocations();
+  }
+
   /**
    * Filtros de inventario alineados con `VehicleService.searchVehicles` para poblar ubicaciones.
    */
@@ -893,10 +906,14 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
   loadInventoryLocations(): void {
     const seq = ++this.locationsRequestSeq;
     this.loadingLocations = true;
-    const filters = {
+    const filters: Record<string, unknown> = {
       ...this.buildHomeSearchFiltersForLocations(),
       has_images: false
     };
+    const vt = resolveVehicleTypesFilter(this.includeVehicleAuto, this.includeVehicleMoto);
+    if (vt?.length) {
+      filters['vehicleTypes'] = vt;
+    }
     const acc = new Map<string, string>();
     /** Con marca/modelo/precio solo tienen sentido ciudades donde hay stock que cumple el filtro. */
     const hasInventoryFilters = !!(
@@ -1026,6 +1043,15 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
 
   performSearch() {
     const queryParams: Record<string, string> = {};
+
+    const vt = resolveVehicleTypesFilter(this.includeVehicleAuto, this.includeVehicleMoto);
+    if (vt?.length) {
+      if (this.includeVehicleMoto && !this.includeVehicleAuto) {
+        queryParams['vt'] = 'moto';
+      } else if (this.includeVehicleAuto && !this.includeVehicleMoto) {
+        queryParams['vt'] = 'auto';
+      }
+    }
 
     if (this.selectedBrand) {
       queryParams['brand'] = this.selectedBrand;

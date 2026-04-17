@@ -183,8 +183,8 @@ constructor(
             params = params.set('body', filters.body);
         }
 
-        if (filters.type) {
-            params = params.set('type', filters.type);
+        if (filters.vehicleTypes && Array.isArray(filters.vehicleTypes) && filters.vehicleTypes.length > 0) {
+            params = params.set('vehicle_types', filters.vehicleTypes.join(','));
         }
 
         // Por defecto el backend (SearchVehiclesRequest) usa has_images=true si no se envía.
@@ -226,4 +226,25 @@ constructor(
             .set('X-Requested-With', 'XMLHttpRequest');
         return this._http.post<DealerShipResponse>(`${this.baseUrl}/api/dealerships/search`, {}, { headers });
     }
+}
+
+/**
+ * Filtro de tipo para `/api/vehicles/search` (vehicle_types).
+ * Autos = car, truck, other; motos = moto. Ambos en true = sin filtro (undefined).
+ */
+export function resolveVehicleTypesFilter(includeAutoLike: boolean, includeMoto: boolean): string[] | undefined {
+    if (includeAutoLike && includeMoto) {
+        return undefined;
+    }
+    if (!includeAutoLike && !includeMoto) {
+        return undefined;
+    }
+    const types: string[] = [];
+    if (includeMoto) {
+        types.push('moto');
+    }
+    if (includeAutoLike) {
+        types.push('car', 'truck', 'other');
+    }
+    return types.length ? types : undefined;
 }

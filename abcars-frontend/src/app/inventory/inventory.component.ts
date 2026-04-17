@@ -5,7 +5,7 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { VehicleCardTailwindComponent, Vehicle } from '../shared/components/vehicle-card-tailwind/vehicle-card-tailwind.component';
 import { DarkNavComponent } from 'src/app/shared/components/dark-nav/dark-nav.component';
 import { ModernFooterComponent } from 'src/app/shared/components/modern-footer/modern-footer.component';
-import { VehicleService } from '../shared/services/vehicle.service';
+import { VehicleService, resolveVehicleTypesFilter } from '../shared/services/vehicle.service';
 import { CampaingService } from '../shared/services/campaing.service';
 import { ReferralService } from '../shared/services/referral.service';
 import { Vehicle as ApiVehicle } from '../shared/interfaces/vehicle_data.interface';
@@ -147,6 +147,26 @@ interface VehicleWithApiData extends Vehicle {
                           <span class="text-sm text-gray-700 capitalize">{{ sucursal }}</span>
                         </label>
                       </div>
+                    </div>
+                  </div>
+
+                  <!-- Filtro autos / motos -->
+                  <div class="border-b border-gray-100">
+                    <button (click)="toggleFilter('vehicleType')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                      <span class="filter-label">Autos y motos</span>
+                      <svg [class.rotate-180]="openFilters.vehicleType" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </button>
+                    <div *ngIf="openFilters.vehicleType" class="px-4 pb-4 space-y-2">
+                      <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" [(ngModel)]="filters.includeVehicleAuto" (change)="onVehicleTypesFilterChange()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                        <span class="text-sm text-gray-700">Autos y camionetas</span>
+                      </label>
+                      <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" [(ngModel)]="filters.includeVehicleMoto" (change)="onVehicleTypesFilterChange()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                        <span class="text-sm text-gray-700">Motocicletas</span>
+                      </label>
                     </div>
                   </div>
 
@@ -516,6 +536,26 @@ interface VehicleWithApiData extends Vehicle {
             </div>
           </div>
 
+          <!-- Filtro autos / motos (móvil) -->
+          <div class="border-b border-gray-100 pb-4">
+            <button (click)="toggleFilter('vehicleType')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
+              <span class="font-medium text-gray-700">Autos y motos</span>
+              <svg [class.rotate-180]="openFilters.vehicleType" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div *ngIf="openFilters.vehicleType" class="px-4 pb-4 space-y-2">
+              <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                <input type="checkbox" [(ngModel)]="filters.includeVehicleAuto" (change)="onVehicleTypesFilterChange()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                <span class="text-sm text-gray-700">Autos y camionetas</span>
+              </label>
+              <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                <input type="checkbox" [(ngModel)]="filters.includeVehicleMoto" (change)="onVehicleTypesFilterChange()" class="rounded border-gray-300 text-yellow-500 focus:ring-yellow-500">
+                <span class="text-sm text-gray-700">Motocicletas</span>
+              </label>
+            </div>
+          </div>
+
           <!-- Filtro Tipo de auto -->
           <div class="border-b border-gray-100 pb-4">
             <button (click)="toggleFilter('body')" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors">
@@ -688,7 +728,9 @@ export class InventoryComponent implements OnInit {
       automatic: false
     },
     selectedColors: {} as { [key: string]: boolean },
-    selectedSucursales: {} as { [key: string]: boolean }
+    selectedSucursales: {} as { [key: string]: boolean },
+    includeVehicleAuto: true,
+    includeVehicleMoto: true
   };
 
   // Acordeones
@@ -700,7 +742,8 @@ export class InventoryComponent implements OnInit {
     body: false,
     transmission: false,
     color: false,
-    sucursal: false
+    sucursal: false,
+    vehicleType: false
   };
 
   // Datos disponibles para filtros
@@ -730,6 +773,18 @@ export class InventoryComponent implements OnInit {
       this.homeBrand = params['brand'] || '';
       this.homeModel = params['model'] || '';
       this.homeLocation = params['location'] || '';
+
+      const vt = (params['vt'] || '').toString().toLowerCase();
+      if (vt === 'moto') {
+        this.filters.includeVehicleAuto = false;
+        this.filters.includeVehicleMoto = true;
+      } else if (vt === 'auto') {
+        this.filters.includeVehicleAuto = true;
+        this.filters.includeVehicleMoto = false;
+      } else {
+        this.filters.includeVehicleAuto = true;
+        this.filters.includeVehicleMoto = true;
+      }
       
       // Establecer filtro de precio máximo si viene
       if (params['price']) {
@@ -761,7 +816,7 @@ export class InventoryComponent implements OnInit {
   /** True si el usuario llegó desde el buscador del home (u otra entrada con query). */
   private hasInboundQueryFilters(): boolean {
     const p = this.route.snapshot.queryParams;
-    return !!(p['brand'] || p['model'] || p['location'] || p['price'] || p['search']);
+    return !!(p['brand'] || p['model'] || p['location'] || p['price'] || p['search'] || p['vt']);
   }
 
   loadActivePromotions() {
@@ -863,6 +918,14 @@ export class InventoryComponent implements OnInit {
     if (hasQueryPrice) {
       filters.priceFrom = 0;
       filters.priceTo = priceFromQuery;
+    }
+
+    const vtList = resolveVehicleTypesFilter(
+      this.filters.includeVehicleAuto,
+      this.filters.includeVehicleMoto
+    );
+    if (vtList?.length) {
+      filters.vehicleTypes = vtList;
     }
 
     const hasSpecialFilters =
@@ -1343,7 +1406,35 @@ export class InventoryComponent implements OnInit {
         (!!sucursalLabel &&
           selectedSucursales.some((sel) => sel.trim().toLowerCase() === sucursalLabel.toLowerCase()));
 
-      return matchesSearch && matchesPrice && matchesBrand && matchesModel && matchesLocation && matchesYear && matchesMileage && matchesBody && matchesTransmission && matchesColor && matchesSucursal;
+      const rawVType = ((item.apiData as ApiVehicle)?.type || (item as { type?: string }).type || '')
+        .toString()
+        .toLowerCase();
+      const isMoto = rawVType === 'moto';
+      const wantAuto = this.filters.includeVehicleAuto;
+      const wantMoto = this.filters.includeVehicleMoto;
+      let matchesVehicleKind = true;
+      if (wantAuto && wantMoto) {
+        matchesVehicleKind = true;
+      } else if (wantMoto && !wantAuto) {
+        matchesVehicleKind = isMoto;
+      } else if (wantAuto && !wantMoto) {
+        matchesVehicleKind = !isMoto;
+      }
+
+      return (
+        matchesSearch &&
+        matchesPrice &&
+        matchesBrand &&
+        matchesModel &&
+        matchesLocation &&
+        matchesYear &&
+        matchesMileage &&
+        matchesBody &&
+        matchesTransmission &&
+        matchesColor &&
+        matchesSucursal &&
+        matchesVehicleKind
+      );
     });
 
     // 4) Si es búsqueda por VIN, priorizar el vehículo con el VIN exacto
@@ -1417,9 +1508,23 @@ export class InventoryComponent implements OnInit {
     const hasPriceFilters = this.filters.priceMin > this.priceRange.min || this.filters.priceMax < this.priceRange.max;
     const hasYearFilters = this.filters.yearFrom > this.yearRange.min || this.filters.yearTo < this.yearRange.max;
     const hasMileageFilters = !!(this.filters.maxMileage && this.filters.maxMileage < this.mileageRange.max);
-    
-    return hasSearchTerm || hasHomeFilters || hasBrandFilters || hasBodyFilters || 
-           hasColorFilters || hasTransmissionFilters || hasSucursalFilters || hasPriceFilters || hasYearFilters || hasMileageFilters;
+
+    const hasVehicleKindFilter =
+      !this.filters.includeVehicleAuto || !this.filters.includeVehicleMoto;
+
+    return (
+      hasSearchTerm ||
+      hasHomeFilters ||
+      hasBrandFilters ||
+      hasBodyFilters ||
+      hasColorFilters ||
+      hasTransmissionFilters ||
+      hasSucursalFilters ||
+      hasPriceFilters ||
+      hasYearFilters ||
+      hasMileageFilters ||
+      hasVehicleKindFilter
+    );
   }
 
   sortVehicles(vehicles: VehicleWithApiData[]) {
@@ -1573,6 +1678,17 @@ export class InventoryComponent implements OnInit {
     this.openFilters[filterName] = !this.openFilters[filterName];
   }
 
+  /** Autos/motos: recarga inventario desde API (vehicle_types). */
+  onVehicleTypesFilterChange(): void {
+    if (!this.filters.includeVehicleAuto && !this.filters.includeVehicleMoto) {
+      this.filters.includeVehicleAuto = true;
+      this.filters.includeVehicleMoto = true;
+    }
+    this.currentPage = 1;
+    const useSearchTerm = !!(this.searchTerm && this.searchTerm.trim());
+    this.loadVehicles(1, useSearchTerm);
+  }
+
   openFiltersModal(): void {
     this.showFiltersModal = true;
     document.body.style.overflow = 'hidden';
@@ -1604,6 +1720,8 @@ export class InventoryComponent implements OnInit {
     this.filters.selectedTransmissions = { manual: false, automatic: false };
     this.filters.selectedColors = {};
     this.filters.selectedSucursales = {};
+    this.filters.includeVehicleAuto = true;
+    this.filters.includeVehicleMoto = true;
     this.sortBy = 'newest';
     
     // Reinicializar checkboxes

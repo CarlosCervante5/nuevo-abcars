@@ -44,11 +44,18 @@
               <div *ngIf="d.latitude != null && d.longitude != null" class="mt-2 text-xs text-gray-500">
                 {{ d.latitude | number:'1.4-4' }}, {{ d.longitude | number:'1.4-4' }}
               </div>
-              <button type="button" (click)="openInMaps(d)"
-                class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600">
-                <i class="fi fi-rr-marker"></i>
-                Ver en mapa
-              </button>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <button type="button" (click)="openInMaps(d)"
+                  class="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600">
+                  <i class="fi fi-rr-marker"></i>
+                  Ver en mapa
+                </button>
+                <a *ngIf="d.id != null" [routerLink]="['/admin/administrator/dealerships']" [queryParams]="{ edit: d.id }"
+                  class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-300 text-gray-800 text-sm rounded-lg hover:bg-gray-50">
+                  <i class="fi fi-rr-pen"></i>
+                  Editar dirección y datos
+                </a>
+              </div>
             </div>
             <div *ngIf="getMapEmbedUrl(d)" class="h-48 bg-gray-100">
               <iframe

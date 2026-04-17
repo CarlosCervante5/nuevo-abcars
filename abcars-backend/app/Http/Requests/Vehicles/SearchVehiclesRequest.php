@@ -28,6 +28,7 @@ class SearchVehiclesRequest extends FormRequest
             'interior_colors' => 'sometimes|nullable',
             'years' => 'sometimes|nullable',
             'prices' => 'sometimes|nullable',
+            'vehicle_types' => 'sometimes|nullable|string',
             'keyword' => 'sometimes|string|nullable',
             'filters' => 'sometimes|boolean',
             'has_images' => 'sometimes|boolean',
@@ -97,6 +98,10 @@ class SearchVehiclesRequest extends FormRequest
 
             'prices' => $this->has('prices')
                 ? array_map('intval', $stringToArray($this->input('prices')))
+                : [],
+
+            'vehicle_types' => $this->has('vehicle_types')
+                ? $stringToArray($this->input('vehicle_types'))
                 : [],
 
             'keyword' => $this->input('keyword', ''),
