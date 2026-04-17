@@ -34,4 +34,25 @@ class StoreAppointmentRequest extends FormRequest
             'referrer_uuid' => 'nullable|string|max:64',
         ];
     }
+
+    protected function prepareForValidation(): void
+    {
+        $merge = [];
+        if ($this->has('year') && is_numeric($this->input('year'))) {
+            $merge['year'] = (int) $this->input('year');
+        }
+        if ($this->has('mileage') && is_numeric($this->input('mileage'))) {
+            $merge['mileage'] = (int) $this->input('mileage');
+        }
+        if ($this->has('referrer_uuid')) {
+            $ru = $this->input('referrer_uuid');
+            if (is_string($ru)) {
+                $clean = strtolower(trim(str_replace(['{', '}', ' '], '', $ru)));
+                $merge['referrer_uuid'] = $clean !== '' ? $clean : null;
+            }
+        }
+        if ($merge !== []) {
+            $this->merge($merge);
+        }
+    }
 }

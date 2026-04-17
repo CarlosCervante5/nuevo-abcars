@@ -17,7 +17,7 @@ export class ReferralService {
      */
     captureFromUrl(route?: ActivatedRoute): void {
         const params = route?.snapshot?.queryParams ?? this.getQueryParamsFromWindow();
-        const raw = params?.['ref'];
+        const raw = params?.['ref'] ?? params?.['referrer'];
         const ref = Array.isArray(raw) ? raw[0] : raw;
         if (ref && typeof ref === 'string') {
             const trimmed = ref.trim();

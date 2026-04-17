@@ -207,8 +207,8 @@ export class ValuationComponent implements OnInit {
             customer_uuid: customerUuid,
             brand_name: formValue.brand || '',
             model_name: formValue.model || '',
-            year: formValue.year || '',
-            mileage: formValue.mileage ? String(formValue.mileage) : '0',
+            year: formValue.year != null && formValue.year !== '' ? Number(formValue.year) : 0,
+            mileage: formValue.mileage != null && formValue.mileage !== '' ? Number(formValue.mileage) : 0,
             scheduled_date: scheduledDateTime,
             dealership_name: formValue.city || ''
           };

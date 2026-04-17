@@ -11,6 +11,7 @@ use App\Models\CustomerAppointment;
 use App\Models\User;
 use App\Services\AppointmentService;
 use App\Services\ValuationService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 
@@ -51,7 +52,11 @@ class AppointmentController extends Controller
 
             // Vendedor: todas las citas atribuidas por referido (cualquier tipo). El filtro type=valuation ocultaba filas si el tipo no coincidía exactamente.
             if ($isSeller) {
-                $query->where('referrer_user_id', $authUser->id);
+                if (CustomerAppointment::schemaHasReferrerUserIdColumn()) {
+                    $query->where('referrer_user_id', $authUser->id);
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
             } else {
                 $query->when(! empty($data['type']), function ($q) use ($data) {
                     $q->where('type', $data['type']);
@@ -202,7 +207,29 @@ class AppointmentController extends Controller
 
             $data = $request->validated();
 
-            $this->appointmentService->createAppointment($data);
+            $appointment = $this->appointmentService->createAppointment($data);
+
+            // Misma relación que valuation_appointment: fila en vehicle_valuations para flujos de valuación y listados.
+            if (($data['type'] ?? '') === 'valuation' && $appointment->valuation()->doesntExist()) {
+                try {
+                    $placeholderUser = User::role('valuator')->orderBy('id')->first()
+                        ?? User::role('valuation_manager')->orderBy('id')->first()
+                        ?? User::role('administrator')->orderBy('id')->first()
+                        ?? User::role('super_admin')->orderBy('id')->first();
+                    if ($placeholderUser) {
+                        $this->valuationService->createValuation($appointment, $placeholderUser);
+                    } else {
+                        Log::warning('Cita pública de valuación sin usuario placeholder para crear VehicleValuation', [
+                            'appointment_id' => $appointment->id,
+                        ]);
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning('No se pudo crear VehicleValuation para cita pública (la cita sí quedó registrada)', [
+                        'appointment_id' => $appointment->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
 
             return ApiResponseHelper::apiSuccess(201, 'Cita creada exitosamente');
 

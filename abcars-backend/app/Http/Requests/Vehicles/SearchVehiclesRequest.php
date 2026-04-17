@@ -28,7 +28,8 @@ class SearchVehiclesRequest extends FormRequest
             'interior_colors' => 'sometimes|nullable',
             'years' => 'sometimes|nullable',
             'prices' => 'sometimes|nullable',
-            'vehicle_types' => 'sometimes|nullable|string',
+            'vehicle_types' => 'sometimes|nullable|array',
+            'vehicle_types.*' => 'string|in:car,moto,truck,other',
             'keyword' => 'sometimes|string|nullable',
             'filters' => 'sometimes|boolean',
             'has_images' => 'sometimes|boolean',
@@ -43,7 +44,7 @@ class SearchVehiclesRequest extends FormRequest
             return $string ? explode(',', $string) : [];
         };
 
-        $this->merge([
+        $merge = [
             'relationship_names' => $this->has('relationship_names')
                 ? $stringToArray($this->input('relationship_names'))
                 : ['brand', 'line', 'model', 'version', 'body', 'dealership', 'specification', 'firstImage', 'campaigns.promotions'],
@@ -100,10 +101,6 @@ class SearchVehiclesRequest extends FormRequest
                 ? array_map('intval', $stringToArray($this->input('prices')))
                 : [],
 
-            'vehicle_types' => $this->has('vehicle_types')
-                ? $stringToArray($this->input('vehicle_types'))
-                : [],
-
             'keyword' => $this->input('keyword', ''),
 
             'filters' => $this->has('filters') ? $this->boolean('filters') : false,
@@ -112,7 +109,14 @@ class SearchVehiclesRequest extends FormRequest
 
             'order_by' => $this->input('order_by', ''),
 
-            'paginate' => $this->input('paginate', 15),
-        ]);
+            'paginate' => (int) $this->input('paginate', 15),
+        ];
+
+        // Solo cuando viene en query: si se fusionara [] siempre, la regla `string` fallaba con 422 en todo el sitio.
+        if ($this->has('vehicle_types') && $this->input('vehicle_types') !== '' && $this->input('vehicle_types') !== null) {
+            $merge['vehicle_types'] = $stringToArray((string) $this->input('vehicle_types'));
+        }
+
+        $this->merge($merge);
     }
 }

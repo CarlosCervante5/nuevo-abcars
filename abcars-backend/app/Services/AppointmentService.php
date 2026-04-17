@@ -43,15 +43,19 @@ class AppointmentService
         ];
 
         $referrerUuid = isset($data['referrer_uuid']) ? trim((string) $data['referrer_uuid']) : '';
-        if ($referrerUuid !== '') {
-            $referrer = User::query()
-                ->whereRaw('LOWER(uuid) = ?', [mb_strtolower($referrerUuid, 'UTF-8')])
-                ->first();
+        if ($referrerUuid !== '' && CustomerAppointment::schemaHasReferrerUserIdColumn()) {
+            $norm = mb_strtolower(str_replace(['{', '}', ' '], '', $referrerUuid), 'UTF-8');
+            // Priorizar vendedores (rol seller); si no hay match, cualquier usuario con ese uuid.
+            $referrer = User::role('seller')
+                ->whereRaw('LOWER(TRIM(uuid)) = ?', [$norm])
+                ->first()
+                ?? User::query()->whereRaw('LOWER(TRIM(uuid)) = ?', [$norm])->first();
             if ($referrer) {
                 $appointmentData['referrer_user_id'] = $referrer->id;
             } else {
                 Log::warning('Cita pública: referrer_uuid sin usuario en BD', [
                     'referrer_uuid' => $referrerUuid,
+                    'normalized' => $norm,
                 ]);
             }
         }
