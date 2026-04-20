@@ -45,7 +45,7 @@ class ValuationService
         $dealership = Dealership::where([
             'name' => $appointment->dealership_name,
         ])->first();
-        
+
         if (!$dealership) {
             throw new \Exception("Concesionaria no encontrada para el nombre: {$appointment->dealership_name}");
         }
@@ -59,11 +59,13 @@ class ValuationService
             throw new \Exception("Error al crear la valuación para la cita con ID: {$appointment->id}");
         }
 
-        $checkpointIds = ValuationCheckpoint::whereIn('id', $this->valuation_checkpoints_ids)->pluck('id')->all();
-        $valuation->checkpoints()->attach($checkpointIds);
+        $checkpoints = ValuationCheckpoint::whereIn('id', $this->valuation_checkpoints_ids)->get();
 
-        $acquisitionCheckpointIds = AcquisitionCheckpoint::whereIn('id', $this->acquisition_checkpoints_ids)->pluck('id')->all();
-        $valuation->acquisition_checkpoints()->attach($acquisitionCheckpointIds);
+        $valuation->checkpoints()->attach($checkpoints);
+
+        $acquisition_checkpoints = AcquisitionCheckpoint::whereIn('id', $this->acquisition_checkpoints_ids)->get();
+
+        $valuation->acquisition_checkpoints()->attach($acquisition_checkpoints);
         
         UserValuation::firstOrCreate([
             'user_role_name' => $role,
