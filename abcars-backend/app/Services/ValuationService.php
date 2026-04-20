@@ -59,13 +59,11 @@ class ValuationService
             throw new \Exception("Error al crear la valuación para la cita con ID: {$appointment->id}");
         }
 
-        $checkpoints = ValuationCheckpoint::whereIn('id', $this->valuation_checkpoints_ids)->get();
+        $checkpointIds = ValuationCheckpoint::whereIn('id', $this->valuation_checkpoints_ids)->pluck('id')->all();
+        $valuation->checkpoints()->attach($checkpointIds);
 
-        $valuation->checkpoints()->attach($checkpoints);
-
-        $acquisition_checkpoints = AcquisitionCheckpoint::whereIn('id', $this->acquisition_checkpoints_ids)->get();
-
-        $valuation->acquisition_checkpoints()->attach($acquisition_checkpoints);
+        $acquisitionCheckpointIds = AcquisitionCheckpoint::whereIn('id', $this->acquisition_checkpoints_ids)->pluck('id')->all();
+        $valuation->acquisition_checkpoints()->attach($acquisitionCheckpointIds);
         
         UserValuation::firstOrCreate([
             'user_role_name' => $role,
