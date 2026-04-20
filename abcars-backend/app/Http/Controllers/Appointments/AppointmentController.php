@@ -141,12 +141,14 @@ class AppointmentController extends Controller
 
         } catch (ValidationException $e) {
             return ApiResponseHelper::validationError($e);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            report($e);
             Log::error('valuationAppointment failed', [
                 'user_id' => auth()->id(),
                 'request_id' => $request->header('x-railway-request-id'),
                 'payload' => $request->except(['password', 'token']),
                 'error' => $e->getMessage(),
+                'exception' => $e::class,
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
             ]);
