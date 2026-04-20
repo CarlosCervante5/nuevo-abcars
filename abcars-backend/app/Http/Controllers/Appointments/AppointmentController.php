@@ -142,6 +142,14 @@ class AppointmentController extends Controller
         } catch (ValidationException $e) {
             return ApiResponseHelper::validationError($e);
         } catch (\Exception $e) {
+            Log::error('valuationAppointment failed', [
+                'user_id' => auth()->id(),
+                'request_id' => $request->header('x-railway-request-id'),
+                'payload' => $request->except(['password', 'token']),
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
             return ApiResponseHelper::apiError('Error al crear la cita de valuacion', $e->getMessage(), 500, 'CREATE_VALUATION_APPOINTMENT_ERROR');
         }
     }
