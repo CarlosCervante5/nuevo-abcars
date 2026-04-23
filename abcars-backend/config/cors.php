@@ -13,6 +13,7 @@ $allowedOrigins = $corsEnv
     ? array_map('trim', explode(',', $corsEnv))
     : array_values(array_filter([
         Env::get('FRONTEND_URL'),
+        'https://honest-art-sandbox.up.railway.app',
         'https://honest-art-production-20e5.up.railway.app',
         'https://vigilant-renewal-production-d135.up.railway.app',
         'https://abcars.mx',
@@ -25,6 +26,7 @@ $allowedOrigins = $corsEnv
     ]));
 if (empty($allowedOrigins)) {
     $allowedOrigins = [
+        'https://honest-art-sandbox.up.railway.app',
         'https://honest-art-production-20e5.up.railway.app',
         'https://vigilant-renewal-production-d135.up.railway.app',
         'http://localhost:4200',
