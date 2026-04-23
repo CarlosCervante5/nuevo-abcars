@@ -680,4 +680,26 @@ export class AdminService {
         const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem('user_token')}`);
         return this._http.delete<GralResponse>(`${this.baseUrl}/api/line_models/${id}`, { headers });
     }
+
+    public createBrandLine(data: { name: string; brand_id: number; image_path?: string | null }) {
+        const headers = new HttpHeaders()
+            .set('Authorization', `Bearer ${localStorage.getItem('user_token')}`)
+            .set('Content-Type', 'application/json');
+        return this._http.post<GralResponse>(`${this.baseUrl}/api/brand_lines`, data, { headers });
+    }
+
+    public updateBrandLine(
+        id: number,
+        data: { name: string; brand_id: number; image_path?: string | null }
+    ) {
+        const headers = new HttpHeaders()
+            .set('Authorization', `Bearer ${localStorage.getItem('user_token')}`)
+            .set('Content-Type', 'application/json');
+        return this._http.put<GralResponse>(`${this.baseUrl}/api/brand_lines/${id}`, data, { headers });
+    }
+
+    public deleteBrandLine(id: number) {
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem('user_token')}`);
+        return this._http.delete<GralResponse>(`${this.baseUrl}/api/brand_lines/${id}`, { headers });
+    }
 }

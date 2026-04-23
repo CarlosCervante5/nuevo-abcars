@@ -1,6 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { forkJoin } from 'rxjs';
 import { AdminService } from '@services/admin.service';
+import {
+  findExactBrandMatch,
+  findFuzzySimilarBrand,
+  suggestBrandsByName
+} from '@helpers/brand-suggest.helper';
 import {
   AdminBrandLineRow,
   AdminInventoryBrand,
@@ -57,6 +63,7 @@ export class AdminBrandsModelsComponent implements OnInit {
         this.brandLines = res.lines.data?.brand_lines ?? [];
         this.lineModels = res.models.data?.line_models ?? [];
         this.loading = false;
+        this.recomputeSortedBrandLines();
         this.recomputeSortedModels();
       },
       error: () => {
@@ -71,6 +78,17 @@ export class AdminBrandsModelsComponent implements OnInit {
   }
 
   private sortedModelRows: AdminLineModelRow[] = [];
+
+  /** Líneas de marca (brand_lines), ordenadas para la tabla. */
+  sortedBrandLines: AdminBrandLineRow[] = [];
+
+  private recomputeSortedBrandLines(): void {
+    this.sortedBrandLines = [...this.brandLines].sort((a, b) => {
+      const an = (this.brandName(a.brand_id) + a.name).toLowerCase();
+      const bn = (this.brandName(b.brand_id) + b.name).toLowerCase();
+      return an.localeCompare(bn);
+    });
+  }
 
   private recomputeSortedModels(): void {
     this.sortedModelRows = [...this.lineModels].sort((a, b) => {
@@ -101,7 +119,7 @@ export class AdminBrandsModelsComponent implements OnInit {
     this.isCreatingBrand = false;
     this.editingBrandId = b.id;
     this.brandForm = {
-      name: this.displayName(b.name),
+      name: b.name ?? '',
       image_path: b.image_path ?? ''
     };
   }
@@ -112,12 +130,68 @@ export class AdminBrandsModelsComponent implements OnInit {
     this.brandForm = { name: '', image_path: '' };
   }
 
-  saveBrand(): void {
-    const name = this.brandForm.name?.trim();
+  /** Sugerencias mientras se escribe el nombre (mismo catálogo, sin duplicar mal tipeado). */
+  get brandNameSuggestions(): AdminInventoryBrand[] {
+    return suggestBrandsByName(this.brandForm.name || '', this.brands, {
+      limit: 15,
+      excludeId: this.isCreatingBrand ? undefined : (this.editingBrandId ?? undefined)
+    });
+  }
+
+  onBrandNameSuggestionPicked(event: MatAutocompleteSelectedEvent): void {
+    this.brandForm.name = String(event.option.value);
+  }
+
+  async saveBrand(): Promise<void> {
+    let name = this.brandForm.name?.trim();
     if (!name) {
       Swal.fire({ icon: 'warning', title: 'Nombre requerido' });
       return;
     }
+
+    if (this.isCreatingBrand) {
+      const duplicate = findExactBrandMatch(name, this.brands);
+      if (duplicate) {
+        await Swal.fire({
+          icon: 'info',
+          title: 'Ya existe en el catálogo',
+          text: 'Hay una marca con el mismo nombre. Elige la existente o cambia el texto.',
+          confirmButtonText: 'Entendido'
+        });
+        return;
+      }
+      const similar = findFuzzySimilarBrand(name, this.brands);
+      if (similar) {
+        const r = await Swal.fire({
+          icon: 'question',
+          title: '¿Era esta marca?',
+          html: `«<strong>${name}</strong>» se parece a <strong>${similar.name}</strong>. ¿Usar el nombre del catálogo?`,
+          showDenyButton: true,
+          showCancelButton: true,
+          confirmButtonText: `Usar «${similar.name}»`,
+          denyButtonText: 'Crear con el texto escrito',
+          cancelButtonText: 'Volver a editar'
+        });
+        if (r.isConfirmed) {
+          name = similar.name;
+          this.brandForm.name = name;
+        } else if (!r.isDenied) {
+          return;
+        }
+      }
+    } else if (this.editingBrandId) {
+      const other = findExactBrandMatch(name, this.brands, this.editingBrandId);
+      if (other) {
+        await Swal.fire({
+          icon: 'info',
+          title: 'Nombre en uso',
+          text: 'Otra marca ya usa ese nombre.',
+          confirmButtonText: 'Entendido'
+        });
+        return;
+      }
+    }
+
     const payload = {
       name,
       image_path: this.brandForm.image_path?.trim() || null
@@ -170,6 +244,106 @@ export class AdminBrandsModelsComponent implements OnInit {
     });
   }
 
+  // --- Líneas de marca (brand_lines) — nombres de series / grupos bajo una marca ---
+
+  isCreatingLine = false;
+  editingLineId: number | null = null;
+  lineForm: { name: string; brand_id: string; image_path: string } = {
+    name: '',
+    brand_id: '',
+    image_path: ''
+  };
+
+  startCreateLine(): void {
+    this.isCreatingLine = true;
+    this.editingLineId = null;
+    const first = this.brands[0];
+    this.lineForm = {
+      name: '',
+      brand_id: first ? String(first.id) : '',
+      image_path: ''
+    };
+  }
+
+  startEditLine(l: AdminBrandLineRow): void {
+    this.isCreatingLine = false;
+    this.editingLineId = l.id;
+    this.lineForm = {
+      name: l.name ?? '',
+      brand_id: l.brand_id != null ? String(l.brand_id) : '',
+      image_path: l.image_path ?? ''
+    };
+  }
+
+  cancelLineForm(): void {
+    this.isCreatingLine = false;
+    this.editingLineId = null;
+    this.lineForm = { name: '', brand_id: '', image_path: '' };
+  }
+
+  saveLine(): void {
+    const name = this.lineForm.name?.trim();
+    const brandId = this.lineForm.brand_id ? Number(this.lineForm.brand_id) : NaN;
+    if (!name) {
+      Swal.fire({ icon: 'warning', title: 'Nombre requerido' });
+      return;
+    }
+    if (!Number.isFinite(brandId) || brandId < 1) {
+      Swal.fire({ icon: 'warning', title: 'Marca requerida' });
+      return;
+    }
+    const payload = {
+      name,
+      brand_id: brandId,
+      image_path: this.lineForm.image_path?.trim() || null
+    };
+    if (this.isCreatingLine) {
+      this.adminService.createBrandLine(payload).subscribe({
+        next: () => {
+          Swal.fire({ icon: 'success', title: 'Línea creada' });
+          this.cancelLineForm();
+          this.loadAll();
+        },
+        error: (err) => this.showError(err, 'crear la línea')
+      });
+    } else if (this.editingLineId) {
+      this.adminService.updateBrandLine(this.editingLineId, payload).subscribe({
+        next: () => {
+          Swal.fire({ icon: 'success', title: 'Línea actualizada' });
+          this.cancelLineForm();
+          this.loadAll();
+        },
+        error: (err) => this.showError(err, 'actualizar la línea')
+      });
+    }
+  }
+
+  deleteLine(l: AdminBrandLineRow): void {
+    Swal.fire({
+      title: '¿Eliminar línea de marca?',
+      text: `Se eliminará «${l.name}». Los modelos asociados pueden quedar afectados.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.adminService.deleteBrandLine(l.id).subscribe({
+          next: () => {
+            Swal.fire({ icon: 'success', title: 'Línea eliminada' });
+            this.loadAll();
+          },
+          error: (err: { error?: GralResponse }) =>
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: err?.error?.message || 'Error al eliminar.'
+            })
+        });
+      }
+    });
+  }
+
   // --- Modelos (line_models) ---
 
   linesForSelectedModelBrand(): AdminBrandLineRow[] {
@@ -200,7 +374,7 @@ export class AdminBrandsModelsComponent implements OnInit {
     this.editingModelId = m.id;
     const brandId = m.brand_id ?? this.lineById(m.line_id)?.brand_id;
     this.modelForm = {
-      name: this.displayName(m.name),
+      name: m.name ?? '',
       year: String(m.year),
       line_id: m.line_id != null ? String(m.line_id) : '',
       image_path: m.image_path ?? '',
@@ -299,6 +473,15 @@ export class AdminBrandsModelsComponent implements OnInit {
     }
     const b = this.brands.find((x) => x.id === brandId);
     return b ? this.displayName(b.name) : '—';
+  }
+
+  /** Nombre de marca tal como se guarda (sin capitalizar) para listados. */
+  brandNameStored(brandId: number | null | undefined): string {
+    if (brandId == null) {
+      return '—';
+    }
+    const b = this.brands.find((x) => x.id === brandId);
+    return b?.name ? String(b.name) : '—';
   }
 
   lineById(lineId: number | null | undefined): AdminBrandLineRow | undefined {

@@ -13,6 +13,7 @@ import {UpdateVehicle, BrandsResponse, Brand, Line, Model, Body, ModelsResponse,
 import { GetcampaingResponse } from '@interfaces/admin.interfaces';
 import { AdminService } from '@services/admin.service';
 
+import { suggestBrandsByName } from '@helpers/brand-suggest.helper';
 import {reload} from '@helpers/session.helper';
 import { Router } from '@angular/router';
 import { ImagesService } from '@services/images.service';
@@ -98,7 +99,13 @@ export class StoreVehicleComponent  implements OnInit{
 
     this.filteredBrands = this.brandControl.valueChanges.pipe(
       startWith(''),
-      map(value => this._filter(value, this.brands))
+      map((value) =>
+        suggestBrandsByName(
+          typeof value === 'string' ? value : '',
+          this.brands,
+          { limit: 20 }
+        )
+      )
     );
 
     this.filteredLines = this.lineControl.valueChanges.pipe(

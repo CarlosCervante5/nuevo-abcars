@@ -41,8 +41,9 @@ class UpdateBrandLineRequest extends FormRequest
             'name' => [
                 'required',
                 'string',
-                Rule::unique(env('DB_TABLE_PREFIX', '') . 'vehicle_brands')->where(function ($query) {
-                    return $query->whereRaw('lower(name) = ?', [strtolower($this->name)]);
+                Rule::unique(env('DB_TABLE_PREFIX', '') . 'brand_lines')->where(function ($query) {
+                    return $query->whereRaw('lower(name) = ?', [strtolower($this->name)])
+                        ->whereNull('deleted_at');
                 })->ignore($this->brandLineModel->id),
             ],
             'image_path' => 'nullable|string',

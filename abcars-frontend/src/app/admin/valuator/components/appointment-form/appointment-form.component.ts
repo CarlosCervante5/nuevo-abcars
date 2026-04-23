@@ -4,6 +4,7 @@ import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { RegisterResponse } from '@interfaces/auth.interface';
 import { Brand, BrandsResponse, Model, ModelsResponse } from '@interfaces/vehicle_data.interface';
+import { suggestBrandsByName } from '@helpers/brand-suggest.helper';
 import { AdminService } from '@services/admin.service';
 import { AppointmentService } from '@services/appointment.service';
 import { VehicleService } from '@services/vehicle.service';
@@ -137,7 +138,13 @@ export class AppointmentFormComponent implements OnInit {
     private filters(): void {
         this.filteredBrands = this.brandControl.valueChanges.pipe(
             startWith(''),
-            map(value => this._filter(value, this.brands))
+            map((value) =>
+                suggestBrandsByName(
+                    typeof value === 'string' ? value : '',
+                    this.brands,
+                    { limit: 20 }
+                )
+            )
         );
         this.filteredModels = this.modelControl.valueChanges.pipe(
             startWith(''),
