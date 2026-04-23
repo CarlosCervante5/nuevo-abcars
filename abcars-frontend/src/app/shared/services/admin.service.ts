@@ -6,7 +6,7 @@ import { FormGroup } from '@angular/forms';
 
 //interfaces
 import { DetailsReward, RegisterResponse } from '@interfaces/auth.interface';
-import {detailsRewardResponse, createcampaing , GetcampaingResponse, DeleteVehicleImage, ImageOrderPromo, DeleteCampaign, UploadImages, ImageOrder , GetPromotionsByBrand,GralResponse, RiderResponse, ChangeOrder, rewardsResponse, UsersResponse, DetailResponsive, RolesResponse, RoleDetailResponse, PermissionResponse, DealerShipResponse, Dealership, CustomerResponse} from '@interfaces/admin.interfaces';
+import {detailsRewardResponse, createcampaing , GetcampaingResponse, DeleteVehicleImage, ImageOrderPromo, DeleteCampaign, UploadImages, ImageOrder , GetPromotionsByBrand,GralResponse, RiderResponse, ChangeOrder, rewardsResponse, UsersResponse, DetailResponsive, RolesResponse, RoleDetailResponse, PermissionResponse, DealerShipResponse, Dealership, CustomerResponse, AdminInventoryBrandsResponse, AdminBrandLinesResponse, AdminLineModelsResponse, AdminInventoryBrand} from '@interfaces/admin.interfaces';
 import { UploadVideo,UploadEventImages, CreateEvent , DeleteEvent, GetEvents, MyEvents, DeleteEventImage} from '@interfaces/community.interface';
 import { RewardResponse } from '@interfaces/rewards.interface';
 
@@ -622,5 +622,62 @@ export class AdminService {
         let user_token = localStorage.getItem('user_token');
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
         return this._http.post<GralResponse>(`${this.baseUrl}/api/users/delete` ,body, { headers });
+    }
+
+    // --- Catálogo inventario: marcas, líneas (para selects) y modelos (line_models) ---
+
+    public getInventoryBrands() {
+        return this._http.get<AdminInventoryBrandsResponse>(`${this.baseUrl}/api/vehicle_brands`);
+    }
+
+    public getBrandLinesForInventory() {
+        return this._http.get<AdminBrandLinesResponse>(`${this.baseUrl}/api/brand_lines`);
+    }
+
+    public getLineModelsForInventory() {
+        return this._http.get<AdminLineModelsResponse>(`${this.baseUrl}/api/line_models`);
+    }
+
+    public createInventoryBrand(data: Pick<AdminInventoryBrand, 'name'> & { image_path?: string | null }) {
+        const headers = new HttpHeaders()
+            .set('Authorization', `Bearer ${localStorage.getItem('user_token')}`)
+            .set('Content-Type', 'application/json');
+        return this._http.post<GralResponse>(`${this.baseUrl}/api/vehicle_brands`, data, { headers });
+    }
+
+    public updateInventoryBrand(id: number, data: { name: string; image_path?: string | null }) {
+        const headers = new HttpHeaders()
+            .set('Authorization', `Bearer ${localStorage.getItem('user_token')}`)
+            .set('Content-Type', 'application/json');
+        return this._http.put<GralResponse>(`${this.baseUrl}/api/vehicle_brands/${id}`, data, { headers });
+    }
+
+    public deleteInventoryBrand(id: number) {
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem('user_token')}`);
+        return this._http.delete<GralResponse>(`${this.baseUrl}/api/vehicle_brands/${id}`, { headers });
+    }
+
+    public createLineModel(
+        data: { name: string; year: string; line_id: number; image_path?: string | null }
+    ) {
+        const headers = new HttpHeaders()
+            .set('Authorization', `Bearer ${localStorage.getItem('user_token')}`)
+            .set('Content-Type', 'application/json');
+        return this._http.post<GralResponse>(`${this.baseUrl}/api/line_models`, data, { headers });
+    }
+
+    public updateLineModel(
+        id: number,
+        data: { name: string; year: string; line_id: number | null; image_path?: string | null }
+    ) {
+        const headers = new HttpHeaders()
+            .set('Authorization', `Bearer ${localStorage.getItem('user_token')}`)
+            .set('Content-Type', 'application/json');
+        return this._http.put<GralResponse>(`${this.baseUrl}/api/line_models/${id}`, data, { headers });
+    }
+
+    public deleteLineModel(id: number) {
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem('user_token')}`);
+        return this._http.delete<GralResponse>(`${this.baseUrl}/api/line_models/${id}`, { headers });
     }
 }

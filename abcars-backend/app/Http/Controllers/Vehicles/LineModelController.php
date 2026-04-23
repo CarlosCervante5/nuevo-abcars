@@ -23,6 +23,7 @@ class LineModelController extends Controller
         try {
             // Obtener todos los modelos de la línea
             $lineModels = LineModel::all();
+            $lineModels->each->makeVisible(['id', 'brand_id', 'line_id']);
 
             // Retornar respuesta exitosa
             return ApiResponseHelper::apiSuccess(200, 'Modelos de la linea obtenidos exitosamente', ['line_models' => $lineModels]);
@@ -46,7 +47,15 @@ class LineModelController extends Controller
             $data = $request->validated();
 
             // Crear un nuevo modelo de la línea
+            if (!empty($data['line_id'])) {
+                $line = BrandLine::find($data['line_id']);
+                if ($line) {
+                    $data['brand_id'] = $line->brand_id;
+                }
+            }
+
             $lineModel = LineModel::create($data);
+            $lineModel->makeVisible(['id', 'brand_id', 'line_id']);
 
             // Retornar respuesta exitosa
             return ApiResponseHelper::apiSuccess(201, 'Modelo de línea creada exitosamente', $lineModel);
@@ -78,6 +87,7 @@ class LineModelController extends Controller
                 return ApiResponseHelper::apiError('El modelo de la línea no existe', 'No existe el id: '. $id ,404, 'GET_LINE_MODEL_ERROR');
             }
 
+            $lineModel->makeVisible(['id', 'brand_id', 'line_id']);
             // Retornar el modelo de linea encontrado
             return ApiResponseHelper::apiSuccess(200, 'Modelo de linea encontrado', $lineModel);
 
@@ -102,8 +112,16 @@ class LineModelController extends Controller
         // Validar los datos recibidos
         $data = $request->validated();
 
+        if (array_key_exists('line_id', $data) && $data['line_id'] !== null) {
+            $line = BrandLine::find($data['line_id']);
+            if ($line) {
+                $data['brand_id'] = $line->brand_id;
+            }
+        }
+
         // Actualizar la marca con los datos validados
         $lineModel->update($data);
+        $lineModel->makeVisible(['id', 'brand_id', 'line_id']);
 
         // Devolver respuesta de éxito
         return ApiResponseHelper::apiSuccess(200, 'Modelo de línea actualizada exitosamente', $lineModel);

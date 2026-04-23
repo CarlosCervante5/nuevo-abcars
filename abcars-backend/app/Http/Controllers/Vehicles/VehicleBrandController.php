@@ -21,6 +21,7 @@ class VehicleBrandController extends Controller
         try {
             // Obtener todos las marcas de vehículos
             $vehicleBrands = VehicleBrand::all();
+            $vehicleBrands->each->makeVisible(['id']);
 
             // Retornar respuesta exitosa
             return ApiResponseHelper::apiSuccess(200, 'Marcas de vehículo obtenidas exitosamente', ['vehicle_brands' => $vehicleBrands]);
@@ -46,6 +47,7 @@ class VehicleBrandController extends Controller
             // Crear una nueva marca de vehículo
             $vehicleBrand = VehicleBrand::create($data);
 
+            $vehicleBrand->makeVisible(['id']);
             // Retornar respuesta exitosa
             return ApiResponseHelper::apiSuccess(201, 'Marca de vehículo creada exitosamente', $vehicleBrand);
 
@@ -76,6 +78,7 @@ class VehicleBrandController extends Controller
                 return ApiResponseHelper::apiError('La marca de vehículo no existe', 'No existe el id: '. $id ,404, 'GET_VEHICLE_BRAND_ERROR');
             }
 
+            $vehicleBrand->makeVisible(['id']);
             // Retornar la marca de vehículo
             return ApiResponseHelper::apiSuccess(200, 'Marca de vehículo encontrada', $vehicleBrand);
 
@@ -103,6 +106,7 @@ class VehicleBrandController extends Controller
         // Actualizar la marca con los datos validados
         $vehicleBrand->update($data);
 
+        $vehicleBrand->makeVisible(['id']);
         // Devolver respuesta de éxito
         return ApiResponseHelper::apiSuccess(200, 'Marca de vehículo actualizada exitosamente', $vehicleBrand);
     }

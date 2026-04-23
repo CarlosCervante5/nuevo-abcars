@@ -74,6 +74,14 @@ export const ADMINISTRATOR_NAV_ITEMS: AdministratorNavItem[] = [
     requiredRoles: ['administrator', 'super_admin']
   },
   {
+    title: 'Marcas y modelos',
+    icon: 'fi fi-rr-layers',
+    routerLink: ['brands-models'],
+    description: 'Catálogo de marcas y modelos de inventario',
+    iconColor: 'blue',
+    requiredRoles: ['administrator', 'super_admin']
+  },
+  {
     title: 'Información de la API',
     icon: 'fi fi-rr-code',
     routerLink: ['api-info'],

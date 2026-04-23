@@ -22,6 +22,7 @@ class BrandLineController extends Controller
         try {
             // Obtener todos las líneas de marca
             $brandLines = BrandLine::all();
+            $brandLines->each->makeVisible(['id', 'brand_id']);
 
             // Retornar respuesta exitosa
             return ApiResponseHelper::apiSuccess(200, 'Líneas de marca obtenidas exitosamente', ['brand_lines' => $brandLines]);
@@ -46,6 +47,7 @@ class BrandLineController extends Controller
 
             // Crear una nueva líneas de marca
             $brandLine = BrandLine::create($data);
+            $brandLine->makeVisible(['id', 'brand_id']);
 
             // Retornar respuesta exitosa
             return ApiResponseHelper::apiSuccess(201, 'Línea de marca creada exitosamente', $brandLine);
@@ -77,6 +79,7 @@ class BrandLineController extends Controller
                 return ApiResponseHelper::apiError('La línea de marca no existe', 'No existe el id: '. $id ,404, 'GET_BRAND_LINE_ERROR');
             }
 
+            $brandLine->makeVisible(['id', 'brand_id']);
             // Retornar la línea de marca encontrada
             return ApiResponseHelper::apiSuccess(200, 'Línea de marca encontrada', $brandLine);
 
@@ -103,6 +106,7 @@ class BrandLineController extends Controller
 
         // Actualizar la marca con los datos validados
         $brandLine->update($data);
+        $brandLine->makeVisible(['id', 'brand_id']);
 
         // Devolver respuesta de éxito
         return ApiResponseHelper::apiSuccess(200, 'Línea de marca actualizada exitosamente', $brandLine);

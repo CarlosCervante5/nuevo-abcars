@@ -22,6 +22,7 @@ import { PromotionsComponent } from '../gestor/pages/promotions/promotions.compo
 import { GestorPromotionsGuard } from './guards/gestor-promotions.guard';
 import { AdminMainBannerComponent } from './pages/admin-main-banner/admin-main-banner.component';
 import { MainBannerGuard } from './guards/main-banner.guard';
+import { AdminBrandsModelsComponent } from './pages/admin-brands-models/admin-brands-models.component';
 
 const routes: Routes = [
   {
@@ -62,6 +63,7 @@ const routes: Routes = [
       { path: 'users', component: AdminUsersComponent, data: { embedInShell: true } },
       { path: 'permissions', component: AdminPermisosComponent, data: { embedInShell: true } },
       { path: 'dealerships', component: AdminDealershipsComponent, data: { embedInShell: true } },
+      { path: 'brands-models', component: AdminBrandsModelsComponent, data: { embedInShell: true } },
       { path: 'dealerships-map', component: DealershipsMapComponent, data: { embedInShell: true } },
       {
         path: 'home-banner',

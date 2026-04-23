@@ -654,6 +654,43 @@ export interface Dealership {
     created_at?: Date;
 }
 
+/** Respuestas API catálogo inventario (marcas / líneas / modelos) */
+export interface AdminInventoryBrand {
+    id: number;
+    name: string;
+    image_path: string | null;
+    created_at?: string;
+}
+
+export interface AdminInventoryBrandsResponse extends GralResponse {
+    data: { vehicle_brands: AdminInventoryBrand[] };
+}
+
+export interface AdminBrandLineRow {
+    id: number;
+    name: string;
+    image_path: string | null;
+    brand_id: number;
+    created_at?: string;
+}
+
+export interface AdminBrandLinesResponse extends GralResponse {
+    data: { brand_lines: AdminBrandLineRow[] };
+}
+
+export interface AdminLineModelRow {
+    id: number;
+    name: string;
+    year: string | number;
+    image_path: string | null;
+    line_id: number | null;
+    brand_id: number | null;
+    created_at?: string;
+}
+
+export interface AdminLineModelsResponse extends GralResponse {
+    data: { line_models: AdminLineModelRow[] };
+}
 
 export interface promos{
     created_at:        Date;

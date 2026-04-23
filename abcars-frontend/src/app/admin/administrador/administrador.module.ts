@@ -26,6 +26,7 @@ import { ValuatorAppointmentsPageModule } from "../valuator/valuator-appointment
 import { DeliveryPhotosPageModule } from "../gestor/delivery-photos-page.module";
 import { PromotionsPageModule } from "../gestor/promotions-page.module";
 import { AdminMainBannerComponent } from "./pages/admin-main-banner/admin-main-banner.component";
+import { AdminBrandsModelsComponent } from "./pages/admin-brands-models/admin-brands-models.component";
 
 @NgModule({
     declarations: [
@@ -33,6 +34,7 @@ import { AdminMainBannerComponent } from "./pages/admin-main-banner/admin-main-b
         AdminUsersComponent,
         AdminPermisosComponent,
         AdminDealershipsComponent,
+        AdminBrandsModelsComponent,
         DealershipsMapComponent,
         ApiInfoComponent,
         DocumentationComponent,

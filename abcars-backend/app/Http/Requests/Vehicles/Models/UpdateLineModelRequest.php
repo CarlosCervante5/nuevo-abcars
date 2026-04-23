@@ -42,14 +42,16 @@ class UpdateLineModelRequest extends FormRequest
                 'required',
                 'string',
                 Rule::unique(env('DB_TABLE_PREFIX', '') . 'line_models')->where(function ($query) {
-                    return $query->whereRaw('lower(name) = ?', [strtolower($this->name)]);
+                    return $query->whereRaw('lower(name) = ?', [strtolower($this->name)])
+                        ->whereNull('deleted_at');
                 })->ignore($this->lineModelModel->id),
             ],
+            'year' => 'required|string',
             'image_path' => 'nullable|string',
-            'brand_id' => [
+            'line_id' => [
                 'nullable',
                 'integer',
-                Rule::exists(env('DB_TABLE_PREFIX', '') . 'brand_lines', 'id')
+                Rule::exists(env('DB_TABLE_PREFIX', '') . 'brand_lines', 'id'),
             ],
         ];
     }

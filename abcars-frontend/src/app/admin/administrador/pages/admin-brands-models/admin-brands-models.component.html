@@ -1,0 +1,321 @@
+<div class="min-h-0 rounded-xl adm-shell-page">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-12">
+    <div class="bg-white shadow-sm rounded-xl p-6">
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Marcas y modelos (inventario)</h1>
+        <p class="mt-1 text-sm text-gray-600 max-w-3xl">
+          Catálogo de marcas (<code class="text-xs bg-gray-100 px-1 rounded">vehicle_brands</code>) y
+          modelos de línea (<code class="text-xs bg-gray-100 px-1 rounded">line_models</code>).
+          Los modelos se vinculan a una <strong>línea</strong> (ej. &quot;Sentra&quot;) dentro de la marca.
+        </p>
+        <nav class="mt-2 text-sm text-gray-500" aria-label="breadcrumb">
+          <ol class="flex flex-wrap items-center gap-2">
+            <li>
+              <a class="text-gray-500 hover:text-gray-700" [routerLink]="['/admin/administrator']">Inicio</a>
+            </li>
+            <li class="text-gray-400">/</li>
+            <li class="text-gray-700 font-medium" aria-current="page">Marcas y modelos</li>
+          </ol>
+        </nav>
+      </div>
+
+      <div *ngIf="loading" class="flex justify-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
+      </div>
+
+      <ng-container *ngIf="!loading">
+        <!-- Marcas -->
+        <section class="mb-12">
+          <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4"
+          >
+            <h2 class="text-lg font-semibold text-gray-800">Marcas</h2>
+            <button
+              type="button"
+              (click)="startCreateBrand()"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+            >
+              <i class="fi fi-rr-plus"></i>
+              Nueva marca
+            </button>
+          </div>
+
+          <div
+            *ngIf="isCreatingBrand || editingBrandId"
+            class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200"
+          >
+            <h3 class="font-semibold text-gray-800 mb-3">
+              {{ isCreatingBrand ? 'Nueva marca' : 'Editar marca' }}
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                <input
+                  type="text"
+                  [(ngModel)]="brandForm.name"
+                  placeholder="Ej: Toyota"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >Ruta de imagen (opcional)</label
+                >
+                <input
+                  type="text"
+                  [(ngModel)]="brandForm.image_path"
+                  placeholder="URL o ruta pública"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+            </div>
+            <div class="flex gap-2 mt-4">
+              <button
+                type="button"
+                (click)="saveBrand()"
+                class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+              >
+                Guardar
+              </button>
+              <button
+                type="button"
+                (click)="cancelBrandForm()"
+                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="brands.length === 0" class="text-sm text-gray-500 py-4">No hay marcas.</div>
+          <div *ngIf="brands.length > 0" class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Nombre
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase max-w-sm"
+                  >
+                    Imagen
+                  </th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <tr *ngFor="let b of brands" class="hover:bg-gray-50">
+                  <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                    {{ displayName(b.name) }}
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-600 truncate max-w-sm" [title]="b.image_path || ''">
+                    {{ b.image_path || '—' }}
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    <div class="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        (click)="startEditBrand(b)"
+                        class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                        title="Editar"
+                      >
+                        <i class="fi fi-rr-pen"></i>
+                      </button>
+                      <button
+                        type="button"
+                        (click)="deleteBrand(b)"
+                        class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                        title="Eliminar"
+                      >
+                        <i class="fi fi-rr-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Modelos -->
+        <section>
+          <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4"
+          >
+            <div>
+              <h2 class="text-lg font-semibold text-gray-800">Modelos de línea</h2>
+              <p class="text-sm text-gray-500 mt-0.5">Filtrar listado o crear/editar un modelo vinculado a una línea de marca.</p>
+            </div>
+            <button
+              type="button"
+              (click)="startCreateModel()"
+              [disabled]="brands.length === 0"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <i class="fi fi-rr-plus"></i>
+              Nuevo modelo
+            </button>
+          </div>
+
+          <div class="mb-4 flex flex-wrap items-end gap-3">
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Ver por marca</label>
+              <select
+                [ngModel]="modelFilterSelect"
+                (ngModelChange)="setModelFilter($event)"
+                class="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="">Todas las marcas</option>
+                <option *ngFor="let b of brands" [value]="b.id">
+                  {{ displayName(b.name) }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div
+            *ngIf="isCreatingModel || editingModelId"
+            class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200"
+          >
+            <h3 class="font-semibold text-gray-800 mb-3">
+              {{ isCreatingModel ? 'Nuevo modelo' : 'Editar modelo' }}
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
+                <select
+                  [(ngModel)]="modelForm.filterBrandId"
+                  (ngModelChange)="onModelBrandChange()"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="">— Selecciona —</option>
+                  <option *ngFor="let b of brands" [value]="b.id">
+                    {{ displayName(b.name) }}
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >Línea (grupo) *</label
+                >
+                <select
+                  [(ngModel)]="modelForm.line_id"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="">— Línea —</option>
+                  <option *ngFor="let ln of linesForSelectedModelBrand()" [value]="ln.id">
+                    {{ displayName(ln.name) }}
+                  </option>
+                </select>
+                <p
+                  *ngIf="modelForm.filterBrandId && linesForSelectedModelBrand().length === 0"
+                  class="text-xs text-amber-700 mt-1"
+                >
+                  No hay líneas para esta marca. Crea una línea en el catálogo (otra sección) o
+                  vía API <code>brand_lines</code>.
+                </p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del modelo *</label>
+                <input
+                  type="text"
+                  [(ngModel)]="modelForm.name"
+                  placeholder="Ej: SR"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Año (referencia) *</label>
+                <input
+                  type="text"
+                  [(ngModel)]="modelForm.year"
+                  placeholder="Ej: 2024"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >Ruta de imagen (opcional)</label
+                >
+                <input
+                  type="text"
+                  [(ngModel)]="modelForm.image_path"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+            </div>
+            <div class="flex gap-2 mt-4">
+              <button
+                type="button"
+                (click)="saveModel()"
+                class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+              >
+                Guardar
+              </button>
+              <button
+                type="button"
+                (click)="cancelModelForm()"
+                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="filteredModels.length === 0" class="text-sm text-gray-500 py-4">
+            No hay modelos{{ modelFilterBrandId != null ? ' para esta marca' : '' }}.
+          </div>
+          <div *ngIf="filteredModels.length > 0" class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Marca
+                  </th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Línea
+                  </th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Modelo</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Año</th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <tr *ngFor="let m of filteredModels" class="hover:bg-gray-50">
+                  <td class="px-4 py-3 text-sm text-gray-900">
+                    {{ brandName(m.brand_id) }}
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-700">{{ lineName(m.line_id) }}</td>
+                  <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                    {{ displayName(m.name) }}
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-600">{{ m.year }}</td>
+                  <td class="px-4 py-3 text-right">
+                    <div class="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        (click)="startEditModel(m)"
+                        class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                      >
+                        <i class="fi fi-rr-pen"></i>
+                      </button>
+                      <button
+                        type="button"
+                        (click)="deleteModel(m)"
+                        class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                      >
+                        <i class="fi fi-rr-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </ng-container>
+    </div>
+  </div>
+</div>
