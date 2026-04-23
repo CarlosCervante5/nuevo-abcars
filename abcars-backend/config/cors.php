@@ -6,25 +6,37 @@ use Illuminate\Support\Env;
 | CORS Allowed Origins
 |--------------------------------------------------------------------------
 | Con supports_credentials=true no se puede usar '*'. Debe ser explícito.
-| CORS_ALLOWED_ORIGINS: lista separada por comas (ej: https://app.com,https://app2.com)
+| CORS_ALLOWED_ORIGINS: se fusiona con la lista por defecto (no la sustituye), para
+| que en Railway el sandbox (honest-art-sandbox) siga permitido aunque en el
+| .env del servidor solo figuren URLs de producción.
 */
 $corsEnv = Env::get('CORS_ALLOWED_ORIGINS');
-$allowedOrigins = $corsEnv
-    ? array_map('trim', explode(',', $corsEnv))
-    : array_values(array_filter([
-        Env::get('FRONTEND_URL'),
-        'https://honest-art-sandbox.up.railway.app',
-        'https://honest-art-production-20e5.up.railway.app',
-        'https://vigilant-renewal-production-d135.up.railway.app',
-        'https://abcars.mx',
-        'https://www.abcars.mx',
-        'http://localhost:4200',
-        'http://localhost:4201',
-        'http://localhost:5173',
-        'http://127.0.0.1:4200',
-        'http://127.0.0.1:5173',
-    ]));
-if (empty($allowedOrigins)) {
+$fromEnv = is_string($corsEnv) && $corsEnv !== ''
+    ? array_values(array_filter(
+        array_map('trim', explode(',', $corsEnv)),
+        static fn (string $o): bool => $o !== ''
+    ))
+    : [];
+
+$defaults = array_values(array_filter([
+    Env::get('FRONTEND_URL'),
+    'https://honest-art-sandbox.up.railway.app',
+    'https://honest-art-production-20e5.up.railway.app',
+    'https://vigilant-renewal-production-d135.up.railway.app',
+    'https://abcars.mx',
+    'https://www.abcars.mx',
+    'http://localhost:4200',
+    'http://localhost:4201',
+    'http://localhost:5173',
+    'http://127.0.0.1:4200',
+    'http://127.0.0.1:5173',
+], static function ($u) {
+    return is_string($u) && $u !== '';
+}));
+
+$allowedOrigins = array_values(array_unique([...$fromEnv, ...$defaults]));
+
+if ($allowedOrigins === []) {
     $allowedOrigins = [
         'https://honest-art-sandbox.up.railway.app',
         'https://honest-art-production-20e5.up.railway.app',
