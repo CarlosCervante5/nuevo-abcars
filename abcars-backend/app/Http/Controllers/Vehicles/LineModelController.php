@@ -8,6 +8,7 @@ use App\Http\Requests\Vehicles\Models\StoreLineModelRequest;
 use App\Http\Requests\Vehicles\Models\UpdateLineModelRequest;
 use App\Models\BrandLine;
 use App\Models\LineModel;
+use App\Models\Vehicle;
 use App\Models\VehicleBrand;
 use Illuminate\Validation\ValidationException;
 
@@ -219,6 +220,48 @@ class LineModelController extends Controller
         } catch (\Exception $e) {
             // Manejar errores y retornar respuesta de error
             return ApiResponseHelper::apiError('Error al obtener los modelos de linea', $e->getMessage(), 500, 'GET_LINE_MODEL_ERROR');
+        }
+    }
+
+    /**
+     * Modelos (line_models) presentes en vehículos activos sin valuación para el nombre de marca dado.
+     */
+    public function inventoryFilterByBrand($brand)
+    {
+        try {
+            $brandName = urldecode($brand);
+            $vehicleBrand = VehicleBrand::where('name', $brandName)->first();
+
+            if (! $vehicleBrand) {
+                return ApiResponseHelper::apiSuccess(200, 'Modelos de filtro de inventario', ['line_models' => []]);
+            }
+
+            $modelIds = Vehicle::query()
+                ->where('page_status', 'active')
+                ->whereDoesntHave('valuations')
+                ->where('brand_id', $vehicleBrand->id)
+                ->whereNotNull('model_id')
+                ->distinct()
+                ->pluck('model_id');
+
+            if ($modelIds->isEmpty()) {
+                return ApiResponseHelper::apiSuccess(200, 'Modelos de filtro de inventario', ['line_models' => []]);
+            }
+
+            $lineModels = LineModel::query()
+                ->whereIn('id', $modelIds)
+                ->withCount(['vehicles' => function ($q) use ($vehicleBrand) {
+                    $q->where('page_status', 'active')
+                        ->whereDoesntHave('valuations')
+                        ->where('brand_id', $vehicleBrand->id);
+                }])
+                ->orderBy('name')
+                ->get();
+            $lineModels->each->makeVisible(['id', 'brand_id', 'line_id']);
+
+            return ApiResponseHelper::apiSuccess(200, 'Modelos de filtro de inventario obtenidos', ['line_models' => $lineModels]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al obtener modelos para el filtro de inventario', $e->getMessage(), 500, 'GET_INVENTORY_FILTER_MODELS_ERROR');
         }
     }
 }

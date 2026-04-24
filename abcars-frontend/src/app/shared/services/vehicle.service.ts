@@ -38,12 +38,27 @@ constructor(
         return this._http.get<BrandsResponse>(`${ this.baseUrl }/api/vehicle_brands`);
     }
 
+    /**
+     * Marcas con al menos un vehículo con page_status activo y sin valuación
+     * (misma lógica que búsqueda pública de inventario).
+     */
+    public getBrandsForInventoryFilter(): Observable<BrandsResponse> {
+        return this._http.get<BrandsResponse>(`${ this.baseUrl }/api/vehicle_brands/inventory_filter`);
+    }
+
     public getModels(brand: string):Observable<ModelsResponse>{
-        return this._http.get<ModelsResponse>(`${ this.baseUrl }/api/line_models/by_brand/${brand}`);
+        return this._http.get<ModelsResponse>(`${ this.baseUrl }/api/line_models/by_brand/${encodeURIComponent(brand)}`);
     }
 
     public getModelsByBrand(brand: string):Observable<ModelsResponse>{
-        return this._http.get<ModelsResponse>(`${ this.baseUrl }/api/line_models/by_brand/${brand}`);
+        return this._http.get<ModelsResponse>(`${ this.baseUrl }/api/line_models/by_brand/${encodeURIComponent(brand)}`);
+    }
+
+    /** Line models en inventario público (activos, sin valuación) para el desplegable del home. */
+    public getLineModelsByBrandForInventoryFilter(brand: string): Observable<ModelsResponse> {
+        return this._http.get<ModelsResponse>(
+            `${ this.baseUrl }/api/line_models/inventory_filter_by_brand/${encodeURIComponent(brand)}`
+        );
     }
 
     public getVersions(model: string):Observable<VersionsResponse>{

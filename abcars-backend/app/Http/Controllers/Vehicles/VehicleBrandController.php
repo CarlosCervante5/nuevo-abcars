@@ -6,6 +6,7 @@ use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Vehicles\Brands\StoreVehicleBrandRequest;
 use App\Http\Requests\Vehicles\Brands\UpdateVehicleBrandRequest;
+use App\Models\Vehicle;
 use App\Models\VehicleBrand;
 use Illuminate\Validation\ValidationException;
 
@@ -29,6 +30,39 @@ class VehicleBrandController extends Controller
         } catch (\Exception $e) {
             // Manejar errores y retornar respuesta de error
             return ApiResponseHelper::apiError('Error al obtener la lista de marcas de vehículo', $e->getMessage(), 500, 'GET_VEHICLE_BRANDS_ERROR');
+        }
+    }
+
+    /**
+     * Marcas que tienen al menos un vehículo activo en página y sin registro de valuación (mismo criterio que búsqueda pública de inventario).
+     */
+    public function inventoryFilter()
+    {
+        try {
+            $brandIds = Vehicle::query()
+                ->where('page_status', 'active')
+                ->whereDoesntHave('valuations')
+                ->whereNotNull('brand_id')
+                ->distinct()
+                ->pluck('brand_id');
+
+            if ($brandIds->isEmpty()) {
+                return ApiResponseHelper::apiSuccess(200, 'Marcas de filtro de inventario obtenidas', ['vehicle_brands' => []]);
+            }
+
+            $vehicleBrands = VehicleBrand::query()
+                ->whereIn('id', $brandIds)
+                ->withCount(['vehicles' => function ($q) {
+                    $q->where('page_status', 'active')
+                        ->whereDoesntHave('valuations');
+                }])
+                ->orderBy('name')
+                ->get();
+            $vehicleBrands->each->makeVisible(['id']);
+
+            return ApiResponseHelper::apiSuccess(200, 'Marcas de filtro de inventario obtenidas', ['vehicle_brands' => $vehicleBrands]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al obtener marcas para el filtro de inventario', $e->getMessage(), 500, 'GET_INVENTORY_FILTER_BRANDS_ERROR');
         }
     }
 

@@ -338,6 +338,9 @@ class VehicleService
     {
         // Crear la consulta base
         $query = Vehicle::query();
+
+        // Inventario público: excluir unidades con valuación asignada
+        $query->whereDoesntHave('valuations');
         
         // Aplicar las condiciones
         $query->with($data['relationship_names']);
@@ -414,6 +417,7 @@ class VehicleService
 
         $vehicles = Vehicle::with(['brand', 'model','images','firstImage'])
             ->where('page_status', 'active')
+            ->whereDoesntHave('valuations')
             ->where('category', 'pre_owned')
             ->whereHas('images')
             ->get();
@@ -467,6 +471,7 @@ class VehicleService
     {
         $vehicles = Vehicle::with(['brand', 'model', 'images', 'firstImage'])
             ->where('page_status', 'active')
+            ->whereDoesntHave('valuations')
             ->where('category', 'pre_owned')
             ->where('sale_price', '>=', 800000)
             ->whereHas('images')
@@ -523,7 +528,10 @@ class VehicleService
     public function minMaxPrices($data)
     {
         // Crear la consulta base
-        $vehicles = Vehicle::where($this->statusCondition($data['status']))->get();      
+        $vehicles = Vehicle::query()
+            ->where($this->statusCondition($data['status']))
+            ->whereDoesntHave('valuations')
+            ->get();      
 
         $minMax = [];
 
@@ -544,6 +552,8 @@ class VehicleService
     {
         // Crear la consulta base
         $query = Vehicle::query();
+
+        $query->whereDoesntHave('valuations');
         
         // Aplicar las condiciones
         $query->with($data['relationship_names']);
@@ -559,7 +569,12 @@ class VehicleService
             return $vehicles;
         }
 
-        return Vehicle::with($data['relationship_names'])->whereHas('images')->inRandomOrder()->limit(10)->get();
+        return Vehicle::with($data['relationship_names'])
+            ->whereDoesntHave('valuations')
+            ->whereHas('images')
+            ->inRandomOrder()
+            ->limit(10)
+            ->get();
 
     }
 

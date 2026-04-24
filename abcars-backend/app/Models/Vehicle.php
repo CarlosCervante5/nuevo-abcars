@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Valuations\VehicleValuation;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -263,6 +264,14 @@ class Vehicle extends Model
     {
         return $this->belongsToMany(MarketingCampaign::class, env('DB_TABLE_PREFIX', '') . 'vehicle_campaign',  'vehicle_id', 'campaign_id')->active();
 
+    }
+
+    /**
+     * Valuaciones vinculadas a este vehículo (inventario en proceso de valuación / compra).
+     */
+    public function valuations()
+    {
+        return $this->hasMany(VehicleValuation::class, 'vehicle_id');
     }
 
     /**

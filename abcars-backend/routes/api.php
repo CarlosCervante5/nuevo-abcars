@@ -142,6 +142,8 @@ Route::prefix('permissions')->middleware(['auth:sanctum', 'role:administrator|su
 Route::prefix('vehicle_brands')->group(function () {
     
     Route::get('/', [VehicleBrandController::class, 'index']);
+    /** Marcas que tienen al menos un vehículo activo (page_status) sin valuación; para filtros de inventario público */
+    Route::get('inventory_filter', [VehicleBrandController::class, 'inventoryFilter']);
     Route::get('/{id}', [VehicleBrandController::class, 'show']);
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -177,6 +179,8 @@ Route::prefix('brand_lines')->group(function () {
 Route::prefix('line_models')->group(function () {
     
     Route::get('/', [LineModelController::class, 'index']);
+    /** Modelos (line_models) presentes en vehículos activos sin valuación, por nombre de marca */
+    Route::get('/inventory_filter_by_brand/{brand}', [LineModelController::class, 'inventoryFilterByBrand']);
     Route::get('/{id}', [LineModelController::class, 'show']);
     Route::get('/by_line/{line}', [LineModelController::class, 'byLine']);
     Route::get('/by_brand/{brand}', [LineModelController::class, 'byBrand']);

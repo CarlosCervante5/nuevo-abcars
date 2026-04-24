@@ -831,7 +831,7 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
     if (!this.selectedBrand) {
       return;
     }
-    this.vehicleService.getModelsByBrand(this.selectedBrand).subscribe({
+    this.vehicleService.getLineModelsByBrandForInventoryFilter(this.selectedBrand).subscribe({
       next: (res) => {
         const list = res?.data?.line_models || [];
         const names = list
@@ -997,7 +997,7 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
   }
 
   loadInventoryBrands(): void {
-    this.vehicleService.getBrands().subscribe({
+    this.vehicleService.getBrandsForInventoryFilter().subscribe({
       next: (res) => {
         const list = res?.data?.vehicle_brands || [];
         this.inventoryBrands = [...list].sort((a, b) =>

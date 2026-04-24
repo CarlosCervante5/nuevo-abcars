@@ -193,7 +193,7 @@ export class ModernFooterComponent implements OnInit {
   }
 
   private loadBrands(): void {
-    this.vehicleService.getBrands().subscribe({
+    this.vehicleService.getBrandsForInventoryFilter().subscribe({
       next: (response: BrandsResponse) => {
         this.availableBrands = response?.data?.vehicle_brands ?? [];
       },
