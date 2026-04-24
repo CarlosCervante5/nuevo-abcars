@@ -19,8 +19,8 @@ class VehicleBrandController extends Controller
     public function index()
     {
         try {
-            // Obtener todos las marcas de vehículos
-            $vehicleBrands = VehicleBrand::all();
+            // Obtener todas las marcas (con conteo de vehículos vinculados por brand_id)
+            $vehicleBrands = VehicleBrand::withCount('vehicles')->get();
             $vehicleBrands->each->makeVisible(['id']);
 
             // Retornar respuesta exitosa

@@ -49,7 +49,7 @@
             [disabled]="!selectedBrand"
           >
             <option value="">Seleccionar</option>
-            <option *ngFor="let model of getAvailableModels()" [value]="model">{{ model }}</option>
+            <option *ngFor="let model of getAvailableModels()" [value]="model">{{ model | uppercase }}</option>
           </select>
         </div>
 

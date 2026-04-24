@@ -7,6 +7,9 @@
           Catálogo de marcas (<code class="text-xs bg-gray-100 px-1 rounded">vehicle_brands</code>) y
           modelos de línea (<code class="text-xs bg-gray-100 px-1 rounded">line_models</code>).
           Los modelos se vinculan a una <strong>línea</strong> (ej. &quot;Sentra&quot;) dentro de la marca.
+          Usa <strong>Nueva…</strong> para crear, o <strong>Editar</strong> / <strong>Eliminar</strong> al final
+          de cada fila. La columna <strong>Vehículos</strong> indica cuántos coches del inventario están
+          vinculados a cada marca, línea o modelo (claves foráneas en <code class="text-xs">vehicles</code>).
         </p>
         <nav class="mt-2 text-sm text-gray-500" aria-label="breadcrumb">
           <ol class="flex flex-wrap items-center gap-2">
@@ -41,8 +44,9 @@
           </div>
 
           <div
-            *ngIf="isCreatingBrand || editingBrandId"
-            class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200"
+            *ngIf="isCreatingBrand || editingBrandId !== null"
+            id="bm-form-brand"
+            class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200 scroll-mt-4"
           >
             <h3 class="font-semibold text-gray-800 mb-3">
               {{ isCreatingBrand ? 'Nueva marca' : 'Editar marca' }}
@@ -63,7 +67,7 @@
                   (optionSelected)="onBrandNameSuggestionPicked($event)"
                 >
                   <mat-option *ngFor="let s of brandNameSuggestions" [value]="s.name">
-                    {{ s.name }}
+                    {{ formatBrandName(s.name) }}
                   </mat-option>
                 </mat-autocomplete>
                 <p class="mt-1 text-xs text-gray-500">Se sugieren marcas existentes para evitar duplicados con distinta ortografía.</p>
@@ -107,6 +111,12 @@
                     Nombre
                   </th>
                   <th
+                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap"
+                    title="Vehículos en inventario con esta marca (brand_id)"
+                  >
+                    Vehículos
+                  </th>
+                  <th
                     class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase max-w-sm"
                   >
                     Imagen
@@ -119,7 +129,10 @@
               <tbody class="divide-y divide-gray-200">
                 <tr *ngFor="let b of brands" class="hover:bg-gray-50">
                   <td class="px-4 py-3 text-sm font-medium text-gray-900">
-                    {{ b.name }}
+                    {{ formatBrandName(b.name) }}
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-800 tabular-nums">
+                    {{ b.vehicles_count ?? 0 }}
                   </td>
                   <td class="px-4 py-3 text-sm text-gray-600 truncate max-w-sm" [title]="b.image_path || ''">
                     {{ b.image_path || '—' }}
@@ -129,18 +142,18 @@
                       <button
                         type="button"
                         (click)="startEditBrand(b)"
-                        class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-                        title="Editar"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-800 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
                       >
-                        <i class="fi fi-rr-pen"></i>
+                        <i class="fi fi-rr-pen" aria-hidden="true"></i>
+                        Editar
                       </button>
                       <button
                         type="button"
                         (click)="deleteBrand(b)"
-                        class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
-                        title="Eliminar"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-800 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100"
                       >
-                        <i class="fi fi-rr-trash"></i>
+                        <i class="fi fi-rr-trash" aria-hidden="true"></i>
+                        Eliminar
                       </button>
                     </div>
                   </td>
@@ -173,8 +186,9 @@
           </div>
 
           <div
-            *ngIf="isCreatingLine || editingLineId"
-            class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200"
+            *ngIf="isCreatingLine || editingLineId !== null"
+            id="bm-form-line"
+            class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200 scroll-mt-4"
           >
             <h3 class="font-semibold text-gray-800 mb-3">
               {{ isCreatingLine ? 'Nueva línea' : 'Editar línea' }}
@@ -187,7 +201,7 @@
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
                   <option value="">— Selecciona —</option>
-                  <option *ngFor="let b of brands" [value]="b.id">{{ b.name }}</option>
+                  <option *ngFor="let b of brands" [value]="b.id">{{ formatBrandName(b.name) }}</option>
                 </select>
               </div>
               <div>
@@ -237,14 +251,23 @@
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Nombre de la línea
                   </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap"
+                    title="Vehículos con esta línea (line_id)"
+                  >
+                    Vehículos
+                  </th>
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase max-w-sm">Imagen</th>
                   <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
                 <tr *ngFor="let l of sortedBrandLines" class="hover:bg-gray-50">
-                  <td class="px-4 py-3 text-sm text-gray-800">{{ brandNameStored(l.brand_id) }}</td>
+                  <td class="px-4 py-3 text-sm text-gray-800">{{ brandName(l.brand_id) }}</td>
                   <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ l.name }}</td>
+                  <td class="px-4 py-3 text-sm text-gray-800 tabular-nums">
+                    {{ l.vehicles_count ?? 0 }}
+                  </td>
                   <td class="px-4 py-3 text-sm text-gray-600 truncate max-w-sm" [title]="l.image_path || ''">
                     {{ l.image_path || '—' }}
                   </td>
@@ -253,18 +276,18 @@
                       <button
                         type="button"
                         (click)="startEditLine(l)"
-                        class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-                        title="Editar"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-800 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
                       >
-                        <i class="fi fi-rr-pen"></i>
+                        <i class="fi fi-rr-pen" aria-hidden="true"></i>
+                        Editar
                       </button>
                       <button
                         type="button"
                         (click)="deleteLine(l)"
-                        class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
-                        title="Eliminar"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-800 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100"
                       >
-                        <i class="fi fi-rr-trash"></i>
+                        <i class="fi fi-rr-trash" aria-hidden="true"></i>
+                        Eliminar
                       </button>
                     </div>
                   </td>
@@ -304,15 +327,16 @@
               >
                 <option value="">Todas las marcas</option>
                 <option *ngFor="let b of brands" [value]="b.id">
-                  {{ b.name }}
+                  {{ formatBrandName(b.name) }}
                 </option>
               </select>
             </div>
           </div>
 
           <div
-            *ngIf="isCreatingModel || editingModelId"
-            class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200"
+            *ngIf="isCreatingModel || editingModelId !== null"
+            id="bm-form-model"
+            class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200 scroll-mt-4"
           >
             <h3 class="font-semibold text-gray-800 mb-3">
               {{ isCreatingModel ? 'Nuevo modelo' : 'Editar modelo' }}
@@ -327,7 +351,7 @@
                 >
                   <option value="">— Selecciona —</option>
                   <option *ngFor="let b of brands" [value]="b.id">
-                    {{ displayName(b.name) }}
+                    {{ formatBrandName(b.name) }}
                   </option>
                 </select>
               </div>
@@ -413,34 +437,45 @@
                   </th>
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Modelo</th>
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Año</th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap"
+                    title="Vehículos con este modelo de catálogo (model_id)"
+                  >
+                    Vehículos
+                  </th>
                   <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
                 <tr *ngFor="let m of filteredModels" class="hover:bg-gray-50">
                   <td class="px-4 py-3 text-sm text-gray-900">
-                    {{ brandNameStored(m.brand_id) }}
+                    {{ brandName(m.brand_id) }}
                   </td>
                   <td class="px-4 py-3 text-sm text-gray-700">{{ lineName(m.line_id) }}</td>
                   <td class="px-4 py-3 text-sm font-medium text-gray-900">
                     {{ displayName(m.name) }}
                   </td>
                   <td class="px-4 py-3 text-sm text-gray-600">{{ m.year }}</td>
+                  <td class="px-4 py-3 text-sm text-gray-800 tabular-nums">
+                    {{ m.vehicles_count ?? 0 }}
+                  </td>
                   <td class="px-4 py-3 text-right">
                     <div class="flex justify-end gap-2">
                       <button
                         type="button"
                         (click)="startEditModel(m)"
-                        class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-800 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
                       >
-                        <i class="fi fi-rr-pen"></i>
+                        <i class="fi fi-rr-pen" aria-hidden="true"></i>
+                        Editar
                       </button>
                       <button
                         type="button"
                         (click)="deleteModel(m)"
-                        class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-800 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100"
                       >
-                        <i class="fi fi-rr-trash"></i>
+                        <i class="fi fi-rr-trash" aria-hidden="true"></i>
+                        Eliminar
                       </button>
                     </div>
                   </td>

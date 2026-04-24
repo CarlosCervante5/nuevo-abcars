@@ -66,7 +66,11 @@ class VehicleBrand extends Model
      */
     public function setNameAttribute($value)
     {
-        $this->attributes['name'] = strtolower($value);
+        if ($value === null || $value === '') {
+            $this->attributes['name'] = $value;
+            return;
+        }
+        $this->attributes['name'] = mb_strtoupper((string) $value, 'UTF-8');
     }
 
     public function lines()

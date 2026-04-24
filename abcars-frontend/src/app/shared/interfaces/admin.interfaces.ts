@@ -660,6 +660,8 @@ export interface AdminInventoryBrand {
     name: string;
     image_path: string | null;
     created_at?: string;
+    /** Vehículos en inventario con esta marca (brand_id), vía API withCount */
+    vehicles_count?: number;
 }
 
 export interface AdminInventoryBrandsResponse extends GralResponse {
@@ -672,6 +674,8 @@ export interface AdminBrandLineRow {
     image_path: string | null;
     brand_id: number;
     created_at?: string;
+    /** Vehículos con esta línea (line_id) */
+    vehicles_count?: number;
 }
 
 export interface AdminBrandLinesResponse extends GralResponse {
@@ -686,6 +690,8 @@ export interface AdminLineModelRow {
     line_id: number | null;
     brand_id: number | null;
     created_at?: string;
+    /** Vehículos con este modelo de catálogo (model_id) */
+    vehicles_count?: number;
 }
 
 export interface AdminLineModelsResponse extends GralResponse {

@@ -21,8 +21,8 @@ class LineModelController extends Controller
     public function index()
     {
         try {
-            // Obtener todos los modelos de la línea
-            $lineModels = LineModel::all();
+            // Modelos de línea (con conteo de vehículos vinculados por model_id)
+            $lineModels = LineModel::withCount('vehicles')->get();
             $lineModels->each->makeVisible(['id', 'brand_id', 'line_id']);
 
             // Retornar respuesta exitosa

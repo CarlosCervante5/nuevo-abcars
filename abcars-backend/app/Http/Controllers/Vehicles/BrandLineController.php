@@ -20,8 +20,8 @@ class BrandLineController extends Controller
     public function index()
     {
         try {
-            // Obtener todos las líneas de marca
-            $brandLines = BrandLine::all();
+            // Líneas de marca (con conteo de vehículos vinculados por line_id)
+            $brandLines = BrandLine::withCount('vehicles')->get();
             $brandLines->each->makeVisible(['id', 'brand_id']);
 
             // Retornar respuesta exitosa

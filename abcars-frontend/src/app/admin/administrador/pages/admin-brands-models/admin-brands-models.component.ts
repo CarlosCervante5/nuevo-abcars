@@ -51,6 +51,22 @@ export class AdminBrandsModelsComponent implements OnInit {
     this.loadAll();
   }
 
+  /** Asegura id de API (string/number) → número; evita `NaN` y formularios que no se abren. */
+  private parseRowId(v: unknown, label: string): number | null {
+    const n = typeof v === 'number' ? v : Number(v);
+    if (!Number.isInteger(n) || n < 1) {
+      console.error(`[admin-brands-models] id inválido en ${label}`, v);
+      return null;
+    }
+    return n;
+  }
+
+  private scrollToForm(anchor: string): void {
+    setTimeout(() => {
+      document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
+  }
+
   loadAll(): void {
     this.loading = true;
     forkJoin({
@@ -113,15 +129,26 @@ export class AdminBrandsModelsComponent implements OnInit {
     this.isCreatingBrand = true;
     this.editingBrandId = null;
     this.brandForm = { name: '', image_path: '' };
+    this.scrollToForm('bm-form-brand');
   }
 
   startEditBrand(b: AdminInventoryBrand): void {
+    const id = this.parseRowId(b.id, 'marca');
+    if (id == null) {
+      void Swal.fire({
+        icon: 'error',
+        title: 'No se puede editar',
+        text: 'El catálogo no trajo un identificador válido para esta marca. Recarga la página e inténtalo de nuevo.'
+      });
+      return;
+    }
     this.isCreatingBrand = false;
-    this.editingBrandId = b.id;
+    this.editingBrandId = id;
     this.brandForm = {
-      name: b.name ?? '',
+      name: this.formatBrandName(b.name),
       image_path: b.image_path ?? ''
     };
+    this.scrollToForm('bm-form-brand');
   }
 
   cancelBrandForm(): void {
@@ -148,6 +175,7 @@ export class AdminBrandsModelsComponent implements OnInit {
       Swal.fire({ icon: 'warning', title: 'Nombre requerido' });
       return;
     }
+    name = name.toLocaleUpperCase('es-MX');
 
     if (this.isCreatingBrand) {
       const duplicate = findExactBrandMatch(name, this.brands);
@@ -173,7 +201,7 @@ export class AdminBrandsModelsComponent implements OnInit {
           cancelButtonText: 'Volver a editar'
         });
         if (r.isConfirmed) {
-          name = similar.name;
+          name = this.formatBrandName(similar.name);
           this.brandForm.name = name;
         } else if (!r.isDenied) {
           return;
@@ -220,7 +248,7 @@ export class AdminBrandsModelsComponent implements OnInit {
   deleteBrand(b: AdminInventoryBrand): void {
     Swal.fire({
       title: '¿Eliminar marca?',
-      text: `Se eliminará «${this.displayName(b.name)}» (lógico). Si hay vehículos o líneas vinculadas, puede fallar por integridad.`,
+      text: `Se eliminará «${this.formatBrandName(b.name)}» (lógico). Si hay vehículos o líneas vinculadas, puede fallar por integridad.`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
@@ -263,16 +291,27 @@ export class AdminBrandsModelsComponent implements OnInit {
       brand_id: first ? String(first.id) : '',
       image_path: ''
     };
+    this.scrollToForm('bm-form-line');
   }
 
   startEditLine(l: AdminBrandLineRow): void {
+    const id = this.parseRowId(l.id, 'línea de marca');
+    if (id == null) {
+      void Swal.fire({
+        icon: 'error',
+        title: 'No se puede editar',
+        text: 'No hay un identificador válido para esta línea. Recarga la página.'
+      });
+      return;
+    }
     this.isCreatingLine = false;
-    this.editingLineId = l.id;
+    this.editingLineId = id;
     this.lineForm = {
       name: l.name ?? '',
       brand_id: l.brand_id != null ? String(l.brand_id) : '',
       image_path: l.image_path ?? ''
     };
+    this.scrollToForm('bm-form-line');
   }
 
   cancelLineForm(): void {
@@ -367,11 +406,21 @@ export class AdminBrandsModelsComponent implements OnInit {
       image_path: '',
       filterBrandId: firstBrand ? String(firstBrand.id) : ''
     };
+    this.scrollToForm('bm-form-model');
   }
 
   startEditModel(m: AdminLineModelRow): void {
+    const id = this.parseRowId(m.id, 'modelo de línea');
+    if (id == null) {
+      void Swal.fire({
+        icon: 'error',
+        title: 'No se puede editar',
+        text: 'No hay un identificador válido para este modelo. Recarga la página.'
+      });
+      return;
+    }
     this.isCreatingModel = false;
-    this.editingModelId = m.id;
+    this.editingModelId = id;
     const brandId = m.brand_id ?? this.lineById(m.line_id)?.brand_id;
     this.modelForm = {
       name: m.name ?? '',
@@ -380,6 +429,7 @@ export class AdminBrandsModelsComponent implements OnInit {
       image_path: m.image_path ?? '',
       filterBrandId: brandId != null ? String(brandId) : ''
     };
+    this.scrollToForm('bm-form-model');
   }
 
   cancelModelForm(): void {
@@ -467,21 +517,23 @@ export class AdminBrandsModelsComponent implements OnInit {
     });
   }
 
+  /**
+   * Marca en mayúsculas (coherente con inventario y con cómo se persiste en
+   * `vehicle_brands` vía mutator en el backend).
+   */
+  formatBrandName(raw: string | null | undefined): string {
+    if (raw == null || raw === '') {
+      return '';
+    }
+    return String(raw).toLocaleUpperCase('es-MX');
+  }
+
   brandName(brandId: number | null | undefined): string {
     if (brandId == null) {
       return '—';
     }
     const b = this.brands.find((x) => x.id === brandId);
-    return b ? this.displayName(b.name) : '—';
-  }
-
-  /** Nombre de marca tal como se guarda (sin capitalizar) para listados. */
-  brandNameStored(brandId: number | null | undefined): string {
-    if (brandId == null) {
-      return '—';
-    }
-    const b = this.brands.find((x) => x.id === brandId);
-    return b?.name ? String(b.name) : '—';
+    return b ? this.formatBrandName(b.name) : '—';
   }
 
   lineById(lineId: number | null | undefined): AdminBrandLineRow | undefined {
