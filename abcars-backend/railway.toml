@@ -7,3 +7,6 @@ builder = "nixpacks"
 [deploy]
 # Un solo comando; Railway solo permite 1 elemento en el array
 preDeployCommand = ["chmod +x ./railway/init-app.sh && sh ./railway/init-app.sh"]
+# Sirve toda la petición vía public/index.php (rutas /api/*, /up, etc.). Si falta, Nixpacks puede
+# dejar un docroot equivocado y devolver 404 aunque el código tenga la ruta registrada.
+startCommand = "php artisan serve --host=0.0.0.0 --port $PORT"
