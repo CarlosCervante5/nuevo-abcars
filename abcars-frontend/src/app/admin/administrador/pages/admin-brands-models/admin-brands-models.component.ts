@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { PageEvent } from '@angular/material/paginator';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { forkJoin } from 'rxjs';
 import { AdminService } from '@services/admin.service';
@@ -30,6 +31,26 @@ export class AdminBrandsModelsComponent implements OnInit {
   modelFilterBrandId: number | null = null;
   /** Valor del select "Ver por marca" (string para ngModel) */
   modelFilterSelect = '';
+  /** Búsqueda de texto en la tabla de modelos (nombre, año, línea, marca) */
+  modelListSearch = '';
+
+  /** Filtro / paginación — marcas */
+  brandListSearch = '';
+  brandPageIndex = 0;
+  brandPageSize = 10;
+  readonly brandPageSizeOptions: number[] = [10, 25, 50, 100];
+
+  /** Filtro / paginación — líneas de marca */
+  lineListSearch = '';
+  lineListBrandFilter: string = '';
+  linePageIndex = 0;
+  linePageSize = 10;
+  readonly linePageSizeOptions: number[] = [10, 25, 50, 100];
+
+  /** Paginación — modelos (el filtro por marca ya existía) */
+  modelListPageIndex = 0;
+  modelListPageSize = 10;
+  readonly modelListPageSizeOptions: number[] = [10, 25, 50, 100];
 
   isCreatingBrand = false;
   editingBrandId: number | null = null;
@@ -79,6 +100,9 @@ export class AdminBrandsModelsComponent implements OnInit {
         this.brandLines = res.lines.data?.brand_lines ?? [];
         this.lineModels = res.models.data?.line_models ?? [];
         this.loading = false;
+        this.brandPageIndex = 0;
+        this.linePageIndex = 0;
+        this.modelListPageIndex = 0;
         this.recomputeSortedBrandLines();
         this.recomputeSortedModels();
       },
@@ -121,6 +145,160 @@ export class AdminBrandsModelsComponent implements OnInit {
     return this.sortedModelRows.filter(
       (m) => m.brand_id === this.modelFilterBrandId
     );
+  }
+
+  /** Modelos: filtro por marca + búsqueda de texto. */
+  get modelRowsFiltered(): AdminLineModelRow[] {
+    const q = (this.modelListSearch || '').trim().toLowerCase();
+    if (!q) {
+      return this.filteredModels;
+    }
+    return this.filteredModels.filter((m) => {
+      const y = String(m.year ?? '');
+      return (
+        (m.name || '').toLowerCase().includes(q) ||
+        y.toLowerCase().includes(q) ||
+        this.brandName(m.brand_id).toLowerCase().includes(q) ||
+        this.lineName(m.line_id).toLowerCase().includes(q)
+      );
+    });
+  }
+
+  get modelRowsPaged(): AdminLineModelRow[] {
+    return this.applyPage(
+      this.modelRowsFiltered,
+      this.modelListPageIndex,
+      this.modelListPageSize
+    );
+  }
+
+  get sortedBrandsList(): AdminInventoryBrand[] {
+    return [...this.brands].sort((a, b) =>
+      this.formatBrandName(a.name).localeCompare(this.formatBrandName(b.name), 'es', {
+        sensitivity: 'base'
+      })
+    );
+  }
+
+  get brandRowsFiltered(): AdminInventoryBrand[] {
+    const q = (this.brandListSearch || '').trim().toLowerCase();
+    if (!q) {
+      return this.sortedBrandsList;
+    }
+    return this.sortedBrandsList.filter((b) => {
+      const n = (b.name || '').toLowerCase();
+      const img = (b.image_path || '').toLowerCase();
+      return n.includes(q) || img.includes(q);
+    });
+  }
+
+  get brandRowsPaged(): AdminInventoryBrand[] {
+    return this.applyPage(
+      this.brandRowsFiltered,
+      this.brandPageIndex,
+      this.brandPageSize
+    );
+  }
+
+  get lineRowsFiltered(): AdminBrandLineRow[] {
+    let rows = this.sortedBrandLines;
+    const brandSel = this.lineListBrandFilter ? Number(this.lineListBrandFilter) : NaN;
+    if (Number.isInteger(brandSel) && brandSel > 0) {
+      rows = rows.filter((l) => l.brand_id === brandSel);
+    }
+    const q = (this.lineListSearch || '').trim().toLowerCase();
+    if (!q) {
+      return rows;
+    }
+    return rows.filter((l) => {
+      const n = (l.name || '').toLowerCase();
+      const img = (l.image_path || '').toLowerCase();
+      const brand = this.brandName(l.brand_id).toLowerCase();
+      return n.includes(q) || img.includes(q) || brand.includes(q);
+    });
+  }
+
+  get lineRowsPaged(): AdminBrandLineRow[] {
+    return this.applyPage(
+      this.lineRowsFiltered,
+      this.linePageIndex,
+      this.linePageSize
+    );
+  }
+
+  private applyPage<T>(data: T[], pageIndex: number, pageSize: number): T[] {
+    if (pageSize <= 0) {
+      return data;
+    }
+    const total = data.length;
+    const maxPage = Math.max(0, Math.ceil(total / pageSize) - 1);
+    const idx = Math.min(pageIndex, maxPage);
+    const start = idx * pageSize;
+    return data.slice(start, start + pageSize);
+  }
+
+  onBrandListFilterChange(): void {
+    this.brandPageIndex = 0;
+  }
+
+  onBrandPage(e: PageEvent): void {
+    this.brandPageIndex = e.pageIndex;
+    this.brandPageSize = e.pageSize;
+  }
+
+  onLineListFilterChange(): void {
+    this.linePageIndex = 0;
+  }
+
+  onLinePage(e: PageEvent): void {
+    this.linePageIndex = e.pageIndex;
+    this.linePageSize = e.pageSize;
+  }
+
+  onModelListFilterChange(): void {
+    this.modelListPageIndex = 0;
+  }
+
+  onModelPage(e: PageEvent): void {
+    this.modelListPageIndex = e.pageIndex;
+    this.modelListPageSize = e.pageSize;
+  }
+
+  /** Incluidos para alinear [pageIndex] de mat-paginator cuando el total baja. */
+  get brandPaginatorIndex(): number {
+    return this.clampedPageIndex(
+      this.brandPageIndex,
+      this.brandRowsFiltered.length,
+      this.brandPageSize
+    );
+  }
+
+  get linePaginatorIndex(): number {
+    return this.clampedPageIndex(
+      this.linePageIndex,
+      this.lineRowsFiltered.length,
+      this.linePageSize
+    );
+  }
+
+  get modelPaginatorIndex(): number {
+    return this.clampedPageIndex(
+      this.modelListPageIndex,
+      this.modelRowsFiltered.length,
+      this.modelListPageSize
+    );
+  }
+
+  private clampedPageIndex(
+    current: number,
+    totalItems: number,
+    pageSize: number
+  ): number {
+    if (totalItems === 0 || pageSize <= 0) {
+      return 0;
+    }
+    const maxP = Math.max(0, Math.ceil(totalItems / pageSize) - 1);
+    return Math.min(Math.max(0, current), maxP);
   }
 
   // --- Marcas ---
@@ -558,6 +736,7 @@ export class AdminBrandsModelsComponent implements OnInit {
   setModelFilter(brandId: string | number): void {
     const s = brandId === null || brandId === undefined ? '' : String(brandId);
     this.modelFilterSelect = s;
+    this.modelListPageIndex = 0;
     if (s === '') {
       this.modelFilterBrandId = null;
       return;

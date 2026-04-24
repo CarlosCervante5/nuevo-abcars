@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { RegisterResponse } from '@interfaces/auth.interface';
@@ -28,11 +28,9 @@ export class AppointmentFormComponent implements OnInit {
     public maxDate: Date = new Date(new Date().setDate( new Date().getDate() + 365));
     public spinner: boolean = false;
 
-    brandControl = new FormControl();
     public brands: Brand[] = [];
     filteredBrands: Observable<Brand[]> = of([]);
 
-    modelControl = new FormControl();
     public models: Model[] = [];
     filteredModels: Observable<Model[]> = of([]);
 
@@ -136,31 +134,40 @@ export class AppointmentFormComponent implements OnInit {
     }
 
     private filters(): void {
-        this.filteredBrands = this.brandControl.valueChanges.pipe(
-            startWith(''),
+        // Debe vincularse a los mismos FormControlName del template (brand_name / model_name);
+        // los controles sueltos nunca recibían valor, por eso el autocompletado no se actualizaba.
+        const brandNameCtrl = this.form.get('brand_name');
+        const modelNameCtrl = this.form.get('model_name');
+        if (!brandNameCtrl || !modelNameCtrl) {
+            return;
+        }
+        this.filteredBrands = brandNameCtrl.valueChanges.pipe(
+            startWith(brandNameCtrl.value ?? ''),
             map((value) =>
                 suggestBrandsByName(
-                    typeof value === 'string' ? value : '',
+                    typeof value === 'string' ? value : String(value ?? ''),
                     this.brands,
                     { limit: 20 }
                 )
             )
         );
-        this.filteredModels = this.modelControl.valueChanges.pipe(
-            startWith(''),
-            map(value => this._filter(value, this.models))
+        this.filteredModels = modelNameCtrl.valueChanges.pipe(
+            startWith(modelNameCtrl.value ?? ''),
+            map((value) => this._filter(
+                typeof value === 'string' ? value : String(value ?? ''),
+                this.models
+            ))
         );
     }
 
     private _filter<T extends { name: string }>(value: string, options: T[]): T[] {
         const filterValue = value.toLowerCase();
-        return options.filter(option => option.name.toLowerCase().includes(filterValue));
+        return options.filter((option) => option.name.toLowerCase().includes(filterValue));
     }
 
     public onBrandSelected(event: MatAutocompleteSelectedEvent): void {
-        const selectedBrand = event.option.value;
-        
-        this.form.patchValue({ brand: selectedBrand });
+        const selectedBrand = event.option.value as string;
+        this.form.patchValue({ brand_name: selectedBrand, model_name: '' });
         this._vehicleService.getModelsByBrand(selectedBrand)
             .subscribe({
                 next: (modelResponse: ModelsResponse) => {
@@ -174,8 +181,8 @@ export class AppointmentFormComponent implements OnInit {
     }
 
     public onModelSelected(event: MatAutocompleteSelectedEvent): void {
-        const selectedModel = event.option.value;
-        this.form.patchValue({ model: selectedModel});
+        const selectedModel = event.option.value as string;
+        this.form.patchValue({ model_name: selectedModel });
         this.filters();
     }
 
