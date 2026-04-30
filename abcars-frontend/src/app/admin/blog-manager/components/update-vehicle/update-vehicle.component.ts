@@ -119,8 +119,10 @@ export class UpdateVehicleComponent implements OnInit {
   }
 
   private _filter<T extends { name: string }>(value: string, options: T[]): T[] {
-    const filterValue = value.toLowerCase();
-    return options.filter(option => option.name.toLowerCase().includes(filterValue));
+    const filterValue = (value ?? '').toLowerCase();
+    return options.filter(
+      (option) => option != null && option.name && option.name.toLowerCase().includes(filterValue)
+    );
   }
 
   public add( event: MatChipInputEvent ): void {
@@ -185,15 +187,25 @@ export class UpdateVehicleComponent implements OnInit {
       .subscribe({
         next: (detailResponse: FullDetailResponse) => {
           this.vehicle = detailResponse.data;
+          const brandName = this.vehicle.brand?.name ?? '';
+          const modelName = this.vehicle.model?.name ?? '';
+
           this.getBrands();
-          this.getModels(this.vehicle.brand.name);
-          this.getVersions(this.vehicle.model.name);
+          if (brandName) {
+            this.getModels(brandName);
+          }
+          if (modelName) {
+            this.getVersions(modelName);
+          }
           this.getBodies();
           this.getCampaigns();
-          let x = this.vehicle.campaigns;
-          x.forEach(element => {
-            this.camps.push(element.name);
-            this.id_camp.push(element.uuid);
+
+          const campaigns = this.vehicle.campaigns ?? [];
+          campaigns.forEach((element) => {
+            if (element?.name != null && element?.uuid != null) {
+              this.camps.push(element.name);
+              this.id_camp.push(element.uuid);
+            }
           });
 
           setTimeout(() => {
@@ -201,10 +213,10 @@ export class UpdateVehicleComponent implements OnInit {
               uuid: this.vehicle.uuid,
               name: this.vehicle.name,
               description: this.vehicle.description,
-              dealership_name: this.vehicle.dealership.name,
-              location: this.vehicle.dealership.location,
+              dealership_name: this.vehicle.dealership?.name ?? '',
+              location: this.vehicle.dealership?.location ?? '',
               vin: this.vehicle.vin,
-              year: this.vehicle.model.year,
+              year: this.vehicle.model?.year ?? '',
               purchase_date: this.vehicle.purchase_date,
               list_price: this.vehicle.list_price,
               sale_price: this.vehicle.sale_price,
@@ -228,15 +240,18 @@ export class UpdateVehicleComponent implements OnInit {
               transmission: this.vehicle.transmission,
               fuel_type: this.vehicle.fuel_type,
               mileage: this.vehicle.mileage,
-              brand: this.vehicle.brand.name,
-              model: this.vehicle.model.name,
-              version: this.vehicle.version.name,
-              body: this.vehicle.body.name,
+              brand: brandName,
+              model: modelName,
+              version: this.vehicle.version?.name ?? '',
+              body: this.vehicle.body?.name ?? '',
             
             });
 
             this.filters();
           }, 500);
+        },
+        error: (err: unknown) => {
+          reload(err, this._router);
         }
       });
   }
@@ -429,7 +444,7 @@ export class UpdateVehicleComponent implements OnInit {
   }
 
   get isNotVehicle() {
-    if(this.vehicle === undefined){
+    if (this.vehicle === undefined || this.vehicle === null) {
       return true;
     }
     return Object.keys(this.vehicle).length === 0;
