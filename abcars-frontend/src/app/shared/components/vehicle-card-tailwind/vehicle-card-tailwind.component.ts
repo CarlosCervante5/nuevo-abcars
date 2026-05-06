@@ -26,7 +26,7 @@ export interface Vehicle {
       <!-- Image Container -->
       <div class="relative overflow-hidden">
         <img 
-          [src]="vehicle.first_image?.service_image_url || '/assets/placeholder-image.jpg'" 
+          [src]="optimizedVehicleThumbUrl(vehicle.first_image?.service_image_url)" 
           [alt]="vehicle.name"
           class="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110"
         />
@@ -114,6 +114,8 @@ export interface Vehicle {
   `]
 })
 export class VehicleCardTailwindComponent {
+  private readonly placeholderThumb = '/assets/placeholder-image.jpg';
+
   @Input() vehicle!: Vehicle;
 
   constructor(
@@ -121,6 +123,23 @@ export class VehicleCardTailwindComponent {
     private scrollService: ScrollService,
     private referralService: ReferralService
   ) {}
+
+  /**
+   * Entrega desde Cloudinary con f_auto,q_auto (formato/calidad automáticos, on-the-fly + CDN).
+   * Otras URLs se devuelven sin cambiar.
+   */
+  optimizedVehicleThumbUrl(url?: string | null): string {
+    const trimmed = url?.trim();
+    if (!trimmed) return this.placeholderThumb;
+    const lower = trimmed.toLowerCase();
+    if (!lower.includes('res.cloudinary.com') || !lower.includes('/image/upload/')) {
+      return trimmed;
+    }
+    if (/\/image\/upload\/[^/]*f_auto/i.test(trimmed)) {
+      return trimmed;
+    }
+    return trimmed.replace(/(\/image\/upload\/)/i, '$1f_auto,q_auto/');
+  }
 
   formatPrice(price: number): string {
     return new Intl.NumberFormat('es-MX', {
