@@ -2120,10 +2120,11 @@ export class VehicleDetailComponent implements OnInit {
       console.log('✅ [DETAIL] Usando imágenes de la API');
       this.vehicle.apiData.images.forEach((image, index) => {
         console.log(`🖼️ [DETAIL] Imagen ${index + 1}:`, image.service_image_url);
+        const deliveryUrl = this.optimizeCloudinaryDeliveryUrl(image.service_image_url ?? '');
         this.mediaItems.push({
           type: 'image',
-          url: image.service_image_url,
-          thumbnail: image.service_image_url,
+          url: deliveryUrl,
+          thumbnail: deliveryUrl,
           title: `${this.vehicle?.brand} ${this.vehicle?.model} - Imagen ${index + 1}`
         });
       });
@@ -2132,10 +2133,11 @@ export class VehicleDetailComponent implements OnInit {
       console.warn('⚠️ [DETAIL] No hay imágenes de la API, usando fallback');
       const images = this.getGalleryImages();
       images.forEach((image, index) => {
+        const deliveryUrl = this.optimizeCloudinaryDeliveryUrl(image ?? '');
         this.mediaItems.push({
           type: 'image',
-          url: image,
-          thumbnail: image,
+          url: deliveryUrl,
+          thumbnail: deliveryUrl,
           title: `${this.vehicle?.brand} ${this.vehicle?.model} - Imagen ${index + 1}`
         });
       });
@@ -2167,10 +2169,10 @@ export class VehicleDetailComponent implements OnInit {
   }
 
   getVehicleImage(): string {
-    if (this.vehicle?.image_url) {
-      return this.vehicle.image_url;
+    if (this.vehicle?.image_url && this.vehicle.image_url.trim() !== '') {
+      return this.optimizeCloudinaryDeliveryUrl(this.vehicle.image_url.trim());
     }
-    
+
     const brandImages: { [key: string]: string } = {
       'BMW': FALLBACK_HERO_IMAGE,
       'Mercedes-Benz': FALLBACK_HERO_IMAGE,
@@ -2184,6 +2186,20 @@ export class VehicleDetailComponent implements OnInit {
     };
     
     return brandImages[this.vehicle?.brand || ''] || FALLBACK_HERO_IMAGE;
+  }
+
+  /** Cloudinary delivery: f_auto,q_auto en URLs res.cloudinary.com/.../image/upload/. */
+  private optimizeCloudinaryDeliveryUrl(url: string): string {
+    const trimmed = (url ?? '').trim();
+    if (!trimmed) return trimmed;
+    const lower = trimmed.toLowerCase();
+    if (!lower.includes('res.cloudinary.com') || !lower.includes('/image/upload/')) {
+      return trimmed;
+    }
+    if (/\/image\/upload\/[^/]*f_auto/i.test(trimmed)) {
+      return trimmed;
+    }
+    return trimmed.replace(/(\/image\/upload\/)/i, '$1f_auto,q_auto/');
   }
 
   // Método para obtener las imágenes de la galería
