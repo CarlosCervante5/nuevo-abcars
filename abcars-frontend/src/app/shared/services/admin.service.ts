@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { map } from 'rxjs/operators';
 import { environment } from '@environments/environment';
 import { Observable } from 'rxjs';
 import { FormGroup } from '@angular/forms';
@@ -9,6 +10,7 @@ import { DetailsReward, RegisterResponse } from '@interfaces/auth.interface';
 import {detailsRewardResponse, createcampaing , GetcampaingResponse, DeleteVehicleImage, ImageOrderPromo, DeleteCampaign, UploadImages, ImageOrder , GetPromotionsByBrand,GralResponse, RiderResponse, ChangeOrder, rewardsResponse, UsersResponse, DetailResponsive, RolesResponse, RoleDetailResponse, PermissionResponse, DealerShipResponse, Dealership, CustomerResponse, AdminInventoryBrandsResponse, AdminBrandLinesResponse, AdminLineModelsResponse, AdminInventoryBrand} from '@interfaces/admin.interfaces';
 import { UploadVideo,UploadEventImages, CreateEvent , DeleteEvent, GetEvents, MyEvents, DeleteEventImage} from '@interfaces/community.interface';
 import { RewardResponse } from '@interfaces/rewards.interface';
+import { dedupeDealershipsForSelect } from '../utils/public-dealerships';
 
 @Injectable({providedIn: 'root'})
 export class AdminService {
@@ -587,12 +589,24 @@ export class AdminService {
         if (user_token) {
             headers = headers.set('Authorization', `Bearer ${user_token}`);
         }
-        return this._http.post<DealerShipResponse>(`${this.baseUrl}/api/dealerships/search`, {}, { headers });
+        return this._http
+            .post<DealerShipResponse>(`${this.baseUrl}/api/dealerships/search`, {}, { headers })
+            .pipe(
+                map((res) => ({
+                    ...res,
+                    data: Array.isArray(res.data) ? dedupeDealershipsForSelect(res.data) : res.data,
+                }))
+            );
     }
 
     public getDealershipsList(){
         const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem('user_token')}`);
-        return this._http.get<DealerShipResponse>(`${this.baseUrl}/api/dealerships`, { headers });
+        return this._http.get<DealerShipResponse>(`${this.baseUrl}/api/dealerships`, { headers }).pipe(
+            map((res) => ({
+                ...res,
+                data: Array.isArray(res.data) ? dedupeDealershipsForSelect(res.data) : res.data,
+            }))
+        );
     }
 
     public getDealership(id: number){

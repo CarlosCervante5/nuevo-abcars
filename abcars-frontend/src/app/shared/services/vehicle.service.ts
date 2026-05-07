@@ -2,6 +2,8 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { dedupeDealershipsForSelect } from '../utils/public-dealerships';
 import { FormGroup } from '@angular/forms';
 
 //prueba
@@ -239,7 +241,14 @@ constructor(
         const headers = new HttpHeaders()
             .set('content-type', 'application/json')
             .set('X-Requested-With', 'XMLHttpRequest');
-        return this._http.post<DealerShipResponse>(`${this.baseUrl}/api/dealerships/search`, {}, { headers });
+        return this._http
+            .post<DealerShipResponse>(`${this.baseUrl}/api/dealerships/search`, {}, { headers })
+            .pipe(
+                map((res) => ({
+                    ...res,
+                    data: Array.isArray(res.data) ? dedupeDealershipsForSelect(res.data) : res.data,
+                }))
+            );
     }
 }
 

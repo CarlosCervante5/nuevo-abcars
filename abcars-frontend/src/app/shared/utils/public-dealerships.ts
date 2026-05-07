@@ -10,8 +10,10 @@ const PUBLIC_DEALERSHIP_SORT_ORDER: Record<string, number> = {
   'ventas sucursal cholula': 6,
 };
 
-/** Evita filas repetidas si la API devuelve el mismo id o el mismo nombre+dirección dos veces. */
-function dedupeDealershipsForPublic(list: Dealership[]): Dealership[] {
+/**
+ * Evita filas repetidas si la API devuelve el mismo id o el mismo nombre+dirección dos veces.
+ */
+export function dedupeDealershipsList(list: Dealership[]): Dealership[] {
   const byKey = new Map<string, Dealership>();
   for (const d of list) {
     const id = d.id;
@@ -26,8 +28,24 @@ function dedupeDealershipsForPublic(list: Dealership[]): Dealership[] {
   return [...byKey.values()];
 }
 
+/**
+ * Para selects: tras deduplicar por id/dirección, una sola entrada por texto visible (nombre + ciudad).
+ * Evita dos opciones idénticas cuando hay filas duplicadas en BD con ids distintos.
+ */
+export function dedupeDealershipsForSelect(list: Dealership[]): Dealership[] {
+  const step1 = dedupeDealershipsList(list);
+  const byLabel = new Map<string, Dealership>();
+  for (const d of step1) {
+    const label = `${(d.name || '').toLowerCase().trim()}|${(d.location || '').toLowerCase().trim()}`;
+    if (!byLabel.has(label)) {
+      byLabel.set(label, d);
+    }
+  }
+  return [...byLabel.values()];
+}
+
 export function sortDealershipsForPublic(list: Dealership[]): Dealership[] {
-  const unique = dedupeDealershipsForPublic(list);
+  const unique = dedupeDealershipsList(list);
   return [...unique].sort((a, b) => {
     const na = (a.name || '').toLowerCase().trim();
     const nb = (b.name || '').toLowerCase().trim();
