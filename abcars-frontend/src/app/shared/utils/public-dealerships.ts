@@ -10,8 +10,25 @@ const PUBLIC_DEALERSHIP_SORT_ORDER: Record<string, number> = {
   'ventas sucursal cholula': 6,
 };
 
+/** Evita filas repetidas si la API devuelve el mismo id o el mismo nombre+dirección dos veces. */
+function dedupeDealershipsForPublic(list: Dealership[]): Dealership[] {
+  const byKey = new Map<string, Dealership>();
+  for (const d of list) {
+    const id = d.id;
+    const key =
+      id != null && !Number.isNaN(Number(id))
+        ? `id:${id}`
+        : `n:${(d.name || '').toLowerCase().trim()}|a:${(d.address || '').toLowerCase().trim()}`;
+    if (!byKey.has(key)) {
+      byKey.set(key, d);
+    }
+  }
+  return [...byKey.values()];
+}
+
 export function sortDealershipsForPublic(list: Dealership[]): Dealership[] {
-  return [...list].sort((a, b) => {
+  const unique = dedupeDealershipsForPublic(list);
+  return [...unique].sort((a, b) => {
     const na = (a.name || '').toLowerCase().trim();
     const nb = (b.name || '').toLowerCase().trim();
     return (PUBLIC_DEALERSHIP_SORT_ORDER[na] ?? 99) - (PUBLIC_DEALERSHIP_SORT_ORDER[nb] ?? 99);

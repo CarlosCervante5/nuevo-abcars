@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { VehicleService } from '@services/vehicle.service';
 import { ReferralService } from '@services/referral.service';
 import { Brand, BrandsResponse } from '@interfaces/vehicle_data.interface';
@@ -135,7 +136,7 @@ import { sortDealershipsForPublic, branchPublicTitle } from '../../utils/public-
         </div>
 
         <!-- Nuestras sucursales (API, mismo orden que el home) -->
-        <div *ngIf="footerDealerships.length" class="mt-12 pt-8 border-t border-gray-800">
+        <div *ngIf="footerDealerships.length && showDealershipsInFooter" class="mt-12 pt-8 border-t border-gray-800">
           <h4 class="text-lg font-bold text-white mb-6">Nuestras sucursales</h4>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
             <div *ngFor="let d of footerDealerships; trackBy: trackByDealership" class="text-sm">
@@ -175,11 +176,14 @@ export class ModernFooterComponent implements OnInit {
   availableBrands: Brand[] = [];
   maxBrandsToShow = 6;
   footerDealerships: Dealership[] = [];
+  /** En home / showroom el bloque «Nuestras Sucursales» ya está en la página; no repetir en el footer. */
+  showDealershipsInFooter = true;
   readonly branchPublicTitle = branchPublicTitle;
 
   constructor(
     private vehicleService: VehicleService,
-    private referralService: ReferralService
+    private referralService: ReferralService,
+    private router: Router
   ) {}
 
   /** Preserva ?ref= del vendedor al ir a valuación (localStorage comparte entre pestañas). */
@@ -190,6 +194,19 @@ export class ModernFooterComponent implements OnInit {
   ngOnInit(): void {
     this.loadBrands();
     this.loadFooterDealerships();
+    this.refreshFooterDealershipsVisibility(this.router.url);
+    this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((e) => this.refreshFooterDealershipsVisibility(e.urlAfterRedirects));
+  }
+
+  private refreshFooterDealershipsVisibility(url: string): void {
+    let path = url.split('?')[0].split('#')[0];
+    if (!path) {
+      path = '/';
+    }
+    path = path.replace(/\/+$/, '') || '/';
+    this.showDealershipsInFooter = path !== '/' && path !== '/showroom';
   }
 
   private loadBrands(): void {

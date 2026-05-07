@@ -1,4 +1,5 @@
 abcars-valuation-ionic/.env
+abcars-imagen-studio/.env
 
 # Node/JS build artifacts
 **/node_modules/
