@@ -42,7 +42,7 @@ class StoreUserRequest extends FormRequest
             'phone_1' => 'nullable|string|max:20',
             'phone_2' => 'nullable|string|max:20',
             'gender' => 'nullable|in:male,female,H,M',
-            'location' => 'required|string|max:255',
+            'location' => 'required|string|max:90',
             'role_name' => 'required|string|max:255',
             'password' => [
                 'required',

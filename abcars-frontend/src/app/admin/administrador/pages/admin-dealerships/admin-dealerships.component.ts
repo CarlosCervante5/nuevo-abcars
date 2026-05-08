@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService } from '@services/admin.service';
-import { Dealership, DealerShipResponse } from '@interfaces/admin.interfaces';
-import { GralResponse } from '@interfaces/vehicle_data.interface';
+import { Dealership, DealerShipResponse, DealershipServiceType } from '@interfaces/admin.interfaces';
+import { dealershipServiceTypeLabel } from 'src/app/shared/utils/public-dealerships';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -53,13 +53,23 @@ export class AdminDealershipsComponent implements OnInit {
   startCreate(): void {
     this.isCreating = true;
     this.editingId = null;
-    this.formData = { name: '', location: '', description: '', address: '', latitude: null, longitude: null };
+    this.formData = {
+      name: '',
+      location: '',
+      service_type: 'venta',
+      description: '',
+      address: '',
+      latitude: null,
+      longitude: null
+    };
   }
 
   startEdit(d: Dealership): void {
     this.isCreating = false;
     this.editingId = d.id ?? null;
-    this.formData = { ...d };
+    const st: DealershipServiceType =
+      d.service_type === 'servicios' ? 'servicios' : 'venta';
+    this.formData = { ...d, service_type: st };
   }
 
   private tryOpenPendingEditFromQuery(): void {
@@ -100,9 +110,12 @@ export class AdminDealershipsComponent implements OnInit {
       Swal.fire({ icon: 'warning', title: 'Longitud inválida', text: 'La longitud debe estar entre -180 y 180. En México usa valores negativos (ej: -99.13).' });
       return;
     }
+    const serviceType: DealershipServiceType =
+      this.formData.service_type === 'servicios' ? 'servicios' : 'venta';
     const payload: Partial<Dealership> = {
       name: this.formData.name!.trim(),
       location: this.formData.location!.trim(),
+      service_type: serviceType,
       description: this.formData.description?.trim() || null,
       address: this.formData.address?.trim() || null,
       latitude: lat,
@@ -166,6 +179,10 @@ export class AdminDealershipsComponent implements OnInit {
   capitalize(str: string): string {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
+
+  serviceTypeLabel(t: Dealership['service_type']): string {
+    return dealershipServiceTypeLabel(t);
   }
 
   private showError(err: any, action: string): void {

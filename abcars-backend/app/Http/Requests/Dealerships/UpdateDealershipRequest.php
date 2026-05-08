@@ -38,6 +38,7 @@ class UpdateDealershipRequest extends FormRequest
         return [
             'name' => 'sometimes|string|max:255',
             'location' => 'sometimes|string|max:255',
+            'service_type' => 'sometimes|string|in:venta,servicios',
             'description' => 'nullable|string|max:500',
             'address' => 'nullable|string|max:500',
             'latitude' => 'nullable|numeric|between:-90,90',

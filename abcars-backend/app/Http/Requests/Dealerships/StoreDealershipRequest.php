@@ -28,6 +28,9 @@ class StoreDealershipRequest extends FormRequest
                 $merge['longitude'] = -$num;
             }
         }
+        if ($this->input('service_type') === '' || $this->input('service_type') === null) {
+            $merge['service_type'] = \App\Models\Dealership::SERVICE_TYPE_VENTA;
+        }
         if (!empty($merge)) {
             $this->merge($merge);
         }
@@ -38,6 +41,7 @@ class StoreDealershipRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'location' => 'required|string|max:255',
+            'service_type' => 'required|string|in:venta,servicios',
             'description' => 'nullable|string|max:500',
             'address' => 'nullable|string|max:500',
             'latitude' => 'nullable|numeric|between:-90,90',

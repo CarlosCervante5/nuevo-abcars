@@ -28,11 +28,24 @@ class Dealership extends Model
     protected $fillable = [
         'name',
         'location',
+        'service_type',
         'description',
         'address',
         'latitude',
         'longitude',
     ];
+
+    public const SERVICE_TYPE_VENTA = 'venta';
+
+    public const SERVICE_TYPE_SERVICIOS = 'servicios';
+
+    /**
+     * @return list<string>
+     */
+    public static function serviceTypes(): array
+    {
+        return [self::SERVICE_TYPE_VENTA, self::SERVICE_TYPE_SERVICIOS];
+    }
 
     /**
      * The attributes that should be hidden for serialization.

@@ -1,12 +1,10 @@
-    import { Component } from '@angular/core';
-    import { AbstractControl, FormControl, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { Component } from '@angular/core';
+import { AbstractControl, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { DealerShipResponse, roles, RolesResponse , Dealership} from '@interfaces/admin.interfaces';
 import { GralResponse } from '@interfaces/vehicle_data.interface';
 import { AdminService } from '@services/admin.service';
-import { Observable, of} from 'rxjs';
-import { map,startWith } from 'rxjs/operators';
+import { dealershipServiceTypeLabel } from 'src/app/shared/utils/public-dealerships';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -20,17 +18,10 @@ export class AddUserComponent {
     public form !: FormGroup;
     public spinner = false;
     public files: File[] = [];
-    //variables para el select de roles
-    public roles!: roles[];
-    public rolesControl = new FormControl();
-    public filteredRoles: Observable<roles[]> = of([]);
-    public rol!: string;
-
-    //variables para el select de locations
-    public dealership!: Dealership[];
-    public locationControl = new FormControl();
-    public filteredLocation: Observable<Dealership[]> = of([]);
-
+    public roles: roles[] = [];
+    public rolesSorted: roles[] = [];
+    public dealership: Dealership[] = [];
+    public dealershipsForSelect: Dealership[] = [];
 
     constructor(
         private _formBuilder: UntypedFormBuilder,
@@ -61,10 +52,9 @@ export class AddUserComponent {
         const phone = control.value;
 
         if (!phone) {
-            return null; // If the field is empty, it's valid
+            return null;
         }
 
-        // If a phone number is provided, validate the format
         const phonePattern = /^[0-9]+$/;
         const valid = phonePattern.test(phone) && phone.length === 10;
 
@@ -72,7 +62,7 @@ export class AddUserComponent {
         return { invalidPhone: true };
         }
 
-        return null; // Valid phone number
+        return null;
     }
 
     public close():void {
@@ -113,7 +103,7 @@ export class AddUserComponent {
         this.form.get('password')!.value,)
         .subscribe({
             next: (response : GralResponse) =>{
-                Swal.fire({                    
+                Swal.fire({
                     icon: 'success',
                     title: 'Usuario creado con éxito',
                     text: response.message,
@@ -137,7 +127,6 @@ export class AddUserComponent {
         const element = event.currentTarget as HTMLInputElement;
         let fileList: FileList | null = element.files;
         if (fileList) {
-            //this.files = fileList[0];
             this.files = Array.from(fileList);
         }
     }
@@ -152,7 +141,7 @@ export class AddUserComponent {
                     'name':     rol.name
                 }));
                 this.roles = datosR;
-                this.filters();
+                this.refreshSelectLists();
             }
         })
     }
@@ -161,36 +150,23 @@ export class AddUserComponent {
         this._adminservice.getDealerships()
         .subscribe({
             next: (response : DealerShipResponse) =>{
-                this.dealership = response.data;
-                this.filters();
+                this.dealership = response.data || [];
+                this.refreshSelectLists();
             }
         })
     }
 
-    private filters(): void {
-        this.filteredRoles = this.rolesControl.valueChanges.pipe(
-            startWith(''),
-            map(value => this._filter(value, this.roles)),
-          );
-        this.filteredLocation = this.locationControl.valueChanges.pipe(
-        startWith(''),
-        map(value => this._filter(value, this.dealership)),
-        );
+    branchTypeLabel(t: Dealership['service_type']): string {
+        return dealershipServiceTypeLabel(t);
     }
 
-    private _filter<T extends { name: string }>(value: string, options: T[] | undefined): T[] {
-        if (!options) return [];
-        const filterValue = (value || '').toLowerCase();
-        return options.filter(option => option.name.toLowerCase().includes(filterValue));
-    }
-
-    onRolesSelected(event: MatAutocompleteSelectedEvent): void{
-        const selectedRole = event.option.value;
-        this.form.patchValue({ role_name: selectedRole });
-    }
-
-    onLocationSelected(event: MatAutocompleteSelectedEvent): void{
-        const selectedLocation = event.option.value;
-        this.form.patchValue({ location: selectedLocation });
+    private refreshSelectLists(): void {
+        if (this.roles?.length) {
+            this.rolesSorted = [...this.roles].sort((a, b) =>
+                a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+        }
+        const raw = this.dealership ?? [];
+        this.dealershipsForSelect = [...raw].sort((a, b) =>
+            a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
     }
 }

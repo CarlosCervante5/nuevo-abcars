@@ -87,11 +87,13 @@
                 formControlName="location"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900"
               >
-                <option value="" disabled>Seleccione</option>
-                <option *ngFor="let location of filteredLocation | async" [value]="location.name">
-                  {{ location.name }}
+                <option value="" disabled>Seleccione sucursal</option>
+                <option *ngFor="let d of dealershipsForSelect" [value]="d.name">
+                  {{ d.name }}<ng-container *ngIf="d.location"> — {{ d.location }}</ng-container>
+                  ({{ branchTypeLabel(d.service_type) }})
                 </option>
               </select>
+              <p *ngIf="locationInvalid" class="text-xs text-red-600 mt-1">Seleccione la sucursal del usuario.</p>
             </div>
 
             <div class="w-full">
@@ -101,10 +103,11 @@
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900"
               >
                 <option value="" disabled>Seleccione</option>
-                <option *ngFor="let rol of filteredRoles | async" [value]="rol.name">
+                <option *ngFor="let rol of rolesSorted" [value]="rol.name">
                   {{ rol.name }}
                 </option>
               </select>
+              <p *ngIf="role_nameInvalid" class="text-xs text-red-600 mt-1">Seleccione un rol.</p>
             </div>
 
             <div class="w-full">

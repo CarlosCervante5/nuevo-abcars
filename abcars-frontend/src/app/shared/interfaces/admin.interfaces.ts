@@ -643,10 +643,14 @@ export interface DealerShipResponse{
     data:    Dealership[];
 }
 
+/** Tipo de sucursal: venta de vehículos o taller / servicios */
+export type DealershipServiceType = 'venta' | 'servicios';
+
 export interface Dealership {
     id?:         number;
     name:        string;
     location:    string;
+    service_type?: DealershipServiceType;
     description?: string | null;
     address?:    string | null;
     latitude?:   number | null;

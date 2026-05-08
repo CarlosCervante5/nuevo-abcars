@@ -1,4 +1,4 @@
-import { Dealership } from '../interfaces/admin.interfaces';
+import { Dealership, DealershipServiceType } from '../interfaces/admin.interfaces';
 
 /** Orden fijo como en el home histórico (Matriz → … → Cholula). */
 const PUBLIC_DEALERSHIP_SORT_ORDER: Record<string, number> = {
@@ -51,6 +51,16 @@ export function sortDealershipsForPublic(list: Dealership[]): Dealership[] {
     const nb = (b.name || '').toLowerCase().trim();
     return (PUBLIC_DEALERSHIP_SORT_ORDER[na] ?? 99) - (PUBLIC_DEALERSHIP_SORT_ORDER[nb] ?? 99);
   });
+}
+
+/** Etiqueta en español para el tipo de sucursal (venta / servicios). */
+export function dealershipServiceTypeLabel(
+  t: DealershipServiceType | string | undefined | null,
+): string {
+  if (t === 'servicios') {
+    return 'Servicios';
+  }
+  return 'Venta';
 }
 
 /** Título público: campo description del seeder; si no, nombre en mayúsculas. */

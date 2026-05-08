@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AdminService } from '@services/admin.service';
 import { Dealership, DealerShipResponse } from '@interfaces/admin.interfaces';
+import { dealershipServiceTypeLabel } from 'src/app/shared/utils/public-dealerships';
 
 @Component({
   selector: 'app-dealerships-map',
@@ -57,6 +58,10 @@ export class DealershipsMapComponent implements OnInit {
   capitalize(str: string): string {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
+
+  serviceTypeLabel(t: Dealership['service_type']): string {
+    return dealershipServiceTypeLabel(t);
   }
 
   get hasCoordinates(): boolean {
