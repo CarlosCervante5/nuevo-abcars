@@ -1,8 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AdminService } from '@services/admin.service';
-import { Dealership, DealerShipResponse } from '@interfaces/admin.interfaces';
-import { dealershipServiceTypeLabel } from 'src/app/shared/utils/public-dealerships';
+import { Dealership, DealerShipResponse, DealershipServiceType } from '@interfaces/admin.interfaces';
+import {
+  dealershipServiceTypeLabel,
+  dealershipTypesForDisplay,
+} from 'src/app/shared/utils/public-dealerships';
 
 @Component({
   selector: 'app-dealerships-map',
@@ -60,8 +63,23 @@ export class DealershipsMapComponent implements OnInit {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   }
 
-  serviceTypeLabel(t: Dealership['service_type']): string {
+  serviceTypeLabel(t: DealershipServiceType): string {
     return dealershipServiceTypeLabel(t);
+  }
+
+  typesForRow(d: Dealership): DealershipServiceType[] {
+    return dealershipTypesForDisplay(d);
+  }
+
+  chipClass(t: DealershipServiceType): string {
+    switch (t) {
+      case 'servicios':
+        return 'bg-sky-100 text-sky-800';
+      case 'valuaciones':
+        return 'bg-violet-100 text-violet-800';
+      default:
+        return 'bg-emerald-100 text-emerald-800';
+    }
   }
 
   get hasCoordinates(): boolean {

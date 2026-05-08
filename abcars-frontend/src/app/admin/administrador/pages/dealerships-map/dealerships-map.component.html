@@ -40,9 +40,12 @@
             <div class="p-4 bg-gray-50">
               <div class="flex flex-wrap items-center gap-2">
                 <h3 class="font-semibold text-gray-900">{{ capitalize(d.name) }}</h3>
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                  [ngClass]="d.service_type === 'servicios' ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'">
-                  {{ serviceTypeLabel(d.service_type) }}
+                <span
+                  *ngFor="let t of typesForRow(d)"
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                  [ngClass]="chipClass(t)"
+                >
+                  {{ serviceTypeLabel(t) }}
                 </span>
               </div>
               <p class="text-sm text-gray-600 mt-1">{{ capitalize(d.location) }}</p>

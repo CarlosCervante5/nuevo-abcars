@@ -10,6 +10,14 @@ const PUBLIC_DEALERSHIP_SORT_ORDER: Record<string, number> = {
   'ventas sucursal cholula': 6,
 };
 
+const SERVICE_TYPES_ORDER: DealershipServiceType[] = [
+  'venta',
+  'valuaciones',
+  'servicios',
+];
+
+const ALLOWED_SERVICE_TYPES = new Set<DealershipServiceType>(SERVICE_TYPES_ORDER);
+
 /**
  * Evita filas repetidas si la API devuelve el mismo id o el mismo nombre+dirección dos veces.
  */
@@ -53,14 +61,62 @@ export function sortDealershipsForPublic(list: Dealership[]): Dealership[] {
   });
 }
 
-/** Etiqueta en español para el tipo de sucursal (venta / servicios). */
+/** Etiqueta en español para un tipo de sucursal. */
 export function dealershipServiceTypeLabel(
   t: DealershipServiceType | string | undefined | null,
 ): string {
-  if (t === 'servicios') {
-    return 'Servicios';
+  switch (t) {
+    case 'servicios':
+      return 'Servicios';
+    case 'valuaciones':
+      return 'Valuaciones';
+    case 'venta':
+    default:
+      return 'Venta';
   }
-  return 'Venta';
+}
+
+/**
+ * Lista normalizada y ordenada de tipos a partir de la respuesta API.
+ */
+export function normalizeDealershipServiceTypesList(
+  types: unknown,
+  legacy?: string | null,
+): DealershipServiceType[] {
+  const out: DealershipServiceType[] = [];
+  const push = (x: string) => {
+    const t = x.toLowerCase().trim() as DealershipServiceType;
+    if (ALLOWED_SERVICE_TYPES.has(t) && !out.includes(t)) {
+      out.push(t);
+    }
+  };
+  if (Array.isArray(types)) {
+    for (const x of types) {
+      if (typeof x === 'string') {
+        push(x);
+      }
+    }
+  }
+  if (out.length === 0 && legacy && typeof legacy === 'string') {
+    push(legacy);
+  }
+  if (out.length === 0) {
+    out.push('venta');
+  }
+  const idx = (t: DealershipServiceType) => SERVICE_TYPES_ORDER.indexOf(t);
+  return [...out].sort((a, b) => idx(a) - idx(b));
+}
+
+/** Tipos de una sucursal (para chips, selects, etc.). */
+export function dealershipTypesForDisplay(d: Dealership): DealershipServiceType[] {
+  return normalizeDealershipServiceTypesList(d.service_types, d.service_type ?? null);
+}
+
+/** Texto corto "Venta · Valuaciones" para listados. */
+export function dealershipServiceTypesSummary(d: Dealership): string {
+  return dealershipTypesForDisplay(d)
+    .map(dealershipServiceTypeLabel)
+    .join(' · ');
 }
 
 /** Título público: campo description del seeder; si no, nombre en mayúsculas. */

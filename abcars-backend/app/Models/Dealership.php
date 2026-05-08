@@ -11,7 +11,7 @@ class Dealership extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    
+
     protected $table;
 
     public function __construct(array $attributes = [])
@@ -21,14 +21,12 @@ class Dealership extends Model
     }
 
     /**
-     * The attributes that are mass assignable.
-     *
      * @var array<int, string>
      */
     protected $fillable = [
         'name',
         'location',
-        'service_type',
+        'service_types',
         'description',
         'address',
         'latitude',
@@ -39,28 +37,62 @@ class Dealership extends Model
 
     public const SERVICE_TYPE_SERVICIOS = 'servicios';
 
+    public const SERVICE_TYPE_VALUACIONES = 'valuaciones';
+
     /**
      * @return list<string>
      */
     public static function serviceTypes(): array
     {
-        return [self::SERVICE_TYPE_VENTA, self::SERVICE_TYPE_SERVICIOS];
+        return [
+            self::SERVICE_TYPE_VENTA,
+            self::SERVICE_TYPE_VALUACIONES,
+            self::SERVICE_TYPE_SERVICIOS,
+        ];
     }
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
+     * @param  array<int, mixed>  $types
+     * @return list<string>
+     */
+    public static function normalizeServiceTypesArray(array $types): array
+    {
+        $allowed = self::serviceTypes();
+        $out = [];
+        foreach ($types as $v) {
+            $v = is_string($v) ? strtolower(trim($v)) : '';
+            if (in_array($v, $allowed, true) && ! in_array($v, $out, true)) {
+                $out[] = $v;
+            }
+        }
+        if ($out === []) {
+            return [self::SERVICE_TYPE_VENTA];
+        }
+        $order = array_flip($allowed);
+        usort($out, fn ($a, $b) => ($order[$a] ?? 99) <=> ($order[$b] ?? 99));
+
+        return $out;
+    }
+
+    /**
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'service_types' => 'array',
+    ];
+
+    /**
      * @var array<int, string>
      */
     protected $hidden = [
         'updated_at',
-        'deleted_at'
+        'deleted_at',
     ];
 
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 
     public function getCreatedAtAttribute($value)
-    {   
+    {
         return $value ? Carbon::parse($value)->format('Y-m-d H:i:s') : null;
     }
 
@@ -74,28 +106,15 @@ class Dealership extends Model
         return $value ? Carbon::parse($value)->format('Y-m-d H:i:s') : null;
     }
 
-    /**
-     * Set the name attribute to lowercase.
-     *
-     * @param  string  $value
-     * @return void
-     */
     protected function setNameAttribute($value)
     {
         $this->attributes['name'] = strtolower($value);
     }
 
-    /**
-     * Set the location attribute to lowercase.
-     *
-     * @param  string  $value
-     * @return void
-     */
     protected function setLocationAttribute($value)
     {
         $this->attributes['location'] = strtolower($value);
     }
-
 
     public function vehicles()
     {

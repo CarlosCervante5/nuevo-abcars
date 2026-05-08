@@ -643,13 +643,16 @@ export interface DealerShipResponse{
     data:    Dealership[];
 }
 
-/** Tipo de sucursal: venta de vehículos o taller / servicios */
-export type DealershipServiceType = 'venta' | 'servicios';
+/** Tipos de actividad que puede tener una sucursal (varios a la vez) */
+export type DealershipServiceType = 'venta' | 'servicios' | 'valuaciones';
 
 export interface Dealership {
     id?:         number;
     name:        string;
     location:    string;
+    /** Lista de tipos (API actual); p. ej. ['venta','valuaciones'] */
+    service_types?: DealershipServiceType[];
+    /** Compatibilidad lectura si la API aún envía un solo valor */
     service_type?: DealershipServiceType;
     description?: string | null;
     address?:    string | null;

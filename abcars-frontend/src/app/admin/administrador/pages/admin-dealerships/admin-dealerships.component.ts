@@ -2,7 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService } from '@services/admin.service';
 import { Dealership, DealerShipResponse, DealershipServiceType } from '@interfaces/admin.interfaces';
-import { dealershipServiceTypeLabel } from 'src/app/shared/utils/public-dealerships';
+import {
+  dealershipServiceTypeLabel,
+  dealershipTypesForDisplay,
+  normalizeDealershipServiceTypesList,
+} from 'src/app/shared/utils/public-dealerships';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -16,9 +20,18 @@ export class AdminDealershipsComponent implements OnInit {
   loading = true;
   editingId: number | null = null;
   formData: Partial<Dealership> = {};
+  /** Tipos seleccionados en el formulario (varios) */
+  formServiceTypes: DealershipServiceType[] = ['venta'];
   isCreating = false;
-  /** Si la URL trae ?edit=id, abrir el formulario al cargar el listado (p. ej. desde «Ubicaciones»). */
   private pendingEditId: number | null = null;
+
+  readonly serviceTypeOptions: { id: DealershipServiceType; label: string }[] = [
+    { id: 'venta', label: 'Venta (vehículos nuevos y seminuevos)' },
+    { id: 'valuaciones', label: 'Valuaciones' },
+    { id: 'servicios', label: 'Servicios (taller / posventa)' },
+  ];
+
+  private readonly typeOrder: DealershipServiceType[] = ['venta', 'valuaciones', 'servicios'];
 
   constructor(
     private adminService: AdminService,
@@ -53,10 +66,10 @@ export class AdminDealershipsComponent implements OnInit {
   startCreate(): void {
     this.isCreating = true;
     this.editingId = null;
+    this.formServiceTypes = ['venta'];
     this.formData = {
       name: '',
       location: '',
-      service_type: 'venta',
       description: '',
       address: '',
       latitude: null,
@@ -67,9 +80,10 @@ export class AdminDealershipsComponent implements OnInit {
   startEdit(d: Dealership): void {
     this.isCreating = false;
     this.editingId = d.id ?? null;
-    const st: DealershipServiceType =
-      d.service_type === 'servicios' ? 'servicios' : 'venta';
-    this.formData = { ...d, service_type: st };
+    this.formServiceTypes = this.sortTypes(
+      normalizeDealershipServiceTypesList(d.service_types, d.service_type ?? null)
+    );
+    this.formData = { ...d };
   }
 
   private tryOpenPendingEditFromQuery(): void {
@@ -93,11 +107,42 @@ export class AdminDealershipsComponent implements OnInit {
     this.editingId = null;
     this.isCreating = false;
     this.formData = {};
+    this.formServiceTypes = ['venta'];
+  }
+
+  isServiceTypeChecked(id: DealershipServiceType): boolean {
+    return this.formServiceTypes.includes(id);
+  }
+
+  onServiceTypeToggle(id: DealershipServiceType, ev: Event): void {
+    const checked = (ev.target as HTMLInputElement).checked;
+    if (checked) {
+      if (!this.formServiceTypes.includes(id)) {
+        this.formServiceTypes = this.sortTypes([...this.formServiceTypes, id]);
+      }
+    } else {
+      this.formServiceTypes = this.sortTypes(this.formServiceTypes.filter((t) => t !== id));
+    }
+  }
+
+  private sortTypes(arr: DealershipServiceType[]): DealershipServiceType[] {
+    const uniq = [...new Set(arr)];
+    return uniq.sort(
+      (a, b) => this.typeOrder.indexOf(a) - this.typeOrder.indexOf(b)
+    );
   }
 
   save(): void {
     if (!this.formData.name?.trim() || !this.formData.location?.trim()) {
       Swal.fire({ icon: 'warning', title: 'Campos requeridos', text: 'Nombre y ubicación son obligatorios.' });
+      return;
+    }
+    if (this.formServiceTypes.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Tipos de sucursal',
+        text: 'Marca al menos un tipo: Venta, Valuaciones o Servicios.',
+      });
       return;
     }
     const lat = this.formData.latitude != null ? Number(this.formData.latitude) : null;
@@ -110,12 +155,10 @@ export class AdminDealershipsComponent implements OnInit {
       Swal.fire({ icon: 'warning', title: 'Longitud inválida', text: 'La longitud debe estar entre -180 y 180. En México usa valores negativos (ej: -99.13).' });
       return;
     }
-    const serviceType: DealershipServiceType =
-      this.formData.service_type === 'servicios' ? 'servicios' : 'venta';
     const payload: Partial<Dealership> = {
       name: this.formData.name!.trim(),
       location: this.formData.location!.trim(),
-      service_type: serviceType,
+      service_types: this.sortTypes([...this.formServiceTypes]),
       description: this.formData.description?.trim() || null,
       address: this.formData.address?.trim() || null,
       latitude: lat,
@@ -181,8 +224,23 @@ export class AdminDealershipsComponent implements OnInit {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   }
 
-  serviceTypeLabel(t: Dealership['service_type']): string {
+  serviceTypeLabel(t: DealershipServiceType): string {
     return dealershipServiceTypeLabel(t);
+  }
+
+  typesForRow(d: Dealership): DealershipServiceType[] {
+    return dealershipTypesForDisplay(d);
+  }
+
+  chipClass(t: DealershipServiceType): string {
+    switch (t) {
+      case 'servicios':
+        return 'bg-sky-100 text-sky-800';
+      case 'valuaciones':
+        return 'bg-violet-100 text-violet-800';
+      default:
+        return 'bg-emerald-100 text-emerald-800';
+    }
   }
 
   private showError(err: any, action: string): void {

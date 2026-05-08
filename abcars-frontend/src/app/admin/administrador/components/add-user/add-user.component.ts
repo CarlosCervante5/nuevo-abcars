@@ -4,7 +4,7 @@ import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { DealerShipResponse, roles, RolesResponse , Dealership} from '@interfaces/admin.interfaces';
 import { GralResponse } from '@interfaces/vehicle_data.interface';
 import { AdminService } from '@services/admin.service';
-import { dealershipServiceTypeLabel } from 'src/app/shared/utils/public-dealerships';
+import { dealershipServiceTypesSummary } from 'src/app/shared/utils/public-dealerships';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -156,8 +156,8 @@ export class AddUserComponent {
         })
     }
 
-    branchTypeLabel(t: Dealership['service_type']): string {
-        return dealershipServiceTypeLabel(t);
+    branchTypesSummary(d: Dealership): string {
+        return dealershipServiceTypesSummary(d);
     }
 
     private refreshSelectLists(): void {

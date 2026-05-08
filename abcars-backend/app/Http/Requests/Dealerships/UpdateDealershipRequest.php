@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Dealerships;
 
+use App\Models\Dealership;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateDealershipRequest extends FormRequest
@@ -20,7 +21,6 @@ class UpdateDealershipRequest extends FormRequest
                 $merge[$field] = null;
             }
         }
-        // Corrección común: longitud positiva 86-118 → negativa (México)
         $lng = $this->input('longitude');
         if (is_numeric($lng)) {
             $num = (float) $lng;
@@ -28,7 +28,20 @@ class UpdateDealershipRequest extends FormRequest
                 $merge['longitude'] = -$num;
             }
         }
-        if (!empty($merge)) {
+
+        if ($this->has('service_types')) {
+            $types = $this->input('service_types');
+            if (is_array($types) && count($types) > 0) {
+                $merge['service_types'] = Dealership::normalizeServiceTypesArray($types);
+            }
+        } elseif ($this->has('service_type')) {
+            $legacy = $this->input('service_type');
+            if (is_string($legacy) && $legacy !== '') {
+                $merge['service_types'] = Dealership::normalizeServiceTypesArray([$legacy]);
+            }
+        }
+
+        if (! empty($merge)) {
             $this->merge($merge);
         }
     }
@@ -38,7 +51,8 @@ class UpdateDealershipRequest extends FormRequest
         return [
             'name' => 'sometimes|string|max:255',
             'location' => 'sometimes|string|max:255',
-            'service_type' => 'sometimes|string|in:venta,servicios',
+            'service_types' => 'sometimes|array|min:1',
+            'service_types.*' => 'string|in:venta,servicios,valuaciones',
             'description' => 'nullable|string|max:500',
             'address' => 'nullable|string|max:500',
             'latitude' => 'nullable|numeric|between:-90,90',
@@ -51,6 +65,7 @@ class UpdateDealershipRequest extends FormRequest
         return [
             'latitude.between' => 'La latitud debe estar entre -90 y 90.',
             'longitude.between' => 'La longitud debe estar entre -180 y 180 (ej: -99.13 para México).',
+            'service_types.min' => 'Selecciona al menos un tipo de servicio para la sucursal.',
         ];
     }
 }

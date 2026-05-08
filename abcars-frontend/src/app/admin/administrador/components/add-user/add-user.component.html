@@ -65,7 +65,7 @@
             <option value="" disabled>Seleccione sucursal</option>
             <option *ngFor="let d of dealershipsForSelect" [value]="d.name">
               {{ d.name }}<ng-container *ngIf="d.location"> — {{ d.location }}</ng-container>
-              ({{ branchTypeLabel(d.service_type) }})
+              ({{ branchTypesSummary(d) }})
             </option>
           </select>
           <p *ngIf="locationInvalid" class="text-xs text-red-600 mt-1">Seleccione la sucursal.</p>

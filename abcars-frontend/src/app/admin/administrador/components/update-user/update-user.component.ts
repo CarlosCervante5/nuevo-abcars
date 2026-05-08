@@ -4,7 +4,7 @@ import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bott
 import { DataDetailUser, Dealership, DealerShipResponse, DetailResponsive, roles, RolesResponse } from '@interfaces/admin.interfaces';
 import { GralResponse } from '@interfaces/vehicle_data.interface';
 import { AdminService } from '@services/admin.service';
-import { dealershipServiceTypeLabel } from 'src/app/shared/utils/public-dealerships';
+import { dealershipServiceTypesSummary } from 'src/app/shared/utils/public-dealerships';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -196,8 +196,8 @@ export class UpdateUserComponent {
         this.foto = 'assets/img/user.jpeg';
     }
 
-    branchTypeLabel(t: Dealership['service_type']): string {
-        return dealershipServiceTypeLabel(t);
+    branchTypesSummary(d: Dealership): string {
+        return dealershipServiceTypesSummary(d);
     }
 
     private refreshSelectLists(): void {
