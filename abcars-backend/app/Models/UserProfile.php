@@ -27,6 +27,7 @@ class UserProfile extends Model
         'phone_1',
         'phone_2',
         'location',
+        'dealership_id',
         'user_id'
     ];
 
@@ -57,6 +58,11 @@ class UserProfile extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function dealership()
+    {
+        return $this->belongsTo(Dealership::class, 'dealership_id');
     }
 
 }

@@ -583,6 +583,8 @@ export interface Profile {
     phone_2:    number | null;
     picture:    string | null;
     location:   string | null;
+    /** Sucursal del catálogo (FK); prioridad sobre `location` en citas valuación. */
+    dealership_id?: number | null;
     created_at: Date;
 }
 

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Helpers\PasswordHelper;
 use App\Jobs\SendUserNotification;
 use App\Models\Quiz;
+use App\Models\Dealership;
 use App\Models\User;
 use App\Models\Valuations\ValuationUpdate;
 use App\Models\VehicleUpdate;
@@ -185,13 +186,17 @@ class UserService
             }
         }
 
+        $dealershipId = (int) $data['dealership_id'];
+        $branch = Dealership::query()->findOrFail($dealershipId);
+
         $user->userProfile()->create([
             'name' => $data['name'],
             'last_name' => $data['last_name'],
             'phone_1' => $data['phone_1'] ?? null,
             'phone_2' => $data['phone_2'] ?? null,
             'gender' => $data['gender'] ?? null,
-            'location' => $data['location'],
+            'dealership_id' => $branch->id,
+            'location' => $branch->name,
         ]);
 
         return $user;

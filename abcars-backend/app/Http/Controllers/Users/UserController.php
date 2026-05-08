@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Users;
 
+use App\Models\Dealership;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Helpers\ApiResponseHelper;
@@ -229,8 +230,16 @@ class UserController extends Controller
 
             // Actualizar profile
             foreach ($data as $key => $value) {
-                if (in_array($key, ['name','last_name','gender', 'phone_1', 'phone_2', 'location'])) {
+                if (in_array($key, ['name', 'last_name', 'gender', 'phone_1', 'phone_2'])) {
                     $profile['profile']->$key = $value;
+                }
+            }
+
+            if (isset($data['dealership_id'])) {
+                $profile['profile']->dealership_id = (int) $data['dealership_id'];
+                $branch = Dealership::query()->find((int) $data['dealership_id']);
+                if ($branch) {
+                    $profile['profile']->location = $branch->name;
                 }
             }
 

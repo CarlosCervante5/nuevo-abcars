@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { DealerShipResponse, roles, RolesResponse , Dealership} from '@interfaces/admin.interfaces';
@@ -13,7 +13,7 @@ import Swal from 'sweetalert2';
     styleUrls: ['./add-user.component.css'],
     standalone: false
 })
-export class AddUserComponent {
+export class AddUserComponent implements OnInit {
 
     public form !: FormGroup;
     public spinner = false;
@@ -33,6 +33,17 @@ export class AddUserComponent {
         this.getDealership();
     }
 
+    ngOnInit(): void {
+        this.form.get('dealership_id')?.valueChanges.subscribe((id: number | string | null) => {
+            const nid = typeof id === 'string' ? Number(id) : id;
+            const d =
+                nid != null && !Number.isNaN(Number(nid))
+                    ? this.dealershipsForSelect.find((x) => x.id === nid)
+                    : undefined;
+            this.form.patchValue({ location_shadow: d?.name ?? '' }, { emitEvent: false });
+        });
+    }
+
     private createForm() {
         this.form = this._formBuilder.group({
             name:           ['', [Validators.required, Validators.pattern("[a-zA-ZÀ-ÿ ]+")]],
@@ -41,7 +52,9 @@ export class AddUserComponent {
             phone_2:        ['', [this.phoneValidator.bind(this)]],
             gender:         ['', [Validators.required]],
             email:          ['', [Validators.required, Validators.pattern("[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$")]],
-            location:       ['', [Validators.required]],
+            /** ID de dealerships; sincroniza nombre en `location` para el API. */
+            dealership_id:  [null as number | string | null, [Validators.required]],
+            location_shadow: [''],
             role_name:      ['', [Validators.required]],
             picture:        [''],
             password:       ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[a-zñ])(?=.*[A-ZÑ])(?=.*\d)(?=.*[@$!%*?&])[A-Za-zÑñ\d@$!%*?&]+$/u)]],
@@ -87,8 +100,9 @@ export class AddUserComponent {
     get emailInvalid() {
         return this.form.get('email')!.invalid && (this.form.get('email')!.dirty || this.form.get('email')?.touched);
     }
-    get locationInvalid() {
-        return this.form.get('location')!.invalid && (this.form.get('location')!.dirty || this.form.get('location')?.touched);
+    get dealershipInvalid() {
+        const c = this.form.get('dealership_id');
+        return !!c?.invalid && (c?.dirty || c?.touched);
     }
     get role_nameInvalid() {
         return this.form.get('role_name')!.invalid && (this.form.get('role_name')!.dirty || this.form.get('role_name')?.touched);
@@ -98,9 +112,13 @@ export class AddUserComponent {
     }
 
     public onSubmit(){
+        const did = this.form.get('dealership_id')!.value;
+        const locDisplay = String(this.form.get('location_shadow')?.value ?? '');
         this._adminservice.addUser(this.form.get('name')!.value, this.form.get('last_name')!.value, this.form.get('phone_1')!.value, this.form.get('phone_2')!.value,
-        this.form.get('gender')!.value, this.form.get('email')!.value, this.form.get('location')!.value, this.form.get('role_name')!.value, this.files,
-        this.form.get('password')!.value,)
+        this.form.get('gender')!.value, this.form.get('email')!.value, locDisplay, this.form.get('role_name')!.value, this.files,
+        this.form.get('password')!.value,
+        did,
+        )
         .subscribe({
             next: (response : GralResponse) =>{
                 Swal.fire({

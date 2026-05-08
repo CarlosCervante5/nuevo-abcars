@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Dealership;
 use Database\Seeders\Support\SeededUser;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
@@ -17,6 +18,8 @@ class RolesPermissionsSeeder extends Seeder
     {
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        $branchDefault = Dealership::query()->orderBy('id')->first();
 
         // Permisos (idempotente: firstOrCreate para poder re-ejecutar el seeder)
         Permission::firstOrCreate(['name' => 'create vehicles']);
@@ -148,7 +151,17 @@ class RolesPermissionsSeeder extends Seeder
             $user->assignRole($roleValuator);
         }
         if (! $user->userProfile) {
-            $user->userProfile()->create(['name' => 'Valuator', 'last_name' => 'Prueba']);
+            $pv = ['name' => 'Valuator', 'last_name' => 'Prueba'];
+            if ($branchDefault) {
+                $pv['dealership_id'] = $branchDefault->id;
+                $pv['location'] = $branchDefault->name;
+            }
+            $user->userProfile()->create($pv);
+        } elseif ($branchDefault && ! $user->userProfile->dealership_id) {
+            $user->userProfile->update([
+                'dealership_id' => $branchDefault->id,
+                'location' => $branchDefault->name,
+            ]);
         }
 
         $roleSeller = Role::findByName('seller');
@@ -161,7 +174,17 @@ class RolesPermissionsSeeder extends Seeder
             $user->assignRole($roleSeller);
         }
         if (! $user->userProfile) {
-            $user->userProfile()->create(['name' => 'Vendedor', 'last_name' => 'Prueba']);
+            $ps = ['name' => 'Vendedor', 'last_name' => 'Prueba'];
+            if ($branchDefault) {
+                $ps['dealership_id'] = $branchDefault->id;
+                $ps['location'] = $branchDefault->name;
+            }
+            $user->userProfile()->create($ps);
+        } elseif ($branchDefault && ! $user->userProfile->dealership_id) {
+            $user->userProfile->update([
+                'dealership_id' => $branchDefault->id,
+                'location' => $branchDefault->name,
+            ]);
         }
     }
 }

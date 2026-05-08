@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Users;
 
+use App\Models\Dealership;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
 {
@@ -23,6 +25,12 @@ class StoreUserRequest extends FormRequest
                 $merge[$field] = null;
             }
         }
+        $did = $this->input('dealership_id');
+        if ($did === '' || $did === null || $did === 'null') {
+            $merge['dealership_id'] = null;
+        } elseif (is_numeric($did)) {
+            $merge['dealership_id'] = (int) $did;
+        }
         if (!empty($merge)) {
             $this->merge($merge);
         }
@@ -42,7 +50,13 @@ class StoreUserRequest extends FormRequest
             'phone_1' => 'nullable|string|max:20',
             'phone_2' => 'nullable|string|max:20',
             'gender' => 'nullable|in:male,female,H,M',
-            'location' => 'required|string|max:90',
+            'dealership_id' => [
+                'required',
+                'integer',
+                Rule::exists((new Dealership())->getTable(), 'id'),
+            ],
+            /** Se rellena en servidor desde la sucursal; el cliente puede enviar texto vacío. */
+            'location' => 'nullable|string|max:90',
             'role_name' => 'required|string|max:255',
             'password' => [
                 'required',

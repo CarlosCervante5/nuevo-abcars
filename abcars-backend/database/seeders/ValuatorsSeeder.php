@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Dealership;
 use Database\Seeders\Support\SeededUser;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
@@ -34,10 +35,21 @@ class ValuatorsSeeder extends Seeder
         if (! $user->hasRole('valuator')) {
             $user->assignRole($role);
         }
+        $branch = Dealership::query()->orderBy('id')->first();
+        $profileAttrs = [
+            'name' => $name,
+            'last_name' => $lastName,
+        ];
+        if ($branch !== null) {
+            $profileAttrs['dealership_id'] = $branch->id;
+            $profileAttrs['location'] = $branch->name;
+        }
         if (! $user->userProfile) {
-            $user->userProfile()->create([
-                'name' => $name,
-                'last_name' => $lastName,
+            $user->userProfile()->create($profileAttrs);
+        } elseif ($branch !== null && $user->userProfile->dealership_id === null) {
+            $user->userProfile->update([
+                'dealership_id' => $branch->id,
+                'location' => $branch->name,
             ]);
         }
     }

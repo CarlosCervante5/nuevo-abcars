@@ -132,6 +132,10 @@ class AppointmentController extends Controller
             $data = $request->validated();
 
             $user = auth()->user();
+            $user->loadMissing('userProfile.dealership');
+            if ($branch = $user->userProfile?->dealership) {
+                $data['dealership_name'] = $branch->name;
+            }
 
             $appointment = $this->appointmentService->createAppointment($data);
 
