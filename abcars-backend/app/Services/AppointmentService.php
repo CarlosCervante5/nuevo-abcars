@@ -22,6 +22,11 @@ class AppointmentService
     public function createAppointment($data)
     {
         $customer = Customer::findByUuid($data['customer_uuid']);
+        if (! $customer) {
+            throw new \InvalidArgumentException(
+                'Cliente no encontrado para el UUID proporcionado: '.(string) ($data['customer_uuid'] ?? '')
+            );
+        }
 
         // Persistir marca/modelo en catálogo para reutilizarlos en el autocomplete.
         $this->syncVehicleCatalog($data);

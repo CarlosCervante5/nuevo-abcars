@@ -152,6 +152,18 @@ class AppointmentController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
             ]);
+            if (config('app.debug')) {
+                return response()->json([
+                    'status' => 500,
+                    'message' => 'Error al crear la cita de valuacion',
+                    'error' => $e->getMessage(),
+                    'exception' => $e::class,
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'code' => 'CREATE_VALUATION_APPOINTMENT_ERROR',
+                ], 500);
+            }
+
             return ApiResponseHelper::apiError('Error al crear la cita de valuacion', $e->getMessage(), 500, 'CREATE_VALUATION_APPOINTMENT_ERROR');
         }
     }

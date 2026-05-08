@@ -199,13 +199,13 @@ class Dealership extends Model
 
         if (isset(static::$legacyBranchAliases[$key])) {
             $byAlias = static::resolveFromAppointmentDealershipName(static::$legacyBranchAliases[$key]);
-            if ($byAlias && $byAlias->offersValuationService()) {
+            if ($byAlias) {
                 return $byAlias;
             }
         }
 
         $byName = static::resolveFromAppointmentDealershipName($raw);
-        if ($byName && $byName->offersValuationService()) {
+        if ($byName) {
             return $byName;
         }
 
@@ -213,20 +213,25 @@ class Dealership extends Model
     }
 
     /**
-     * Sucursales con valuaciones cuyo campo location coincide; desempate por orden de marca pública.
+     * Sucursales cuyo campo location coincide. Prioriza filas que declaran servicio valuaciones (JSON);
+     * si todas vienen legacy sin service_types, usa igualmente la mejor candidata por orden público.
      */
     protected static function pickValuationDealershipByLocationKey(string $locationKey): ?self
     {
-        /** @var Collection<int, self> $candidates */
-        $candidates = static::query()
+        /** @var Collection<int, self> $byLocation */
+        $byLocation = static::query()
             ->whereRaw('LOWER(TRIM(location)) = ?', [$locationKey])
             ->orderBy('id')
-            ->get()
-            ->filter(fn (self $d) => $d->offersValuationService())
-            ->values();
+            ->get();
 
-        if ($candidates->isEmpty()) {
+        if ($byLocation->isEmpty()) {
             return null;
+        }
+
+        /** @var Collection<int, self> $candidates */
+        $candidates = $byLocation->filter(fn (self $d) => $d->offersValuationService())->values();
+        if ($candidates->isEmpty()) {
+            $candidates = $byLocation->values();
         }
 
         if ($candidates->count() === 1) {

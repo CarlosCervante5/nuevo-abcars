@@ -41,6 +41,9 @@ class ValuationService
 
         $roleProfile = $user->getRoleProfile();
         $role = $roleProfile['role'];
+        if (! is_string($role) || trim($role) === '') {
+            throw new \Exception('El usuario autenticado no tiene rol asignado; no se puede crear la valuación.');
+        }
 
         $dealership = Dealership::resolveFromAppointmentDealershipName($appointment->dealership_name)
             ?? Dealership::resolveFromValuatorUserProfile($user);
