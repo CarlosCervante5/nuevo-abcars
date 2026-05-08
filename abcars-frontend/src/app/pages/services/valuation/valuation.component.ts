@@ -71,7 +71,7 @@ export class ValuationComponent implements OnInit {
   }
 
   getDealerships(): void {
-    this.vehicleService.searchDealerships().subscribe({
+    this.vehicleService.searchDealershipsForServiceTypes('valuaciones').subscribe({
       next: (response: DealerShipResponse) => {
         if (response.status === 200 && Array.isArray(response.data)) {
           this.dealerships = response.data;

@@ -3,7 +3,8 @@ import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { dedupeDealershipsForSelect } from '../utils/public-dealerships';
+import { dedupeDealershipsForSelect, filterDealershipsByServiceTypes } from '../utils/public-dealerships';
+import type { DealershipServiceType } from '../interfaces/admin.interfaces';
 import { FormGroup } from '@angular/forms';
 
 //prueba
@@ -249,6 +250,23 @@ constructor(
                     data: Array.isArray(res.data) ? dedupeDealershipsForSelect(res.data) : res.data,
                 }))
             );
+    }
+
+    /**
+     * Mismo catálogo que searchDealerships, filtrado por tipos de servicio de la sucursal
+     * (p. ej. solo venta para financiamiento, solo valuaciones para agendar valuación).
+     */
+    public searchDealershipsForServiceTypes(
+        required: DealershipServiceType | DealershipServiceType[],
+    ): Observable<DealerShipResponse> {
+        return this.searchDealerships().pipe(
+            map((res) => ({
+                ...res,
+                data: Array.isArray(res.data)
+                    ? filterDealershipsByServiceTypes(res.data, required)
+                    : res.data,
+            })),
+        );
     }
 }
 

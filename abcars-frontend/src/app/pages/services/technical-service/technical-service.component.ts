@@ -43,7 +43,7 @@ export class TechnicalServiceComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.vehicleService.searchDealerships().subscribe({
+    this.vehicleService.searchDealershipsForServiceTypes('servicios').subscribe({
       next: (res: DealerShipResponse) => {
         if (res.status === 200 && Array.isArray(res.data)) {
           this.dealerships = res.data;

@@ -2022,7 +2022,8 @@ export class VehicleDetailComponent implements OnInit {
   }
 
   private loadDealerships(): void {
-    this.vehicleService.searchDealerships().subscribe({
+    // Financiamiento, prueba de manejo y oferta: solo sucursales con venta
+    this.vehicleService.searchDealershipsForServiceTypes('venta').subscribe({
       next: (res: DealerShipResponse) => {
         if (res.status === 200 && Array.isArray(res.data)) {
           this.dealerships = res.data;

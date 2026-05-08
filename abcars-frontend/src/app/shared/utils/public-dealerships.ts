@@ -112,6 +112,22 @@ export function dealershipTypesForDisplay(d: Dealership): DealershipServiceType[
   return normalizeDealershipServiceTypesList(d.service_types, d.service_type ?? null);
 }
 
+/**
+ * Sucursales que ofrecen al menos uno de los tipos indicados (OR).
+ * Útil para mostrar solo sucursales de venta en financiamiento, solo valuaciones en citas de valuación, etc.
+ */
+export function filterDealershipsByServiceTypes(
+  list: Dealership[],
+  required: DealershipServiceType | DealershipServiceType[],
+): Dealership[] {
+  const needs = (Array.isArray(required) ? required : [required]) as DealershipServiceType[];
+  const base = dedupeDealershipsList(list);
+  return base.filter((d) => {
+    const types = dealershipTypesForDisplay(d);
+    return needs.some((n) => types.includes(n));
+  });
+}
+
 /** Texto corto "Venta · Valuaciones" para listados. */
 export function dealershipServiceTypesSummary(d: Dealership): string {
   return dealershipTypesForDisplay(d)

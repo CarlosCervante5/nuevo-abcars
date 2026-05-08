@@ -56,7 +56,7 @@ export class InsuranceComponent implements OnInit {
   }
 
   private loadDealerships(): void {
-    this.vehicleService.searchDealerships().subscribe({
+    this.vehicleService.searchDealershipsForServiceTypes('venta').subscribe({
       next: (res: DealerShipResponse) => {
         if (res.status === 200 && Array.isArray(res.data)) {
           this.dealerships = res.data;
