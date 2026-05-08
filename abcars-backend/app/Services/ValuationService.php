@@ -41,20 +41,13 @@ class ValuationService
 
         $roleProfile = $user->getRoleProfile();
         $role = $roleProfile['role'];
-        if (! is_string($role) || trim($role) === '') {
-            throw new \Exception('El usuario autenticado no tiene rol asignado; no se puede crear la valuación.');
-        }
 
-        $dealership = Dealership::resolveFromAppointmentDealershipName($appointment->dealership_name)
-            ?? Dealership::resolveFromValuatorUserProfile($user);
+        $dealership = Dealership::where([
+            'name' => $appointment->dealership_name,
+        ])->first();
 
-        if (! $dealership) {
+        if (!$dealership) {
             throw new \Exception("Concesionaria no encontrada para el nombre: {$appointment->dealership_name}");
-        }
-
-        if (($appointment->dealership_name ?? '') !== $dealership->name) {
-            $appointment->dealership_name = $dealership->name;
-            $appointment->saveQuietly();
         }
 
         $valuation = VehicleValuation::create([

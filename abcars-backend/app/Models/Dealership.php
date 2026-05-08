@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -120,129 +119,6 @@ class Dealership extends Model
     public function vehicles()
     {
         return $this->hasMany(Vehicle::class, 'dealership_id');
-    }
-
-    public function offersValuationService(): bool
-    {
-        foreach ($this->service_types ?? [] as $t) {
-            if (is_string($t) && strtolower(trim($t)) === self::SERVICE_TYPE_VALUACIONES) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Texto típico en cita o en user_profiles.location → nombre canónico en dealerships.name (minúsculas).
-     *
-     * @var array<string, string>
-     */
-    protected static array $legacyBranchAliases = [
-        'chevrolet puebla' => 'ventas matriz',
-        'chevy puebla' => 'ventas matriz',
-        'matriz chevrolet' => 'ventas matriz',
-        'chevrolet matriz' => 'ventas matriz',
-        'chevrolet serdan' => 'ventas serdan',
-        'chevrolet serdán' => 'ventas serdan',
-        'chevrolet serdán.' => 'ventas serdan',
-    ];
-
-    /**
-     * Misma prioridad visual que sucursales públicas (fallback cuando varias comparten ciudad).
-     *
-     * @var array<string, int>
-     */
-    protected static array $branchStableOrder = [
-        'ventas matriz' => 1,
-        'ventas serdan' => 2,
-        'ventas sucursal tlaxcala' => 3,
-        'service body paint' => 4,
-        'ventas sucursal hidalgo' => 5,
-        'ventas sucursal cholula' => 6,
-    ];
-
-    /**
-     * Resuelve sucursal por el valor guardado en customer_appointments.dealership_name.
-     */
-    public static function resolveFromAppointmentDealershipName(?string $appointmentName): ?self
-    {
-        $raw = trim((string) $appointmentName);
-        if ($raw === '') {
-            return null;
-        }
-
-        $key = mb_strtolower($raw, 'UTF-8');
-        $canonical = static::$legacyBranchAliases[$key] ?? $key;
-
-        return static::query()
-            ->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower(trim($canonical), 'UTF-8')])
-            ->first();
-    }
-
-    /**
-     * Si el nombre de la cita no matchea, usa user_profiles.location del valuador (alias o ciudad).
-     */
-    public static function resolveFromValuatorUserProfile(?User $user): ?self
-    {
-        if (! $user) {
-            return null;
-        }
-
-        $user->loadMissing('userProfile');
-        $raw = trim((string) ($user->userProfile?->location ?? ''));
-        if ($raw === '') {
-            return null;
-        }
-
-        $key = mb_strtolower($raw, 'UTF-8');
-
-        if (isset(static::$legacyBranchAliases[$key])) {
-            $byAlias = static::resolveFromAppointmentDealershipName(static::$legacyBranchAliases[$key]);
-            if ($byAlias) {
-                return $byAlias;
-            }
-        }
-
-        $byName = static::resolveFromAppointmentDealershipName($raw);
-        if ($byName) {
-            return $byName;
-        }
-
-        return static::pickValuationDealershipByLocationKey($key);
-    }
-
-    /**
-     * Sucursales cuyo campo location coincide. Prioriza filas que declaran servicio valuaciones (JSON);
-     * si todas vienen legacy sin service_types, usa igualmente la mejor candidata por orden público.
-     */
-    protected static function pickValuationDealershipByLocationKey(string $locationKey): ?self
-    {
-        /** @var Collection<int, self> $byLocation */
-        $byLocation = static::query()
-            ->whereRaw('LOWER(TRIM(location)) = ?', [$locationKey])
-            ->orderBy('id')
-            ->get();
-
-        if ($byLocation->isEmpty()) {
-            return null;
-        }
-
-        /** @var Collection<int, self> $candidates */
-        $candidates = $byLocation->filter(fn (self $d) => $d->offersValuationService())->values();
-        if ($candidates->isEmpty()) {
-            $candidates = $byLocation->values();
-        }
-
-        if ($candidates->count() === 1) {
-            return $candidates->first();
-        }
-
-        return $candidates->sortBy(function (self $d) {
-            $n = mb_strtolower(trim((string) $d->name), 'UTF-8');
-
-            return static::$branchStableOrder[$n] ?? 99;
-        })->first();
     }
 
     /**
