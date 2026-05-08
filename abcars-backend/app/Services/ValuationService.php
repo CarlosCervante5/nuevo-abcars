@@ -42,12 +42,16 @@ class ValuationService
         $roleProfile = $user->getRoleProfile();
         $role = $roleProfile['role'];
 
-        $dealership = Dealership::where([
-            'name' => $appointment->dealership_name,
-        ])->first();
+        $dealership = Dealership::resolveFromAppointmentDealershipName($appointment->dealership_name)
+            ?? Dealership::resolveFromValuatorUserProfile($user);
 
-        if (!$dealership) {
+        if (! $dealership) {
             throw new \Exception("Concesionaria no encontrada para el nombre: {$appointment->dealership_name}");
+        }
+
+        if (($appointment->dealership_name ?? '') !== $dealership->name) {
+            $appointment->dealership_name = $dealership->name;
+            $appointment->saveQuietly();
         }
 
         $valuation = VehicleValuation::create([
