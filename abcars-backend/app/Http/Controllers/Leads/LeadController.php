@@ -367,6 +367,7 @@ class LeadController extends Controller
                 'apellido' => $data['last_name'] ?? '',
                 'telefono' => $data['phone'],
                 'correo' => $data['email'],
+                'vehicle_of_interest' => $data['vehicle_of_interest'] ?? '',
                 'marca' => $data['vehicle_brand'] ?? '',
                 'modelo' => $data['vehicle_model'] ?? '',
                 'año' => $data['vehicle_year'] ?? '',
