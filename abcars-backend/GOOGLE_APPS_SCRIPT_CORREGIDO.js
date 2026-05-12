@@ -282,7 +282,11 @@ function doPost(e) {
     var sucursal = getParamValue(params.sucursal) || '';
     var formType = getParamValue(params.formType) || '';
     var canal = getParamValue(params.canal) || 'abcars.mx';
-    var campana = formType; // Campaña o submedio = tipo de formulario (financing, testDrive, offer, valuation)
+    // D: Campaña o submedio (etiqueta legible; formType se mantiene para lógica de columnas)
+    var campana = formType;
+    if (formType === 'valuation') {
+      campana = 'Formulario: Valuación Gratuita';
+    }
     var nombre = getParamValue(params.nombre) || '';
     var apellido = getParamValue(params.apellido) || '';
     var telefono = getParamValue(params.telefono) || '';

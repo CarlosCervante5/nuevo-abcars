@@ -21,6 +21,7 @@ use App\Models\Leads\RidersQuiz;
 use App\Models\Vehicle;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -568,7 +569,7 @@ class LeadController extends Controller
         try {
             $data = $request->validated();
 
-            // Construir comentarios con información adicional
+            // Construir comentarios con información adicional (sucursal también va en columna A en mayúsculas)
             $comments = [];
             if (!empty($data['city'])) {
                 $comments[] = "Ciudad/Sucursal: " . $data['city'];
@@ -581,9 +582,14 @@ class LeadController extends Controller
             }
             $fullComments = implode(" | ", $comments);
 
+            $sucursal = '';
+            if (!empty($data['city'])) {
+                $sucursal = Str::upper(trim($data['city']));
+            }
+
             // Preparar datos para enviar a Google Sheets
             $googleSheetData = [
-                'sucursal' => '', // A: Sucursal (vacío por defecto, ajustar si es necesario)
+                'sucursal' => $sucursal,
                 'formType' => 'valuation',
                 'fecha' => now()->format('Y-m-d H:i:s'),
                 'canal' => 'abcars.mx',
