@@ -144,8 +144,8 @@ export class InsuranceComponent implements OnInit {
     // Preparar datos con campos adicionales para enviar
     const formData = {
       ...this.insuranceForm.value,
-      q_model_interest: '',
-      q_brand_interest: '',
+      q_brand_interest: (this.quoteData.brand || '').trim(),
+      q_model_interest: (this.quoteData.model || '').trim(),
       q_initial_investment: String(coverageAmount),
       q_time_to_buy: '',
       q_comments: qComments,

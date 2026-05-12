@@ -107,6 +107,7 @@ class OpportunityController extends Controller
                 'correo' => $request->email,
                 'telefono' => $request->phone,
                 'modelo_body' => $request->q_model_interest,
+                'modelo' => $request->q_model_interest,
                 'marca' => $request->q_brand_interest,
                 'clientPriceOffer' => $request->q_initial_investment,
                 'comentario' => $request->q_comments,
