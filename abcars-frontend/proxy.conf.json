@@ -6,6 +6,7 @@
     "pathRewrite": {
       "^/gemini-api": ""
     },
-    "timeout": 600000
+    "timeout": 600000,
+    "logLevel": "silent"
   }
 }
