@@ -1,5 +1,17 @@
 import { environment } from '@environments/environment';
 
+/** URLs scheme-relative (`//host/path`) no son válidas para `new URL()` sin base; el navegador sí las resuelve a https y rompen CORS si van directo al CDN. */
+function normalizeRemoteImageUrl(url: string): string {
+  const t = url.trim();
+  if (!t) {
+    return t;
+  }
+  if (t.startsWith('//')) {
+    return `https:${t}`;
+  }
+  return t;
+}
+
 /**
  * URLs que el navegador no puede leer en modo CORS (p. ej. CloudFront sin ACAO)
  * y que deben pasar por el proxy del API (misma lista conceptual que el backend).
@@ -27,8 +39,8 @@ function shouldUseApiImageProxy(url: string): boolean {
 }
 
 function buildProxyUrl(remoteUrl: string): string {
-  const base = environment.baseUrl.replace(/\/$/, '');
-  return `${base}/api/media/fetch-image?url=${encodeURIComponent(remoteUrl)}`;
+  const apiRoot = (environment.apiUrl ?? environment.baseUrl ?? '').replace(/\/$/, '');
+  return `${apiRoot}/api/media/fetch-image?url=${encodeURIComponent(remoteUrl)}`;
 }
 
 /**
@@ -36,8 +48,12 @@ function buildProxyUrl(remoteUrl: string): string {
  * Si la URL es CDN sin CORS (CloudFront, etc.), usa el proxy autenticado del backend.
  */
 export async function fetchImageAsFile(url: string, filename: string): Promise<File> {
-  const useProxy = shouldUseApiImageProxy(url);
-  const fetchUrl = useProxy ? buildProxyUrl(url) : url;
+  const resolved = normalizeRemoteImageUrl(url);
+  if (!resolved) {
+    throw new Error('URL de imagen vacía.');
+  }
+  const useProxy = shouldUseApiImageProxy(resolved);
+  const fetchUrl = useProxy ? buildProxyUrl(resolved) : resolved;
   const headers: Record<string, string> = {};
   if (useProxy && typeof localStorage !== 'undefined') {
     const token = localStorage.getItem('user_token');
