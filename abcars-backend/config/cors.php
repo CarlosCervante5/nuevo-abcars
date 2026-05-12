@@ -28,8 +28,11 @@ $defaults = array_values(array_filter([
     'http://localhost:4200',
     'http://localhost:4201',
     'http://localhost:5173',
+    'http://localhost:5176',
     'http://127.0.0.1:4200',
+    'http://127.0.0.1:4201',
     'http://127.0.0.1:5173',
+    'http://127.0.0.1:5176',
 ], static function ($u) {
     return is_string($u) && $u !== '';
 }));

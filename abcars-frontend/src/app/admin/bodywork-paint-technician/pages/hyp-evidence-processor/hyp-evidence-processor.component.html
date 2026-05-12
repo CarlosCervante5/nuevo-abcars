@@ -1,0 +1,271 @@
+<app-overview
+  [overview]="itemOverview"
+  [url_index]="'/admin/bodywork_paint_technician'"
+  [hideModules]="true"
+></app-overview>
+
+<div class="hyp-studio-page">
+  <div class="hyp-studio-shell">
+    <header class="hyp-studio-header">
+      <p class="hyp-studio-eyebrow">ABCars · Herramientas HyP</p>
+      <h1 class="hyp-studio-title">Evidencia fotográfica (solo procesar y descargar)</h1>
+      <p class="hyp-studio-lead">
+        Las imágenes no se guardan en ABCars: se envían a Gemini en el navegador y puedes descargar el
+        resultado. Elige el tipo de corrección y añade las fotos.
+      </p>
+      <nav class="hyp-studio-breadcrumb" aria-label="breadcrumb">
+        <ol class="hyp-studio-breadcrumb-list">
+          <li class="hyp-studio-breadcrumb-item" [routerLink]="['/admin/bodywork_paint_technician']">
+            Overview
+          </li>
+          <li class="hyp-studio-breadcrumb-item hyp-studio-breadcrumb-item--current" aria-current="page">
+            Evidencia IA
+          </li>
+        </ol>
+      </nav>
+    </header>
+
+    <section class="hyp-studio-panel" aria-labelledby="hyp-corr-heading">
+      <h2 id="hyp-corr-heading" class="hyp-studio-panel-title">Tipo de corrección</h2>
+      <div class="hyp-studio-prompt-grid" role="radiogroup" aria-label="Tipo de corrección">
+        <button
+          type="button"
+          role="radio"
+          [attr.aria-checked]="variant === 'sobreexpuesta'"
+          class="hyp-studio-prompt"
+          [class.hyp-studio-prompt--active]="variant === 'sobreexpuesta'"
+          [disabled]="processing"
+          (click)="variant = 'sobreexpuesta'"
+        >
+          <span class="hyp-studio-prompt__dot" aria-hidden="true"></span>
+          <span class="hyp-studio-prompt__label">Sobreexpuesta / quemada por luz</span>
+        </button>
+        <button
+          type="button"
+          role="radio"
+          [attr.aria-checked]="variant === 'opaca'"
+          class="hyp-studio-prompt"
+          [class.hyp-studio-prompt--active]="variant === 'opaca'"
+          [disabled]="processing"
+          (click)="variant = 'opaca'"
+        >
+          <span class="hyp-studio-prompt__dot" aria-hidden="true"></span>
+          <span class="hyp-studio-prompt__label">Opaca / poca luz</span>
+        </button>
+      </div>
+      <p class="hyp-studio-hint">
+        <strong>Paso 1:</strong> elige el tipo de corrección. <strong>Paso 2:</strong> arrastra imágenes a la zona o usa
+        «Agregar fotos». <strong>Paso 3:</strong> «Procesar con IA». JPEG o PNG recomendados.
+      </p>
+
+      <h3 class="hyp-studio-upload-heading">Añadir imágenes</h3>
+      <label
+        class="hyp-studio-dropzone"
+        [class.hyp-studio-dropzone--drag]="dragOver && variant"
+        [class.hyp-studio-dropzone--busy]="processing"
+        [class.hyp-studio-dropzone--locked]="!variant"
+        for="hyp-evidence-file-input"
+        (click)="onDropZoneLabelClick($event)"
+        (dragover)="onDropZoneDragOver($event)"
+        (dragleave)="onDropZoneDragLeave($event)"
+        (drop)="onDropZoneDrop($event)"
+      >
+        <input
+          id="hyp-evidence-file-input"
+          #fileInput
+          type="file"
+          accept="image/*"
+          multiple
+          class="hyp-studio-dropzone-input"
+          [disabled]="processing || !variant"
+          (change)="onFilesSelected($event)"
+        />
+        <div class="hyp-studio-dropzone__body">
+          <svg
+            class="hyp-studio-dropzone__icon"
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span class="hyp-studio-dropzone__strong">
+            {{
+              !variant
+                ? 'Primero elige el tipo de corrección arriba'
+                : processing
+                  ? 'Procesando…'
+                  : dragOver
+                    ? 'Suelta las imágenes aquí'
+                    : 'Arrastra varias imágenes o haz clic para elegir'
+            }}
+          </span>
+          <p class="hyp-studio-dropzone__sub" *ngIf="!variant">
+            La zona de soltar y el selector de archivos se habilitan al elegir sobreexpuesta u opaca.
+          </p>
+          <p class="hyp-studio-dropzone__sub" *ngIf="variant">
+            JPEG, PNG o WebP; varias a la vez. No se suben al servidor hasta que ejecutes el procesamiento con IA.
+          </p>
+        </div>
+      </label>
+
+      <div class="hyp-studio-actions">
+        <button
+          type="button"
+          class="hyp-studio-btn hyp-studio-btn--primary"
+          (click)="fileInput.click()"
+          [disabled]="processing || !variant"
+        >
+          Agregar fotos
+        </button>
+        <button type="button" class="hyp-studio-btn hyp-studio-btn--ghost" (click)="clearQueue()" [disabled]="processing || !rows.length">
+          Vaciar lista
+        </button>
+        <button
+          type="button"
+          class="hyp-studio-btn hyp-studio-btn--accent"
+          (click)="processAll()"
+          [disabled]="processing || !rows.length || !variant"
+        >
+          <span *ngIf="!processing">Procesar con IA</span>
+          <span *ngIf="processing">Procesando… {{ progressCurrent }}/{{ progressTotal }}</span>
+        </button>
+        <button type="button" class="hyp-studio-btn hyp-studio-btn--link" (click)="downloadAll()" [disabled]="processing || !hasAnyResult">
+          Descargar todas
+        </button>
+      </div>
+
+      <div *ngIf="processing" class="hyp-studio-progress" aria-hidden="true">
+        <div class="hyp-studio-progress__bar"></div>
+      </div>
+    </section>
+
+    <section *ngIf="rows.length" class="hyp-studio-results" aria-labelledby="hyp-results-heading">
+      <div class="hyp-studio-results__head">
+        <h2 id="hyp-results-heading" class="hyp-studio-results__title">
+          Cola · {{ rows.length }} {{ rows.length === 1 ? 'foto' : 'fotos' }}
+        </h2>
+      </div>
+      <ul class="hyp-studio-grid">
+        <li
+          *ngFor="let row of rows; let i = index"
+          class="hyp-studio-card"
+          [class.hyp-studio-card--preview-active]="previewModalOpen && row.resultUrl && previewRowIndex === i"
+        >
+          <div class="hyp-studio-card__head">
+            <span class="hyp-studio-card__name" [matTooltip]="row.file.name">{{ row.file.name }}</span>
+            <button
+              type="button"
+              class="hyp-studio-icon-btn"
+              (click)="removeRow(i)"
+              [disabled]="processing"
+              aria-label="Quitar de la lista"
+            >
+              ×
+            </button>
+          </div>
+          <div class="hyp-studio-pair">
+            <div class="hyp-studio-pair__col">
+              <div class="hyp-studio-caption">Original</div>
+              <div class="hyp-studio-thumb-wrap">
+                <img class="hyp-studio-thumb" [src]="row.previewUrl" alt="" />
+              </div>
+            </div>
+            <div class="hyp-studio-pair__col">
+              <div class="hyp-studio-caption">Resultado</div>
+              <button
+                *ngIf="row.resultUrl"
+                type="button"
+                class="hyp-studio-thumb-wrap hyp-studio-thumb-wrap--preview-trigger"
+                (click)="openPreviewAt(i)"
+                [disabled]="processing"
+                aria-label="Abrir vista previa del resultado"
+              >
+                <img class="hyp-studio-thumb" [src]="row.resultUrl" alt="" />
+              </button>
+              <div *ngIf="!row.resultUrl" class="hyp-studio-placeholder">Sin procesar</div>
+            </div>
+          </div>
+          <div class="hyp-studio-card__actions">
+            <button type="button" class="hyp-studio-btn hyp-studio-btn--ghost hyp-studio-btn--small" (click)="downloadFile(row.result!)" [disabled]="!row.result">
+              Descargar
+            </button>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <div
+      class="hyp-studio-preview-modal"
+      *ngIf="previewModalOpen && previewRow && previewRowIndex !== null"
+      (click)="onPreviewBackdropClick($event)"
+    >
+      <div
+        class="hyp-studio-preview-modal__sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="hyp-preview-modal-title"
+        (click)="$event.stopPropagation()"
+      >
+        <button
+          type="button"
+          class="hyp-studio-preview-modal__close"
+          (click)="closePreviewModal()"
+          aria-label="Cerrar vista previa"
+        >
+          ×
+        </button>
+        <h2 id="hyp-preview-modal-title" class="hyp-studio-preview-modal__title">Vista previa</h2>
+        <div class="hyp-studio-preview-modal__toolbar">
+          <span class="hyp-studio-preview-modal__name" [matTooltip]="rows[previewRowIndex].file.name">{{
+            rows[previewRowIndex].file.name
+          }}</span>
+          <span class="hyp-studio-preview-modal__counter" *ngIf="resultRowIndices.length > 1">
+            {{ resultRowIndices.indexOf(previewRowIndex) + 1 }} / {{ resultRowIndices.length }}
+          </span>
+          <div class="hyp-studio-preview-modal__nav" *ngIf="resultRowIndices.length > 1">
+            <button type="button" class="hyp-studio-btn hyp-studio-btn--ghost hyp-studio-btn--small" (click)="advancePreview(-1)">
+              Anterior
+            </button>
+            <button type="button" class="hyp-studio-btn hyp-studio-btn--ghost hyp-studio-btn--small" (click)="advancePreview(1)">
+              Siguiente
+            </button>
+          </div>
+        </div>
+        <div class="hyp-studio-preview-pair">
+          <div class="hyp-studio-preview-pair__col">
+            <div class="hyp-studio-caption">Original</div>
+            <div class="hyp-studio-preview-frame">
+              <img class="hyp-studio-preview-img" [src]="previewRow.previewUrl" alt="" />
+            </div>
+          </div>
+          <div class="hyp-studio-preview-pair__col">
+            <div class="hyp-studio-caption">Resultado (IA)</div>
+            <div class="hyp-studio-preview-frame">
+              <img class="hyp-studio-preview-img" [src]="previewRow.resultUrl" alt="" />
+            </div>
+          </div>
+        </div>
+        <div class="hyp-studio-preview-modal__footer">
+          <button
+            type="button"
+            class="hyp-studio-btn hyp-studio-btn--ghost hyp-studio-btn--small"
+            (click)="downloadFile(rows[previewRowIndex].result!)"
+            [disabled]="!rows[previewRowIndex].result"
+          >
+            Descargar esta imagen
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

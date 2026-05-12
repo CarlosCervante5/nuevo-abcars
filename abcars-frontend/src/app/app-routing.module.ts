@@ -14,6 +14,7 @@ import { ServicesComponent } from './pages/services/services.component';
 import { PrivacidadDeUsoComponent } from './pages/externals/privacidad-de-uso/privacidad-de-uso.component';
 import { TerminosYCondicionesComponent } from './pages/externals/terminos-y-condiciones/terminos-y-condiciones.component';
 import { ScrollTopGuard } from './shared/guards/scroll-top.guard';
+import { ImagenStudioComponent } from './pages/imagen-studio/imagen-studio.component';
 
 const routes: Routes = [
   // Ruta principal apunta al nuevo showroom moderno
@@ -31,6 +32,11 @@ const routes: Routes = [
     path: 'tailwind-demo',
     component: TailwindDemoComponent,
     canActivate: [ScrollTopGuard]
+  },
+  {
+    path: 'herramientas/imagen-studio',
+    component: ImagenStudioComponent,
+    canActivate: [ScrollTopGuard],
   },
   {
     path: 'inventario',

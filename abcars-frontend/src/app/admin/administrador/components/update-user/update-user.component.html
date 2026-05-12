@@ -104,7 +104,7 @@
               >
                 <option value="" disabled>Seleccione</option>
                 <option *ngFor="let rol of rolesSorted" [value]="rol.name">
-                  {{ rol.name }}
+                  {{ roleLabel(rol.name) }}
                 </option>
               </select>
               <p *ngIf="role_nameInvalid" class="text-xs text-red-600 mt-1">Seleccione un rol.</p>

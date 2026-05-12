@@ -1,13 +1,14 @@
 import { Campaign } from '@interfaces/admin.interfaces';
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { AbstractControl, FormControl, FormGroup, UntypedFormBuilder, ValidatorFn, Validators } from '@angular/forms';
 import { VehicleService } from '@services/vehicle.service';
 import { ImagesService } from '@services/images.service';
+import { GeminiVehicleImageService } from '@services/gemini-vehicle-image.service';
 import Swal from "sweetalert2";
 import { MatChipInputEvent } from '@angular/material/chips';
-import { Observable, of } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { Observable, of, TimeoutError } from 'rxjs';
+import { map, startWith, timeout, finalize } from 'rxjs/operators';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
@@ -19,6 +20,8 @@ import { AdminService } from '@services/admin.service';
 import { suggestBrandsByName } from '@helpers/brand-suggest.helper';
 import {reload} from '@helpers/session.helper';
 import { Router } from '@angular/router';
+import { VehicleGalleryReplaceService } from '@services/vehicle-gallery-replace.service';
+import { fetchImageAsFile } from '../../../../shared/utils/fetch-image-as-file';
 
 type ImageRow = ImageOrder & { selected?: boolean };
 
@@ -28,7 +31,7 @@ type ImageRow = ImageOrder & { selected?: boolean };
     styleUrls: ['./update-vehicle.component.css'],
     standalone: false
 })
-export class UpdateVehicleComponent implements OnInit {
+export class UpdateVehicleComponent implements OnInit, OnDestroy {
   
   
   public vehicle_uuid: string = '';
@@ -43,8 +46,15 @@ export class UpdateVehicleComponent implements OnInit {
   imageFiles: File[] = [];
   imageUploadDisabled = true;
   imageUploadLoading = false;
+  imageUploadPhase: 'idle' | 'ai' | 'upload' = 'idle';
+  processImagesWithAi = false;
+  geminiAiConfigured = false;
   imagesForSlider: ImageRow[] = [];
   imagesOrderSaving = false;
+  /** Reemplazo por IA en curso (evita doble clic). */
+  galleryReplacing = false;
+  imageDropZoneActive = false;
+  pendingPreviewUrls: string[] = [];
   /** Si hubo cambios en imágenes sin cerrar, al cerrar se notifica reload al listado. */
   private imagesDirty = false;
 
@@ -82,8 +92,10 @@ export class UpdateVehicleComponent implements OnInit {
     private _vehicleService:VehicleService,
     private _campaignService:AdminService,
     private _imagesService: ImagesService,
+    private _geminiVehicleImage: GeminiVehicleImageService,
     private _bottomSheetRef: MatBottomSheetRef<{ reload?: boolean } | undefined>,
-    private _router: Router 
+    private _router: Router,
+    private readonly _vehicleGalleryReplace: VehicleGalleryReplaceService,
   ) {
       this.vehicle_uuid = data.uuid;
       if (data.initialTab === 1) {
@@ -93,8 +105,91 @@ export class UpdateVehicleComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.geminiAiConfigured = this._geminiVehicleImage.isConfigured();
+    this.getVehicle();
+  }
 
-      this.getVehicle();
+  ngOnDestroy(): void {
+    this.revokePendingPreviews();
+  }
+
+  formatBytes(n: number): string {
+    if (!Number.isFinite(n) || n < 0) return '—';
+    if (n < 1024) return `${n} B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+    return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  private revokePendingPreviews(): void {
+    for (const u of this.pendingPreviewUrls) {
+      URL.revokeObjectURL(u);
+    }
+    this.pendingPreviewUrls = [];
+  }
+
+  private isAllowedImageFile(f: File): boolean {
+    const t = (f.type || '').toLowerCase();
+    if (['image/png', 'image/jpeg', 'image/webp'].includes(t)) return true;
+    return /\.(png|jpe?g|webp)$/i.test(f.name);
+  }
+
+  private applySelectedImageFiles(
+    list: FileList | File[] | null,
+    mode: 'replace' | 'append' = 'replace',
+  ): void {
+    this.revokePendingPreviews();
+    if (!list || !list.length) {
+      if (mode === 'replace') {
+        this.imageFiles = [];
+        this.imageUploadDisabled = true;
+      }
+      return;
+    }
+    const raw = Array.isArray(list)
+      ? list
+      : Array.from(list as ArrayLike<File>);
+    const incoming = raw.filter((f) => this.isAllowedImageFile(f));
+    if (!incoming.length) {
+      if (mode === 'replace') {
+        this.imageFiles = [];
+        this.imageUploadDisabled = true;
+      }
+      return;
+    }
+    const next =
+      mode === 'append' ? [...this.imageFiles, ...incoming] : incoming;
+    this.imageFiles = next;
+    this.imageUploadDisabled = next.length === 0;
+    this.pendingPreviewUrls = next.map((f) => URL.createObjectURL(f));
+  }
+
+  onImageDragOver(ev: DragEvent): void {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (ev.dataTransfer) {
+      ev.dataTransfer.dropEffect = 'copy';
+    }
+    this.imageDropZoneActive = true;
+  }
+
+  onImageDragLeave(ev: DragEvent): void {
+    const cur = ev.currentTarget as HTMLElement;
+    const rel = ev.relatedTarget as Node | null;
+    if (rel && cur.contains(rel)) return;
+    this.imageDropZoneActive = false;
+  }
+
+  onImageDrop(ev: DragEvent): void {
+    ev.preventDefault();
+    ev.stopPropagation();
+    this.imageDropZoneActive = false;
+    const dt = ev.dataTransfer;
+    if (!dt?.files?.length) return;
+    this.applySelectedImageFiles(dt.files, 'append');
+  }
+
+  clearPendingImages(): void {
+    this.applySelectedImageFiles(null);
   }
 
   private filters(): void {
@@ -316,41 +411,91 @@ export class UpdateVehicleComponent implements OnInit {
 
   assignImageFiles(event: Event): void {
     const el = event.currentTarget as HTMLInputElement;
-    const list = el.files;
-    if (list?.length) {
-      this.imageFiles = Array.from(list);
-      this.imageUploadDisabled = false;
-    } else {
-      this.imageFiles = [];
-      this.imageUploadDisabled = true;
-    }
+    this.applySelectedImageFiles(el.files, 'replace');
+    el.value = '';
   }
 
   uploadNewImages(): void {
     if (!this.imageFiles.length) {
       return;
     }
+    void this.runUploadNewImages();
+  }
+
+  private async runUploadNewImages(): Promise<void> {
     this.imageUploadLoading = true;
     this.imageUploadDisabled = true;
-    this._imagesService.setImage(this.vehicle_uuid, this.imageFiles).subscribe({
+    this.imageUploadPhase = 'idle';
+
+    let filesToUpload = [...this.imageFiles];
+
+    if (this.processImagesWithAi) {
+      if (!this._geminiVehicleImage.isConfigured()) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'IA no disponible',
+          text: 'Configura geminiApiKey en environment.ts. En desarrollo activa geminiUseDevProxy y proxy.conf.json.',
+          confirmButtonColor: '#EEB838',
+        });
+        this.imageUploadLoading = false;
+        this.imageUploadDisabled = this.imageFiles.length === 0;
+        return;
+      }
+      this.imageUploadPhase = 'ai';
+      try {
+        filesToUpload = await this._geminiVehicleImage.processFilesRecorteEmbellecer(
+          this.imageFiles,
+        );
+      } catch (e) {
+        this.imageUploadPhase = 'idle';
+        this.imageUploadLoading = false;
+        this.imageUploadDisabled = this.imageFiles.length === 0;
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al procesar con IA',
+          text:
+            e instanceof Error
+              ? e.message
+              : 'Intenta de nuevo o desactiva el interruptor y sube los originales.',
+          confirmButtonColor: '#EEB838',
+        });
+        return;
+      }
+    }
+
+    this.imageUploadPhase = 'upload';
+    this._imagesService
+      .setImage(this.vehicle_uuid, filesToUpload)
+      .pipe(timeout(240000))
+      .subscribe({
       next: () => {
         this.imageUploadLoading = false;
-        this.imageFiles = [];
-        this.imageUploadDisabled = true;
+        this.imageUploadPhase = 'idle';
+        this.applySelectedImageFiles(null);
         this.imagesDirty = true;
         Swal.fire({
           icon: 'success',
           title: 'Imágenes subidas',
           showConfirmButton: false,
-          timer: 2000
+          timer: 2000,
         });
         this.refreshImagesFromApi();
       },
       error: (err: unknown) => {
         this.imageUploadLoading = false;
+        this.imageUploadPhase = 'idle';
         this.imageUploadDisabled = this.imageFiles.length === 0;
+        if (err instanceof TimeoutError) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Tiempo agotado',
+            text: 'El servidor no respondió (240 s). Comprueba Laravel en 127.0.0.1:8000 y tu red.',
+            confirmButtonColor: '#EEB838',
+          });
+          return;
+        }
         reload(err, this._router);
-      }
+      },
     });
   }
 
@@ -391,6 +536,76 @@ export class UpdateVehicleComponent implements OnInit {
         reload(err, this._router);
       }
     });
+  }
+
+  /**
+   * Reemplaza una imagen de la galería tras pasarla por Gemini (recorte estudio + embellecimiento).
+   */
+  processGalleryImageWithAi(image: ImageOrder, index: number): void {
+    if (this.galleryReplacing) return;
+    if (!this._geminiVehicleImage.isConfigured()) {
+      void Swal.fire({
+        icon: 'warning',
+        title: 'IA no disponible',
+        text: 'Configura geminiApiKey en environment.ts (y en desarrollo geminiUseDevProxy + proxy.conf.json).',
+        confirmButtonColor: '#EEB838',
+      });
+      return;
+    }
+    void Swal.fire({
+      title: '¿Procesar con IA?',
+      html: 'Se enviará esta foto a Gemini (recorte tipo estudio y embellecimiento) y <strong>sustituirá</strong> la imagen actual en el mismo lugar de la galería.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Procesar y reemplazar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#ca8a04',
+    }).then((r) => {
+      if (!r.isConfirmed) return;
+      void this.runProcessGalleryImageWithAi(image, index);
+    });
+  }
+
+  private async runProcessGalleryImageWithAi(image: ImageOrder, index: number): Promise<void> {
+    this.galleryReplacing = true;
+    try {
+      const source = await fetchImageAsFile(image.path, `source_${image.id}.jpg`);
+      const processed = await this._geminiVehicleImage.processFilesRecorteEmbellecer([source]);
+      const outFile = processed[0];
+      if (!outFile) {
+        throw new Error('La IA no devolvió imagen.');
+      }
+      const idsSnapshot = new Set(this.imagesForSlider.map((x) => x.id));
+      this._vehicleGalleryReplace
+        .replaceAtIndex(this.vehicle_uuid, image.id, index, outFile, idsSnapshot)
+        .pipe(finalize(() => (this.galleryReplacing = false)))
+        .subscribe({
+          next: (vehRes) => {
+            this.vehicle.images = vehRes.data.images;
+            this.syncImagesFromVehicle();
+            this.imagesDirty = true;
+            void Swal.fire({
+              icon: 'success',
+              title: 'Imagen procesada y actualizada',
+              showConfirmButton: false,
+              timer: 2200,
+            });
+          },
+          error: (err: unknown) => reload(err, this._router),
+        });
+    } catch (e) {
+      this.galleryReplacing = false;
+      const msg =
+        e instanceof Error
+          ? e.message
+          : 'No se pudo procesar. Si la imagen viene de otro dominio, revisa CORS o descárgala y súbela de nuevo.';
+      void Swal.fire({
+        icon: 'error',
+        title: 'Error al procesar',
+        text: msg,
+        confirmButtonColor: '#EEB838',
+      });
+    }
   }
 
   deleteImageAt(vehicleImageUuid: string, index: number): void {

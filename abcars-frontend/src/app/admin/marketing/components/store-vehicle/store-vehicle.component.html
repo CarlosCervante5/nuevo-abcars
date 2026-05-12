@@ -555,12 +555,59 @@
           <ng-container *ngIf="createdUuid">
             <section class="uv-images-upload" aria-label="Subir imágenes">
               <h2 class="uv-images-section-title">Agregar fotos</h2>
-              <p class="uv-images-hint">PNG, JPG, JPEG o WebP. Varias a la vez.</p>
-              <label class="uv-images-drop">
-                <input type="file" accept=".png,.jpg,.jpeg,.webp" multiple (change)="assignImageFiles($event)" />
-                <mat-icon class="uv-images-drop-icon">cloud_upload</mat-icon>
-                <span class="uv-images-drop-text">Toca o arrastra archivos aquí</span>
-              </label>
+              <p class="uv-images-hint">PNG, JPG, JPEG o WebP. Varias a la vez. Al arrastrar al recuadro, los archivos se <strong>añaden</strong> a la lista (el selector de archivos la reemplaza).</p>
+              <div class="uv-images-ai-panel">
+                <mat-slide-toggle
+                  [(ngModel)]="processImagesWithAi"
+                  [disabled]="!geminiAiConfigured || imageUploadLoading"
+                  color="primary"
+                  class="uv-images-ai-toggle"
+                >
+                  Procesar con IA antes de subir
+                </mat-slide-toggle>
+                <p class="uv-images-hint uv-images-hint--ai" *ngIf="geminiAiConfigured">
+                  Recorte tipo estudio, fondo limpio y embellecimiento (Gemini). Cada imagen es una petición a Google; desactiva para subir el original sin IA.
+                </p>
+                <p class="uv-images-hint uv-images-hint--ai" *ngIf="!geminiAiConfigured">
+                  Para usar IA, configura <code>geminiApiKey</code> en <code>environment.ts</code> (y en desarrollo <code>geminiUseDevProxy</code> + <code>proxy.conf.json</code>).
+                </p>
+              </div>
+              <div
+                class="uv-images-drop"
+                [class.uv-images-drop--active]="imageDropZoneActive"
+                (dragover)="onImageDragOver($event)"
+                (dragleave)="onImageDragLeave($event)"
+                (drop)="onImageDrop($event)"
+              >
+                <label class="uv-images-drop-inner">
+                  <input type="file" accept=".png,.jpg,.jpeg,.webp" multiple (change)="assignImageFiles($event)" />
+                  <mat-icon class="uv-images-drop-icon">cloud_upload</mat-icon>
+                  <span class="uv-images-drop-text">Toca o arrastra archivos aquí</span>
+                </label>
+              </div>
+              <div *ngIf="imageFiles.length > 0" class="uv-images-pending" aria-live="polite">
+                <div class="uv-images-pending-head">
+                  <span class="uv-images-pending-title"
+                    >Listos para subir ({{ imageFiles.length }})</span
+                  >
+                  <button type="button" class="uv-images-pending-clear" (click)="clearPendingImages()">
+                    Quitar selección
+                  </button>
+                </div>
+                <ul class="uv-images-pending-list">
+                  <li *ngFor="let f of imageFiles; let i = index" class="uv-images-pending-item">
+                    <img
+                      class="uv-images-pending-thumb"
+                      [src]="pendingPreviewUrls[i]"
+                      alt=""
+                    />
+                    <div class="uv-images-pending-meta">
+                      <span class="uv-images-pending-name">{{ f.name }}</span>
+                      <span class="uv-images-pending-size">{{ formatBytes(f.size) }}</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
               <div class="uv-images-upload-actions">
                 <button
                   type="button"
@@ -569,7 +616,8 @@
                   [disabled]="imageUploadDisabled || imageUploadLoading"
                 >
                   <span *ngIf="!imageUploadLoading">Subir imágenes</span>
-                  <span *ngIf="imageUploadLoading">Subiendo…</span>
+                  <span *ngIf="imageUploadLoading && imageUploadPhase === 'ai'">Procesando con IA…</span>
+                  <span *ngIf="imageUploadLoading && imageUploadPhase !== 'ai'">Subiendo…</span>
                 </button>
               </div>
               <mat-progress-bar *ngIf="imageUploadLoading" mode="indeterminate"></mat-progress-bar>
@@ -578,7 +626,9 @@
             <section class="uv-images-gallery" aria-label="Galería y orden">
               <div class="uv-images-gallery-head">
                 <h2 class="uv-images-section-title">Galería (arrastra para reordenar)</h2>
-                <p class="uv-images-hint">La primera imagen es la portada en el listado.</p>
+                <p class="uv-images-hint">
+                  La primera imagen es la portada en el listado. Usa <strong>procesar con IA</strong> en cada fila para reprocesar una foto ya subida con Gemini.
+                </p>
               </div>
 
               <div *ngIf="imagesForSlider.length === 0" class="uv-images-empty">
@@ -594,6 +644,9 @@
               >
                 <div class="uv-images-row" *ngFor="let image of imagesForSlider; let i = index" cdkDrag>
                   <div class="uv-images-row-inner">
+                    <span class="uv-images-drag-handle" cdkDragHandle matTooltip="Arrastrar para reordenar">
+                      <mat-icon>drag_indicator</mat-icon>
+                    </span>
                     <input
                       type="checkbox"
                       [(ngModel)]="image.selected"
@@ -606,6 +659,16 @@
                       <span class="uv-images-meta-val">{{ image.path_public || '—' }}</span>
                     </div>
                     <img class="uv-images-thumb" [src]="image.path" alt="" />
+                    <button
+                      type="button"
+                      class="uv-images-ia-btn"
+                      (click)="processGalleryImageWithAi(image, i)"
+                      [disabled]="galleryReplacing"
+                      matTooltip="Procesar con IA y reemplazar"
+                      aria-label="Procesar con IA y reemplazar imagen"
+                    >
+                      <mat-icon>auto_fix_high</mat-icon>
+                    </button>
                     <button
                       type="button"
                       class="uv-images-trash"

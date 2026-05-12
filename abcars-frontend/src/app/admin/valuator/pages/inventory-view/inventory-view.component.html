@@ -28,6 +28,7 @@
         </div>
 
         <!-- Table (solo lectura) -->
+        <div class="adm-mat-table-wrap">
         <div class="row">
             <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 mb-2">
                 <ng-container matColumnDef="status">
@@ -123,6 +124,7 @@
                 (page)="paginationChange($event)" 
                 #paginador
             ></mat-paginator>
+        </div>
         </div>
 
         <footer class="admin-view-footer">© {{ currentYear }} ABCars.mx - Todos los derechos reservados.</footer>

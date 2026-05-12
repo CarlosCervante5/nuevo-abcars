@@ -5,6 +5,7 @@ import { DataDetailUser, Dealership, DealerShipResponse, DetailResponsive, roles
 import { GralResponse } from '@interfaces/vehicle_data.interface';
 import { AdminService } from '@services/admin.service';
 import { dealershipServiceTypesSummary } from 'src/app/shared/utils/public-dealerships';
+import { displayAdminRoleNameEs } from 'src/app/shared/utils/admin-role-labels';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -234,10 +235,16 @@ export class UpdateUserComponent implements OnInit {
         return dealershipServiceTypesSummary(d);
     }
 
+    roleLabel(technical: string): string {
+        return displayAdminRoleNameEs(technical);
+    }
+
     private refreshSelectLists(): void {
         if (this.roles?.length) {
             this.rolesSorted = [...this.roles].sort((a, b) =>
-                a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+                displayAdminRoleNameEs(a.name).localeCompare(displayAdminRoleNameEs(b.name), 'es', {
+                    sensitivity: 'base'
+                }));
         }
         const raw = this.dealership ?? [];
         let list = [...raw].sort((a, b) =>

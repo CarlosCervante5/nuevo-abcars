@@ -99,8 +99,8 @@
       </div>
 
       <div *ngIf="!loading && dealerships.length > 0" class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="adm-plain-table min-w-full divide-y divide-gray-200">
+          <thead>
             <tr>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
@@ -111,7 +111,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <tr *ngFor="let d of dealerships" class="hover:bg-gray-50">
+            <tr *ngFor="let d of dealerships">
               <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ capitalize(d.name) }}</td>
               <td class="px-4 py-3 text-sm text-gray-600">
                 <div class="flex flex-wrap gap-1">

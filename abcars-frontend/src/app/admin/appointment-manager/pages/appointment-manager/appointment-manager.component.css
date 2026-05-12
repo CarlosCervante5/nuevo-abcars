@@ -265,33 +265,12 @@
   background: transparent;
 }
 
-::ng-deep .apm-mat-table .mat-mdc-header-row,
-::ng-deep .apm-mat-table .mat-header-row {
-  background: #f8fafc;
-}
-
-::ng-deep .apm-mat-table .mat-mdc-header-cell,
-::ng-deep .apm-mat-table .mat-header-cell,
-.apm-th {
-  color: #64748b !important;
-  font-weight: 700 !important;
-  font-size: 0.75rem !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.04em !important;
-  border-bottom: 1px solid #e2e8f0 !important;
-}
-
 ::ng-deep .apm-mat-table .mat-mdc-cell,
 ::ng-deep .apm-mat-table .mat-cell,
 .apm-td {
   border-bottom: 1px solid #f1f5f9 !important;
   color: #334155 !important;
   font-size: 0.875rem !important;
-}
-
-::ng-deep .apm-mat-table .apm-data-row:hover .mat-mdc-cell,
-::ng-deep .apm-mat-table .apm-data-row:hover .mat-cell {
-  background: #fafafa;
 }
 
 .apm-td-strong {

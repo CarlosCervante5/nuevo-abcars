@@ -24,18 +24,14 @@
         width: 100%;
     }
 
-    table .mat-mdc-header-cell{
-        background: #94bcf4;
+    @media (min-width: 300px) and (max-width: 1200px) {
+        .toggle-button {
+            display: contents !important;
+        }
     }
 
-    @media(min-width: 300px) and (max-width: 1200px){
-        .toggle-button {
-        display: contents !important; /* Mostrar botón */
-        }
-        
-    }
     .toggle-button {
-        display: none; /* Mostrar botón */
+        display: none;
     }
 
 /* Estilos para la barra de búsqueda */

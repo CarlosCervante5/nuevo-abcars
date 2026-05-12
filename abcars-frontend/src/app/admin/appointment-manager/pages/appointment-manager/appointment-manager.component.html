@@ -70,7 +70,8 @@
       <button type="button" class="apm-btn apm-btn--ghost" (click)="clearSearch()">Limpiar búsqueda</button>
     </div>
 
-    <div class="apm-table-wrap" *ngIf="!loading && length > 0">
+    <div class="adm-mat-table-wrap" *ngIf="!loading && length > 0">
+    <div class="apm-table-wrap">
       <table mat-table [dataSource]="dataSource" matSort class="apm-mat-table">
         <ng-container matColumnDef="id">
           <th mat-header-cell *matHeaderCellDef mat-sort-header class="apm-th">#</th>
@@ -141,7 +142,6 @@
     </div>
 
     <mat-paginator
-      *ngIf="!loading && length > 0"
       class="apm-paginator"
       [pageSize]="paginate"
       [length]="length"
@@ -151,6 +151,7 @@
       aria-label="Paginación de citas"
       (page)="paginationChange($event)"
     ></mat-paginator>
+    </div>
   </section>
 
   <footer class="apm-footer">© {{ currentYear }} ABCars.mx — Todos los derechos reservados.</footer>

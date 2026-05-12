@@ -11,14 +11,26 @@ use App\Models\Valuations\ValuationUpdate;
 use App\Models\VehicleUpdate;
 use App\Notifications\InternallyRegisterNotification;
 use App\Notifications\RegisterNotification;
-use Faker\Factory as Faker;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserService
 {       
 
     protected $quiz_ids = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48];
+
+    /**
+     * Nickname único sin depender de Faker (no está en require en prod con --no-dev).
+     */
+    protected function randomNickname(?string $email = null): string
+    {
+        $local = Str::before((string) $email, '@');
+        $base = Str::slug($local, '_');
+        $base = $base !== '' ? Str::limit($base, 24, '') : 'user';
+
+        return $base.'_'.Str::lower(Str::random(10));
+    }
 
 
     /**
@@ -93,7 +105,6 @@ class UserService
 
     public function createNewCustomer(array $data)
     {
-        $faker = Faker::create();
         $userCreated = false;
 
         if( !isset($data['password']) ){
@@ -109,7 +120,7 @@ class UserService
 
         while (!$userCreated) {
             try {
-                $nickname = $faker->unique()->userName;
+                $nickname = $this->randomNickname($data['email'] ?? null);
 
                 $user = User::create([
                     'email' => $data['email'],
@@ -163,12 +174,11 @@ class UserService
     public function createNewUser(array $data)
     {   
 
-        $faker = Faker::create();
         $userCreated = false;
 
         while (!$userCreated) {
             try {
-                $nickname = $faker->unique()->userName;
+                $nickname = $this->randomNickname($data['email'] ?? null);
 
                 $user = User::create([
                     'email' => $data['email'],

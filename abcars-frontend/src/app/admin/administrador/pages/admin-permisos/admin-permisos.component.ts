@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AdminService } from '@services/admin.service';
 import { RolesResponse, PermissionResponse, RoleDetailResponse } from '@interfaces/admin.interfaces';
+import { displayAdminRoleNameEs } from 'src/app/shared/utils/admin-role-labels';
 import Swal from 'sweetalert2';
 
 /** Orden y etiquetas en español para la vista (Spatie guarda el nombre técnico en inglés). */
@@ -29,6 +30,11 @@ const PERMISSION_GROUPS: { id: string; label: string; prefixOrIncludes: (name: s
     id: 'crm',
     label: 'CRM / oportunidades (Strega)',
     prefixOrIncludes: (n) => n.includes('opportunities')
+  },
+  {
+    id: 'body_hyp',
+    label: 'HyP / carrocería (órdenes independientes)',
+    prefixOrIncludes: (n) => n.includes('body hyp')
   }
 ];
 
@@ -45,7 +51,9 @@ const PERMISSION_LABELS_ES: Record<string, string> = {
   'manage delivery photos': 'Editar fotos de entregas (carrusel)',
   'view analytics dashboard': 'Ver métricas y solicitudes de formularios',
   'view opportunities': 'Ver oportunidades / leads (CRM)',
-  'manage opportunities': 'Gestionar oportunidades (CRM)'
+  'manage opportunities': 'Gestionar oportunidades (CRM)',
+  'view body hyp standalone orders': 'Ver órdenes HyP independientes',
+  'create body hyp standalone orders': 'Crear órdenes HyP independientes'
 };
 
 @Component({
@@ -72,7 +80,12 @@ export class AdminPermisosComponent implements OnInit {
         this.loading = true;
         this.adminService.getRoles().subscribe({
             next: (roles) => {
-                this.roles = Array.isArray(roles) ? roles : [];
+                const list = Array.isArray(roles) ? roles : [];
+                this.roles = [...list].sort((a, b) =>
+                    displayAdminRoleNameEs(a.name).localeCompare(displayAdminRoleNameEs(b.name), 'es', {
+                        sensitivity: 'base'
+                    })
+                );
                 this.adminService.getPermissions().subscribe({
                     next: (perms) => {
                         this.permissions = Array.isArray(perms) ? perms : [];
@@ -169,5 +182,9 @@ export class AdminPermisosComponent implements OnInit {
 
     permissionLabelEs(technicalName: string): string {
         return PERMISSION_LABELS_ES[technicalName] || technicalName;
+    }
+
+    roleLabelEs(technical: string): string {
+        return displayAdminRoleNameEs(technical);
     }
 }

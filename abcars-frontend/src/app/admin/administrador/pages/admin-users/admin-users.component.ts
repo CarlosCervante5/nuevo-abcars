@@ -9,6 +9,7 @@ import { AddUserComponent } from '../../components/add-user/add-user.component';
 import Swal from 'sweetalert2';
 import { UpdateUserComponent } from '../../components/update-user/update-user.component';
 import { Dealership } from '../../../../shared/interfaces/admin.interfaces';
+import { displayAdminRoleNameEs } from 'src/app/shared/utils/admin-role-labels';
 
 @Component({
     selector: 'app-admin-users',
@@ -30,6 +31,10 @@ export class AdminUsersComponent {
     public mostrarId!: string;
     public mostrar= false;
     public valuator = 'valuator';
+
+    roleLabel(technical: string): string {
+        return displayAdminRoleNameEs(technical);
+    }
 
     dataSource = new MatTableDataSource(this.uuids);
     displayedColumns: string[] = [
@@ -102,7 +107,6 @@ export class AdminUsersComponent {
                     email:      user.email,
                     nickname:   user.nickname,
                     index:      ((this.pageIndex-1) * this.paginate)+(index+1),
-                    color:      index % 2 === 0 ? '#e5e5e5' : '#fff',
                     uuid:       user.uuid,
                     name:       user.profile?.name,
                     last_name:  user.profile?.last_name,

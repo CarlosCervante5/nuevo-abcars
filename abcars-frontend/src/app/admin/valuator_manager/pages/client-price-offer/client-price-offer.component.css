@@ -133,14 +133,11 @@
 }
 
 .client-price-offer-th {
-  background-color: #f9fafb !important;
-  color: #111827 !important;
   font-weight: 600 !important;
   font-size: 0.875rem !important;
   text-transform: none !important;
   letter-spacing: normal !important;
   padding: 0.75rem 1rem !important;
-  border-bottom: 1px solid #e5e7eb !important;
 }
 
 .client-price-offer-td {
@@ -148,10 +145,6 @@
   border-bottom: 1px solid #f3f4f6 !important;
   color: #374151 !important;
   font-size: 0.875rem !important;
-}
-
-.client-price-offer-table tr:hover {
-  background-color: #f9fafb !important;
 }
 
 /* Responsive adjustments */

@@ -40,7 +40,17 @@ class RolesPermissionsSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'view opportunities']);
         Permission::firstOrCreate(['name' => 'manage opportunities']);
 
+        // HyP independientes (rol body)
+        Permission::firstOrCreate(['name' => 'view body hyp standalone orders']);
+        Permission::firstOrCreate(['name' => 'create body hyp standalone orders']);
+
         // Roles (idempotente)
+        $roleBody = Role::firstOrCreate(['name' => 'body']);
+        $roleBody->syncPermissions([
+            'view body hyp standalone orders',
+            'create body hyp standalone orders',
+        ]);
+
         $role1 = Role::firstOrCreate(['name' => 'manager']);
         $role1->givePermissionTo(['create vehicles', 'update vehicles', 'delete vehicles']);
 

@@ -25,6 +25,11 @@ export class DashboardComponent {
                 icon: 'fi fi-rr-car',
                 permalink: '/admin/bodywork_paint_technician/bodywork-paint'
             },
+            {
+                title: 'Evidencia fotográfica (IA)',
+                icon: 'fi fi-rr-picture',
+                permalink: '/admin/bodywork_paint_technician/evidencia-ia'
+            },
         ]
     };
 }

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Fondo fijo de cat�logo ABCars  ciclorama neutro (sin veh�culo).
+  Proporci�n 4:3 (2048�1536). Usar como capa inferior en composici�n local
+  o como referencia crom�tica para prompts de IA.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="1536" viewBox="0 0 2048 1536" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- Pared: gris muy claro arriba � ligero tono m�s fr�o hacia el horizonte -->
+    <linearGradient id="abc-wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fafbfc"/>
+      <stop offset="42%" stop-color="#eef1f4"/>
+      <stop offset="72%" stop-color="#e4e8ec"/>
+      <stop offset="100%" stop-color="#dde2e8"/>
+    </linearGradient>
+    <!-- Suelo: transici�n suave bajo el horizonte visual (~62% altura) -->
+    <linearGradient id="abc-floor" x1="0" y1="0.62" x2="0" y2="1">
+      <stop offset="0%" stop-color="#dce1e6"/>
+      <stop offset="35%" stop-color="#e8ebef"/>
+      <stop offset="100%" stop-color="#f2f4f7"/>
+    </linearGradient>
+    <!-- Vi�eta muy suave en esquinas (estudio real) -->
+    <radialGradient id="abc-vignette" cx="50%" cy="45%" r="75%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="78%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#c5ccd4" stop-opacity="0.12"/>
+    </radialGradient>
+    <!-- Contacto suelocoche (zona de sombra difusa) -->
+    <radialGradient id="abc-contact" cx="50%" cy="92%" r="45%">
+      <stop offset="0%" stop-color="#b8c0ca" stop-opacity="0.22"/>
+      <stop offset="50%" stop-color="#d5dae0" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#e8ebef" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="2048" height="1536" fill="url(#abc-wall)"/>
+  <rect x="0" y="952" width="2048" height="584" fill="url(#abc-floor)"/>
+  <!-- Curva tipo ciclorama entre pared y suelo -->
+  <path
+    fill="#e2e6eb"
+    d="M0 900 C 340 820, 708 800, 1024 812 C 1340 824, 1708 848, 2048 900 L 2048 952 L 0 952 Z"
+    opacity="0.55"
+  />
+  <rect width="2048" height="1536" fill="url(#abc-vignette)"/>
+  <rect width="2048" height="1536" fill="url(#abc-contact)"/>
+</svg>

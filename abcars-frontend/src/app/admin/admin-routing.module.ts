@@ -10,6 +10,7 @@ import { BlogManagerGuard } from './blog-manager/guards/blog-manager.guard';
 import { TechnicianGuard } from './technician/guards/technician.guard';
 import { ValuationManagerGuard } from './valuator_manager/guards/valuation-manager.guard';
 import { BodyworkPaintTechnicianGuard } from './bodywork-paint-technician/guards/bodywork-paint-technician.guard';
+import { BodyGuard } from './body/guards/body.guard';
 import { SparePartsGuard } from './spare-parts/guards/spare-parts.guard';
 
 
@@ -76,6 +77,11 @@ const routes: Routes = [
     loadChildren: () => import('./bodywork-paint-technician/bodywork-paint-technician.module').then( m => m.BodyworkPaintTechnicianModule),
     canActivate: [BodyworkPaintTechnicianGuard],
     canLoad: [BodyworkPaintTechnicianGuard]
+  },
+  { path: 'body',
+    loadChildren: () => import('./body/body.module').then(m => m.BodyModule),
+    canActivate: [BodyGuard],
+    canLoad: [BodyGuard],
   },
   { path: 'spare_parts',
     loadChildren: () => import('./spare-parts/spare-parts.module').then(m => m.SparePartsModule),

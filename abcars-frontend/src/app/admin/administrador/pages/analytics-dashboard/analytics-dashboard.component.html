@@ -88,8 +88,8 @@
         </div>
       } @else {
         <div class="overflow-x-auto max-h-72">
-          <table class="w-full text-sm">
-            <thead class="bg-gray-50 sticky top-0">
+          <table class="adm-plain-table w-full text-sm">
+            <thead class="sticky top-0">
               <tr>
                 <th class="text-left p-2 font-medium text-gray-600">Vehículo</th>
                 <th class="text-left p-2 font-medium text-gray-600">Marca</th>
@@ -100,7 +100,7 @@
             </thead>
             <tbody>
               @for (item of recentSold.data; track item.sold_date) {
-                <tr class="border-b border-gray-50 hover:bg-gray-50">
+                <tr class="border-b border-gray-50">
                   <td class="p-2 text-gray-800">{{ item.vehicle_name }}</td>
                   <td class="p-2 text-gray-600">{{ item.brand_name }}</td>
                   <td class="p-2 text-right font-medium text-gray-800">{{ formatCurrency(item.sale_price) }}</td>
@@ -203,8 +203,8 @@
         </div>
       } @else {
         <div class="overflow-x-auto max-h-80">
-          <table class="w-full text-sm">
-            <thead class="bg-gray-50 sticky top-0">
+          <table class="adm-plain-table w-full text-sm">
+            <thead class="sticky top-0">
               <tr>
                 <th class="text-left p-2 font-medium text-gray-600">Vehículo</th>
                 <th class="text-left p-2 font-medium text-gray-600">Marca</th>
@@ -215,7 +215,7 @@
             </thead>
             <tbody>
               @for (item of longestInventory.data; track item.vehicle_name) {
-                <tr class="border-b border-gray-50 hover:bg-gray-50"
+                <tr class="border-b border-gray-50"
                     [class.bg-red-50]="item.days_in_inventory > 90"
                     [class.text-red-700]="item.days_in_inventory > 90">
                   <td class="p-2">{{ item.vehicle_name }}</td>

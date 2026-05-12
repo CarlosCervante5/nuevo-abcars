@@ -3,6 +3,7 @@
 use App\Http\Controllers\Acquisitions\AcquisitionController;
 use App\Http\Controllers\Appointments\AppointmentController;
 use App\Http\Controllers\Authentication\AuthController;
+use App\Http\Controllers\BodyHypOrders\BodyHypOrderController;
 use App\Http\Controllers\Blogs\BlogController;
 use App\Http\Controllers\Customers\CustomerController;
 use App\Http\Controllers\Campaigns\CampaignController;
@@ -243,19 +244,19 @@ Route::prefix('vehicles')->middleware('bandwidth_usage')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         // Permisos Spatie + administrator/super_admin (alineado con RolesPermissionsSeeder)
-        Route::middleware('role_or_permission:super_admin|administrator|create vehicles')->group(function () {
+        Route::middleware('role_or_permission:super_admin|administrator|marketing|create vehicles')->group(function () {
             Route::post('/', [VehicleController::class, 'store']);
             Route::post('/create', [VehicleController::class, 'create']);
             Route::post('/csv_upload', [VehicleController::class, 'csvUpload']);
         });
-        Route::middleware('role_or_permission:super_admin|administrator|update vehicles')->group(function () {
+        Route::middleware('role_or_permission:super_admin|administrator|marketing|update vehicles')->group(function () {
             Route::post('/update', [VehicleController::class, 'update']);
             Route::post('/status', [VehicleController::class, 'status']);
             Route::post('/restore', [VehicleController::class, 'restore']);
             Route::post('/inverse_delete_batch', [VehicleController::class, 'inverseDeleteBatch']);
             Route::post('/status-batch', [VehicleController::class, 'statusBatch']);
         });
-        Route::middleware('role_or_permission:super_admin|administrator|delete vehicles')->group(function () {
+        Route::middleware('role_or_permission:super_admin|administrator|marketing|delete vehicles')->group(function () {
             Route::post('/delete', [VehicleController::class, 'delete']);
             Route::post('/delete-batch', [VehicleController::class, 'deleteBatch']);
         });
@@ -269,11 +270,11 @@ Route::prefix('vehicles')->middleware('bandwidth_usage')->group(function () {
 // Segmento Imágenes de Vehículos
 
 Route::prefix('vehicle_images')->middleware(['bandwidth_usage', 'auth:sanctum'])->group(function () {
-    Route::middleware('role_or_permission:super_admin|administrator|create vehicles|update vehicles')->group(function () {
+    Route::middleware('role_or_permission:super_admin|administrator|marketing|create vehicles|update vehicles')->group(function () {
         Route::post('/', [VehicleImageController::class, 'store']);
         Route::post('/sort_update', [VehicleImageController::class, 'sortUpdate']);
     });
-    Route::middleware('role_or_permission:super_admin|administrator|delete vehicles')->group(function () {
+    Route::middleware('role_or_permission:super_admin|administrator|marketing|delete vehicles')->group(function () {
         Route::post('/delete', [VehicleImageController::class, 'delete']);
         Route::post('/delete_batch', [VehicleImageController::class, 'deleteBatch']);
     });
@@ -489,7 +490,7 @@ Route::prefix('appointment')->middleware('bandwidth_usage')->group(function () {
 
     Route::post('/', [AppointmentController::class, 'store']);
 
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'deny_role:body'])->group(function () {
         Route::post('/valuation_appointment', [AppointmentController::class, 'valuationAppointment']);
         Route::post('/attatch_valuator', [AppointmentController::class, 'attatchValuator']);
         Route::post('/search', [AppointmentController::class, 'search']);
@@ -506,7 +507,7 @@ Route::prefix('valuations')->middleware('bandwidth_usage')->group(function () {
     Route::post('/count',[ValuationController::class, 'count']);
 
 
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'deny_role:body'])->group(function () {
         Route::get('/search', [ValuationController::class, 'search']);
         Route::get('/search_bodyworks', [ValuationController::class, 'searchBodyworks']);
         Route::get('/search_repairs', [ValuationController::class, 'searchRepairs']);
@@ -564,7 +565,7 @@ Route::prefix('spare_parts')->middleware('bandwidth_usage')->group(function () {
 
 Route::prefix('bodyworks')->middleware('bandwidth_usage')->group(function () {
 
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'deny_role:body'])->group(function () {
         
         Route::post('/', [RepairController::class, 'store']);
         Route::post('/update', [RepairController::class, 'update']);
@@ -573,6 +574,19 @@ Route::prefix('bodyworks')->middleware('bandwidth_usage')->group(function () {
 });
 
 // Fin Hojalatería y pintura
+
+// Órdenes HyP independientes (rol body / administración)
+Route::prefix('body-hyp-orders')->middleware('bandwidth_usage')->group(function () {
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/', [BodyHypOrderController::class, 'index'])->middleware(
+            'role_or_permission:super_admin|administrator|view body hyp standalone orders'
+        );
+        Route::post('/', [BodyHypOrderController::class, 'store'])->middleware(
+            'role_or_permission:super_admin|administrator|create body hyp standalone orders'
+        );
+    });
+});
 
 
 // Segmento Blog

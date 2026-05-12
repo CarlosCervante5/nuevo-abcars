@@ -32,7 +32,7 @@ import { AVehicleComponent } from './components/a-vehicle/a-vehicle.component';
     AdminModule,
     DragDropModule,
     SkCubeComponent,
-    NewNavComponent
+    NewNavComponent,
   ],
   exports: [VehiclesComponent]
 })

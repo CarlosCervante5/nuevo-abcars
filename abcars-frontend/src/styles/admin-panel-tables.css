@@ -1,0 +1,92 @@
+/**
+ * Tablas panel admin — mismo criterio que Usuarios:
+ * encabezado #94bcf4, filas cebra #e5e5e5 / #fff.
+ * Envolver la tabla (y opcionalmente el paginator) en .adm-mat-table-wrap
+ */
+
+.adm-mat-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.adm-mat-table-wrap table.mat-mdc-table,
+.adm-mat-table-wrap table.mat-table {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: #fff;
+}
+
+.adm-mat-table-wrap .mat-mdc-header-row,
+.adm-mat-table-wrap tr.mat-header-row {
+  background: #94bcf4 !important;
+}
+
+.adm-mat-table-wrap .mat-mdc-header-cell,
+.adm-mat-table-wrap th.mat-header-cell {
+  background-color: #94bcf4 !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  border-bottom: 1px solid #7ea8e8 !important;
+}
+
+.adm-mat-table-wrap tr.mat-mdc-row:nth-child(even) .mat-mdc-cell,
+.adm-mat-table-wrap tr.mat-row:nth-child(even) .mat-cell {
+  background-color: #e5e5e5 !important;
+}
+
+.adm-mat-table-wrap tr.mat-mdc-row:nth-child(odd) .mat-mdc-cell,
+.adm-mat-table-wrap tr.mat-row:nth-child(odd) .mat-cell {
+  background-color: #ffffff !important;
+}
+
+.adm-mat-table-wrap tr.mat-mdc-row:hover .mat-mdc-cell,
+.adm-mat-table-wrap tr.mat-row:hover .mat-cell {
+  filter: brightness(0.97);
+}
+
+.adm-mat-table-wrap .mat-mdc-paginator,
+.adm-mat-table-wrap mat-paginator {
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* Tablas HTML simples (sin Angular Material) */
+.adm-plain-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.adm-plain-table thead th,
+.adm-plain-table thead td {
+  background-color: #94bcf4 !important;
+  color: #0f172a !important;
+  font-weight: 700;
+  border-bottom: 1px solid #7ea8e8;
+}
+
+.adm-plain-table thead {
+  background: #94bcf4;
+}
+
+.adm-plain-table tbody tr:nth-child(odd) td,
+.adm-plain-table tbody tr:nth-child(odd) th {
+  background-color: #e5e5e5;
+}
+
+.adm-plain-table tbody tr:nth-child(even) td,
+.adm-plain-table tbody tr:nth-child(even) th {
+  background-color: #ffffff;
+}
+
+.adm-plain-table tbody tr:hover td {
+  filter: brightness(0.97);
+}
+
+/* Alertas en filas (p. ej. inventario largo en analytics) */
+.adm-plain-table tbody tr.bg-red-50 td,
+.adm-plain-table tbody tr[class*='bg-red-50'] td {
+  background-color: #fef2f2 !important;
+}

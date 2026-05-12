@@ -145,7 +145,8 @@
       <button type="button" class="inv-btn inv-btn--ghost" (click)="clearFilters()">Limpiar filtros</button>
     </div>
 
-    <div class="inv-table-wrap" *ngIf="!loading && length > 0">
+    <div class="adm-mat-table-wrap" *ngIf="!loading && length > 0">
+      <div class="inv-table-wrap">
       <table mat-table [dataSource]="dataSource" class="inv-mat-table">
         <ng-container matColumnDef="image">
           <th mat-header-cell *matHeaderCellDef>Foto</th>
@@ -216,10 +217,9 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns" class="inv-data-row"></tr>
       </table>
-    </div>
+      </div>
 
     <mat-paginator
-      *ngIf="!loading && length > 0"
       class="inv-paginator"
       [length]="length"
       [pageSize]="pageSize"
@@ -229,5 +229,6 @@
       aria-label="Paginación del inventario"
       (page)="paginationChange($event)"
     ></mat-paginator>
+    </div>
   </section>
 </div>

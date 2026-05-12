@@ -38,12 +38,12 @@
       </div>
 
       <!-- Tabla de usuarios -->
-      <div class="mat-table-container">
+      <div class="mat-table-container adm-mat-table-wrap">
         <div class="w-100">
           <table mat-table [dataSource]="dataSource" class="w-100">
                 <ng-container matColumnDef="n">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">No.</th>
-                    <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">
+                    <td mat-cell *matCellDef="let row">
                         <button class="toggle-button" (click)="details(row.index)" style="font-size: 18px; width: 20px; height: 20px; "><i class="fa-solid fa-caret-down"></i></button>
                         {{ row.index }}
                         <div class="" *ngIf="mostrar && row.index == mostrarId && datosM == 'movil' ">
@@ -119,27 +119,27 @@
                 </ng-container>
                 <ng-container matColumnDef="Rol">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Rol</th>
-                    <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.rol }}</td>
+                    <td mat-cell *matCellDef="let row">{{ roleLabel(row.rol) }}</td>
                 </ng-container>
                 <ng-container matColumnDef="Nombre">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Nombre</th>
-                    <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.name}} {{row.last_name}}</td>
+                    <td mat-cell *matCellDef="let row">{{ row.name}} {{row.last_name}}</td>
                 </ng-container>
                 <ng-container matColumnDef="sucursal">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Sucursal</th>
-                    <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.location}}</td>
+                    <td mat-cell *matCellDef="let row">{{ row.location}}</td>
                 </ng-container>
                 <ng-container matColumnDef="email">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Correo</th>
-                    <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.email}}</td>
+                    <td mat-cell *matCellDef="let row">{{ row.email}}</td>
                 </ng-container>
                 <ng-container matColumnDef="fecha">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'font-weight': 'bold'}">Fecha de creación</th>
-                    <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">{{ row.fecha}}</td>
+                    <td mat-cell *matCellDef="let row">{{ row.fecha}}</td>
                 </ng-container>
                 <ng-container matColumnDef="opciones">
                     <th mat-header-cell *matHeaderCellDef [ngStyle]="{'font-weight': 'bold'}">Acciones</th>
-                    <td mat-cell *matCellDef="let row" [ngStyle]="{'background-color': row.color}">
+                    <td mat-cell *matCellDef="let row">
                       <div class="flex items-center justify-between gap-2">
                         <a class="inline-flex" matTooltip="Actualizar Usuario" (click)="updateUser(row.uuid)" matTooltipPosition="above">
                           <img src="assets/icons-fontawesome/pen-to-square-solid.svg" alt="flecha" width="22px" height="22px">

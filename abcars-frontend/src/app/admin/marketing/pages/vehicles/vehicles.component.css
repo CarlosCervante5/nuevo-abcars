@@ -420,31 +420,11 @@
   background: transparent;
 }
 
-::ng-deep .inv-mat-table .mat-mdc-header-row,
-::ng-deep .inv-mat-table .mat-header-row {
-  background: #f8fafc;
-}
-
-::ng-deep .inv-mat-table .mat-mdc-header-cell,
-::ng-deep .inv-mat-table .mat-header-cell {
-  color: #64748b;
-  font-weight: 700;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border-bottom: 1px solid #e2e8f0 !important;
-}
-
 ::ng-deep .inv-mat-table .mat-mdc-cell,
 ::ng-deep .inv-mat-table .mat-cell {
   border-bottom: 1px solid #f1f5f9 !important;
   color: #334155;
   font-size: 0.875rem;
-}
-
-::ng-deep .inv-mat-table .inv-data-row:hover .mat-mdc-cell,
-::ng-deep .inv-mat-table .inv-data-row:hover .mat-cell {
-  background: #fafafa;
 }
 
 .inv-thumb-wrap {

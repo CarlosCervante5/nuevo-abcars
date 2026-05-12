@@ -119,7 +119,7 @@ export class LoginComponent implements OnInit {
                 const validRoles = [
                     'client', 'administrator', 'super_admin', 'marketing', 'blog_manager', 
                     'gestor', 'receptionist', 'valuator', 'technician', 
-                    'appointment_manager', 'bodywork_paint_technician', 
+                    'appointment_manager', 'bodywork_paint_technician', 'body',
                     'spare_parts', 'valuation_manager', 'seller'
                 ];
 
