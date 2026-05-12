@@ -40,6 +40,7 @@
     "quill": "^2.0.3",
     "rxjs": "~7.6.0",
     "sweetalert2": "^11.7.3",
+    "serve": "^14.2.4",
     "swiper": "^9.4.1",
     "tslib": "^2.4.1",
     "typescript": "~5.8.3",
@@ -64,7 +65,6 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "^2.0.0",
     "postcss": "^8.5.6",
-    "serve": "^14.2.4",
     "tailwindcss": "^3.4.17"
   }
 }

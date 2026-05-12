@@ -14,6 +14,7 @@ use App\Http\Controllers\Promotions\PromotionController;
 use App\Http\Controllers\Leads\LeadController;
 use App\Http\Controllers\DeliveryPhotos\DeliveryPhotoController;
 use App\Http\Controllers\MainBanner\MainBannerController;
+use App\Http\Controllers\Media\ImageFetchProxyController;
 use App\Http\Controllers\Multimedia\MultimediaController;
 use App\Http\Controllers\Repairs\RepairController;
 use App\Http\Controllers\Rewards\RewardController;
@@ -73,6 +74,11 @@ Route::prefix('auth')->group(function () {
 });
 
 // Fin Segmento Autenticación
+
+// Proxy de imágenes CDN (CORS): panel marketing / IA sobre galería
+Route::prefix('media')->middleware(['auth:sanctum', 'role_or_permission:super_admin|administrator|marketing|create vehicles|update vehicles|delete vehicles'])->group(function () {
+    Route::get('/fetch-image', [ImageFetchProxyController::class, 'fetch']);
+});
 
 // Segmento Sucursales
 
