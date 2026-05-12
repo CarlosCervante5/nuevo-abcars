@@ -697,10 +697,19 @@
   cursor: not-allowed;
 }
 
+.uv-images-ia-btn.uv-images-ia-btn--busy:disabled {
+  opacity: 1;
+  cursor: wait;
+}
+
 .uv-images-ia-btn mat-icon {
   font-size: 1.25rem !important;
   width: 1.25rem !important;
   height: 1.25rem !important;
+}
+
+.uv-images-ia-btn .uv-images-ia-spinner {
+  --mdc-circular-progress-active-indicator-color: #6d28d9;
 }
 
 .uv-images-trash {

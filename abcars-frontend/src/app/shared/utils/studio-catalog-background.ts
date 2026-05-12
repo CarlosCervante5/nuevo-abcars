@@ -8,7 +8,7 @@ export const STUDIO_CATALOG_BACKGROUND_ASSET = 'assets/catalog/studio-cyclorama-
 
 /** Colores principales del SVG (para alinear prompts de Gemini si sigues usando IA). */
 export const STUDIO_CATALOG_COLOR_HINT =
-  'Ciclorama neutro: pared superior ~#fafbfc, horizonte ~#e4e8ec, suelo ~#e8ebef a #f2f4f7, sin texturas ni objetos.';
+  'Ciclorama neutro continuo en TODO el encuadre (no solo el suelo): pared superior ~#fafbfc, horizonte ~#e4e8ec, suelo ~#e8ebef a #f2f4f7, sin texturas ni objetos. Prohibido conservar techo, luces, columnas, cielo o cualquier resto del local original, aunque esté difuminado.';
 
 function resolveAssetUrl(relativePath: string): string {
   const base = document.querySelector('base')?.href?.replace(/\/?$/, '') ?? '';

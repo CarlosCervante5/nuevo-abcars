@@ -671,12 +671,29 @@
                                 <button
                                     type="button"
                                     class="uv-images-ia-btn"
+                                    [class.uv-images-ia-btn--busy]="galleryReplacing && galleryReplacingIndex === i"
                                     (click)="processGalleryImageWithAi(image, i)"
                                     [disabled]="galleryReplacing"
-                                    matTooltip="Procesar con IA y reemplazar"
-                                    aria-label="Procesar con IA y reemplazar imagen"
+                                    [matTooltip]="
+                                        galleryReplacing && galleryReplacingIndex === i
+                                            ? 'Procesando con IA…'
+                                            : 'Procesar con IA y reemplazar'
+                                    "
+                                    [attr.aria-label]="
+                                        galleryReplacing && galleryReplacingIndex === i
+                                            ? 'Procesando con IA'
+                                            : 'Procesar con IA y reemplazar imagen'
+                                    "
+                                    [attr.aria-busy]="galleryReplacing && galleryReplacingIndex === i ? 'true' : null"
                                 >
-                                    <mat-icon>auto_fix_high</mat-icon>
+                                    <mat-progress-spinner
+                                        *ngIf="galleryReplacing && galleryReplacingIndex === i"
+                                        diameter="22"
+                                        mode="indeterminate"
+                                        class="uv-images-ia-spinner"
+                                        aria-hidden="true"
+                                    ></mat-progress-spinner>
+                                    <mat-icon *ngIf="!(galleryReplacing && galleryReplacingIndex === i)">auto_fix_high</mat-icon>
                                 </button>
                                 <button
                                     type="button"

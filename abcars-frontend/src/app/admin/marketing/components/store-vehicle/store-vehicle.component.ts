@@ -55,6 +55,8 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
   imagesForSlider: ImageRow[] = [];
   imagesOrderSaving = false;
   galleryReplacing = false;
+  /** Fila cuyo botón de IA muestra preloader (mismo índice que la galería). */
+  galleryReplacingIndex: number | null = null;
 
   /** Zona de soltar archivos (HTML5); el <label> solo dispara click, no recibe drops. */
   imageDropZoneActive = false;
@@ -611,6 +613,7 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
     const uuid = this.createdUuid;
     if (!uuid) return;
     this.galleryReplacing = true;
+    this.galleryReplacingIndex = index;
     try {
       const source = await fetchImageAsFile(image.path, `source_${image.id}.jpg`);
       const processed = await this._geminiVehicleImage.processFilesRecorteEmbellecer([source]);
@@ -621,7 +624,12 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
       const idsSnapshot = new Set(this.imagesForSlider.map((x) => x.id));
       this._vehicleGalleryReplace
         .replaceAtIndex(uuid, image.id, index, outFile, idsSnapshot)
-        .pipe(finalize(() => (this.galleryReplacing = false)))
+        .pipe(
+          finalize(() => {
+            this.galleryReplacing = false;
+            this.galleryReplacingIndex = null;
+          }),
+        )
         .subscribe({
           next: (vehRes) => {
             if (this.vehicle) {
@@ -639,6 +647,7 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
         });
     } catch (e) {
       this.galleryReplacing = false;
+      this.galleryReplacingIndex = null;
       const msg =
         e instanceof Error
           ? e.message

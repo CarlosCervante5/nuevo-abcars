@@ -53,6 +53,8 @@ export class UpdateVehicleComponent implements OnInit, OnDestroy {
   imagesOrderSaving = false;
   /** Reemplazo por IA en curso (evita doble clic). */
   galleryReplacing = false;
+  /** Fila cuyo botón de IA muestra preloader. */
+  galleryReplacingIndex: number | null = null;
   imageDropZoneActive = false;
   pendingPreviewUrls: string[] = [];
   /** Si hubo cambios en imágenes sin cerrar, al cerrar se notifica reload al listado. */
@@ -568,6 +570,7 @@ export class UpdateVehicleComponent implements OnInit, OnDestroy {
 
   private async runProcessGalleryImageWithAi(image: ImageOrder, index: number): Promise<void> {
     this.galleryReplacing = true;
+    this.galleryReplacingIndex = index;
     try {
       const source = await fetchImageAsFile(image.path, `source_${image.id}.jpg`);
       const processed = await this._geminiVehicleImage.processFilesRecorteEmbellecer([source]);
@@ -578,7 +581,12 @@ export class UpdateVehicleComponent implements OnInit, OnDestroy {
       const idsSnapshot = new Set(this.imagesForSlider.map((x) => x.id));
       this._vehicleGalleryReplace
         .replaceAtIndex(this.vehicle_uuid, image.id, index, outFile, idsSnapshot)
-        .pipe(finalize(() => (this.galleryReplacing = false)))
+        .pipe(
+          finalize(() => {
+            this.galleryReplacing = false;
+            this.galleryReplacingIndex = null;
+          }),
+        )
         .subscribe({
           next: (vehRes) => {
             this.vehicle.images = vehRes.data.images;
@@ -595,6 +603,7 @@ export class UpdateVehicleComponent implements OnInit, OnDestroy {
         });
     } catch (e) {
       this.galleryReplacing = false;
+      this.galleryReplacingIndex = null;
       const msg =
         e instanceof Error
           ? e.message

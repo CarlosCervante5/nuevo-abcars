@@ -77,7 +77,7 @@ MEJORAS PERMITIDAS:
 RESULTADO FINAL:
 Fotografía automotriz técnica más clara y legible, con colores naturales y daños visibles correctamente, manteniendo apariencia auténtica de evidencia de taller.`
 
-const PROMPT_RECORTE = `Recorte y fondo: detecta el vehículo principal, recorta y aísla el auto del entorno original. Sustituye el fondo por un estudio tipo concesionario (ciclorama suave gris claro a blanco o piso continuo limpio, sin personas ni carteles). Embellece la imagen: limpia suciedad leve, reflejos más equilibrados y acabado premium. Mantén la identidad exacta del coche (modelo, proporciones, llantas, emblemas).`
+const PROMPT_RECORTE = `Recorte y fondo: detecta el vehículo principal, recorta y aísla el auto. Elimina por completo el entorno original (techo, paredes, columnas, suelo viejo, cielo, árboles, carteles): no lo dejes difuminado ni en una franja superior. Sustituye el 100% del fondo por un solo ciclorama continuo de catálogo (pared superior ~#fafbfc, horizonte ~#e4e8ec, suelo ~#e8ebef a #f2f4f7, sin texturas ni objetos). Embellece: suciedad leve, reflejos equilibrados, acabado premium. Mantén la identidad exacta del coche (modelo, proporciones, llantas, emblemas).`
 
 export const IMAGE_PROMPT_OPTIONS: ImagePromptOption[] = [
   {
