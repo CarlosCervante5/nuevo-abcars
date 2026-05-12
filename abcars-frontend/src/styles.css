@@ -1,7 +1,6 @@
 /* Imports first - All @import rules must come before any other CSS */
 @import 'node_modules/quill/dist/quill.bubble.css';
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
-@import './styles/admin-panel-tables.css';
 
 /* Tailwind CSS Base Styles */
 @tailwind base;

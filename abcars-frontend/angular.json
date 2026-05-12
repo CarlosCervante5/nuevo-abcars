@@ -47,7 +47,8 @@
               "./node_modules/swiper/swiper-bundle.css",
               "src/global.scss",
               "node_modules/quill/dist/quill.snow.css",
-              "node_modules/quill/dist/quill.bubble.css"
+              "node_modules/quill/dist/quill.bubble.css",
+              "src/styles/admin-panel-tables.css"
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
@@ -67,8 +68,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "10kb",
-                  "maximumError": "12kb"
+                  "maximumWarning": "14kb",
+                  "maximumError": "16kb"
                 }
               ],
               "outputHashing": "all",

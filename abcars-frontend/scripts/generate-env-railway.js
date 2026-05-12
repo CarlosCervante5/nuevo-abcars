@@ -1,11 +1,18 @@
 /**
- * Genera environment.ts y environment.production.ts con la URL del backend desde API_URL.
- * El compilador resuelve imports a environment.ts; ese archivo no está en el repo (gitignore),
- * así que lo creamos aquí junto con environment.production.ts para que el build no falle.
- * Uso: en Railway definir variable API_URL (ej. https://tu-backend.up.railway.app).
+ * Genera environment.ts y environment.production.ts para el build en Railway.
+ * Obligatoria: API_URL (URL del backend).
+ * Opcionales (Gemini / Imagen Studio): IMAGEN_STUDIO_URL, GEMINI_API_KEY, GEMINI_API_BASE_URL
+ *
+ * El compilador importa @environments/environment; estos archivos suelen estar en .gitignore
+ * en CI, por eso los generamos aquí antes de `ng build`.
  */
 const fs = require('fs');
 const path = require('path');
+
+/** Escapa comillas simples y barras invertidas para literales TS entre comillas simples. */
+function q(s) {
+  return String(s ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
 
 let apiUrl = process.env.API_URL;
 if (!apiUrl || typeof apiUrl !== 'string' || !apiUrl.trim()) {
@@ -16,11 +23,23 @@ apiUrl = apiUrl.trim();
 if (!apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
   apiUrl = 'https://' + apiUrl;
 }
-const baseUrl = apiUrl.replace(/'/g, "\\'");
+
+const baseUrl = q(apiUrl);
+const imagenStudioUrl = q((process.env.IMAGEN_STUDIO_URL || '').trim());
+const geminiApiKey = q((process.env.GEMINI_API_KEY || '').trim());
+const geminiApiBaseRaw = (process.env.GEMINI_API_BASE_URL || '').trim();
+const geminiApiBaseUrl = q(
+  geminiApiBaseRaw || 'https://generativelanguage.googleapis.com',
+);
 
 const content = `export const environment = {
   production: true,
-  baseUrl: '${baseUrl}'
+  baseUrl: '${baseUrl}',
+  apiUrl: '${baseUrl}',
+  imagenStudioUrl: '${imagenStudioUrl}',
+  geminiApiKey: '${geminiApiKey}',
+  geminiUseDevProxy: false,
+  geminiApiBaseUrl: '${geminiApiBaseUrl}',
 };
 `;
 
