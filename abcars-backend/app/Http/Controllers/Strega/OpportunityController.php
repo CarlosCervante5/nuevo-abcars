@@ -100,8 +100,15 @@ class OpportunityController extends Controller
 
             $this->opportunityService->createPublicOpportunity($data);
 
+            // Google Sheets (Apps Script): CAMPANA_LABELS debe mapear cada clave.
+            // Seguros: 'Formulario Servicio' → etiqueta seguros.
+            // Servicio técnico (misma ruta API): 'Formulario Stecnico' → etiqueta servicio (clave acordada con el script).
+            $campaignSource = (string) ($request->campaign_source ?? '');
+            $isTechnicalServiceLead = str_contains($campaignSource, 'agendamiento de servicio técnico');
+            $formTypeForSheet = $isTechnicalServiceLead ? 'Formulario Stecnico' : 'Formulario Servicio';
+
             $leadData = [
-                'formType' => 'Formulario Servicio',
+                'formType' => $formTypeForSheet,
                 'nombre' => $request->name,
                 'apellido' => $request->last_name,
                 'correo' => $request->email,
