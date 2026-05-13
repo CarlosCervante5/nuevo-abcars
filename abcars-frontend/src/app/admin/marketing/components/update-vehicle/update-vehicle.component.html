@@ -718,7 +718,23 @@
                             <span *ngIf="!imagesOrderSaving">Guardar orden</span>
                             <span *ngIf="imagesOrderSaving">Guardando…</span>
                         </button>
+                        <button
+                            *ngIf="canPushIntelimotorPhotos"
+                            type="button"
+                            class="update-vehicle-btn update-vehicle-btn-intelimotor"
+                            (click)="pushPhotosToIntelimotor()"
+                            [disabled]="pushingIntelimotorPhotos || imagesOrderSaving"
+                        >
+                            <span *ngIf="!pushingIntelimotorPhotos">Actualizar fotos en Intelimotor</span>
+                            <span *ngIf="pushingIntelimotorPhotos">Enviando a Intelimotor…</span>
+                        </button>
                     </div>
+                    <p class="uv-images-hint uv-images-hint--intelimotor" *ngIf="vehicle?.intelimotor_unit_id && imagesForSlider.length > 0">
+                        Este vehículo está vinculado a Intelimotor. Tras editar la galería, usa el botón verde para publicar solo las fotos de esta unidad.
+                    </p>
+                    <p class="uv-images-hint uv-images-hint--intelimotor uv-images-hint--warn" *ngIf="!vehicle?.intelimotor_unit_id && imagesForSlider.length > 0">
+                        Para enviar fotos a Intelimotor, sincroniza primero el inventario desde el panel Intelimotor del administrador.
+                    </p>
                 </section>
             </div>
         </mat-tab>

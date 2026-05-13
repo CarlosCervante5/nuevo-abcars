@@ -21,6 +21,7 @@ import { suggestBrandsByName } from '@helpers/brand-suggest.helper';
 import {reload} from '@helpers/session.helper';
 import { Router } from '@angular/router';
 import { VehicleGalleryReplaceService } from '@services/vehicle-gallery-replace.service';
+import { IntelimotorService } from '@services/intelimotor.service';
 import { fetchImageAsFile } from '../../../../shared/utils/fetch-image-as-file';
 
 type ImageRow = ImageOrder & { selected?: boolean };
@@ -59,6 +60,7 @@ export class UpdateVehicleComponent implements OnInit, OnDestroy {
   pendingPreviewUrls: string[] = [];
   /** Si hubo cambios en imágenes sin cerrar, al cerrar se notifica reload al listado. */
   private imagesDirty = false;
+  pushingIntelimotorPhotos = false;
 
   public camps: string[] = [];
   public id_camp: string[] = [];
@@ -98,6 +100,7 @@ export class UpdateVehicleComponent implements OnInit, OnDestroy {
     private _bottomSheetRef: MatBottomSheetRef<{ reload?: boolean } | undefined>,
     private _router: Router,
     private readonly _vehicleGalleryReplace: VehicleGalleryReplaceService,
+    private readonly _intelimotorService: IntelimotorService,
   ) {
       this.vehicle_uuid = data.uuid;
       if (data.initialTab === 1) {
@@ -537,6 +540,50 @@ export class UpdateVehicleComponent implements OnInit, OnDestroy {
         this.imagesOrderSaving = false;
         reload(err, this._router);
       }
+    });
+  }
+
+  get canPushIntelimotorPhotos(): boolean {
+    return !!this.vehicle?.intelimotor_unit_id
+      && this.vehicle.page_status !== 'sale'
+      && this.imagesForSlider.length > 0;
+  }
+
+  pushPhotosToIntelimotor(): void {
+    if (!this.canPushIntelimotorPhotos || this.pushingIntelimotorPhotos) {
+      return;
+    }
+
+    void Swal.fire({
+      title: '¿Actualizar fotos en Intelimotor?',
+      html: 'Se enviará la galería actual de ABCars a la unidad vinculada en Intelimotor (<strong>pictureUrls</strong>).',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Actualizar en Intelimotor',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#059669',
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      this.pushingIntelimotorPhotos = true;
+      this._intelimotorService.pushVehiclePhotos(this.vehicle_uuid).subscribe({
+        next: (resp) => {
+          this.pushingIntelimotorPhotos = false;
+          void Swal.fire('Fotos actualizadas', resp.message, 'success');
+        },
+        error: (err: unknown) => {
+          this.pushingIntelimotorPhotos = false;
+          const body = (err as { error?: { message?: string } })?.error;
+          const message = body?.message || 'No se pudieron subir las fotos a Intelimotor';
+          void Swal.fire(
+            'Error',
+            message.replace(/^Hubo un problema con su solicitud:\s*/i, ''),
+            'error'
+          );
+        },
+      });
     });
   }
 

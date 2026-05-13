@@ -170,6 +170,8 @@ export interface Vehicle {
     transmission:   string;
     drive_train:    string;
     page_status:    string;
+    intelimotor_unit_id?: string | null;
+    intelimotor_ref?: string | null;
     created_at:     Date;
     brand:          Brand;
     line:           Line;

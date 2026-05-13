@@ -38,6 +38,7 @@ use App\Http\Controllers\Vehicles\VehicleImageController;
 use App\Http\Controllers\Analytics\AnalyticsController;
 use App\Http\Controllers\Analytics\AdminAnalyticsDashboardController;
 use App\Http\Controllers\Assistant\AssistantController;
+use App\Http\Controllers\Integrations\IntelimotorIntegrationController;
 use Illuminate\Support\Facades\Route;
 
 // Información básica de la API (GET /api)
@@ -347,6 +348,22 @@ Route::prefix('public-assistant')->middleware(['bandwidth_usage'])->group(functi
 });
 
 // Fin Segmento Asistente
+
+// Segmento Integración Intelimotor (inventario externo)
+Route::prefix('integrations/intelimotor')->middleware(['auth:sanctum', 'role:administrator|super_admin'])->group(function () {
+    Route::get('/settings', [IntelimotorIntegrationController::class, 'showSettings']);
+    Route::put('/settings', [IntelimotorIntegrationController::class, 'updateSettings']);
+    Route::post('/test-connection', [IntelimotorIntegrationController::class, 'testConnection']);
+    Route::get('/units', [IntelimotorIntegrationController::class, 'getUnits']);
+    Route::get('/units/{unitId}', [IntelimotorIntegrationController::class, 'getUnit']);
+    Route::post('/units', [IntelimotorIntegrationController::class, 'createUnit']);
+    Route::post('/sync-inventory', [IntelimotorIntegrationController::class, 'syncInventory']);
+    Route::get('/linked-vehicles', [IntelimotorIntegrationController::class, 'linkedVehicles']);
+});
+
+Route::post('integrations/intelimotor/vehicles/{vehicleUuid}/push-photos', [IntelimotorIntegrationController::class, 'pushVehiclePhotos'])
+    ->middleware(['auth:sanctum', 'role_or_permission:super_admin|administrator|marketing|update vehicles']);
+// Fin Segmento Integración Intelimotor
 
 // Segmento Campaigns
 

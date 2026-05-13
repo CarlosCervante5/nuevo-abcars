@@ -57,6 +57,15 @@
         <button
           type="button"
           class="inv-btn inv-btn--ghost inv-btn--sm"
+          [disabled]="selectedIntelimotorVehicleUuids.length === 0 || pushingIntelimotorBulk"
+          (click)="pushIntelimotorPhotosBulk()"
+          matTooltip="Subir fotos de ABCars a Intelimotor (seleccionados vinculados)"
+        >
+          <mat-icon class="inv-btn-mat-icon" aria-hidden="true">cloud_upload</mat-icon>
+        </button>
+        <button
+          type="button"
+          class="inv-btn inv-btn--ghost inv-btn--sm"
           [disabled]="vehicle_uuids.length === 0"
           (click)="deleteSelectedVehicles()"
           matTooltip="Eliminar seleccionados"

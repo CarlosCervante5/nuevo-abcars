@@ -15,10 +15,12 @@ import { VEHICLE_INVENTORY_GUARD_PERMISSIONS } from '../../config/vehicle-invent
 export class AdminHomeDashboardComponent implements OnInit {
   showMetrics = false;
   showInventory = false;
+  showIntelimotor = false;
 
   constructor(private adminPermission: AdminPermissionService) {}
 
   ngOnInit(): void {
+    this.showIntelimotor = this.adminPermission.isFullAdminRole();
     this.showMetrics =
       this.adminPermission.isFullAdminRole() ||
       this.adminPermission.hasAnyPermission(['view analytics dashboard']);

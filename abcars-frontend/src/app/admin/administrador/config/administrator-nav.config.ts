@@ -25,6 +25,14 @@ export const ADMINISTRATOR_NAV_ITEMS: AdministratorNavItem[] = [
     requiredPermissions: [...VEHICLE_INVENTORY_GUARD_PERMISSIONS]
   },
   {
+    title: 'Intelimotor',
+    icon: 'fi fi-rr-link-alt',
+    routerLink: ['/admin/administrator/intelimotor'],
+    description: 'Conexión e inventario externo',
+    iconColor: 'green',
+    requiredRoles: ['administrator', 'super_admin']
+  },
+  {
     title: 'Banner del inicio',
     icon: 'fi fi-rr-picture',
     routerLink: ['home-banner'],

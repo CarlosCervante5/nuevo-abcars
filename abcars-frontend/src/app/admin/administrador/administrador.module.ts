@@ -27,6 +27,7 @@ import { DeliveryPhotosPageModule } from "../gestor/delivery-photos-page.module"
 import { PromotionsPageModule } from "../gestor/promotions-page.module";
 import { AdminMainBannerComponent } from "./pages/admin-main-banner/admin-main-banner.component";
 import { AdminBrandsModelsComponent } from "./pages/admin-brands-models/admin-brands-models.component";
+import { IntelimotorIntegrationComponent } from "./pages/intelimotor-integration/intelimotor-integration.component";
 
 @NgModule({
     declarations: [
@@ -60,7 +61,8 @@ import { AdminBrandsModelsComponent } from "./pages/admin-brands-models/admin-br
         ValuatorAppointmentsPageModule,
         DeliveryPhotosPageModule,
         PromotionsPageModule,
-        AdminMainBannerComponent
+        AdminMainBannerComponent,
+        IntelimotorIntegrationComponent
     ]
   })
   export class AdministradorModule { }

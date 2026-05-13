@@ -15,7 +15,9 @@ import { VehicleService, } from '@services/vehicle.service';
 
 import { Vehicle, SearchResponse, LoadVehiclesResponse} from '@interfaces/vehicle_data.interface';
 import { StoreVehicleComponent } from '../../components/store-vehicle/store-vehicle.component';
-import { Overview } from '@interfaces/admin.interfaces'; 
+import { Overview } from '@interfaces/admin.interfaces';
+import { IntelimotorService } from '@services/intelimotor.service';
+import { forkJoin } from 'rxjs';
 
 
 
@@ -55,6 +57,7 @@ export class VehiclesComponent implements OnInit {
   public pageIndex: number = 1;
 
   public vehicle_uuids: string[] = [];
+  public pushingIntelimotorBulk = false;
 
   // References Overview para el encabezado
   public itemOverview: Overview;
@@ -69,7 +72,8 @@ export class VehiclesComponent implements OnInit {
     private _bottomSheet: MatBottomSheet,
     private _snackBar: MatSnackBar,
     private _router: Router,
-    private _route: ActivatedRoute
+    private _route: ActivatedRoute,
+    private _intelimotorService: IntelimotorService
   ) {
     // Inicializar itemOverview
     try {
@@ -365,6 +369,53 @@ export class VehiclesComponent implements OnInit {
         
         }
       })
+    }
+
+    get selectedIntelimotorVehicleUuids(): string[] {
+      const selected = new Set(this.vehicle_uuids);
+      return (this.dataSource?.data ?? [])
+        .filter((vehicle) =>
+          selected.has(vehicle.uuid) &&
+          !!vehicle.intelimotor_unit_id &&
+          vehicle.page_status !== 'sale'
+        )
+        .map((vehicle) => vehicle.uuid);
+    }
+
+    pushIntelimotorPhotosBulk(): void {
+      const targets = this.selectedIntelimotorVehicleUuids;
+      if (targets.length === 0 || this.pushingIntelimotorBulk) {
+        return;
+      }
+
+      Swal.fire({
+        title: '¿Subir fotos a Intelimotor?',
+        text: `Se actualizarán ${targets.length} unidad(es) vinculada(s).`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Subir fotos',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#059669'
+      }).then((result) => {
+        if (!result.isConfirmed) {
+          return;
+        }
+
+        this.pushingIntelimotorBulk = true;
+        forkJoin(
+          targets.map((uuid) => this._intelimotorService.pushVehiclePhotos(uuid))
+        ).subscribe({
+          next: () => {
+            this.pushingIntelimotorBulk = false;
+            Swal.fire('Listo', `Fotos enviadas para ${targets.length} vehículo(s).`, 'success');
+          },
+          error: (err) => {
+            this.pushingIntelimotorBulk = false;
+            const message = err?.error?.message || 'Algunas fotos no se pudieron subir a Intelimotor';
+            Swal.fire('Error', message.replace(/^Hubo un problema con su solicitud:\s*/i, ''), 'error');
+          }
+        });
+      });
     }
 
     openStoreVehicleSheet(): void {

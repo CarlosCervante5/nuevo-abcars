@@ -55,4 +55,9 @@ return [
         'to' => Env::get('MAIL_DEPLOY_TEST_TO', ''),
     ],
 
+    'intelimotor' => [
+        'base_url' => Env::get('INTELIMOTOR_API_BASE_URL', 'https://app.intelimotor.com/api'),
+        'timeout' => (int) Env::get('INTELIMOTOR_API_TIMEOUT', 30),
+    ],
+
 ];

@@ -41,6 +41,13 @@ export class DashboardComponent {
         requiredPermissions: ['manage main banner'],
         requiredRoles: ['marketing']
       },
+      {
+        title: 'Intelimotor',
+        icon: 'fi fi-rr-link-alt',
+        permalink: '/admin/administrator/intelimotor',
+        iconColor: 'green',
+        requiredRoles: ['administrator', 'super_admin']
+      },
     ]
   };
 

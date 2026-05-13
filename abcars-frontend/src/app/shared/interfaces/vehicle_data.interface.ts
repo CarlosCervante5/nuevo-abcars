@@ -161,6 +161,9 @@ export interface Vehicle {
     page_status:    string;
     spec_sheet:     string|null;
     video_link:     string|null;
+    intelimotor_unit_id?: string | null;
+    intelimotor_ref?: string | null;
+    intelimotor_synced_at?: string | null;
     created_at:     Date;
     brand:          Brand;
     line:           Line;
@@ -240,6 +243,9 @@ export interface UpdateVehicle {
     page_status:    string;
     spec_sheet:     string|null;
     video_link:     string|null;
+    intelimotor_unit_id?: string | null;
+    intelimotor_ref?: string | null;
+    intelimotor_synced_at?: string | null;
     created_at:     Date;
     brand:          Brand;
     line:           Line;

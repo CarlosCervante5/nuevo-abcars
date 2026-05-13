@@ -16,6 +16,16 @@
     <mat-icon aria-hidden="true">photo_library</mat-icon>
   </button>
   <button
+    *ngIf="canPushIntelimotorPhotos"
+    type="button"
+    class="inv-act inv-act--intelimotor"
+    [disabled]="pushingIntelimotor"
+    matTooltip="Subir fotos de ABCars a Intelimotor"
+    (click)="pushPhotosToIntelimotor()"
+  >
+    <mat-icon aria-hidden="true">cloud_upload</mat-icon>
+  </button>
+  <button
     type="button"
     class="inv-act inv-act--danger"
     matTooltip="Eliminar vehículo"

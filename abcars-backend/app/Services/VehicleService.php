@@ -739,8 +739,6 @@ class VehicleService
         return function ($query) use ($transmission_names) {
             if (!empty($transmission_names)) {
                 $query->whereIn('transmission', $transmission_names);
-            } else {
-                $query->where('transmission', '!=', '');
             }
         };
     }
@@ -817,8 +815,6 @@ class VehicleService
         return function ($query) use ($interior_colors) {
             if (!empty($interior_colors)) {
                 $query->whereIn('interior_color', $interior_colors);
-            } else {
-                $query->where('interior_color', '!=', '');
             }
         };
     }
@@ -835,8 +831,6 @@ class VehicleService
         return function ($query) use ($exterior_colors) {
             if (!empty($exterior_colors)) {
                 $query->whereIn('exterior_color', $exterior_colors);
-            } else {
-                $query->where('exterior_color', '!=', '');
             }
         };
     }

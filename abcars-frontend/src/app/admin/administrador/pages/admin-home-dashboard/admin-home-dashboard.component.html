@@ -13,6 +13,13 @@
         Métricas de negocio
       </a>
       <a
+        *ngIf="showIntelimotor"
+        routerLink="/admin/administrator/intelimotor"
+        class="home-dash-btn home-dash-btn--ghost"
+      >
+        Integración Intelimotor
+      </a>
+      <a
         *ngIf="showInventory"
         routerLink="/admin/administrator/vehicles"
         class="home-dash-btn home-dash-btn--ghost"

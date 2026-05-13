@@ -23,6 +23,7 @@ import { GestorPromotionsGuard } from './guards/gestor-promotions.guard';
 import { AdminMainBannerComponent } from './pages/admin-main-banner/admin-main-banner.component';
 import { MainBannerGuard } from './guards/main-banner.guard';
 import { AdminBrandsModelsComponent } from './pages/admin-brands-models/admin-brands-models.component';
+import { IntelimotorIntegrationComponent } from './pages/intelimotor-integration/intelimotor-integration.component';
 
 const routes: Routes = [
   {
@@ -74,6 +75,7 @@ const routes: Routes = [
       { path: 'analytics', component: AnalyticsComponent, data: { embedInShell: true } },
       { path: 'assistant', component: AssistantComponent, data: { embedInShell: true } },
       { path: 'api-info', component: ApiInfoComponent, data: { embedInShell: true } },
+      { path: 'intelimotor', component: IntelimotorIntegrationComponent, data: { embedInShell: true } },
       { path: 'documentation', component: DocumentationComponent, data: { embedInShell: true } },
       { path: 'analytics-dashboard', redirectTo: 'analytics', pathMatch: 'full' }
     ]

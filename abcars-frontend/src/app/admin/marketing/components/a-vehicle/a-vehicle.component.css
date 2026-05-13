@@ -58,6 +58,23 @@
   color: #991b1b;
 }
 
+.inv-act--intelimotor {
+  border-color: #a7f3d0;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.inv-act--intelimotor:hover:not(:disabled) {
+  background: #d1fae5;
+  border-color: #34d399;
+  color: #065f46;
+}
+
+.inv-act--intelimotor:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .inv-act-check {
   margin-left: 0.25rem;
 }

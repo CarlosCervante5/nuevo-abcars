@@ -25,6 +25,7 @@ export class AdminShellComponent implements OnInit, OnDestroy {
   private readonly titleBySegment: Record<string, string> = {
     '': 'Inicio',
     vehicles: 'Inventario',
+    intelimotor: 'Intelimotor',
     'home-banner': 'Banner del inicio',
     'assing-valuations': 'Solicitudes',
     'valuation-appointments': 'Valuaciones',
@@ -33,7 +34,7 @@ export class AdminShellComponent implements OnInit, OnDestroy {
     users: 'Usuarios',
     permissions: 'Roles y permisos',
     dealerships: 'Sucursales',
-    'dealerships-map': 'Mapa de sucursales',
+    'brands-models': 'Marcas y modelos',
     analytics: 'Analytics',
     assistant: 'Asistente de datos',
     'api-info': 'Información de la API',

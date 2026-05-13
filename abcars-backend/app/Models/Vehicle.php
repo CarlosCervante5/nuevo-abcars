@@ -78,7 +78,10 @@ class Vehicle extends Model
         'model_id',
         'version_id',
         'body_id',
-        'dealership_id'
+        'dealership_id',
+        'intelimotor_unit_id',
+        'intelimotor_ref',
+        'intelimotor_synced_at',
     ];
 
     /**
@@ -100,6 +103,10 @@ class Vehicle extends Model
     ];
 
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
+
+    protected $casts = [
+        'intelimotor_synced_at' => 'datetime',
+    ];
 
     public function getCreatedAtAttribute($value)
     {   

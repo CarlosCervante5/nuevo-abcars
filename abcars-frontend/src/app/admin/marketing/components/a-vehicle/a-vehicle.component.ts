@@ -1,6 +1,7 @@
 import { Component, Input, EventEmitter, Output  } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { CompraTuAutoService } from '@services/compra-tu-auto.service';
+import { IntelimotorService } from '@services/intelimotor.service';
 import Swal from 'sweetalert2';
 import { UpdateVehicleComponent } from '../update-vehicle/update-vehicle.component';
 import {reload} from '@helpers/session.helper';
@@ -22,14 +23,19 @@ export class AVehicleComponent {
   @Output() remove_vehicle_uuid = new EventEmitter<string>();
 
   checked = false;
-  
+  pushingIntelimotor = false;
 
   constructor(
     private _compraTuAutoService: CompraTuAutoService,
     private _bottomSheet: MatBottomSheet,
-    private _router: Router
+    private _router: Router,
+    private _intelimotorService: IntelimotorService
   ) { 
     
+  }
+
+  get canPushIntelimotorPhotos(): boolean {
+    return !!this.vehicle?.intelimotor_unit_id && this.vehicle.page_status !== 'sale';
   }
 
   /**
@@ -79,5 +85,38 @@ export class AVehicleComponent {
     }else {
       this.remove_vehicle_uuid.emit(this.vehicle.uuid);
     }
+  }
+
+  pushPhotosToIntelimotor(): void {
+    if (!this.canPushIntelimotorPhotos || this.pushingIntelimotor) {
+      return;
+    }
+
+    Swal.fire({
+      title: '¿Subir fotos a Intelimotor?',
+      text: 'Se enviarán las imágenes actuales de ABCars a la unidad vinculada en Intelimotor.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Subir fotos',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#059669'
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      this.pushingIntelimotor = true;
+      this._intelimotorService.pushVehiclePhotos(this.vehicle.uuid).subscribe({
+        next: (resp) => {
+          this.pushingIntelimotor = false;
+          Swal.fire('Fotos actualizadas', resp.message, 'success');
+        },
+        error: (err) => {
+          this.pushingIntelimotor = false;
+          const message = err?.error?.message || 'No se pudieron subir las fotos a Intelimotor';
+          Swal.fire('Error', message.replace(/^Hubo un problema con su solicitud:\s*/i, ''), 'error');
+        }
+      });
+    });
   }
 }
