@@ -6,6 +6,7 @@ import {
   IntelimotorAccount,
   IntelimotorLinkedVehicle,
   IntelimotorProxyResult,
+  IntelimotorSchedulerSettings,
   IntelimotorService,
   IntelimotorSyncSummary,
   IntelimotorUnitSummary
@@ -26,6 +27,9 @@ export class IntelimotorIntegrationComponent implements OnInit {
   testing = false;
   fetchingUnits = false;
   syncingInventory = false;
+  loadingScheduler = false;
+  savingScheduler = false;
+  runningScheduledSync = false;
   loadingLinked = false;
   pushingPhotosUuid: string | null = null;
   creatingUnit = false;
@@ -43,6 +47,7 @@ export class IntelimotorIntegrationComponent implements OnInit {
   unitsPreview: IntelimotorUnitSummary[] = [];
   linkedVehicles: IntelimotorLinkedVehicle[] = [];
   lastSyncSummary: IntelimotorSyncSummary | null = null;
+  schedulerSettings: IntelimotorSchedulerSettings | null = null;
   unitsPagination: Record<string, number> | null = null;
   lastProxyResult: IntelimotorProxyResult | null = null;
 
@@ -74,6 +79,7 @@ export class IntelimotorIntegrationComponent implements OnInit {
   ngOnInit(): void {
     this.loadAccounts();
     this.loadLinkedVehicles();
+    this.loadSchedulerSettings();
   }
 
   get selectedAccount(): IntelimotorAccount | null {
@@ -270,6 +276,86 @@ export class IntelimotorIntegrationComponent implements OnInit {
         this.syncingInventory = false;
       }
     });
+  }
+
+  loadSchedulerSettings(): void {
+    this.loadingScheduler = true;
+
+    this.intelimotorService.getSchedulerSettings().subscribe({
+      next: (response) => {
+        this.schedulerSettings = response.data ?? null;
+        this.loadingScheduler = false;
+      },
+      error: () => {
+        this.loadingScheduler = false;
+      }
+    });
+  }
+
+  saveSchedulerSettings(): void {
+    if (!this.schedulerSettings) {
+      return;
+    }
+
+    this.savingScheduler = true;
+    this.error = null;
+    this.successMessage = null;
+
+    this.intelimotorService.updateSchedulerSettings({
+      is_enabled: this.schedulerSettings.is_enabled,
+      interval_minutes: this.schedulerSettings.interval_minutes,
+      sync_images: this.schedulerSettings.sync_images
+    }).subscribe({
+      next: (response) => {
+        this.schedulerSettings = response.data ?? null;
+        this.successMessage = 'Sincronización automática actualizada.';
+        this.savingScheduler = false;
+      },
+      error: (err) => {
+        this.error = this.extractApiError(err) || 'No se pudo guardar la configuración automática';
+        this.savingScheduler = false;
+      }
+    });
+  }
+
+  runScheduledSyncNow(): void {
+    this.runningScheduledSync = true;
+    this.error = null;
+    this.successMessage = null;
+
+    this.intelimotorService.runScheduledSyncNow().subscribe({
+      next: (response) => {
+        const payload = response.data;
+        this.lastSyncSummary = payload?.summary ?? null;
+        this.schedulerSettings = payload?.scheduler ?? this.schedulerSettings;
+        const s = payload?.summary;
+        if (s) {
+          this.successMessage = `Sync automática ejecutada: ${s.created} nuevos, ${s.updated} actualizados, ${s.marked_sold} vendidos.`;
+        } else {
+          this.successMessage = response.message;
+        }
+        this.loadAccounts();
+        this.loadLinkedVehicles();
+        this.runningScheduledSync = false;
+      },
+      error: (err) => {
+        this.error = this.extractApiError(err) || 'No se pudo ejecutar la sincronización automática';
+        this.loadSchedulerSettings();
+        this.runningScheduledSync = false;
+      }
+    });
+  }
+
+  intervalLabel(minutes: number): string {
+    const labels: Record<number, string> = {
+      15: 'Cada 15 minutos',
+      30: 'Cada 30 minutos',
+      60: 'Cada hora',
+      360: 'Cada 6 horas',
+      720: 'Cada 12 horas',
+      1440: 'Cada 24 horas'
+    };
+    return labels[minutes] ?? `Cada ${minutes} minutos`;
   }
 
   pushPhotos(vehicle: IntelimotorLinkedVehicle): void {

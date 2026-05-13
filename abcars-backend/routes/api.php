@@ -360,6 +360,9 @@ Route::prefix('integrations/intelimotor')->middleware(['auth:sanctum', 'role:adm
     Route::get('/units/{unitId}', [IntelimotorIntegrationController::class, 'getUnit']);
     Route::post('/units', [IntelimotorIntegrationController::class, 'createUnit']);
     Route::post('/sync-inventory', [IntelimotorIntegrationController::class, 'syncInventory']);
+    Route::get('/scheduler', [IntelimotorIntegrationController::class, 'getSchedulerSettings']);
+    Route::put('/scheduler', [IntelimotorIntegrationController::class, 'updateSchedulerSettings']);
+    Route::post('/scheduler/run', [IntelimotorIntegrationController::class, 'runScheduledSyncNow']);
     Route::get('/linked-vehicles', [IntelimotorIntegrationController::class, 'linkedVehicles']);
 });
 

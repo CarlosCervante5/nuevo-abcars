@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\LogBandwidthUsage;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,6 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'deny_role' => \App\Http\Middleware\DenyIfRoleMiddleware::class,
             'bandwidth_usage' => LogBandwidthUsage::class,
         ]);
+    })
+    ->withSchedule(function (Schedule $schedule) {
+        $schedule->command('intelimotor:sync-scheduled')->everyMinute();
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

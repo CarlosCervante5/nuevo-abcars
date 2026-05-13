@@ -46,6 +46,16 @@ export interface IntelimotorSyncSummary {
   accounts?: Array<IntelimotorSyncSummary & { account_uuid: string; account_name: string }>;
 }
 
+export interface IntelimotorSchedulerSettings {
+  is_enabled: boolean;
+  interval_minutes: number;
+  sync_images: boolean;
+  last_run_at: string | null;
+  last_run_summary: IntelimotorSyncSummary | null;
+  last_run_error: string | null;
+  interval_options: number[];
+}
+
 export interface IntelimotorLinkedVehicle {
   uuid: string;
   name: string;
@@ -167,6 +177,29 @@ export class IntelimotorService {
   pushVehiclePhotos(vehicleUuid: string): Observable<IntelimotorApiEnvelope<Record<string, unknown>>> {
     return this.http.post<IntelimotorApiEnvelope<Record<string, unknown>>>(
       `${this.baseUrl}/vehicles/${vehicleUuid}/push-photos`,
+      {},
+      { headers: this.authHeaders() }
+    );
+  }
+
+  getSchedulerSettings(): Observable<IntelimotorApiEnvelope<IntelimotorSchedulerSettings>> {
+    return this.http.get<IntelimotorApiEnvelope<IntelimotorSchedulerSettings>>(
+      `${this.baseUrl}/scheduler`,
+      { headers: this.authHeaders() }
+    );
+  }
+
+  updateSchedulerSettings(payload: Partial<IntelimotorSchedulerSettings>): Observable<IntelimotorApiEnvelope<IntelimotorSchedulerSettings>> {
+    return this.http.put<IntelimotorApiEnvelope<IntelimotorSchedulerSettings>>(
+      `${this.baseUrl}/scheduler`,
+      payload,
+      { headers: this.authHeaders() }
+    );
+  }
+
+  runScheduledSyncNow(): Observable<IntelimotorApiEnvelope<{ summary: IntelimotorSyncSummary; scheduler: IntelimotorSchedulerSettings }>> {
+    return this.http.post<IntelimotorApiEnvelope<{ summary: IntelimotorSyncSummary; scheduler: IntelimotorSchedulerSettings }>>(
+      `${this.baseUrl}/scheduler/run`,
       {},
       { headers: this.authHeaders() }
     );

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Integrations;
 
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Models\IntelimotorSchedulerSetting;
 use App\Models\Vehicle;
 use App\Services\Intelimotor\IntelimotorAccountService;
 use App\Services\Intelimotor\IntelimotorApiService;
@@ -195,6 +196,69 @@ class IntelimotorIntegrationController extends Controller
 
             return ApiResponseHelper::apiSuccess(200, 'Fotos enviadas a Intelimotor', $result);
         } catch (IntelimotorIntegrationException $exception) {
+            return ApiResponseHelper::apiError($exception->getMessage(), null, $exception->status());
+        }
+    }
+
+    public function getSchedulerSettings(): JsonResponse
+    {
+        return ApiResponseHelper::apiSuccess(
+            200,
+            'Configuración de sincronización programada',
+            IntelimotorSchedulerSetting::current()->toPublicArray()
+        );
+    }
+
+    public function updateSchedulerSettings(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'is_enabled' => 'nullable|boolean',
+            'interval_minutes' => 'nullable|integer|in:' . implode(',', IntelimotorSchedulerSetting::INTERVAL_OPTIONS),
+            'sync_images' => 'nullable|boolean',
+        ]);
+
+        $settings = IntelimotorSchedulerSetting::current();
+
+        if (array_key_exists('is_enabled', $validated)) {
+            $settings->is_enabled = (bool) $validated['is_enabled'];
+        }
+        if (array_key_exists('interval_minutes', $validated)) {
+            $settings->interval_minutes = (int) $validated['interval_minutes'];
+        }
+        if (array_key_exists('sync_images', $validated)) {
+            $settings->sync_images = (bool) $validated['sync_images'];
+        }
+
+        $settings->save();
+
+        return ApiResponseHelper::apiSuccess(
+            200,
+            'Configuración de sincronización programada actualizada',
+            $settings->fresh()->toPublicArray()
+        );
+    }
+
+    public function runScheduledSyncNow(): JsonResponse
+    {
+        $settings = IntelimotorSchedulerSetting::current();
+
+        try {
+            $summary = $this->intelimotorInventorySyncService->syncInventory((bool) $settings->sync_images);
+
+            $settings->last_run_at = now();
+            $settings->last_run_summary = json_encode($summary);
+            $settings->last_run_error = null;
+            $settings->save();
+
+            return ApiResponseHelper::apiSuccess(200, 'Sincronización programada ejecutada', [
+                'summary' => $summary,
+                'scheduler' => $settings->fresh()->toPublicArray(),
+            ]);
+        } catch (IntelimotorIntegrationException $exception) {
+            $settings->last_run_at = now();
+            $settings->last_run_error = $exception->getMessage();
+            $settings->save();
+
             return ApiResponseHelper::apiError($exception->getMessage(), null, $exception->status());
         }
     }
