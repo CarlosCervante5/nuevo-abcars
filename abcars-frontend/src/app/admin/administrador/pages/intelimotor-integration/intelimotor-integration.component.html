@@ -137,7 +137,7 @@
             <div>
               <h2 class="text-lg font-semibold text-gray-900">Sincronizar inventario a ABCars</h2>
               <p class="text-sm text-gray-600">
-                Importa solo unidades <strong>visibles</strong> en Intelimotor (<strong>isSold = false</strong>), sin duplicar por unit ID, VIN o ref. El resto del inventario remoto se omite. Las vinculadas que dejan de ser visibles pasan a <strong>sale</strong>.
+                Importa solo unidades visibles en Intelimotor (<strong>isSold = false</strong> en la API). La consulta remota trae ~45 unidades, no todo el inventario. Sin duplicar por unit ID, VIN o ref. Las vinculadas que dejan de ser visibles pasan a <strong>sale</strong>.
               </p>
             </div>
             <button

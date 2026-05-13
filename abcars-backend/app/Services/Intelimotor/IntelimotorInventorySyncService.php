@@ -22,11 +22,11 @@ class IntelimotorInventorySyncService
     public function syncInventory(bool $syncImages = true): array
     {
         $settings = IntelimotorSetting::current();
-        $units = $this->intelimotorApi->fetchAllUnits($settings);
+        $units = $this->intelimotorApi->fetchVisibleUnits($settings);
 
         $summary = [
             'total_remote' => count($units),
-            'visible_remote' => 0,
+            'visible_remote' => count($units),
             'created' => 0,
             'updated' => 0,
             'marked_sold' => 0,
@@ -46,12 +46,6 @@ class IntelimotorInventorySyncService
                     continue;
                 }
 
-                if (! $this->isImportableIntelimotorUnit($unit)) {
-                    $summary['skipped_not_visible']++;
-                    continue;
-                }
-
-                $summary['visible_remote']++;
                 $seenUnitIds[] = $unitId;
 
                 try {
@@ -310,14 +304,6 @@ class IntelimotorInventorySyncService
                 'page_status' => 'sale',
                 'intelimotor_synced_at' => now(),
             ]);
-    }
-
-    /**
-     * Solo importar unidades visibles en Intelimotor (isSold=false).
-     */
-    private function isImportableIntelimotorUnit(array $unit): bool
-    {
-        return ($unit['isSold'] ?? true) === false;
     }
 
     private function resolvePageStatusFromIntelimotor(array $unit, array $pictureUrls): string

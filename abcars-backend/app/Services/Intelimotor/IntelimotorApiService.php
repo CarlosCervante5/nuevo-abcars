@@ -82,10 +82,7 @@ class IntelimotorApiService
         $settings ??= IntelimotorSetting::current();
         $this->assertReady($settings);
 
-        $endpoint = $settings->business_unit_id
-            ? '/business-units/' . $settings->business_unit_id . '/units'
-            : '/inventory-units';
-
+        $endpoint = $this->inventoryUnitsEndpoint($settings);
         $response = $this->request($settings, 'get', $endpoint, $this->buildPaginationQuery($query));
 
         return $this->formatResponse($response);
@@ -134,23 +131,33 @@ class IntelimotorApiService
     /**
      * @return array<int, array<string, mixed>>
      */
-    public function fetchAllUnits(?IntelimotorSetting $settings = null, int $pageSize = 100): array
+    public function fetchVisibleUnits(?IntelimotorSetting $settings = null, int $pageSize = 100): array
     {
+        return $this->fetchAllUnits($settings, $pageSize, ['isSold' => false]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return array<int, array<string, mixed>>
+     */
+    public function fetchAllUnits(
+        ?IntelimotorSetting $settings = null,
+        int $pageSize = 100,
+        array $filters = []
+    ): array {
         $settings ??= IntelimotorSetting::current();
         $this->assertReady($settings);
 
-        $endpoint = $settings->business_unit_id
-            ? '/business-units/' . $settings->business_unit_id . '/units'
-            : '/units';
+        $endpoint = $this->inventoryUnitsEndpoint($settings);
 
         $units = [];
         $pageNumber = 0;
 
         do {
-            $response = $this->request($settings, 'get', $endpoint, $this->buildPaginationQuery([
+            $response = $this->request($settings, 'get', $endpoint, $this->buildPaginationQuery(array_merge([
                 'pageNumber' => $pageNumber,
                 'pageSize' => $pageSize,
-            ]));
+            ], $filters)));
 
             $result = $this->formatResponse($response);
 
@@ -177,6 +184,13 @@ class IntelimotorApiService
         return $units;
     }
 
+    private function inventoryUnitsEndpoint(IntelimotorSetting $settings): string
+    {
+        return $settings->business_unit_id
+            ? '/business-units/' . $settings->business_unit_id . '/units'
+            : '/inventory-units';
+    }
+
     private function assertReady(IntelimotorSetting $settings): void
     {
         if (! $settings->hasCredentials()) {
@@ -198,6 +212,15 @@ class IntelimotorApiService
             'brand' => $query['brand'] ?? null,
             'state' => $query['state'] ?? null,
             'bodyType' => $query['bodyType'] ?? $query['body_type'] ?? null,
+            'isSold' => array_key_exists('isSold', $query)
+                ? ($query['isSold'] ? 'true' : 'false')
+                : (array_key_exists('is_sold', $query)
+                    ? ($query['is_sold'] ? 'true' : 'false')
+                    : null),
+            'status' => $query['status'] ?? null,
+            'visible' => array_key_exists('visible', $query)
+                ? ($query['visible'] ? 'true' : 'false')
+                : null,
         ], static fn ($value) => $value !== null && $value !== '');
     }
 
