@@ -3,42 +3,137 @@
 namespace App\Services\Intelimotor;
 
 use App\Models\Dealership;
-use App\Models\IntelimotorSetting;
+use App\Models\IntelimotorAccount;
 use App\Models\LineModel;
 use App\Models\ModelVersion;
 use App\Models\Vehicle;
 use App\Models\VehicleBody;
 use App\Models\VehicleBrand;
 use App\Models\VehicleImage;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class IntelimotorInventorySyncService
 {
     public function __construct(
-        private IntelimotorApiService $intelimotorApi
+        private IntelimotorApiService $intelimotorApi,
+        private IntelimotorAccountService $accountService
     ) {}
 
-    public function syncInventory(bool $syncImages = true): array
+    public function syncInventory(bool $syncImages = true, ?string $accountUuid = null): array
     {
-        $settings = IntelimotorSetting::current();
-        $units = $this->intelimotorApi->fetchVisibleUnits($settings);
+        $accounts = $this->resolveAccountsForSync($accountUuid);
 
-        $summary = [
-            'total_remote' => count($units),
-            'visible_remote' => count($units),
-            'created' => 0,
-            'updated' => 0,
-            'marked_sold' => 0,
-            'images_synced' => 0,
-            'skipped' => 0,
-            'skipped_not_visible' => 0,
-            'errors' => [],
+        if ($accounts->isEmpty()) {
+            throw new IntelimotorIntegrationException('No hay cuentas Intelimotor habilitadas con credenciales.', 422);
+        }
+
+        $aggregate = $this->emptySummary();
+        $aggregate['accounts'] = [];
+
+        foreach ($accounts as $account) {
+            $accountSummary = $this->syncAccountInventory($account, $syncImages);
+            $aggregate['accounts'][] = [
+                'account_uuid' => $account->uuid,
+                'account_name' => $account->name,
+                ...$accountSummary,
+            ];
+            $this->mergeSummary($aggregate, $accountSummary);
+        }
+
+        return $aggregate;
+    }
+
+    public function pushVehiclePhotos(Vehicle $vehicle): array
+    {
+        if (! filled($vehicle->intelimotor_unit_id)) {
+            throw new IntelimotorIntegrationException(
+                'El vehículo no tiene intelimotor_unit_id. Sincroniza primero desde Intelimotor.',
+                422
+            );
+        }
+
+        $account = $this->resolveAccountForVehicle($vehicle);
+
+        $pictureUrls = $vehicle->images()
+            ->orderBy('sort_id')
+            ->pluck('service_image_url')
+            ->filter(fn ($url) => filled($url) && str_starts_with($url, 'http'))
+            ->values()
+            ->all();
+
+        if ($pictureUrls === []) {
+            throw new IntelimotorIntegrationException('El vehículo no tiene fotos con URL pública para enviar.', 422);
+        }
+
+        $result = $this->intelimotorApi->patchUnit($vehicle->intelimotor_unit_id, [
+            'pictureUrls' => $pictureUrls,
+        ], $account);
+
+        if (! $result['success']) {
+            throw new IntelimotorIntegrationException(
+                $result['error'] ?? 'Intelimotor rechazó la actualización de fotos.',
+                $result['status']
+            );
+        }
+
+        $vehicle->intelimotor_synced_at = now();
+        $vehicle->save();
+
+        return [
+            'vehicle_uuid' => $vehicle->uuid,
+            'intelimotor_account_uuid' => $account->uuid,
+            'intelimotor_unit_id' => $vehicle->intelimotor_unit_id,
+            'photos_sent' => count($pictureUrls),
+            'remote' => $result['data'],
         ];
+    }
+
+    public function listLinkedVehicles(int $limit = 100): array
+    {
+        return Vehicle::query()
+            ->whereNotNull('intelimotor_unit_id')
+            ->with(['intelimotorAccount:id,uuid,name'])
+            ->withCount('images')
+            ->orderByDesc('intelimotor_synced_at')
+            ->limit($limit)
+            ->get([
+                'uuid',
+                'name',
+                'vin',
+                'page_status',
+                'intelimotor_unit_id',
+                'intelimotor_account_id',
+                'intelimotor_ref',
+                'intelimotor_synced_at',
+            ])
+            ->map(fn (Vehicle $vehicle) => [
+                'uuid' => $vehicle->uuid,
+                'name' => $vehicle->name,
+                'vin' => $vehicle->vin,
+                'page_status' => $vehicle->page_status,
+                'intelimotor_unit_id' => $vehicle->intelimotor_unit_id,
+                'intelimotor_account_uuid' => $vehicle->intelimotorAccount?->uuid,
+                'intelimotor_account_name' => $vehicle->intelimotorAccount?->name,
+                'intelimotor_ref' => $vehicle->intelimotor_ref,
+                'intelimotor_synced_at' => $vehicle->intelimotor_synced_at?->toIso8601String(),
+                'images_count' => $vehicle->images_count,
+            ])
+            ->all();
+    }
+
+    private function syncAccountInventory(IntelimotorAccount $account, bool $syncImages): array
+    {
+        $units = $this->intelimotorApi->fetchVisibleUnits($account);
+
+        $summary = $this->emptySummary();
+        $summary['total_remote'] = count($units);
+        $summary['visible_remote'] = count($units);
 
         $seenUnitIds = [];
 
-        DB::transaction(function () use ($units, $settings, $syncImages, &$summary, &$seenUnitIds) {
+        DB::transaction(function () use ($units, $account, $syncImages, &$summary, &$seenUnitIds) {
             foreach ($units as $unit) {
                 $unitId = (string) ($unit['id'] ?? '');
                 if ($unitId === '') {
@@ -49,9 +144,9 @@ class IntelimotorInventorySyncService
                 $seenUnitIds[] = $unitId;
 
                 try {
-                    $existing = $this->findVehicleForUnit($unit);
+                    $existing = $this->findVehicleForUnit($unit, $account);
                     $isCreate = $existing === null;
-                    $vehicle = $this->upsertVehicleFromUnit($unit, $settings, $existing);
+                    $vehicle = $this->upsertVehicleFromUnit($unit, $account, $existing);
 
                     if ($isCreate) {
                         $summary['created']++;
@@ -71,85 +166,81 @@ class IntelimotorInventorySyncService
                 }
             }
 
-            $summary['marked_sold'] += $this->markMissingUnitsAsSold($seenUnitIds);
+            $summary['marked_sold'] += $this->markMissingUnitsAsSold($seenUnitIds, $account);
         });
 
-        $settings->last_sync_at = now();
-        $settings->last_sync_summary = json_encode($summary);
-        $settings->save();
+        $account->last_sync_at = now();
+        $account->last_sync_summary = json_encode($summary);
+        $account->save();
 
         return $summary;
     }
 
-    public function pushVehiclePhotos(Vehicle $vehicle): array
+    private function resolveAccountsForSync(?string $accountUuid): Collection
     {
-        if (! filled($vehicle->intelimotor_unit_id)) {
-            throw new IntelimotorIntegrationException(
-                'El vehículo no tiene intelimotor_unit_id. Sincroniza primero desde Intelimotor.',
-                422
-            );
+        if ($accountUuid) {
+            $account = $this->accountService->findByUuid($accountUuid);
+            if (! $account->is_enabled || ! $account->hasCredentials()) {
+                throw new IntelimotorIntegrationException('La cuenta seleccionada no está habilitada o no tiene credenciales.', 422);
+            }
+
+            return collect([$account]);
         }
 
-        $pictureUrls = $vehicle->images()
-            ->orderBy('sort_id')
-            ->pluck('service_image_url')
-            ->filter(fn ($url) => filled($url) && str_starts_with($url, 'http'))
-            ->values()
-            ->all();
+        return $this->accountService->enabledAccounts()->filter(fn (IntelimotorAccount $account) => $account->hasCredentials());
+    }
 
-        if ($pictureUrls === []) {
-            throw new IntelimotorIntegrationException('El vehículo no tiene fotos con URL pública para enviar.', 422);
+    private function resolveAccountForVehicle(Vehicle $vehicle): IntelimotorAccount
+    {
+        if ($vehicle->intelimotor_account_id) {
+            $account = IntelimotorAccount::query()->find($vehicle->intelimotor_account_id);
+            if ($account) {
+                return $account;
+            }
         }
 
-        $result = $this->intelimotorApi->patchUnit($vehicle->intelimotor_unit_id, [
-            'pictureUrls' => $pictureUrls,
-        ]);
-
-        if (! $result['success']) {
-            throw new IntelimotorIntegrationException(
-                $result['error'] ?? 'Intelimotor rechazó la actualización de fotos.',
-                $result['status']
-            );
+        $fallback = $this->accountService->enabledAccounts()->first(fn (IntelimotorAccount $account) => $account->hasCredentials());
+        if (! $fallback) {
+            throw new IntelimotorIntegrationException('No hay cuenta Intelimotor configurada para este vehículo.', 422);
         }
 
-        $vehicle->intelimotor_synced_at = now();
-        $vehicle->save();
+        return $fallback;
+    }
 
+    private function emptySummary(): array
+    {
         return [
-            'vehicle_uuid' => $vehicle->uuid,
-            'intelimotor_unit_id' => $vehicle->intelimotor_unit_id,
-            'photos_sent' => count($pictureUrls),
-            'remote' => $result['data'],
+            'total_remote' => 0,
+            'visible_remote' => 0,
+            'created' => 0,
+            'updated' => 0,
+            'marked_sold' => 0,
+            'images_synced' => 0,
+            'skipped' => 0,
+            'skipped_not_visible' => 0,
+            'errors' => [],
+            'accounts' => [],
         ];
     }
 
-    public function listLinkedVehicles(int $limit = 50): array
+    private function mergeSummary(array &$aggregate, array $accountSummary): void
     {
-        return Vehicle::query()
-            ->whereNotNull('intelimotor_unit_id')
-            ->withCount('images')
-            ->orderByDesc('intelimotor_synced_at')
-            ->limit($limit)
-            ->get(['uuid', 'name', 'vin', 'page_status', 'intelimotor_unit_id', 'intelimotor_ref', 'intelimotor_synced_at'])
-            ->map(fn (Vehicle $vehicle) => [
-                'uuid' => $vehicle->uuid,
-                'name' => $vehicle->name,
-                'vin' => $vehicle->vin,
-                'page_status' => $vehicle->page_status,
-                'intelimotor_unit_id' => $vehicle->intelimotor_unit_id,
-                'intelimotor_ref' => $vehicle->intelimotor_ref,
-                'intelimotor_synced_at' => $vehicle->intelimotor_synced_at?->toIso8601String(),
-                'images_count' => $vehicle->images_count,
-            ])
-            ->all();
+        foreach (['total_remote', 'visible_remote', 'created', 'updated', 'marked_sold', 'images_synced', 'skipped', 'skipped_not_visible'] as $key) {
+            $aggregate[$key] += (int) ($accountSummary[$key] ?? 0);
+        }
+
+        $aggregate['errors'] = array_merge($aggregate['errors'], $accountSummary['errors'] ?? []);
     }
 
-    private function findVehicleForUnit(array $unit): ?Vehicle
+    private function findVehicleForUnit(array $unit, IntelimotorAccount $account): ?Vehicle
     {
         $unitId = (string) ($unit['id'] ?? '');
 
         if ($unitId !== '') {
-            $byUnitId = Vehicle::query()->where('intelimotor_unit_id', $unitId)->first();
+            $byUnitId = Vehicle::query()
+                ->where('intelimotor_account_id', $account->id)
+                ->where('intelimotor_unit_id', $unitId)
+                ->first();
             if ($byUnitId) {
                 return $byUnitId;
             }
@@ -168,8 +259,11 @@ class IntelimotorInventorySyncService
             $normalizedRefVin = $this->normalizeVin($ref);
 
             return Vehicle::query()
-                ->where(function ($query) use ($ref, $normalizedRefVin) {
-                    $query->where('intelimotor_ref', $ref);
+                ->where(function ($query) use ($ref, $normalizedRefVin, $account) {
+                    $query->where(function ($inner) use ($ref, $account) {
+                        $inner->where('intelimotor_account_id', $account->id)
+                            ->where('intelimotor_ref', $ref);
+                    });
                     if ($this->isUsableVin($normalizedRefVin)) {
                         $query->orWhere('vin', $normalizedRefVin);
                     }
@@ -180,7 +274,7 @@ class IntelimotorInventorySyncService
         return null;
     }
 
-    private function upsertVehicleFromUnit(array $unit, IntelimotorSetting $settings, ?Vehicle $vehicle = null): Vehicle
+    private function upsertVehicleFromUnit(array $unit, IntelimotorAccount $account, ?Vehicle $vehicle = null): Vehicle
     {
         $unitId = (string) $unit['id'];
         $brandName = $unit['brands'][0]['name'] ?? $unit['externalBrand'] ?? 'sin marca';
@@ -198,7 +292,7 @@ class IntelimotorInventorySyncService
         $vin = $this->resolveVin($unit);
         $pictureUrls = $this->extractPictureUrls($unit);
 
-        $dealership = $this->resolveDealership($settings);
+        $dealership = $this->resolveDealership($account);
         $brand = VehicleBrand::firstOrCreate(['name' => strtolower($brandName)]);
         $model = LineModel::firstOrCreate([
             'name' => strtolower($modelName),
@@ -221,6 +315,7 @@ class IntelimotorInventorySyncService
             $vehicle->vin = $vin;
         }
 
+        $vehicle->intelimotor_account_id = $account->id;
         $vehicle->intelimotor_unit_id = $unitId;
         $vehicle->intelimotor_ref = (string) ($unit['ref'] ?? null) ?: null;
         $vehicle->intelimotor_synced_at = now();
@@ -288,15 +383,16 @@ class IntelimotorInventorySyncService
     }
 
     /**
-     * @param array<int, string> $seenUnitIds
+     * @param  array<int, string>  $seenUnitIds
      */
-    private function markMissingUnitsAsSold(array $seenUnitIds): int
+    private function markMissingUnitsAsSold(array $seenUnitIds, IntelimotorAccount $account): int
     {
         if ($seenUnitIds === []) {
             return 0;
         }
 
         return Vehicle::query()
+            ->where('intelimotor_account_id', $account->id)
             ->whereNotNull('intelimotor_unit_id')
             ->whereNotIn('intelimotor_unit_id', $seenUnitIds)
             ->where('page_status', '!=', 'sale')
@@ -390,10 +486,10 @@ class IntelimotorInventorySyncService
         return strlen($vin) >= 8;
     }
 
-    private function resolveDealership(IntelimotorSetting $settings): Dealership
+    private function resolveDealership(IntelimotorAccount $account): Dealership
     {
-        if ($settings->default_dealership_id) {
-            $dealership = Dealership::query()->find($settings->default_dealership_id);
+        if ($account->default_dealership_id) {
+            $dealership = Dealership::query()->find($account->default_dealership_id);
             if ($dealership) {
                 return $dealership;
             }

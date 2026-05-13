@@ -80,6 +80,7 @@ class Vehicle extends Model
         'body_id',
         'dealership_id',
         'intelimotor_unit_id',
+        'intelimotor_account_id',
         'intelimotor_ref',
         'intelimotor_synced_at',
     ];
@@ -225,6 +226,11 @@ class Vehicle extends Model
     public function dealership()
     {
         return $this->hasOne(Dealership::class, 'id', 'dealership_id');
+    }
+
+    public function intelimotorAccount()
+    {
+        return $this->belongsTo(IntelimotorAccount::class, 'intelimotor_account_id');
     }
 
     public function brand()

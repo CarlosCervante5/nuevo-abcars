@@ -2,123 +2,61 @@
 
 namespace App\Services\Intelimotor;
 
-use App\Models\IntelimotorSetting;
+use App\Models\IntelimotorAccount;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 class IntelimotorApiService
 {
-    public function getSettings(): IntelimotorSetting
+    public function testConnection(IntelimotorAccount $account): array
     {
-        return IntelimotorSetting::current();
+        $response = $this->request($account, 'get', '/business-units');
+
+        return $this->finalizeConnectionTest(
+            $account,
+            $response,
+            'Conexión exitosa con Intelimotor (' . $account->name . ').'
+        );
     }
 
-    public function toPublicSettings(IntelimotorSetting $settings): array
+    public function getInventoryUnits(array $query, IntelimotorAccount $account): array
     {
-        return [
-            'business_unit_id' => $settings->business_unit_id,
-            'base_url' => $settings->base_url,
-            'is_enabled' => $settings->is_enabled,
-            'has_credentials' => $settings->hasCredentials(),
-            'api_key_masked' => $settings->maskedApiKey(),
-            'api_secret_masked' => $settings->maskedApiSecret(),
-            'last_connection_at' => $settings->last_connection_at?->toIso8601String(),
-            'last_connection_status' => $settings->last_connection_status,
-            'last_connection_message' => $settings->last_connection_message,
-            'last_sync_at' => $settings->last_sync_at?->toIso8601String(),
-            'last_sync_summary' => $settings->last_sync_summary
-                ? json_decode($settings->last_sync_summary, true)
-                : null,
-        ];
-    }
+        $this->assertReady($account);
 
-    public function updateSettings(array $data): IntelimotorSetting
-    {
-        $settings = IntelimotorSetting::current();
-
-        if (array_key_exists('api_key', $data) && filled($data['api_key'])) {
-            $settings->api_key = $data['api_key'];
-        }
-
-        if (array_key_exists('api_secret', $data) && filled($data['api_secret'])) {
-            $settings->api_secret = $data['api_secret'];
-        }
-
-        if (array_key_exists('business_unit_id', $data)) {
-            $settings->business_unit_id = $data['business_unit_id'] ?: null;
-        }
-
-        if (array_key_exists('default_dealership_id', $data)) {
-            $settings->default_dealership_id = $data['default_dealership_id'] ?: null;
-        }
-
-        if (array_key_exists('base_url', $data) && filled($data['base_url'])) {
-            $settings->base_url = rtrim($data['base_url'], '/');
-        }
-
-        if (array_key_exists('is_enabled', $data)) {
-            $settings->is_enabled = (bool) $data['is_enabled'];
-        }
-
-        if ($settings->hasCredentials() && ! array_key_exists('is_enabled', $data)) {
-            $settings->is_enabled = true;
-        }
-
-        $settings->save();
-
-        return $settings->fresh();
-    }
-
-    public function testConnection(?IntelimotorSetting $settings = null): array
-    {
-        $settings ??= IntelimotorSetting::current();
-        $response = $this->request($settings, 'get', '/business-units');
-
-        return $this->finalizeConnectionTest($settings, $response, 'Conexión exitosa con Intelimotor.');
-    }
-
-    public function getInventoryUnits(array $query = [], ?IntelimotorSetting $settings = null): array
-    {
-        $settings ??= IntelimotorSetting::current();
-        $this->assertReady($settings);
-
-        $endpoint = $this->inventoryUnitsEndpoint($settings);
-        $response = $this->request($settings, 'get', $endpoint, $this->buildPaginationQuery($query));
+        $endpoint = $this->inventoryUnitsEndpoint($account);
+        $response = $this->request($account, 'get', $endpoint, $this->buildPaginationQuery($query));
 
         return $this->formatResponse($response);
     }
 
-    public function getUnit(string $unitId, ?IntelimotorSetting $settings = null): array
+    public function getUnit(string $unitId, IntelimotorAccount $account): array
     {
-        $settings ??= IntelimotorSetting::current();
-        $this->assertReady($settings);
+        $this->assertReady($account);
 
-        $response = $this->request($settings, 'get', '/units/' . rawurlencode($unitId));
+        $response = $this->request($account, 'get', '/units/' . rawurlencode($unitId));
 
         return $this->formatResponse($response);
     }
 
-    public function createUnit(array $payload, ?IntelimotorSetting $settings = null): array
+    public function createUnit(array $payload, IntelimotorAccount $account): array
     {
-        $settings ??= IntelimotorSetting::current();
-        $this->assertReady($settings);
+        $this->assertReady($account);
 
-        if (empty($payload['businessUnitId']) && filled($settings->business_unit_id)) {
-            $payload['businessUnitId'] = $settings->business_unit_id;
+        if (empty($payload['businessUnitId']) && filled($account->business_unit_id)) {
+            $payload['businessUnitId'] = $account->business_unit_id;
         }
 
-        $response = $this->request($settings, 'post', '/units', [], $payload);
+        $response = $this->request($account, 'post', '/units', [], $payload);
 
         return $this->formatResponse($response);
     }
 
-    public function patchUnit(string $unitId, array $payload, ?IntelimotorSetting $settings = null): array
+    public function patchUnit(string $unitId, array $payload, IntelimotorAccount $account): array
     {
-        $settings ??= IntelimotorSetting::current();
-        $this->assertReady($settings);
+        $this->assertReady($account);
 
         $response = $this->request(
-            $settings,
+            $account,
             'patch',
             '/units/' . rawurlencode($unitId),
             [],
@@ -131,9 +69,9 @@ class IntelimotorApiService
     /**
      * @return array<int, array<string, mixed>>
      */
-    public function fetchVisibleUnits(?IntelimotorSetting $settings = null, int $pageSize = 100): array
+    public function fetchVisibleUnits(IntelimotorAccount $account, int $pageSize = 100): array
     {
-        return $this->fetchAllUnits($settings, $pageSize, ['isSold' => false]);
+        return $this->fetchAllUnits($account, $pageSize, ['isSold' => false]);
     }
 
     /**
@@ -141,20 +79,18 @@ class IntelimotorApiService
      * @return array<int, array<string, mixed>>
      */
     public function fetchAllUnits(
-        ?IntelimotorSetting $settings = null,
+        IntelimotorAccount $account,
         int $pageSize = 100,
         array $filters = []
     ): array {
-        $settings ??= IntelimotorSetting::current();
-        $this->assertReady($settings);
+        $this->assertReady($account);
 
-        $endpoint = $this->inventoryUnitsEndpoint($settings);
-
+        $endpoint = $this->inventoryUnitsEndpoint($account);
         $units = [];
         $pageNumber = 0;
 
         do {
-            $response = $this->request($settings, 'get', $endpoint, $this->buildPaginationQuery(array_merge([
+            $response = $this->request($account, 'get', $endpoint, $this->buildPaginationQuery(array_merge([
                 'pageNumber' => $pageNumber,
                 'pageSize' => $pageSize,
             ], $filters)));
@@ -184,17 +120,20 @@ class IntelimotorApiService
         return $units;
     }
 
-    private function inventoryUnitsEndpoint(IntelimotorSetting $settings): string
+    private function inventoryUnitsEndpoint(IntelimotorAccount $account): string
     {
-        return $settings->business_unit_id
-            ? '/business-units/' . $settings->business_unit_id . '/units'
+        return $account->business_unit_id
+            ? '/business-units/' . $account->business_unit_id . '/units'
             : '/inventory-units';
     }
 
-    private function assertReady(IntelimotorSetting $settings): void
+    private function assertReady(IntelimotorAccount $account): void
     {
-        if (! $settings->hasCredentials()) {
-            throw new IntelimotorIntegrationException('Configura API Key y API Secret antes de usar la integración.', 422);
+        if (! $account->hasCredentials()) {
+            throw new IntelimotorIntegrationException(
+                'Configura API Key y API Secret en la cuenta «' . $account->name . '».',
+                422
+            );
         }
     }
 
@@ -225,20 +164,20 @@ class IntelimotorApiService
     }
 
     private function request(
-        IntelimotorSetting $settings,
+        IntelimotorAccount $account,
         string $method,
         string $path,
         array $query = [],
         ?array $body = null
     ): Response {
-        if (! $settings->hasCredentials()) {
+        if (! $account->hasCredentials()) {
             throw new IntelimotorIntegrationException('Configura API Key y API Secret antes de continuar.', 422);
         }
 
-        $baseUrl = rtrim($settings->base_url ?: config('services.intelimotor.base_url'), '/');
+        $baseUrl = rtrim($account->base_url ?: config('services.intelimotor.base_url'), '/');
         $authQuery = [
-            'apiKey' => $settings->api_key,
-            'apiSecret' => $settings->api_secret,
+            'apiKey' => $account->api_key,
+            'apiSecret' => $account->api_secret,
         ];
 
         $client = Http::acceptJson()
@@ -254,19 +193,19 @@ class IntelimotorApiService
         return $client->{$method}($baseUrl . $path);
     }
 
-    private function finalizeConnectionTest(IntelimotorSetting $settings, Response $response, string $successMessage): array
+    private function finalizeConnectionTest(IntelimotorAccount $account, Response $response, string $successMessage): array
     {
         $formatted = $this->formatResponse($response);
 
-        $settings->last_connection_at = now();
-        $settings->last_connection_status = $formatted['success'] ? 'success' : 'error';
-        $settings->last_connection_message = $formatted['success']
+        $account->last_connection_at = now();
+        $account->last_connection_status = $formatted['success'] ? 'success' : 'error';
+        $account->last_connection_message = $formatted['success']
             ? $successMessage
             : ($formatted['error'] ?? 'No se pudo conectar con Intelimotor.');
-        $settings->save();
+        $account->save();
 
         if (! $formatted['success']) {
-            throw new IntelimotorIntegrationException($settings->last_connection_message, $formatted['status']);
+            throw new IntelimotorIntegrationException($account->last_connection_message, $formatted['status']);
         }
 
         return $formatted;

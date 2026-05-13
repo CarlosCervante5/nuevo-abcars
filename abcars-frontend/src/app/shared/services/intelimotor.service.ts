@@ -3,8 +3,11 @@ import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
 import { Observable } from 'rxjs';
 
-export interface IntelimotorSettings {
+export interface IntelimotorAccount {
+  uuid: string;
+  name: string;
   business_unit_id: string | null;
+  default_dealership_id: number | null;
   base_url: string;
   is_enabled: boolean;
   has_credentials: boolean;
@@ -40,6 +43,7 @@ export interface IntelimotorSyncSummary {
   skipped: number;
   skipped_not_visible: number;
   errors: Array<{ unit_id?: string; message: string }>;
+  accounts?: Array<IntelimotorSyncSummary & { account_uuid: string; account_name: string }>;
 }
 
 export interface IntelimotorLinkedVehicle {
@@ -48,6 +52,8 @@ export interface IntelimotorLinkedVehicle {
   vin: string;
   page_status: string;
   intelimotor_unit_id: string;
+  intelimotor_account_uuid?: string | null;
+  intelimotor_account_name?: string | null;
   intelimotor_ref: string | null;
   intelimotor_synced_at: string | null;
   images_count: number;
@@ -78,60 +84,75 @@ export class IntelimotorService {
     return new HttpHeaders().set('Authorization', `Bearer ${token ?? ''}`);
   }
 
-  getSettings(): Observable<IntelimotorApiEnvelope<IntelimotorSettings>> {
-    return this.http.get<IntelimotorApiEnvelope<IntelimotorSettings>>(
-      `${this.baseUrl}/settings`,
+  listAccounts(): Observable<IntelimotorApiEnvelope<IntelimotorAccount[]>> {
+    return this.http.get<IntelimotorApiEnvelope<IntelimotorAccount[]>>(
+      `${this.baseUrl}/accounts`,
       { headers: this.authHeaders() }
     );
   }
 
-  saveSettings(payload: {
-    api_key?: string;
-    api_secret?: string;
-    business_unit_id?: string | null;
-    base_url?: string;
-    is_enabled?: boolean;
-  }): Observable<IntelimotorApiEnvelope<IntelimotorSettings>> {
-    return this.http.put<IntelimotorApiEnvelope<IntelimotorSettings>>(
-      `${this.baseUrl}/settings`,
+  createAccount(payload: Record<string, unknown>): Observable<IntelimotorApiEnvelope<IntelimotorAccount>> {
+    return this.http.post<IntelimotorApiEnvelope<IntelimotorAccount>>(
+      `${this.baseUrl}/accounts`,
       payload,
       { headers: this.authHeaders() }
     );
   }
 
-  testConnection(): Observable<IntelimotorApiEnvelope<IntelimotorProxyResult>> {
+  updateAccount(accountUuid: string, payload: Record<string, unknown>): Observable<IntelimotorApiEnvelope<IntelimotorAccount>> {
+    return this.http.put<IntelimotorApiEnvelope<IntelimotorAccount>>(
+      `${this.baseUrl}/accounts/${accountUuid}`,
+      payload,
+      { headers: this.authHeaders() }
+    );
+  }
+
+  deleteAccount(accountUuid: string): Observable<IntelimotorApiEnvelope<null>> {
+    return this.http.delete<IntelimotorApiEnvelope<null>>(
+      `${this.baseUrl}/accounts/${accountUuid}`,
+      { headers: this.authHeaders() }
+    );
+  }
+
+  testConnection(accountUuid: string): Observable<IntelimotorApiEnvelope<IntelimotorProxyResult>> {
     return this.http.post<IntelimotorApiEnvelope<IntelimotorProxyResult>>(
-      `${this.baseUrl}/test-connection`,
+      `${this.baseUrl}/accounts/${accountUuid}/test-connection`,
       {},
       { headers: this.authHeaders() }
     );
   }
 
-  getUnits(pageNumber = 0, pageSize = 10): Observable<IntelimotorApiEnvelope<IntelimotorProxyResult>> {
+  getUnits(accountUuid: string, pageNumber = 0, pageSize = 10): Observable<IntelimotorApiEnvelope<IntelimotorProxyResult>> {
     return this.http.get<IntelimotorApiEnvelope<IntelimotorProxyResult>>(
-      `${this.baseUrl}/units`,
+      `${this.baseUrl}/accounts/${accountUuid}/units`,
       {
         headers: this.authHeaders(),
         params: {
           pageNumber: String(pageNumber),
-          pageSize: String(pageSize)
+          pageSize: String(pageSize),
+          isSold: 'false'
         }
       }
     );
   }
 
-  createUnit(payload: Record<string, unknown>): Observable<IntelimotorApiEnvelope<IntelimotorProxyResult>> {
+  createUnit(accountUuid: string, payload: Record<string, unknown>): Observable<IntelimotorApiEnvelope<IntelimotorProxyResult>> {
     return this.http.post<IntelimotorApiEnvelope<IntelimotorProxyResult>>(
       `${this.baseUrl}/units`,
-      payload,
+      { ...payload, account_uuid: accountUuid },
       { headers: this.authHeaders() }
     );
   }
 
-  syncInventory(syncImages = true): Observable<IntelimotorApiEnvelope<IntelimotorSyncSummary>> {
+  syncInventory(syncImages = true, accountUuid?: string | null): Observable<IntelimotorApiEnvelope<IntelimotorSyncSummary>> {
+    const body: Record<string, unknown> = { sync_images: syncImages };
+    if (accountUuid) {
+      body['account_uuid'] = accountUuid;
+    }
+
     return this.http.post<IntelimotorApiEnvelope<IntelimotorSyncSummary>>(
       `${this.baseUrl}/sync-inventory`,
-      { sync_images: syncImages },
+      body,
       { headers: this.authHeaders() }
     );
   }
@@ -151,4 +172,3 @@ export class IntelimotorService {
     );
   }
 }
-

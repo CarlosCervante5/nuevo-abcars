@@ -9,7 +9,7 @@
           <span class="text-gray-700 font-medium">Intelimotor</span>
         </nav>
         <p class="mt-3 text-sm text-gray-600">
-          Configura las credenciales de la API de Intelimotor, verifica la conexión y prueba GET/POST del inventario de unidades.
+          Administra una o varias cuentas Intelimotor (API Key / Secret), sincroniza inventario visible y envía fotos a la cuenta correcta.
         </p>
       </div>
 
@@ -17,8 +17,8 @@
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
       </div>
 
-      <div *ngIf="settings && !settings.has_credentials" class="bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-lg mb-4">
-        Guarda API Key y API Secret para poder sincronizar o consultar inventario.
+      <div *ngIf="!loading && accounts.length === 0 && isNewAccount" class="bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-lg mb-4">
+        Agrega al menos una cuenta con API Key y API Secret para sincronizar inventario.
       </div>
 
       <div *ngIf="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
@@ -30,106 +30,93 @@
       </div>
 
       <div *ngIf="!loading" class="space-y-6">
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-            <p class="text-sm text-gray-500">Estado</p>
-            <span class="inline-flex mt-2 px-3 py-1 rounded-full text-sm font-medium" [ngClass]="connectionStatusClass()">
-              {{ connectionStatusLabel() }}
-            </span>
-          </div>
-          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-            <p class="text-sm text-gray-500">Última prueba</p>
-            <p class="mt-2 font-medium text-gray-900">
-              {{ settings?.last_connection_at ? (settings?.last_connection_at | date:'medium') : 'Nunca' }}
-            </p>
-          </div>
-          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-            <p class="text-sm text-gray-500">Credenciales</p>
-            <p class="mt-2 font-medium text-gray-900">
-              {{ settings?.has_credentials ? 'Configuradas' : 'Pendientes' }}
-            </p>
-          </div>
-        </section>
-
         <section class="border border-gray-200 rounded-xl p-5">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Credenciales y conexión</h2>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">Cuentas Intelimotor</h2>
+            <button type="button" (click)="startNewAccount()" class="px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-50">
+              + Nueva cuenta
+            </button>
+          </div>
+
+          <div class="flex flex-wrap gap-2 mb-5">
+            <button
+              *ngFor="let account of accounts"
+              type="button"
+              (click)="selectAccount(account)"
+              class="px-3 py-2 rounded-lg text-sm border"
+              [class.bg-yellow-100]="selectedAccountUuid === account.uuid"
+              [class.border-yellow-400]="selectedAccountUuid === account.uuid"
+              [class.border-gray-300]="selectedAccountUuid !== account.uuid"
+            >
+              {{ account.name }}
+              <span class="ml-1 text-xs" [class.text-green-700]="account.is_enabled" [class.text-gray-400]="!account.is_enabled">
+                {{ account.is_enabled ? 'activa' : 'inactiva' }}
+              </span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5" *ngIf="selectedAccount">
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+              <p class="text-sm text-gray-500">Estado</p>
+              <span class="inline-flex mt-2 px-3 py-1 rounded-full text-sm font-medium" [ngClass]="connectionStatusClass(selectedAccount)">
+                {{ connectionStatusLabel(selectedAccount) }}
+              </span>
+            </div>
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+              <p class="text-sm text-gray-500">Última prueba</p>
+              <p class="mt-2 font-medium text-gray-900">
+                {{ selectedAccount.last_connection_at ? (selectedAccount.last_connection_at | date:'medium') : 'Nunca' }}
+              </p>
+            </div>
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+              <p class="text-sm text-gray-500">Credenciales</p>
+              <p class="mt-2 font-medium text-gray-900">{{ selectedAccount.has_credentials ? 'Configuradas' : 'Pendientes' }}</p>
+            </div>
+          </div>
+
+          <h3 class="text-sm font-semibold text-gray-800 mb-3">{{ isNewAccount ? 'Nueva cuenta' : 'Editar cuenta' }}</h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1" for="intelimotor-account-name">Nombre de la cuenta</label>
+              <input id="intelimotor-account-name" type="text" [(ngModel)]="formName" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Ej. Matriz, Sucursal norte" />
+            </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1" for="intelimotor-api-key">API Key</label>
-              <input
-                id="intelimotor-api-key"
-                type="password"
-                [(ngModel)]="apiKey"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                [placeholder]="settings?.api_key_masked || 'Ingresa API Key'"
-                autocomplete="off"
-              />
-              <p *ngIf="settings?.api_key_masked" class="mt-1 text-xs text-gray-500">Actual: {{ settings?.api_key_masked }}</p>
+              <input id="intelimotor-api-key" type="password" [(ngModel)]="apiKey" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" [placeholder]="selectedAccount?.api_key_masked || 'Ingresa API Key'" autocomplete="off" />
             </div>
-
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1" for="intelimotor-api-secret">API Secret</label>
-              <input
-                id="intelimotor-api-secret"
-                type="password"
-                [(ngModel)]="apiSecret"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                [placeholder]="settings?.api_secret_masked || 'Ingresa API Secret'"
-                autocomplete="off"
-              />
-              <p *ngIf="settings?.api_secret_masked" class="mt-1 text-xs text-gray-500">Actual: {{ settings?.api_secret_masked }}</p>
+              <input id="intelimotor-api-secret" type="password" [(ngModel)]="apiSecret" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" [placeholder]="selectedAccount?.api_secret_masked || 'Ingresa API Secret'" autocomplete="off" />
             </div>
-
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1" for="intelimotor-business-unit">Business Unit ID</label>
-              <input
-                id="intelimotor-business-unit"
-                type="text"
-                [(ngModel)]="businessUnitId"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                placeholder="5ced6fd3208ced009675ea50"
-              />
+              <input id="intelimotor-business-unit" type="text" [(ngModel)]="businessUnitId" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
             </div>
-
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1" for="intelimotor-base-url">Base URL</label>
-              <input
-                id="intelimotor-base-url"
-                type="url"
-                [(ngModel)]="baseUrl"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-              />
+              <input id="intelimotor-base-url" type="url" [(ngModel)]="baseUrl" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
             </div>
           </div>
 
           <label class="mt-4 flex items-center gap-2 text-sm text-gray-700">
             <input type="checkbox" [(ngModel)]="isEnabled" class="rounded border-gray-300 text-yellow-600 focus:ring-yellow-500" />
-            Habilitar integración
+            Cuenta habilitada para sincronización
           </label>
 
           <div class="mt-5 flex flex-wrap gap-3">
-            <button
-              type="button"
-              (click)="saveSettings()"
-              [disabled]="saving"
-              class="px-4 py-2 rounded-lg bg-yellow-500 text-white text-sm font-medium hover:bg-yellow-600 disabled:opacity-60"
-            >
-              {{ saving ? 'Guardando…' : 'Guardar configuración' }}
+            <button type="button" (click)="saveAccount()" [disabled]="saving" class="px-4 py-2 rounded-lg bg-yellow-500 text-white text-sm font-medium hover:bg-yellow-600 disabled:opacity-60">
+              {{ saving ? 'Guardando…' : (isNewAccount ? 'Crear cuenta' : 'Guardar cuenta') }}
             </button>
-            <button
-              type="button"
-              (click)="testConnection()"
-              [disabled]="testing"
-              class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
-            >
+            <button type="button" (click)="testConnection()" [disabled]="testing || isNewAccount" class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60">
               {{ testing ? 'Probando…' : 'Probar conexión' }}
+            </button>
+            <button type="button" (click)="deleteSelectedAccount()" [disabled]="isNewAccount" class="px-4 py-2 rounded-lg border border-red-300 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60">
+              Eliminar cuenta
             </button>
           </div>
 
-          <p *ngIf="settings?.last_connection_message" class="mt-4 text-sm text-gray-600">
-            {{ settings?.last_connection_message }}
-          </p>
+          <p *ngIf="selectedAccount?.last_connection_message" class="mt-4 text-sm text-gray-600">{{ selectedAccount?.last_connection_message }}</p>
         </section>
 
         <section class="border border-gray-200 rounded-xl p-5">
@@ -137,21 +124,21 @@
             <div>
               <h2 class="text-lg font-semibold text-gray-900">Sincronizar inventario a ABCars</h2>
               <p class="text-sm text-gray-600">
-                Importa solo unidades visibles en Intelimotor (<strong>isSold = false</strong> en la API). La consulta remota trae ~45 unidades, no todo el inventario. Sin duplicar por unit ID, VIN o ref. Las vinculadas que dejan de ser visibles pasan a <strong>sale</strong>.
+                Sincroniza todas las cuentas habilitadas o solo la cuenta seleccionada. Solo unidades visibles (<strong>isSold = false</strong>).
               </p>
             </div>
-            <button
-              type="button"
-              (click)="syncInventory()"
-              [disabled]="syncingInventory"
-              class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-60"
-            >
-              {{ syncingInventory ? 'Sincronizando…' : 'Sincronizar inventario' }}
-            </button>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" (click)="syncInventory()" [disabled]="syncingInventory" class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-60">
+                {{ syncingInventory ? 'Sincronizando…' : 'Sincronizar todas' }}
+              </button>
+              <button type="button" (click)="syncInventory(selectedAccountUuid)" [disabled]="syncingInventory || !selectedAccountUuid" class="px-4 py-2 rounded-lg border border-emerald-600 text-emerald-700 text-sm font-medium hover:bg-emerald-50 disabled:opacity-60">
+                Sincronizar cuenta actual
+              </button>
+            </div>
           </div>
 
-          <p *ngIf="settings?.last_sync_at" class="text-sm text-gray-600 mb-4">
-            Última sincronización: {{ settings?.last_sync_at | date:'medium' }}
+          <p *ngIf="selectedAccount?.last_sync_at" class="text-sm text-gray-600 mb-4">
+            Última sync de «{{ selectedAccount?.name }}»: {{ selectedAccount?.last_sync_at | date:'medium' }}
           </p>
 
           <div *ngIf="lastSyncSummary" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-8 gap-3">
@@ -177,6 +164,7 @@
               <thead class="bg-gray-50 text-left text-gray-600">
                 <tr>
                   <th class="px-4 py-3">Vehículo</th>
+                  <th class="px-4 py-3">Cuenta</th>
                   <th class="px-4 py-3">VIN</th>
                   <th class="px-4 py-3">Estado</th>
                   <th class="px-4 py-3">Fotos</th>
@@ -187,18 +175,14 @@
               <tbody>
                 <tr *ngFor="let vehicle of linkedVehicles" class="border-t border-gray-100">
                   <td class="px-4 py-3">{{ vehicle.name }}</td>
+                  <td class="px-4 py-3 text-xs">{{ vehicle.intelimotor_account_name || '—' }}</td>
                   <td class="px-4 py-3 font-mono text-xs">{{ vehicle.vin }}</td>
                   <td class="px-4 py-3">{{ pageStatusLabel(vehicle.page_status) }}</td>
                   <td class="px-4 py-3">{{ vehicle.images_count }}</td>
                   <td class="px-4 py-3 font-mono text-xs">{{ vehicle.intelimotor_unit_id }}</td>
                   <td class="px-4 py-3">
-                    <button
-                      type="button"
-                      (click)="pushPhotos(vehicle)"
-                      [disabled]="pushingPhotosUuid === vehicle.uuid || vehicle.page_status === 'sale'"
-                      class="px-3 py-1.5 rounded-lg border border-gray-300 text-xs font-medium hover:bg-gray-50 disabled:opacity-50"
-                    >
-                      {{ pushingPhotosUuid === vehicle.uuid ? 'Enviando…' : 'Subir fotos a Intelimotor' }}
+                    <button type="button" (click)="pushPhotos(vehicle)" [disabled]="pushingPhotosUuid === vehicle.uuid || vehicle.page_status === 'sale'" class="px-3 py-1.5 rounded-lg border border-gray-300 text-xs font-medium hover:bg-gray-50 disabled:opacity-50">
+                      {{ pushingPhotosUuid === vehicle.uuid ? 'Enviando…' : 'Subir fotos' }}
                     </button>
                   </td>
                 </tr>
@@ -215,14 +199,9 @@
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div>
               <h2 class="text-lg font-semibold text-gray-900">Prueba GET inventario</h2>
-              <p class="text-sm text-gray-600">Consulta unidades desde Intelimotor.</p>
+              <p class="text-sm text-gray-600">Consulta unidades de la cuenta seleccionada.</p>
             </div>
-            <button
-              type="button"
-              (click)="fetchUnits()"
-              [disabled]="fetchingUnits"
-              class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-60"
-            >
+            <button type="button" (click)="fetchUnits()" [disabled]="fetchingUnits || !selectedAccountUuid" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-60">
               {{ fetchingUnits ? 'Consultando…' : 'Consultar inventario' }}
             </button>
           </div>
@@ -264,24 +243,14 @@
         <section class="border border-gray-200 rounded-xl p-5">
           <h2 class="text-lg font-semibold text-gray-900 mb-2">Prueba POST crear unidad</h2>
           <p class="text-sm text-gray-600 mb-4">
-            Envía un payload JSON compatible con
+            Envía un payload JSON a la cuenta seleccionada.
             <a href="https://app.intelimotor.com/api/docs/#api-Units-CreateUnit" target="_blank" rel="noopener" class="text-yellow-600 hover:text-yellow-700">CreateUnit</a>.
-            Si no incluyes businessUnitId, se usará el configurado arriba.
           </p>
 
-          <textarea
-            [(ngModel)]="createUnitPayload"
-            rows="16"
-            class="w-full font-mono text-xs px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-          ></textarea>
+          <textarea [(ngModel)]="createUnitPayload" rows="16" class="w-full font-mono text-xs px-3 py-2 border border-gray-300 rounded-lg"></textarea>
 
           <div class="mt-4">
-            <button
-              type="button"
-              (click)="createTestUnit()"
-              [disabled]="creatingUnit"
-              class="px-4 py-2 rounded-lg bg-purple-600 text-white text-sm font-medium hover:bg-purple-700 disabled:opacity-60"
-            >
+            <button type="button" (click)="createTestUnit()" [disabled]="creatingUnit || !selectedAccountUuid" class="px-4 py-2 rounded-lg bg-purple-600 text-white text-sm font-medium hover:bg-purple-700 disabled:opacity-60">
               {{ creatingUnit ? 'Enviando…' : 'Enviar unidad de prueba' }}
             </button>
           </div>

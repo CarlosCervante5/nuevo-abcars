@@ -351,10 +351,12 @@ Route::prefix('public-assistant')->middleware(['bandwidth_usage'])->group(functi
 
 // Segmento Integración Intelimotor (inventario externo)
 Route::prefix('integrations/intelimotor')->middleware(['auth:sanctum', 'role:administrator|super_admin'])->group(function () {
-    Route::get('/settings', [IntelimotorIntegrationController::class, 'showSettings']);
-    Route::put('/settings', [IntelimotorIntegrationController::class, 'updateSettings']);
-    Route::post('/test-connection', [IntelimotorIntegrationController::class, 'testConnection']);
-    Route::get('/units', [IntelimotorIntegrationController::class, 'getUnits']);
+    Route::get('/accounts', [IntelimotorIntegrationController::class, 'listAccounts']);
+    Route::post('/accounts', [IntelimotorIntegrationController::class, 'storeAccount']);
+    Route::put('/accounts/{accountUuid}', [IntelimotorIntegrationController::class, 'updateAccount']);
+    Route::delete('/accounts/{accountUuid}', [IntelimotorIntegrationController::class, 'deleteAccount']);
+    Route::post('/accounts/{accountUuid}/test-connection', [IntelimotorIntegrationController::class, 'testAccountConnection']);
+    Route::get('/accounts/{accountUuid}/units', [IntelimotorIntegrationController::class, 'getAccountUnits']);
     Route::get('/units/{unitId}', [IntelimotorIntegrationController::class, 'getUnit']);
     Route::post('/units', [IntelimotorIntegrationController::class, 'createUnit']);
     Route::post('/sync-inventory', [IntelimotorIntegrationController::class, 'syncInventory']);

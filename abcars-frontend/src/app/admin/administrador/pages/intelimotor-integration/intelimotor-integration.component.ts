@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import {
+  IntelimotorAccount,
   IntelimotorLinkedVehicle,
   IntelimotorProxyResult,
   IntelimotorService,
-  IntelimotorSettings,
   IntelimotorSyncSummary,
   IntelimotorUnitSummary
 } from '@services/intelimotor.service';
@@ -19,7 +19,8 @@ import {
   imports: [CommonModule, FormsModule, RouterModule]
 })
 export class IntelimotorIntegrationComponent implements OnInit {
-  settings: IntelimotorSettings | null = null;
+  accounts: IntelimotorAccount[] = [];
+  selectedAccountUuid: string | null = null;
   loading = true;
   saving = false;
   testing = false;
@@ -31,11 +32,13 @@ export class IntelimotorIntegrationComponent implements OnInit {
   error: string | null = null;
   successMessage: string | null = null;
 
+  formName = '';
   apiKey = '';
   apiSecret = '';
   businessUnitId = '';
   baseUrl = 'https://app.intelimotor.com/api';
-  isEnabled = false;
+  isEnabled = true;
+  isNewAccount = true;
 
   unitsPreview: IntelimotorUnitSummary[] = [];
   linkedVehicles: IntelimotorLinkedVehicle[] = [];
@@ -69,8 +72,15 @@ export class IntelimotorIntegrationComponent implements OnInit {
   constructor(private intelimotorService: IntelimotorService) {}
 
   ngOnInit(): void {
-    this.loadSettings();
+    this.loadAccounts();
     this.loadLinkedVehicles();
+  }
+
+  get selectedAccount(): IntelimotorAccount | null {
+    if (!this.selectedAccountUuid) {
+      return null;
+    }
+    return this.accounts.find((account) => account.uuid === this.selectedAccountUuid) ?? null;
   }
 
   loadLinkedVehicles(): void {
@@ -95,32 +105,74 @@ export class IntelimotorIntegrationComponent implements OnInit {
     return 'Ocurrió un error al comunicarse con el servidor.';
   }
 
-  loadSettings(): void {
+  loadAccounts(): void {
     this.loading = true;
     this.error = null;
 
-    this.intelimotorService.getSettings().subscribe({
+    this.intelimotorService.listAccounts().subscribe({
       next: (response) => {
-        this.settings = response.data;
-        this.businessUnitId = response.data.business_unit_id ?? '';
-        this.baseUrl = response.data.base_url || 'https://app.intelimotor.com/api';
-        this.isEnabled = response.data.is_enabled;
-        this.lastSyncSummary = response.data.last_sync_summary ?? null;
+        this.accounts = response.data ?? [];
+        if (!this.selectedAccountUuid && this.accounts.length > 0) {
+          this.selectAccount(this.accounts[0]);
+        } else if (this.selectedAccountUuid) {
+          const current = this.accounts.find((a) => a.uuid === this.selectedAccountUuid);
+          if (current) {
+            this.fillForm(current);
+          } else {
+            this.startNewAccount();
+          }
+        } else {
+          this.startNewAccount();
+        }
         this.loading = false;
       },
       error: (err) => {
-        this.error = this.extractApiError(err) || 'No se pudo cargar la configuración de Intelimotor';
+        this.error = this.extractApiError(err) || 'No se pudieron cargar las cuentas Intelimotor';
         this.loading = false;
       }
     });
   }
 
-  saveSettings(): void {
+  selectAccount(account: IntelimotorAccount): void {
+    this.selectedAccountUuid = account.uuid;
+    this.isNewAccount = false;
+    this.fillForm(account);
+    this.lastSyncSummary = account.last_sync_summary ?? null;
+  }
+
+  startNewAccount(): void {
+    this.selectedAccountUuid = null;
+    this.isNewAccount = true;
+    this.formName = '';
+    this.apiKey = '';
+    this.apiSecret = '';
+    this.businessUnitId = '';
+    this.baseUrl = 'https://app.intelimotor.com/api';
+    this.isEnabled = true;
+    this.lastSyncSummary = null;
+  }
+
+  private fillForm(account: IntelimotorAccount): void {
+    this.formName = account.name;
+    this.apiKey = '';
+    this.apiSecret = '';
+    this.businessUnitId = account.business_unit_id ?? '';
+    this.baseUrl = account.base_url || 'https://app.intelimotor.com/api';
+    this.isEnabled = account.is_enabled;
+  }
+
+  saveAccount(): void {
+    if (!this.formName.trim()) {
+      this.error = 'Indica un nombre para la cuenta.';
+      return;
+    }
+
     this.saving = true;
     this.error = null;
     this.successMessage = null;
 
     const payload: Record<string, unknown> = {
+      name: this.formName.trim(),
       business_unit_id: this.businessUnitId || null,
       base_url: this.baseUrl,
       is_enabled: this.isEnabled
@@ -129,56 +181,87 @@ export class IntelimotorIntegrationComponent implements OnInit {
     if (this.apiKey.trim()) {
       payload['api_key'] = this.apiKey.trim();
     }
-
     if (this.apiSecret.trim()) {
       payload['api_secret'] = this.apiSecret.trim();
     }
 
-    this.intelimotorService.saveSettings(payload).subscribe({
+    const request$ = this.isNewAccount
+      ? this.intelimotorService.createAccount(payload)
+      : this.intelimotorService.updateAccount(this.selectedAccountUuid!, payload);
+
+    request$.subscribe({
       next: (response) => {
-        this.settings = response.data;
+        this.successMessage = this.isNewAccount ? 'Cuenta creada correctamente.' : 'Cuenta actualizada.';
+        this.selectedAccountUuid = response.data.uuid;
+        this.isNewAccount = false;
         this.apiKey = '';
         this.apiSecret = '';
-        this.successMessage = 'Configuración guardada correctamente.';
         this.saving = false;
+        this.loadAccounts();
       },
       error: (err) => {
-        this.error = this.extractApiError(err) || 'No se pudo guardar la configuración';
+        this.error = this.extractApiError(err) || 'No se pudo guardar la cuenta';
         this.saving = false;
+      }
+    });
+  }
+
+  deleteSelectedAccount(): void {
+    if (!this.selectedAccountUuid || this.isNewAccount) {
+      return;
+    }
+    if (!confirm('¿Eliminar esta cuenta Intelimotor? Los vehículos ya vinculados conservarán su historial.')) {
+      return;
+    }
+
+    this.intelimotorService.deleteAccount(this.selectedAccountUuid).subscribe({
+      next: () => {
+        this.successMessage = 'Cuenta eliminada.';
+        this.startNewAccount();
+        this.loadAccounts();
+      },
+      error: (err) => {
+        this.error = this.extractApiError(err) || 'No se pudo eliminar la cuenta';
       }
     });
   }
 
   testConnection(): void {
+    if (!this.selectedAccountUuid) {
+      this.error = 'Guarda y selecciona una cuenta antes de probar la conexión.';
+      return;
+    }
+
     this.testing = true;
     this.error = null;
     this.successMessage = null;
 
-    this.intelimotorService.testConnection().subscribe({
+    this.intelimotorService.testConnection(this.selectedAccountUuid).subscribe({
       next: (response) => {
         this.lastProxyResult = response.data;
         this.successMessage = response.message;
-        this.loadSettings();
+        this.loadAccounts();
         this.testing = false;
       },
       error: (err) => {
         this.error = this.extractApiError(err) || 'La prueba de conexión falló';
-        this.loadSettings();
+        this.loadAccounts();
         this.testing = false;
       }
     });
   }
 
-  syncInventory(): void {
+  syncInventory(accountUuid?: string | null): void {
     this.syncingInventory = true;
     this.error = null;
     this.successMessage = null;
 
-    this.intelimotorService.syncInventory(true).subscribe({
+    this.intelimotorService.syncInventory(true, accountUuid ?? undefined).subscribe({
       next: (response) => {
         this.lastSyncSummary = response.data;
-        this.successMessage = `Sincronización completa: ${response.data.created} nuevos, ${response.data.updated} actualizados, ${response.data.marked_sold} marcados vendidos.`;
-        this.loadSettings();
+        const s = response.data;
+        this.successMessage = `Sincronización completa: ${s.created} nuevos, ${s.updated} actualizados, ${s.marked_sold} marcados vendidos.`;
+        this.loadAccounts();
         this.loadLinkedVehicles();
         this.syncingInventory = false;
       },
@@ -218,11 +301,16 @@ export class IntelimotorIntegrationComponent implements OnInit {
   }
 
   fetchUnits(): void {
+    if (!this.selectedAccountUuid) {
+      this.error = 'Selecciona una cuenta para consultar inventario.';
+      return;
+    }
+
     this.fetchingUnits = true;
     this.error = null;
     this.successMessage = null;
 
-    this.intelimotorService.getUnits(0, 10).subscribe({
+    this.intelimotorService.getUnits(this.selectedAccountUuid, 0, 10).subscribe({
       next: (response) => {
         this.lastProxyResult = response.data;
         const payload = response.data?.data as {
@@ -243,6 +331,11 @@ export class IntelimotorIntegrationComponent implements OnInit {
   }
 
   createTestUnit(): void {
+    if (!this.selectedAccountUuid) {
+      this.error = 'Selecciona una cuenta para enviar la unidad de prueba.';
+      return;
+    }
+
     this.creatingUnit = true;
     this.error = null;
     this.successMessage = null;
@@ -256,7 +349,7 @@ export class IntelimotorIntegrationComponent implements OnInit {
       return;
     }
 
-    this.intelimotorService.createUnit(payload).subscribe({
+    this.intelimotorService.createUnit(this.selectedAccountUuid, payload).subscribe({
       next: (response) => {
         this.lastProxyResult = response.data;
         this.successMessage = response.message;
@@ -264,26 +357,24 @@ export class IntelimotorIntegrationComponent implements OnInit {
       },
       error: (err) => {
         this.error = this.extractApiError(err) || 'No se pudo crear la unidad de prueba';
-        this.lastProxyResult = err?.error?.data ?? null;
+        this.lastProxyResult = (err as { error?: { data?: IntelimotorProxyResult } })?.error?.data ?? null;
         this.creatingUnit = false;
       }
     });
   }
 
-  connectionStatusLabel(): string {
-    if (!this.settings?.last_connection_status) {
+  connectionStatusLabel(account: IntelimotorAccount | null): string {
+    if (!account?.last_connection_status) {
       return 'Sin pruebas';
     }
-
-    return this.settings.last_connection_status === 'success' ? 'Conectado' : 'Error';
+    return account.last_connection_status === 'success' ? 'Conectado' : 'Error';
   }
 
-  connectionStatusClass(): string {
-    if (!this.settings?.last_connection_status) {
+  connectionStatusClass(account: IntelimotorAccount | null): string {
+    if (!account?.last_connection_status) {
       return 'bg-gray-100 text-gray-700';
     }
-
-    return this.settings.last_connection_status === 'success'
+    return account.last_connection_status === 'success'
       ? 'bg-green-100 text-green-800'
       : 'bg-red-100 text-red-800';
   }
