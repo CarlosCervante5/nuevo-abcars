@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, Output, EventEmitter, HostListener, OnDestroy } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -17,7 +17,7 @@ import { displayAdminRoleNameEs } from 'src/app/shared/utils/admin-role-labels';
     styleUrls: ['./admin-users.component.css'],
     standalone: false
 })
-export class AdminUsersComponent {
+export class AdminUsersComponent implements OnDestroy {
     public users !: Datum[];
     public uuids: userTable[] = [];
     //variables para la paginación
@@ -31,6 +31,10 @@ export class AdminUsersComponent {
     public mostrarId!: string;
     public mostrar= false;
     public valuator = 'valuator';
+
+    /** Texto de búsqueda (rol, nombre, apellido, correo, teléfono) */
+    public searchKeyword = '';
+    private searchDebounceHandle: ReturnType<typeof setTimeout> | null = null;
 
     roleLabel(technical: string): string {
         return displayAdminRoleNameEs(technical);
@@ -53,7 +57,7 @@ export class AdminUsersComponent {
         private _adminservice : AdminService,
         private _bottomSheet: MatBottomSheet
     ){
-        this.getUsers(this.page);
+        this.loadUsers();
         if(window.innerWidth < 360){
             this.datosM = 'movil';
             this.displayedColumns = [
@@ -95,8 +99,8 @@ export class AdminUsersComponent {
         }
     }
     
-    public getUsers(page:number,){
-        this._adminservice.getUsers(this.page)
+    public loadUsers(): void {
+        this._adminservice.getUsers(this.page, this.searchKeyword)
         .subscribe({
             next: (response : UsersResponse) =>{
                 this.users = response.data.data;
@@ -117,12 +121,30 @@ export class AdminUsersComponent {
                 this.uuids = datosR;
                 this.dataSource.data = this.uuids;
             }
-        })
+        });
+    }
+
+    /** Debounce: al escribir se consulta el API (rol, nombre, correo, etc.) */
+    public onSearchKeywordChange(): void {
+        if (this.searchDebounceHandle) {
+            clearTimeout(this.searchDebounceHandle);
+        }
+        this.searchDebounceHandle = setTimeout(() => {
+            this.searchDebounceHandle = null;
+            this.page = 1;
+            this.loadUsers();
+        }, 400);
+    }
+
+    ngOnDestroy(): void {
+        if (this.searchDebounceHandle) {
+            clearTimeout(this.searchDebounceHandle);
+        }
     }
     
     public paginationChange(event: PageEvent) {
         this.page = event.pageIndex + 1;
-        this.getUsers(this.page);
+        this.loadUsers();
     }
 
     public addUser(){
@@ -132,7 +154,7 @@ export class AdminUsersComponent {
         bottomSheetRef.afterDismissed().subscribe((dataFromChild) => {      
             if(dataFromChild != undefined && dataFromChild.reload === true ){        
                 this.reload.emit(true);
-                this.getUsers(this.page);
+                this.loadUsers();
             }
         });
     }
@@ -151,7 +173,7 @@ export class AdminUsersComponent {
                 (resp) => {
                     Swal.fire(resp.message, '', 'success');
                     this.reload.emit(true);
-                    this.getUsers(this.page);
+                    this.loadUsers();
                 })
             }
         })
@@ -165,7 +187,7 @@ export class AdminUsersComponent {
         bottomSheetRef.afterDismissed().subscribe((dataFromChild) => {      
             if(dataFromChild != undefined && dataFromChild.reload === true ){        
                 this.reload.emit(true);
-                this.getUsers(this.page);
+                this.loadUsers();
             }
         });
     }

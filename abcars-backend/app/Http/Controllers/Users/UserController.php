@@ -72,18 +72,27 @@ class UserController extends Controller
 
             $data = $request->validated();
 
-            // Crear la consulta base
-            $users = User::where(function ($query) use ($data) {
-                if (!empty($data['keyword'])) {
-                    $keyword = '%' . $data['keyword'] . '%';
+            $keyword = trim((string) ($data['keyword'] ?? ''));
+            $perPage = (int) ($data['paginate'] ?? 15);
 
-                    $query->whereHas('userProfile', function ($query) use ($keyword) {
-                        $query->where('name', 'LIKE', $keyword)
-                            ->orWhere('last_name', 'LIKE', $keyword)
-                            ->orWhere('phone_1', 'LIKE', $keyword);
-                    });
-                }
-            })->paginate(15);
+            $query = User::query()->whereHas('userProfile');
+
+            if ($keyword !== '') {
+                $like = '%' . $keyword . '%';
+                $query->where(function ($q) use ($like) {
+                    $q->where('email', 'LIKE', $like)
+                        ->orWhereHas('userProfile', function ($profile) use ($like) {
+                            $profile->where('name', 'LIKE', $like)
+                                ->orWhere('last_name', 'LIKE', $like)
+                                ->orWhere('phone_1', 'LIKE', $like);
+                        })
+                        ->orWhereHas('roles', function ($roles) use ($like) {
+                            $roles->where('name', 'LIKE', $like);
+                        });
+                });
+            }
+
+            $users = $query->paginate($perPage);
 
 
             $users->getCollection()->transform(function ($user) {
