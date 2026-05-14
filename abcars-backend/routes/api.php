@@ -38,7 +38,7 @@ use App\Http\Controllers\Vehicles\VehicleImageController;
 use App\Http\Controllers\Analytics\AnalyticsController;
 use App\Http\Controllers\Analytics\AdminAnalyticsDashboardController;
 use App\Http\Controllers\Assistant\AssistantController;
-use App\Http\Controllers\Integrations\IntelimotorIntegrationController;
+use App\Http\Controllers\StudioCatalog\StudioCatalogController;
 use Illuminate\Support\Facades\Route;
 
 // Información básica de la API (GET /api)
@@ -79,6 +79,16 @@ Route::prefix('auth')->group(function () {
 // Proxy de imágenes CDN (CORS): panel marketing / IA sobre galería
 Route::prefix('media')->middleware(['auth:sanctum', 'role_or_permission:super_admin|administrator|marketing|create vehicles|update vehicles|delete vehicles'])->group(function () {
     Route::get('/fetch-image', [ImageFetchProxyController::class, 'fetch']);
+});
+
+Route::prefix('studio-catalog')->middleware(['auth:sanctum'])->group(function () {
+    Route::get('/background', [StudioCatalogController::class, 'showBackground'])
+        ->middleware('role_or_permission:super_admin|administrator|marketing|create vehicles|update vehicles|delete vehicles');
+
+    Route::middleware('role:administrator|super_admin')->group(function () {
+        Route::post('/background', [StudioCatalogController::class, 'storeBackground']);
+        Route::delete('/background', [StudioCatalogController::class, 'resetBackground']);
+    });
 });
 
 // Segmento Sucursales

@@ -1,14 +1,17 @@
 /**
- * Fondo de catálogo fijo (ciclorama). No se genera con IA: es un asset en `src/assets/catalog/`.
- * Úsalo para componer un vehículo con canal alpha encima y evitar tokens de “inventar” el estudio.
+ * Fondo de catálogo fijo (ciclorama). No se genera con IA en cada foto:
+ * se usa un JPG maestro (Cloudinary) o la plantilla SVG local.
  */
 
 /** Ruta bajo `src/assets` (Angular la sirve como `/assets/...` con base href por defecto). */
 export const STUDIO_CATALOG_BACKGROUND_ASSET = 'assets/catalog/studio-cyclorama-background.svg';
 
-/** Colores principales del SVG (para alinear prompts de Gemini si sigues usando IA). */
+export const STUDIO_CATALOG_DEFAULT_WIDTH = 2048;
+export const STUDIO_CATALOG_DEFAULT_HEIGHT = 1536;
+
+/** Colores principales del SVG (referencia visual). */
 export const STUDIO_CATALOG_COLOR_HINT =
-  'Ciclorama neutro continuo en TODO el encuadre (no solo el suelo): pared superior ~#fafbfc, horizonte ~#e4e8ec, suelo ~#e8ebef a #f2f4f7, sin texturas ni objetos. Prohibido conservar techo, luces, columnas, cielo o cualquier resto del local original, aunque esté difuminado.';
+  'Ciclorama neutro continuo en TODO el encuadre (no solo el suelo): pared superior ~#fafbfc, horizonte ~#e4e8ec, suelo ~#e8ebef a #f2f4f7, sin texturas ni objetos.';
 
 function resolveAssetUrl(relativePath: string): string {
   const base = document.querySelector('base')?.href?.replace(/\/?$/, '') ?? '';
@@ -16,39 +19,77 @@ function resolveAssetUrl(relativePath: string): string {
   return `${base}${path}`;
 }
 
-/** Carga el fondo fijo como `HTMLImageElement` (útil para Canvas). */
-export function loadStudioCatalogBackgroundImage(): Promise<HTMLImageElement> {
+function loadImageFromSrc(src: string, crossOrigin = false): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.decoding = 'async';
+    if (crossOrigin) {
+      img.crossOrigin = 'anonymous';
+    }
     img.onload = () => resolve(img);
-    img.onerror = () =>
-      reject(new Error(`No se pudo cargar el fondo: ${STUDIO_CATALOG_BACKGROUND_ASSET}`));
-    img.src = resolveAssetUrl(STUDIO_CATALOG_BACKGROUND_ASSET);
+    img.onerror = () => reject(new Error(`No se pudo cargar la imagen: ${src}`));
+    img.src = src;
   });
 }
 
+/** Carga el fondo fijo: URL maestra (Cloudinary) o plantilla SVG local. */
+export async function loadStudioCatalogBackgroundImage(
+  backgroundUrl?: string | null,
+): Promise<HTMLImageElement> {
+  if (backgroundUrl?.trim()) {
+    return loadImageFromSrc(backgroundUrl.trim(), true);
+  }
+  return loadImageFromSrc(resolveAssetUrl(STUDIO_CATALOG_BACKGROUND_ASSET));
+}
+
 export type CompositeOverStudioOptions = {
-  /** Ancho de salida (por defecto 2048, coherente con el SVG). */
+  backgroundUrl?: string | null;
   width?: number;
-  /** Alto de salida (por defecto 1536, 4:3). */
   height?: number;
-  /** Formato de salida. */
   mime?: 'image/jpeg' | 'image/png';
-  /** Calidad JPEG 0–1 (solo si mime es jpeg). */
   jpegQuality?: number;
 };
 
 /**
- * Dibuja el fondo fijo y encima una imagen (idealmente PNG con transparencia).
- * Si la imagen de entrada es opaca (p. ej. salida actual de Gemini), cubrirá todo el fondo.
+ * Rasteriza la plantilla SVG local a JPG (sin vehículo).
+ */
+export async function renderDefaultStudioBackgroundBlob(
+  options: Omit<CompositeOverStudioOptions, 'backgroundUrl'> = {},
+): Promise<Blob> {
+  const width = options.width ?? STUDIO_CATALOG_DEFAULT_WIDTH;
+  const height = options.height ?? STUDIO_CATALOG_DEFAULT_HEIGHT;
+  const mime = options.mime ?? 'image/jpeg';
+  const jpegQuality = options.jpegQuality ?? 0.92;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    throw new Error('Canvas 2D no disponible');
+  }
+
+  const bg = await loadStudioCatalogBackgroundImage(null);
+  ctx.drawImage(bg, 0, 0, width, height);
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error('toBlob falló'))),
+      mime,
+      mime === 'image/jpeg' ? jpegQuality : undefined,
+    );
+  });
+}
+
+/**
+ * Dibuja el fondo maestro y encima el vehículo (idealmente PNG con transparencia).
  */
 export async function compositeDataUrlOverStudioBackground(
   foregroundDataUrl: string,
   options: CompositeOverStudioOptions = {},
 ): Promise<Blob> {
-  const width = options.width ?? 2048;
-  const height = options.height ?? 1536;
+  const width = options.width ?? STUDIO_CATALOG_DEFAULT_WIDTH;
+  const height = options.height ?? STUDIO_CATALOG_DEFAULT_HEIGHT;
   const mime = options.mime ?? 'image/jpeg';
   const jpegQuality = options.jpegQuality ?? 0.92;
 
@@ -61,15 +102,8 @@ export async function compositeDataUrlOverStudioBackground(
   }
 
   const [bg, fg] = await Promise.all([
-    loadStudioCatalogBackgroundImage(),
-    new Promise<HTMLImageElement>((resolve, reject) => {
-      const im = new Image();
-      im.decoding = 'async';
-      im.crossOrigin = 'anonymous';
-      im.onload = () => resolve(im);
-      im.onerror = () => reject(new Error('No se pudo cargar la imagen frontal'));
-      im.src = foregroundDataUrl;
-    }),
+    loadStudioCatalogBackgroundImage(options.backgroundUrl),
+    loadImageFromSrc(foregroundDataUrl, true),
   ]);
 
   ctx.drawImage(bg, 0, 0, width, height);

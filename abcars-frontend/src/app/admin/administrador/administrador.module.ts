@@ -28,6 +28,7 @@ import { PromotionsPageModule } from "../gestor/promotions-page.module";
 import { AdminMainBannerComponent } from "./pages/admin-main-banner/admin-main-banner.component";
 import { AdminBrandsModelsComponent } from "./pages/admin-brands-models/admin-brands-models.component";
 import { IntelimotorIntegrationComponent } from "./pages/intelimotor-integration/intelimotor-integration.component";
+import { StudioCatalogSettingsComponent } from "./pages/studio-catalog-settings/studio-catalog-settings.component";
 
 @NgModule({
     declarations: [
@@ -62,7 +63,8 @@ import { IntelimotorIntegrationComponent } from "./pages/intelimotor-integration
         DeliveryPhotosPageModule,
         PromotionsPageModule,
         AdminMainBannerComponent,
-        IntelimotorIntegrationComponent
+        IntelimotorIntegrationComponent,
+        StudioCatalogSettingsComponent
     ]
   })
   export class AdministradorModule { }

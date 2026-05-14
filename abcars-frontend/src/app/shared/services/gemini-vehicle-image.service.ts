@@ -6,13 +6,14 @@ import {
   PRESERVE_CANVAS_SUFFIX,
   type HypEvidencePromptId,
 } from '../constants/hyp-evidence-prompts';
-import { STUDIO_CATALOG_COLOR_HINT } from '../utils/studio-catalog-background';
+import { StudioCatalogService } from './studio-catalog.service';
+import { compositeDataUrlOverStudioBackground } from '../utils/studio-catalog-background';
 
 const MODEL = 'gemini-3.1-flash-image-preview';
 
-const PROMPT_RECORTE = `Recorte y fondo: detecta el vehículo principal, recorta y aísla el auto. Elimina por completo el entorno original (techo, paredes, columnas, suelo viejo, cielo, árboles, carteles): no lo dejes difuminado ni en una franja superior. Sustituye el 100% del fondo por el estudio de catálogo ABCars, un solo ciclorama continuo (${STUDIO_CATALOG_COLOR_HINT}). Embellece: suciedad leve, reflejos equilibrados, acabado premium. Mantén la identidad exacta del coche (modelo, proporciones, llantas, emblemas).`;
+const PROMPT_RECORTE = `Recorte del vehículo: detecta el auto principal y elimina por completo el entorno original (techo, paredes, suelo, cielo, carteles). Devuelve solo el vehículo aislado con fondo 100 % transparente (PNG con canal alpha). Embellece ligeramente: suciedad leve, reflejos equilibrados, acabado premium. Mantén la identidad exacta del coche (modelo, proporciones, llantas, emblemas). Puedes añadir una sombra de contacto suave bajo las ruedas integrada en el alpha.`;
 
-const STUDIO_RECORTE_SUFFIX = `[Technical output requirement] Full-frame cyclorama only: every pixel outside the vehicle silhouette must belong to the synthetic neutral studio (${STUDIO_CATALOG_COLOR_HINT}). Absolutely no visible original environment—no blurred ceiling, lights, pillars, showroom, sky, or horizon from the source photo. No horizontal “blend band” between old scene and studio. Seamless wall-to-floor curve only. Tight framing around the vehicle with consistent margins. Subtle beautify: dirt reduction, balanced reflections, catalog finish. Do NOT change vehicle identity, geometry, badges, wheels, or proportions. Photorealistic edges and a soft natural contact shadow on the new floor.`;
+const STUDIO_RECORTE_SUFFIX = `[Technical output requirement] Output MUST be PNG with alpha channel outside the vehicle silhouette. Every pixel outside the car must be fully transparent — NO studio background, NO cyclorama, NO gray backdrop, NO floor plane, NO wall. Do NOT paint any environment. Absolutely no visible original scene (no blurred ceiling, pillars, or horizon). Preserve exact vehicle identity, geometry, badges, and wheels. Optional soft contact shadow only under tires within the alpha matte. Photorealistic cutout edges.`;
 
 type GenResponse = {
   candidates?: Array<{
@@ -56,6 +57,8 @@ function isRetriableNetworkError(e: unknown): boolean {
 
 @Injectable({ providedIn: 'root' })
 export class GeminiVehicleImageService {
+  constructor(private readonly studioCatalog: StudioCatalogService) {}
+
   isConfigured(): boolean {
     return Boolean(environment.geminiApiKey?.trim());
   }
@@ -95,18 +98,35 @@ export class GeminiVehicleImageService {
       throw new Error('Falta geminiApiKey en environment.');
     }
     const promptText = `${PROMPT_RECORTE.trim()}\n\n${STUDIO_RECORTE_SUFFIX}`;
+    const compositeOptions = await this.studioCatalog.resolveCompositeOptions();
     const out: File[] = [];
     const n = files.length;
     for (let i = 0; i < n; i++) {
       onProgress?.(i + 1, n);
-      out.push(
-        await this.generateTransformedFile(files[i], promptText, {
-          aspectRatio: '4:3',
-          imageSize: '2K',
-        }, false),
-      );
+      const cutout = await this.generateTransformedFile(files[i], promptText, {
+        aspectRatio: '4:3',
+        imageSize: '2K',
+      }, false);
+      const dataUrl = await this.fileToDataUrl(cutout);
+      const composed = await compositeDataUrlOverStudioBackground(dataUrl, {
+        backgroundUrl: compositeOptions.backgroundUrl,
+        width: compositeOptions.width,
+        height: compositeOptions.height,
+        mime: 'image/jpeg',
+      });
+      const base = files[i].name.replace(/\.[^/.]+$/, '') || 'vehiculo';
+      out.push(new File([composed], `${base}-estudio.jpg`, { type: 'image/jpeg' }));
     }
     return out;
+  }
+
+  private async fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error ?? new Error('Lectura de archivo fallida'));
+      reader.readAsDataURL(file);
+    });
   }
 
   private generateContentUrl(): string {
