@@ -8,7 +8,7 @@ import {
 } from '@services/studio-catalog.service';
 import {
   loadStudioCatalogBackgroundImage,
-  renderDefaultStudioBackgroundToBlob,
+  renderDefaultStudioBackgroundBlob,
   STUDIO_CATALOG_DEFAULT_HEIGHT,
   STUDIO_CATALOG_DEFAULT_WIDTH,
 } from '../../../../shared/utils/studio-catalog-background';
@@ -102,7 +102,7 @@ export class StudioCatalogSettingsComponent implements OnInit {
     this.successMessage = null;
 
     try {
-      const blob = await renderDefaultStudioBackgroundToBlob({
+      const blob = await renderDefaultStudioBackgroundBlob({
         width: this.settings?.width ?? STUDIO_CATALOG_DEFAULT_WIDTH,
         height: this.settings?.height ?? STUDIO_CATALOG_DEFAULT_HEIGHT,
       });
