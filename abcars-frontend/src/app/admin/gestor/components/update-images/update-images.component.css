@@ -1,0 +1,30 @@
+:host {
+  display: block;
+  background-color: white;
+}
+
+::ng-deep .mat-bottom-sheet-container {
+  background-color: white !important;
+  padding: 0 !important;
+}
+
+.update-images-row.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.update-images-row.cdk-drag-placeholder {
+  opacity: 0.35;
+  background: #f3f4f6;
+  border: 2px dashed #d1d5db;
+  border-radius: 0.75rem;
+  min-height: 4rem;
+}
+
+.update-images-row.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
