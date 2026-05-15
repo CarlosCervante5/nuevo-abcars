@@ -42,9 +42,28 @@ function studioCatalogBackgroundDataUrl(): string {
 /** Referencia a asset estático (opcional); el runtime usa SVG embebido para evitar 404 en deploy. */
 export const STUDIO_CATALOG_BACKGROUND_ASSET = 'assets/catalog/studio-cyclorama-background.svg';
 
+/**
+ * Paleta fija del ciclorama (alineada al SVG embebido). No improvisar otros grises:
+ * evita variaciones tipo gris medio (#808080) u oscuros como en fotos inconsistentes.
+ */
+export const STUDIO_CATALOG_BACKDROP_TOP_HEX = '#fafbfc';
+export const STUDIO_CATALOG_BACKDROP_HORIZON_HEX = '#e4e8ec';
+export const STUDIO_CATALOG_FLOOR_UNDER_VEHICLE_HEX = '#e8ebef';
+export const STUDIO_CATALOG_FLOOR_FOREGROUND_HEX = '#f2f4f7';
+
+/** Bloque técnico en inglés (sufijo del prompt) — mismos hex que la paleta anterior. */
+export const STUDIO_CATALOG_HEX_SPEC_EN =
+  `Mandatory fixed studio palette (match these hex values everywhere outside the vehicle): ` +
+  `backdrop/wall upper region ${STUDIO_CATALOG_BACKDROP_TOP_HEX}, blending to ${STUDIO_CATALOG_BACKDROP_HORIZON_HEX} at the cyclorama horizon/curve; ` +
+  `floor matte ${STUDIO_CATALOG_FLOOR_UNDER_VEHICLE_HEX} under the tires, blending to ${STUDIO_CATALOG_FLOOR_FOREGROUND_HEX} toward the foreground. ` +
+  `No medium-gray or dark-gray studio; no glossy showroom mirror floor.`;
+
 /** Texto del prompt fijo de Gemini (recorte + ciclorama en una sola imagen). */
 export const STUDIO_CATALOG_COLOR_HINT =
-  'Ciclorama neutro continuo en TODO el encuadre (no solo el suelo): pared superior ~#fafbfc, horizonte ~#e4e8ec, suelo ~#e8ebef a #f2f4f7, sin texturas ni objetos. Prohibido conservar techo, luces, columnas, cielo o cualquier resto del local original, aunque esté difuminado.';
+  `Ciclorama continuo en todo el encuadre con paleta FIJA ABCars: detrás del vehículo (pared del estudio) ${STUDIO_CATALOG_BACKDROP_TOP_HEX} arriba degradando suavemente a ${STUDIO_CATALOG_BACKDROP_HORIZON_HEX} en el horizonte del curvado; ` +
+  `piso mate ${STUDIO_CATALOG_FLOOR_UNDER_VEHICLE_HEX} bajo el auto hasta ${STUDIO_CATALOG_FLOOR_FOREGROUND_HEX} en primer plano. ` +
+  `Usar exactamente estos hex (no sustituir por otros grises). Sin texturas, rejillas ni objetos. ` +
+  `Prohibido conservar techo, luces, columnas, cielo o cualquier resto del local original, aunque esté difuminado.`;
 
 export type CompositeOverStudioOptions = {
   width?: number;

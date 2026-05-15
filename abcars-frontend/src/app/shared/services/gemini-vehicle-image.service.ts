@@ -6,13 +6,22 @@ import {
   PRESERVE_CANVAS_SUFFIX,
   type HypEvidencePromptId,
 } from '../constants/hyp-evidence-prompts';
-import { STUDIO_CATALOG_COLOR_HINT } from '../utils/studio-catalog-background';
+import {
+  STUDIO_CATALOG_COLOR_HINT,
+  STUDIO_CATALOG_HEX_SPEC_EN,
+} from '../utils/studio-catalog-background';
 
 const MODEL = 'gemini-3.1-flash-image-preview';
 
 const PROMPT_RECORTE = `Recorte y fondo: detecta el vehículo principal, recorta y aísla el auto. Elimina por completo el entorno original (techo, paredes, columnas, suelo viejo, cielo, árboles, carteles): no lo dejes difuminado ni en una franja superior. Sustituye el 100% del fondo por el estudio de catálogo ABCars, un solo ciclorama continuo (${STUDIO_CATALOG_COLOR_HINT}). Embellece: suciedad leve, reflejos equilibrados, acabado premium. Mantén la identidad exacta del coche (modelo, proporciones, llantas, emblemas).`;
 
-const STUDIO_RECORTE_SUFFIX = `[Technical output requirement] Full-frame cyclorama only: every pixel outside the vehicle silhouette must belong to the synthetic neutral studio (${STUDIO_CATALOG_COLOR_HINT}). Absolutely no visible original environment—no blurred ceiling, lights, pillars, showroom, sky, or horizon from the source photo. No horizontal “blend band” between old scene and studio. Seamless wall-to-floor curve only. Tight framing around the vehicle with consistent margins. Subtle beautify: dirt reduction, balanced reflections, catalog finish. Do NOT change vehicle identity, geometry, badges, wheels, or proportions. Photorealistic edges and a soft natural contact shadow on the new floor.`;
+const STUDIO_RECORTE_SUFFIX =
+  `[Technical output requirement] ${STUDIO_CATALOG_HEX_SPEC_EN} ` +
+  `Full-frame cyclorama only: every pixel outside the vehicle silhouette must use only this fixed palette—no visible original environment ` +
+  `(no blurred ceiling, lights, pillars, showroom, sky, or horizon from the source photo). ` +
+  `No horizontal “blend band” between old scene and studio. Seamless wall-to-floor curve only. ` +
+  `Tight framing around the vehicle with consistent margins. Subtle beautify: dirt reduction, balanced reflections, catalog finish. ` +
+  `Do NOT change vehicle identity, geometry, badges, wheels, or proportions. Photorealistic edges and a soft natural contact shadow on the new floor.`;
 
 type GenResponse = {
   candidates?: Array<{
