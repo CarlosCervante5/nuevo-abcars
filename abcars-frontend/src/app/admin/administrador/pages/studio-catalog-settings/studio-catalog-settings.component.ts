@@ -30,6 +30,10 @@ export class StudioCatalogSettingsComponent implements OnInit {
   previewUrl: string | null = null;
   selectedFile: File | null = null;
 
+  /** Dimensiones usadas en vista previa, generación desde plantilla y guardado (sin editor canvas frágil). */
+  composeWidth = STUDIO_CATALOG_DEFAULT_WIDTH;
+  composeHeight = STUDIO_CATALOG_DEFAULT_HEIGHT;
+
   readonly defaultWidth = STUDIO_CATALOG_DEFAULT_WIDTH;
   readonly defaultHeight = STUDIO_CATALOG_DEFAULT_HEIGHT;
 
@@ -46,7 +50,9 @@ export class StudioCatalogSettingsComponent implements OnInit {
     this.studioCatalog.getBackgroundSettings(true).subscribe({
       next: (response) => {
         this.settings = response.data;
-        this.refreshPreview();
+        this.composeWidth = response.data.width ?? STUDIO_CATALOG_DEFAULT_WIDTH;
+        this.composeHeight = response.data.height ?? STUDIO_CATALOG_DEFAULT_HEIGHT;
+        void this.refreshPreview();
         this.loading = false;
       },
       error: () => {
@@ -56,6 +62,10 @@ export class StudioCatalogSettingsComponent implements OnInit {
     });
   }
 
+  /**
+   * Vista previa = fondo escalado exactamente a composeWidth×composeHeight (igual que composición IA).
+   * Evita `object-cover` en un `<img>` que recortaba el ciclorama al agrandar el contenedor.
+   */
   async refreshPreview(): Promise<void> {
     if (this.previewUrl?.startsWith('blob:')) {
       URL.revokeObjectURL(this.previewUrl);
@@ -66,24 +76,50 @@ export class StudioCatalogSettingsComponent implements OnInit {
       return;
     }
 
-    if (this.settings && !this.settings.using_default && this.settings.cyclorama_image_url) {
-      this.previewUrl = this.settings.cyclorama_image_url;
-      return;
-    }
+    this.clampComposeDimensions();
+
+    const w = this.composeWidth;
+    const h = this.composeHeight;
+
+    const bgUrl =
+      this.settings && !this.settings.using_default && this.settings.cyclorama_image_url?.trim()
+        ? this.settings.cyclorama_image_url.trim()
+        : null;
 
     try {
-      const img = await loadStudioCatalogBackgroundImage(null);
+      const img = await loadStudioCatalogBackgroundImage(bgUrl);
       const canvas = document.createElement('canvas');
-      canvas.width = this.settings?.width ?? STUDIO_CATALOG_DEFAULT_WIDTH;
-      canvas.height = this.settings?.height ?? STUDIO_CATALOG_DEFAULT_HEIGHT;
+      canvas.width = w;
+      canvas.height = h;
       const ctx = canvas.getContext('2d');
       if (!ctx) {
+        this.previewUrl = bgUrl;
         return;
       }
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      this.previewUrl = canvas.toDataURL('image/jpeg', 0.9);
+      ctx.drawImage(img, 0, 0, w, h);
+      this.previewUrl = canvas.toDataURL('image/jpeg', 0.88);
     } catch {
-      this.previewUrl = null;
+      this.previewUrl = bgUrl ?? null;
+    }
+  }
+
+  clampComposeDimensions(): void {
+    let w = Math.round(Number(this.composeWidth));
+    let heightPx = Math.round(Number(this.composeHeight));
+    if (!Number.isFinite(w)) {
+      w = STUDIO_CATALOG_DEFAULT_WIDTH;
+    }
+    if (!Number.isFinite(heightPx)) {
+      heightPx = STUDIO_CATALOG_DEFAULT_HEIGHT;
+    }
+    this.composeWidth = Math.min(4096, Math.max(640, w));
+    this.composeHeight = Math.min(4096, Math.max(480, heightPx));
+  }
+
+  onComposeSizeChanged(): void {
+    this.clampComposeDimensions();
+    if (!this.selectedFile) {
+      void this.refreshPreview();
     }
   }
 
@@ -103,8 +139,8 @@ export class StudioCatalogSettingsComponent implements OnInit {
 
     try {
       const blob = await renderDefaultStudioBackgroundBlob({
-        width: this.settings?.width ?? STUDIO_CATALOG_DEFAULT_WIDTH,
-        height: this.settings?.height ?? STUDIO_CATALOG_DEFAULT_HEIGHT,
+        width: this.composeWidth,
+        height: this.composeHeight,
       });
       this.selectedFile = new File([blob], 'cyclorama-plantilla.jpg', { type: 'image/jpeg' });
       await this.refreshPreview();
@@ -127,15 +163,15 @@ export class StudioCatalogSettingsComponent implements OnInit {
     this.error = null;
     this.successMessage = null;
 
+    this.clampComposeDimensions();
+
     this.studioCatalog
-      .uploadBackground(
-        this.selectedFile,
-        this.settings?.width ?? STUDIO_CATALOG_DEFAULT_WIDTH,
-        this.settings?.height ?? STUDIO_CATALOG_DEFAULT_HEIGHT,
-      )
+      .uploadBackground(this.selectedFile, this.composeWidth, this.composeHeight)
       .subscribe({
         next: (response) => {
           this.settings = response.data;
+          this.composeWidth = response.data.width ?? this.composeWidth;
+          this.composeHeight = response.data.height ?? this.composeHeight;
           this.selectedFile = null;
           this.studioCatalog.invalidateCache();
           void this.refreshPreview();
