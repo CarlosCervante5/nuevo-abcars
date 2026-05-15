@@ -6,6 +6,7 @@ import { Vehicle } from '@interfaces/vehicle_data.interface';
 
 // Services
 import { DetailService } from '../../services/detail/detail.service';
+import { optimizeCloudinaryVehicleDeliveryUrl } from '../../../../../shared/utils/cloudinary-vehicle-delivery-url';
 
 @Component({
     selector: 'c-vender-autos-vehicle',
@@ -26,7 +27,8 @@ export class VehicleComponent implements OnInit {
 
   ngOnInit(): void {  
 
-    this.vehicle_image = this.vehicle.first_image?.service_image_url;
+    const raw = this.vehicle.first_image?.service_image_url;
+    this.vehicle_image = raw ? optimizeCloudinaryVehicleDeliveryUrl(raw) : '';
   }
 
 }

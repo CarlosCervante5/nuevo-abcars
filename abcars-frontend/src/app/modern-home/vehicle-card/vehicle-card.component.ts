@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { Vehicle } from '../../interfaces/vehicle.interface';
 import { FALLBACK_HERO_IMAGE } from '../../shared/constants/fallback-media';
+import { optimizeCloudinaryVehicleDeliveryUrl } from '../../shared/utils/cloudinary-vehicle-delivery-url';
 
 @Component({
   selector: 'app-vehicle-card',
@@ -88,22 +89,10 @@ export class VehicleCardComponent {
 
   getVehicleImage(): string {
     if (this.vehicle.image_url && this.vehicle.image_url.trim() !== '') {
-      return this.optimizeCloudinaryDeliveryUrl(this.vehicle.image_url.trim());
+      return optimizeCloudinaryVehicleDeliveryUrl(this.vehicle.image_url.trim());
     }
 
     return FALLBACK_HERO_IMAGE;
-  }
-
-  /** URLs res.cloudinary.com/.../image/upload/ con f_auto,q_auto (CDN on-the-fly). */
-  private optimizeCloudinaryDeliveryUrl(url: string): string {
-    const lower = url.toLowerCase();
-    if (!lower.includes('res.cloudinary.com') || !lower.includes('/image/upload/')) {
-      return url;
-    }
-    if (/\/image\/upload\/[^/]*f_auto/i.test(url)) {
-      return url;
-    }
-    return url.replace(/(\/image\/upload\/)/i, '$1f_auto,q_auto/');
   }
 
   getContadoPrice(): number {

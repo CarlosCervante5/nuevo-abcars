@@ -11,6 +11,7 @@ import { ReferralService } from '../../shared/services/referral.service';
 import { Vehicle as ApiVehicle } from '../../shared/interfaces/vehicle_data.interface';
 import { Dealership, DealerShipResponse } from '../../shared/interfaces/admin.interfaces';
 import { FALLBACK_HERO_IMAGE } from '../../shared/constants/fallback-media';
+import { optimizeCloudinaryVehicleDeliveryUrl } from '../../shared/utils/cloudinary-vehicle-delivery-url';
 import Swal from 'sweetalert2';
 
 interface Vehicle {
@@ -2149,7 +2150,7 @@ export class VehicleDetailComponent implements OnInit {
       console.log('✅ [DETAIL] Usando imágenes de la API');
       this.vehicle.apiData.images.forEach((image, index) => {
         console.log(`🖼️ [DETAIL] Imagen ${index + 1}:`, image.service_image_url);
-        const deliveryUrl = this.optimizeCloudinaryDeliveryUrl(image.service_image_url ?? '');
+        const deliveryUrl = optimizeCloudinaryVehicleDeliveryUrl(image.service_image_url ?? '');
         this.mediaItems.push({
           type: 'image',
           url: deliveryUrl,
@@ -2162,7 +2163,7 @@ export class VehicleDetailComponent implements OnInit {
       console.warn('⚠️ [DETAIL] No hay imágenes de la API, usando fallback');
       const images = this.getGalleryImages();
       images.forEach((image, index) => {
-        const deliveryUrl = this.optimizeCloudinaryDeliveryUrl(image ?? '');
+        const deliveryUrl = optimizeCloudinaryVehicleDeliveryUrl(image ?? '');
         this.mediaItems.push({
           type: 'image',
           url: deliveryUrl,
@@ -2199,7 +2200,7 @@ export class VehicleDetailComponent implements OnInit {
 
   getVehicleImage(): string {
     if (this.vehicle?.image_url && this.vehicle.image_url.trim() !== '') {
-      return this.optimizeCloudinaryDeliveryUrl(this.vehicle.image_url.trim());
+      return optimizeCloudinaryVehicleDeliveryUrl(this.vehicle.image_url.trim());
     }
 
     const brandImages: { [key: string]: string } = {
@@ -2215,20 +2216,6 @@ export class VehicleDetailComponent implements OnInit {
     };
     
     return brandImages[this.vehicle?.brand || ''] || FALLBACK_HERO_IMAGE;
-  }
-
-  /** Cloudinary delivery: f_auto,q_auto en URLs res.cloudinary.com/.../image/upload/. */
-  private optimizeCloudinaryDeliveryUrl(url: string): string {
-    const trimmed = (url ?? '').trim();
-    if (!trimmed) return trimmed;
-    const lower = trimmed.toLowerCase();
-    if (!lower.includes('res.cloudinary.com') || !lower.includes('/image/upload/')) {
-      return trimmed;
-    }
-    if (/\/image\/upload\/[^/]*f_auto/i.test(trimmed)) {
-      return trimmed;
-    }
-    return trimmed.replace(/(\/image\/upload\/)/i, '$1f_auto,q_auto/');
   }
 
   // Método para obtener las imágenes de la galería

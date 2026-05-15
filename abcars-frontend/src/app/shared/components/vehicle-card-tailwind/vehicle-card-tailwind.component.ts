@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ScrollService } from '../../services/scroll.service';
 import { ReferralService } from '../../services/referral.service';
+import { optimizeCloudinaryVehicleDeliveryUrl } from '../../utils/cloudinary-vehicle-delivery-url';
 
 export interface Vehicle {
   uuid: string;
@@ -23,21 +24,21 @@ export interface Vehicle {
   imports: [CommonModule, RouterModule],
   template: `
     <div class="vehicle-card group max-w-sm cursor-pointer rounded-2xl overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-shadow duration-300" (click)="navigateToDetail()">
-      <!-- Image Container -->
-      <div class="relative overflow-hidden">
+      <!-- Image Container (fondo estudio: respaldo si la URL no es Cloudinary) -->
+      <div class="relative overflow-hidden catalog-card-image-frame">
         <img 
           [src]="optimizedVehicleThumbUrl(vehicle.first_image?.service_image_url)" 
           [alt]="vehicle.name"
-          class="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110"
+          class="relative z-10 w-full h-64 object-cover block transition-transform duration-300 group-hover:scale-110"
         />
         <!-- Price Badge -->
-        <div class="absolute top-4 right-4 bg-white bg-opacity-90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
+        <div class="absolute top-4 right-4 z-20 bg-white bg-opacity-90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
           <span class="text-lg font-bold text-abcars-primary">
             {{ formatPrice(vehicle.sale_price) }}
           </span>
         </div>
         <!-- Brand Badge -->
-        <div class="absolute top-4 left-4 bg-black bg-opacity-70 backdrop-blur-sm rounded-full px-3 py-1">
+        <div class="absolute top-4 left-4 z-20 bg-black bg-opacity-70 backdrop-blur-sm rounded-full px-3 py-1">
           <span class="text-white text-sm font-medium uppercase">
             {{ vehicle.brand?.name || 'N/A' }}
           </span>
@@ -105,6 +106,9 @@ export interface Vehicle {
     </div>
   `,
   styles: [`
+    .catalog-card-image-frame {
+      background: linear-gradient(180deg, #fafbfc 0%, #e8ebef 62%, #f2f4f7 100%);
+    }
     .line-clamp-2 {
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -124,21 +128,11 @@ export class VehicleCardTailwindComponent {
     private referralService: ReferralService
   ) {}
 
-  /**
-   * Entrega desde Cloudinary con f_auto,q_auto (formato/calidad automáticos, on-the-fly + CDN).
-   * Otras URLs se devuelven sin cambiar.
-   */
+  /** Cloudinary: JPG + fondo (#fafbfc) para no mostrar PNG con alpha en rejilla. */
   optimizedVehicleThumbUrl(url?: string | null): string {
     const trimmed = url?.trim();
     if (!trimmed) return this.placeholderThumb;
-    const lower = trimmed.toLowerCase();
-    if (!lower.includes('res.cloudinary.com') || !lower.includes('/image/upload/')) {
-      return trimmed;
-    }
-    if (/\/image\/upload\/[^/]*f_auto/i.test(trimmed)) {
-      return trimmed;
-    }
-    return trimmed.replace(/(\/image\/upload\/)/i, '$1f_auto,q_auto/');
+    return optimizeCloudinaryVehicleDeliveryUrl(trimmed);
   }
 
   formatPrice(price: number): string {
