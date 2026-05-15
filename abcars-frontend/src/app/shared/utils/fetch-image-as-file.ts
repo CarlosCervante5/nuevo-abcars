@@ -12,9 +12,18 @@ function normalizeRemoteImageUrl(url: string): string {
   return t;
 }
 
+/** Fotos Intelimotor en S3 no envían CORS al panel en Railway. */
+function isIntelimotorS3ImageHost(hostname: string): boolean {
+  const h = hostname.toLowerCase();
+  if (h === 'intelimotor.s3.amazonaws.com') {
+    return true;
+  }
+  return /^intelimotor\.s3\.[^.]+\.amazonaws\.com$/i.test(h);
+}
+
 /**
- * URLs que el navegador no puede leer en modo CORS (p. ej. CloudFront sin ACAO)
- * y que deben pasar por el proxy del API (misma lista conceptual que el backend).
+ * URLs que el navegador no puede leer en modo CORS (CloudFront, Cloudinary ajeno, S3 Intelimotor…)
+ * y que deben pasar por el proxy del API (alineado con config/external_image_proxy.php).
  */
 function shouldUseApiImageProxy(url: string): boolean {
   try {
@@ -32,6 +41,9 @@ function shouldUseApiImageProxy(url: string): boolean {
     if (h === 'res.cloudinary.com' || h.endsWith('.cloudinary.com')) {
       return true;
     }
+    if (isIntelimotorS3ImageHost(h)) {
+      return true;
+    }
     return false;
   } catch {
     return false;
@@ -45,7 +57,7 @@ function buildProxyUrl(remoteUrl: string): string {
 
 /**
  * Descarga una imagen por URL para enviarla a Gemini u otros procesos.
- * Si la URL es CDN sin CORS (CloudFront, etc.), usa el proxy autenticado del backend.
+ * Si la URL es CDN/S3 sin CORS para el origen del panel, usa el proxy autenticado del backend.
  */
 export async function fetchImageAsFile(url: string, filename: string): Promise<File> {
   const resolved = normalizeRemoteImageUrl(url);
