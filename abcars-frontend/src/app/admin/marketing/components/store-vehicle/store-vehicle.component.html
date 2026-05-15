@@ -559,19 +559,35 @@
               <div class="uv-images-ai-panel">
                 <mat-slide-toggle
                   [(ngModel)]="processImagesWithAi"
-                  [disabled]="!geminiAiConfigured || imageUploadLoading"
+                  [disabled]="!geminiAiConfigured"
                   color="primary"
                   class="uv-images-ai-toggle"
                 >
                   Procesar con IA antes de subir
                 </mat-slide-toggle>
                 <p class="uv-images-hint uv-images-hint--ai" *ngIf="geminiAiConfigured">
-                  Recorte tipo estudio, fondo limpio y embellecimiento (Gemini). Cada imagen es una petición a Google; desactiva para subir el original sin IA.
+                  Recorte tipo estudio, fondo limpio y embellecimiento (Gemini). La IA y la subida pueden continuar en segundo plano: puedes seguir editando el vehículo y eligiendo más fotos.
                 </p>
                 <p class="uv-images-hint uv-images-hint--ai" *ngIf="!geminiAiConfigured">
                   Para usar IA, configura <code>geminiApiKey</code> en <code>environment.ts</code> (y en desarrollo <code>geminiUseDevProxy</code> + <code>proxy.conf.json</code>).
                 </p>
               </div>
+              <ng-container *ngIf="filteredBatchJobs$ | async as batchJobs">
+                <div class="uv-images-bg-banner" *ngIf="batchJobs.length">
+                  <ng-container *ngFor="let job of batchJobs">
+                    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                    <p class="uv-images-hint uv-images-bg-banner-text">
+                      <ng-container *ngIf="job.phase === 'gemini'">
+                        <ng-container *ngIf="job.geminiCurrent === 0">Procesando con IA… iniciando ({{ job.geminiTotal }} fotos). Puedes seguir en el formulario.</ng-container>
+                        <ng-container *ngIf="job.geminiCurrent > 0">Procesando con IA… foto {{ job.geminiCurrent }} de {{ job.geminiTotal }}. Puedes seguir en el formulario.</ng-container>
+                      </ng-container>
+                      <ng-container *ngIf="job.phase === 'upload'">
+                        Subiendo imágenes al servidor…
+                      </ng-container>
+                    </p>
+                  </ng-container>
+                </div>
+              </ng-container>
               <div
                 class="uv-images-drop"
                 [class.uv-images-drop--active]="imageDropZoneActive"
@@ -613,14 +629,11 @@
                   type="button"
                   class="store-vehicle-btn store-vehicle-btn-primary"
                   (click)="uploadNewImages()"
-                  [disabled]="imageUploadDisabled || imageUploadLoading"
+                  [disabled]="imageUploadDisabled"
                 >
-                  <span *ngIf="!imageUploadLoading">Subir imágenes</span>
-                  <span *ngIf="imageUploadLoading && imageUploadPhase === 'ai'">Procesando con IA…</span>
-                  <span *ngIf="imageUploadLoading && imageUploadPhase !== 'ai'">Subiendo…</span>
+                  Subir imágenes
                 </button>
               </div>
-              <mat-progress-bar *ngIf="imageUploadLoading" mode="indeterminate"></mat-progress-bar>
             </section>
 
             <section class="uv-images-gallery" aria-label="Galería y orden">
@@ -659,32 +672,32 @@
                       <span class="uv-images-meta-val">{{ image.path_public || '—' }}</span>
                     </div>
                     <img class="uv-images-thumb" [src]="image.path" alt="" />
-                    <button
+                  <button
                       type="button"
                       class="uv-images-ia-btn"
-                      [class.uv-images-ia-btn--busy]="galleryReplacing && galleryReplacingIndex === i"
+                      [class.uv-images-ia-btn--busy]="isGalleryAiBusy(i)"
                       (click)="processGalleryImageWithAi(image, i)"
-                      [disabled]="galleryReplacing"
+                      [disabled]="isGalleryAiBusy(i)"
                       [matTooltip]="
-                        galleryReplacing && galleryReplacingIndex === i
+                        isGalleryAiBusy(i)
                           ? 'Procesando con IA…'
                           : 'Procesar con IA y reemplazar'
                       "
                       [attr.aria-label]="
-                        galleryReplacing && galleryReplacingIndex === i
+                        isGalleryAiBusy(i)
                           ? 'Procesando con IA'
                           : 'Procesar con IA y reemplazar imagen'
                       "
-                      [attr.aria-busy]="galleryReplacing && galleryReplacingIndex === i ? 'true' : null"
+                      [attr.aria-busy]="isGalleryAiBusy(i) ? 'true' : null"
                     >
                       <mat-progress-spinner
-                        *ngIf="galleryReplacing && galleryReplacingIndex === i"
+                        *ngIf="isGalleryAiBusy(i)"
                         diameter="22"
                         mode="indeterminate"
                         class="uv-images-ia-spinner"
                         aria-hidden="true"
                       ></mat-progress-spinner>
-                      <mat-icon *ngIf="!(galleryReplacing && galleryReplacingIndex === i)">auto_fix_high</mat-icon>
+                      <mat-icon *ngIf="!isGalleryAiBusy(i)">auto_fix_high</mat-icon>
                     </button>
                     <button
                       type="button"

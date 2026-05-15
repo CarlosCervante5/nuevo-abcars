@@ -67,6 +67,36 @@
   z-index: 10;
 }
 
+.photo-ia-btn {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  --padding: 8px;
+  z-index: 10;
+}
+
+.ia-info-card {
+  margin: 0 0 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.ia-note {
+  display: block;
+  padding: 0 16px 12px;
+  font-size: 0.8rem;
+}
+
+.ia-note code {
+  font-size: 0.72rem;
+}
+
+.photos-hint-existing {
+  font-size: 0.8rem;
+  color: var(--ion-color-medium-shade, #666);
+  margin: -8px 0 12px;
+  line-height: 1.35;
+}
+
 .upload-button {
   margin-top: 24px;
 }

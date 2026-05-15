@@ -14,6 +14,8 @@ export const vehicleService = {
     body_names?: string;
     min_price?: number;
     max_price?: number;
+    /** Misma convención que el panel Angular (`has_images=false` en inventario). Por defecto no se envía → backend usa `true`. */
+    has_images?: boolean;
   }): Promise<VehicleSearchResponse> {
     const queryParams = new URLSearchParams();
     
@@ -32,10 +34,13 @@ export const vehicleService = {
       if (params.max_price) prices.push(params.max_price);
       queryParams.append('prices', prices.join(','));
     }
-    
-    // Solicitar relaciones necesarias para mostrar la miniatura
-    // El backend puede soportar 'with' o 'relationship_names' como parámetro
-    queryParams.append('with', 'firstImage,brand,model,version');
+
+    if (params.has_images !== undefined) {
+      queryParams.append('has_images', params.has_images ? '1' : '0');
+    }
+
+    // Laravel SearchVehiclesRequest usa `relationship_names` (CSV). Sin esto el backend aplica su lista por defecto.
+    queryParams.append('relationship_names', 'firstImage,brand,model,version');
 
     console.log('Vehicle search request:', `vehicles/search?${queryParams.toString()}`);
     const response = await api.get<any>(
@@ -48,7 +53,7 @@ export const vehicleService = {
     // axios ya desenvuelve response.data, así que response.data es el JSON completo
     const apiResponse = response.data;
     
-    if (apiResponse && apiResponse.status === 200 && apiResponse.data) {
+    if (apiResponse && Number(apiResponse.status) === 200 && apiResponse.data != null) {
       const paginatedData = apiResponse.data;
       
       // Mapear vehículos para convertir first_image (snake_case) a firstImage (camelCase)
@@ -154,12 +159,51 @@ export const vehicleService = {
       formData.append('images[]', file);
     });
 
-    const response = await api.post<ApiResponse<void>>('vehicle_images', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await api.post<ApiResponse<void>>('vehicle_images', formData);
     return response.data;
+  },
+
+  /**
+   * Sustituye una foto en un índice concreto (borrar + subir nueva + restaurar orden).
+   * Misma idea que VehicleGalleryReplaceService en el panel web.
+   */
+  async replaceGalleryImageAtIndex(
+    vehicleUuid: string,
+    oldImageUuid: string,
+    slotIndex: number,
+    file: File,
+  ): Promise<ApiResponse<Vehicle>> {
+    const before = await this.getVehicleDetail(vehicleUuid);
+    if (before.status !== 200 || !before.data) {
+      throw new Error('No se pudo cargar el vehículo');
+    }
+    const imgsBefore = before.data.images || [];
+    const idsSnapshot = new Set(imgsBefore.map((img: { uuid: string }) => img.uuid));
+
+    await this.deleteVehicleImage(oldImageUuid);
+    await this.uploadVehicleImages(vehicleUuid, [file]);
+
+    const after = await this.getVehicleDetail(vehicleUuid);
+    if (after.status !== 200 || !after.data) {
+      throw new Error('No se pudo recargar el vehículo tras subir');
+    }
+    const rows = after.data.images || [];
+    const added = rows.find((r: { uuid: string }) => !idsSnapshot.has(r.uuid));
+    if (!added || slotIndex < 0 || slotIndex >= rows.length) {
+      return after;
+    }
+    const withoutNew = rows.filter((r: { uuid: string }) => r.uuid !== added.uuid);
+    const reordered = [
+      ...withoutNew.slice(0, slotIndex),
+      added,
+      ...withoutNew.slice(slotIndex),
+    ];
+    const imageOrder = reordered.map((r: { uuid: string }, i: number) => ({
+      uuid: r.uuid,
+      sort_id: i + 1,
+    }));
+    await this.updateImageOrder(vehicleUuid, imageOrder);
+    return await this.getVehicleDetail(vehicleUuid);
   },
 
   // Actualizar orden de imágenes

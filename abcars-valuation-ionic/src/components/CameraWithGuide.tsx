@@ -15,6 +15,7 @@ import { close, checkmark, camera, swapHorizontal } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { PhotoGuideType } from './PhotoTypeSelector';
 import PhotoTypeSelector from './PhotoTypeSelector';
+import { CameraGuideDefs, CameraGuideShape, CameraGuideThirdsGrid } from './CameraGuideShapes';
 import './CameraWithGuide.css';
 
 interface CameraImage {
@@ -316,52 +317,18 @@ const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
 
   const renderGuide = () => {
     const getGuideTitle = () => {
-      return photoTitle || 'Alinea el vehículo con la silueta verde';
+      if (photoTitle) {
+        return photoTitle;
+      }
+      return `Guía: ${String(currentGuideType).replace(/_/g, ' ')}`;
     };
 
     const getGuideSubtitle = () => {
       if (photoTitle) {
-        return `Fotografía: ${photoTitle}`;
+        return `Encuadre: ${photoTitle}`;
       }
-      return 'Asegúrate de que el vehículo esté centrado';
+      return 'Mantén el horizonte estable y el sujeto dentro del contorno';
     };
-
-    // Mapear el tipo de guía al nombre del archivo SVG
-    const getSvgPath = (type: PhotoGuideType | 'car'): string => {
-      const basePath = '/fotos/';
-      const svgMap: Record<string, string> = {
-        'frontal_izquierda': `${basePath}frontal-izquierda.svg`,
-        'lateral_izquierda': `${basePath}lateral-izquierda.svg`,
-        'posterior_izquierda': `${basePath}posterior-izquierda.svg`,
-        'posterior': `${basePath}posterior.svg`,
-        'posterior_derecha': `${basePath}posterior-derecha.svg`,
-        'lateral_derecha': `${basePath}lateral-derecha.svg`,
-        'frontal_derecha': `${basePath}frontal-derecha.svg`,
-        'frontal': `${basePath}frontal.svg`,
-        'interior': `${basePath}interior.svg`,
-        'asientos_delanteros': `${basePath}asientos-delanteros.svg`,
-        'asientos_traseros': `${basePath}asientos-traseros.svg`,
-        'vista_cabina': `${basePath}vista-cabina.svg`,
-        'vista_conductor': `${basePath}vista-conductor.svg`,
-        'odometro': `${basePath}odometro.svg`,
-        'controles': `${basePath}controles.svg`,
-        'luces_interiores': `${basePath}luces-internas.svg`,
-        'palanca_velocidades': `${basePath}palanca-velocidades.svg`,
-        'faros_delanteros': `${basePath}faros-delanteros.svg`,
-        'llantas': `${basePath}llantas.svg`,
-        'luces_traseras': `${basePath}luces-traceras.svg`,
-        'logotipo_marca': `${basePath}logotipo.svg`,
-        'motor': `${basePath}motor.svg`,
-        'logotipo_modelo': `${basePath}logotipo-modelo.svg`,
-        'cajuela': `${basePath}cajuela.svg`,
-        'quemacocos': `${basePath}quemacocos.svg`,
-        'llaves': `${basePath}llaves.svg`,
-        'car': `${basePath}frontal.svg`, // Default
-      };
-      return svgMap[type] || svgMap['car'];
-    };
-
-    const svgPath = getSvgPath(currentGuideType || 'car');
 
     return (
       <div 
@@ -384,44 +351,20 @@ const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
           viewBox="0 0 800 600"
           className="car-silhouette landscape-svg"
           preserveAspectRatio="xMidYMid meet"
-          style={{ 
+          style={{
             background: 'transparent',
             width: '100%',
             height: '100%',
           }}
         >
-          {/* Cuadrícula 4x3 - Líneas verticales (4 columnas) */}
-          <line x1="200" y1="0" x2="200" y2="600" stroke="#00ff00" strokeWidth="2" strokeDasharray="5,5" opacity="0.4" />
-          <line x1="400" y1="0" x2="400" y2="600" stroke="#00ff00" strokeWidth="3" strokeDasharray="5,5" opacity="0.5" />
-          <line x1="600" y1="0" x2="600" y2="600" stroke="#00ff00" strokeWidth="2" strokeDasharray="5,5" opacity="0.4" />
-          
-          {/* Cuadrícula 4x3 - Líneas horizontales (3 filas) */}
-          <line x1="0" y1="200" x2="800" y2="200" stroke="#00ff00" strokeWidth="2" strokeDasharray="5,5" opacity="0.4" />
-          <line x1="0" y1="400" x2="800" y2="400" stroke="#00ff00" strokeWidth="2" strokeDasharray="5,5" opacity="0.4" />
-          
-          {/* Línea central horizontal (más visible) */}
-          <line x1="0" y1="300" x2="800" y2="300" stroke="#00ff00" strokeWidth="2" strokeDasharray="3,3" opacity="0.3" />
-          
-          {/* SVG de la silueta centrada con espacios a los lados */}
-          {/* La silueta ocupará aproximadamente el 60% del ancho, centrada */}
-          <g transform="translate(400, 300)">
-            <image
-              href={svgPath}
-              x="-240"
-              y="-300"
-              width="480"
-              height="600"
-              preserveAspectRatio="xMidYMid meet"
-              className="silhouette-image"
-            />
-          </g>
-          
-          {/* Texto de guía */}
-          <text x="400" y="50" textAnchor="middle" fill="#00ff00" fontSize="24" fontWeight="bold" opacity="1" className="guide-title-text">
-            {photoTitle || `Guía: ${currentGuideType.replace(/_/g, ' ')}`}
+          <CameraGuideDefs />
+          <CameraGuideThirdsGrid />
+          <CameraGuideShape type={currentGuideType || 'car'} />
+          <text x="400" y="48" textAnchor="middle" className="guide-title-text">
+            {getGuideTitle()}
           </text>
-          <text x="400" y="80" textAnchor="middle" fill="#ffffff" fontSize="16" opacity="0.9" className="guide-subtitle-text">
-            {photoTitle || 'Asegúrate de que el vehículo esté centrado'}
+          <text x="400" y="78" textAnchor="middle" className="guide-subtitle-text">
+            {getGuideSubtitle()}
           </text>
         </svg>
       </div>
@@ -448,7 +391,7 @@ const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
             <div className="camera-guide-instructions">
               <IonIcon icon={camera} size="large" />
               <h3>Guía para Tomar la Foto</h3>
-              <p>Alinea el vehículo con la silueta verde para obtener la mejor foto</p>
+              <p>Alinea el encuadre con la guía iluminada (4:3) para obtener la mejor foto</p>
             </div>
             <div className="guide-preview-container">
               {renderGuide()}
@@ -463,7 +406,7 @@ const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
                 <IonIcon icon={camera} slot="start" />
                 {loading ? 'Abriendo cámara...' : 'Iniciar Vista Previa'}
               </IonButton>
-              <p className="guide-hint">La silueta te ayudará a alinear el vehículo cuando tomes la foto</p>
+              <p className="guide-hint">La guía vectorial te ayuda a centrar el sujeto antes de abrir la cámara</p>
             </div>
           </div>
         ) : !isPreviewMode ? (

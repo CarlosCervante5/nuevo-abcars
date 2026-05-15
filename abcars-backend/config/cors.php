@@ -33,6 +33,11 @@ $defaults = array_values(array_filter([
     'http://127.0.0.1:4201',
     'http://127.0.0.1:5173',
     'http://127.0.0.1:5176',
+    // Capacitor / Ionic WebView (Android usa https://localhost como origen del shell)
+    'https://localhost',
+    'http://localhost',
+    'capacitor://localhost',
+    'ionic://localhost',
 ], static function ($u) {
     return is_string($u) && $u !== '';
 }));
@@ -71,7 +76,10 @@ return [
 
     'allowed_origins' => $allowedOrigins,
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '#^https://localhost(:\d+)?$#',
+        '#^http://localhost(:\d+)?$#',
+    ],
 
     'allowed_headers' => ['*'],
 

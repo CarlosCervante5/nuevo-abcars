@@ -85,6 +85,12 @@ Route::prefix('studio-catalog')->middleware(['auth:sanctum'])->group(function ()
     Route::get('/background', [StudioCatalogController::class, 'showBackground'])
         ->middleware('role_or_permission:super_admin|administrator|marketing|create vehicles|update vehicles|delete vehicles');
 
+    /** Cualquier usuario autenticado: solo indica si el servidor tiene clave (no expone la clave). */
+    Route::get('/gemini/capabilities', [StudioCatalogController::class, 'geminiCapabilities']);
+    /** Misma política que subir fotos (`vehicle_images` POST): sin exigir `delete vehicles`. */
+    Route::post('/gemini/generate-recorte', [StudioCatalogController::class, 'geminiGenerateRecorte'])
+        ->middleware('role_or_permission:super_admin|administrator|marketing|create vehicles|update vehicles');
+
     Route::middleware('role:administrator|super_admin')->group(function () {
         Route::post('/background', [StudioCatalogController::class, 'storeBackground']);
         Route::delete('/background', [StudioCatalogController::class, 'resetBackground']);

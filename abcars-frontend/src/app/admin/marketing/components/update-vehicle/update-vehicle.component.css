@@ -455,6 +455,20 @@
   border-radius: 0.2rem;
 }
 
+.uv-images-bg-banner {
+  margin: 0.75rem 0 0;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.5rem;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.uv-images-bg-banner-text {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: #1e40af;
+}
+
 .uv-images-upload {
   margin-bottom: 1.75rem;
   padding-bottom: 1.25rem;

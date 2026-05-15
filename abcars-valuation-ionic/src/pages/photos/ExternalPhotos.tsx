@@ -24,6 +24,7 @@ import { useParams, useHistory } from 'react-router-dom';
 import { valuationService } from '../../services/valuationService';
 import { cameraHelper, CameraImage } from '../../utils/camera';
 import './Photos.css';
+import { getApiBaseUrl, getAssetBaseUrl } from '../../config/apiBaseUrl';
 
 interface PhotoItem {
   index: number;
@@ -33,9 +34,8 @@ interface PhotoItem {
   existingUrl?: string;
 }
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'https://backend.abcars.mx/api/';
-const ASSET_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '/');
+const API_BASE_URL = getApiBaseUrl();
+const ASSET_BASE_URL = getAssetBaseUrl();
 
 const EXTERIOR_PHOTOS = [
   { index: 0, name: 'Frente' },

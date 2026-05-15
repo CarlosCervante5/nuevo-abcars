@@ -53,11 +53,13 @@ const VehicleList: React.FC = () => {
         page,
         per_page: 20,
         search: searchTerm || undefined,
+        status: 'active,inactive',
+        has_images: false,
       });
 
       console.log('Vehicle search response:', JSON.stringify(response, null, 2));
 
-      if (response.status === 200 && response.data) {
+      if (Number(response.status) === 200 && response.data) {
         const vehiclesData = Array.isArray(response.data.vehicles) ? response.data.vehicles : [];
         console.log('Vehicles data:', vehiclesData.length, 'vehicles found');
         if (append) {
@@ -76,7 +78,13 @@ const VehicleList: React.FC = () => {
     } catch (error: any) {
       console.error('Error loading vehicles:', error);
       console.error('Error details:', JSON.stringify(error, null, 2));
-      setToastMessage(error.response?.data?.message || 'Error al cargar vehículos');
+      setToastMessage(
+        error?.response?.data?.message ||
+          (error?.message === 'Network Error'
+            ? 'Sin conexión. Revisa datos/Wi‑Fi y que la API responda.'
+            : error?.message) ||
+          'Error al cargar vehículos',
+      );
       setShowToast(true);
       setVehicles([]);
     } finally {

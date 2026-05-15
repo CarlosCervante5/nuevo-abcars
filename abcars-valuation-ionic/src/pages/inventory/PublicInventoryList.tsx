@@ -82,13 +82,14 @@ const PublicInventoryList: React.FC = () => {
         per_page: 20,
         search: searchTerm || undefined,
         status: 'active,sale',
+        has_images: false,
       };
       if (category?.bodyNames?.length) {
         params.body_names = category.bodyNames.join(',');
       }
       const response = await vehicleService.searchVehicles(params);
 
-      if (response.status === 200 && response.data) {
+      if (Number(response.status) === 200 && response.data) {
         const vehiclesData = response.data.vehicles || [];
         if (append) {
           setVehicles((prev) => [...prev, ...vehiclesData]);
@@ -104,7 +105,12 @@ const PublicInventoryList: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error loading vehicles:', error);
-      setToastMessage(error.response?.data?.message || 'Error al cargar vehículos');
+      setToastMessage(
+        error?.response?.data?.message ||
+          (error?.message === 'Network Error'
+            ? 'Sin conexión. Revisa datos/Wi‑Fi.'
+            : 'Error al cargar vehículos'),
+      );
       setShowToast(true);
       setVehicles([]);
     } finally {

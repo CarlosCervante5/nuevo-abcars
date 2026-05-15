@@ -5,8 +5,8 @@ import { AbstractControl, FormControl, FormGroup, UntypedFormBuilder, ValidatorF
 import { VehicleService } from '@services/vehicle.service';
 import Swal from "sweetalert2";
 import { MatChipInputEvent } from '@angular/material/chips';
-import { Observable, of, TimeoutError } from 'rxjs';
-import { map, startWith, timeout, finalize } from 'rxjs/operators';
+import { Observable, of, Subject, combineLatest, BehaviorSubject } from 'rxjs';
+import { map, startWith, finalize, takeUntil } from 'rxjs/operators';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 
 import {UpdateVehicle, BrandsResponse, Brand, Line, Model, Body, ModelsResponse, VersionsResponse, Version, BodiesResponse, GralResponse, VehicleStoreResponse, FullDetailResponse, ImageOrder} from '@interfaces/vehicle_data.interface';
@@ -19,6 +19,10 @@ import { Router } from '@angular/router';
 import { ImagesService } from '@services/images.service';
 import { GeminiVehicleImageService } from '@services/gemini-vehicle-image.service';
 import { VehicleGalleryReplaceService } from '@services/vehicle-gallery-replace.service';
+import {
+  VehicleImageAiQueueService,
+  VehicleImageBatchJob,
+} from '@services/vehicle-image-ai-queue.service';
 import { fetchImageAsFile } from '../../../../shared/utils/fetch-image-as-file';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
@@ -46,17 +50,19 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
 
   imageFiles: File[] = [];
   imageUploadDisabled = true;
-  imageUploadLoading = false;
-  /** Fase de subida: IA con Gemini o envío al backend. */
-  imageUploadPhase: 'idle' | 'ai' | 'upload' = 'idle';
   /** Si true y hay clave Gemini, recorte estudio + embellecimiento antes de subir. */
   processImagesWithAi = false;
   geminiAiConfigured = false;
   imagesForSlider: ImageRow[] = [];
   imagesOrderSaving = false;
-  galleryReplacing = false;
-  /** Fila cuyo botón de IA muestra preloader (mismo índice que la galería). */
-  galleryReplacingIndex: number | null = null;
+  /** Índices de fila con IA en curso (Gemini + reemplazo); no bloquea el resto del formulario. */
+  private readonly galleryAiBusyIndices = new Set<number>();
+
+  filteredBatchJobs$!: Observable<VehicleImageBatchJob[]>;
+  private readonly queueVehicleIdentity$ = new BehaviorSubject<string | null>(
+    null,
+  );
+  private readonly destroy$ = new Subject<void>();
 
   /** Zona de soltar archivos (HTML5); el <label> solo dispara click, no recibe drops. */
   imageDropZoneActive = false;
@@ -100,17 +106,57 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
     private _bottomSheetRef: MatBottomSheetRef<{ reload?: boolean } | undefined>,
     private _router: Router,
     private readonly _vehicleGalleryReplace: VehicleGalleryReplaceService,
+    private readonly _imageAiQueue: VehicleImageAiQueueService,
   ) {
+      this.filteredBatchJobs$ = combineLatest([
+        this._imageAiQueue.batchJobs$,
+        this.queueVehicleIdentity$,
+      ]).pipe(
+        map(([jobs, id]) =>
+          id ? jobs.filter((j) => j.vehicleUuid === id) : [],
+        ),
+      );
       this.formInit();
   }
 
   ngOnInit(): void {
     this.InitForm();
     this.geminiAiConfigured = this._geminiVehicleImage.isConfigured();
+    this.queueVehicleIdentity$.next(this.createdUuid);
+
+    this._imageAiQueue.vehicleBatchFinished$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((ev) => {
+        if (!this.createdUuid || ev.vehicleUuid !== this.createdUuid) {
+          return;
+        }
+        if (ev.ok) {
+          void Swal.fire({
+            icon: 'success',
+            title: 'Imágenes subidas',
+            showConfirmButton: false,
+            timer: 2000,
+          });
+          this.refreshImagesFromApi();
+          return;
+        }
+        void Swal.fire({
+          icon: 'error',
+          title: 'Error al procesar o subir',
+          text: ev.message ?? 'Intenta de nuevo o desactiva IA y sube los originales.',
+          confirmButtonColor: '#EEB838',
+        });
+      });
   }
 
   ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
     this.revokePendingPreviews();
+  }
+
+  isGalleryAiBusy(index: number): boolean {
+    return this.galleryAiBusyIndices.has(index);
   }
 
   formatBytes(n: number): string {
@@ -467,82 +513,42 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
     if (!this.createdUuid || !this.imageFiles.length) {
       return;
     }
-    void this.runUploadNewImages();
+    this.runUploadNewImages();
   }
 
-  private async runUploadNewImages(): Promise<void> {
-    this.imageUploadLoading = true;
-    this.imageUploadDisabled = true;
-    this.imageUploadPhase = 'idle';
-
-    let filesToUpload = [...this.imageFiles];
-
-    if (this.processImagesWithAi) {
-      if (!this._geminiVehicleImage.isConfigured()) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'IA no disponible',
-          text: 'Configura geminiApiKey en environment.ts. En desarrollo activa geminiUseDevProxy y el archivo proxy.conf.json.',
-          confirmButtonColor: '#EEB838',
-        });
-        this.imageUploadLoading = false;
-        this.imageUploadDisabled = this.imageFiles.length === 0;
-        return;
-      }
-      this.imageUploadPhase = 'ai';
-      try {
-        filesToUpload = await this._geminiVehicleImage.processFilesRecorteEmbellecer(
-          this.imageFiles,
-        );
-      } catch (e) {
-        this.imageUploadPhase = 'idle';
-        this.imageUploadLoading = false;
-        this.imageUploadDisabled = this.imageFiles.length === 0;
-        Swal.fire({
-          icon: 'error',
-          title: 'Error al procesar con IA',
-          text:
-            e instanceof Error
-              ? e.message
-              : 'Intenta de nuevo o desactiva el interruptor y sube los archivos originales.',
-          confirmButtonColor: '#EEB838',
-        });
-        return;
-      }
+  private runUploadNewImages(): void {
+    if (!this.createdUuid || !this.imageFiles.length) {
+      return;
     }
 
-    this.imageUploadPhase = 'upload';
-    this._imagesService
-      .setImage(this.createdUuid!, filesToUpload)
-      .pipe(timeout(240000))
-      .subscribe({
-      next: () => {
-        this.imageUploadLoading = false;
-        this.imageUploadPhase = 'idle';
-        this.applySelectedImageFiles(null);
-        Swal.fire({
-          icon: 'success',
-          title: 'Imágenes subidas',
-          showConfirmButton: false,
-          timer: 2000,
-        });
-        this.refreshImagesFromApi();
-      },
-      error: (err: unknown) => {
-        this.imageUploadLoading = false;
-        this.imageUploadPhase = 'idle';
-        this.imageUploadDisabled = this.imageFiles.length === 0;
-        if (err instanceof TimeoutError) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Tiempo agotado',
-            text: 'El servidor no respondió (240 s). Comprueba Laravel en 127.0.0.1:8000 y tu red.',
-            confirmButtonColor: '#EEB838',
-          });
-          return;
-        }
-        reload(err, this._router);
-      },
+    if (this.processImagesWithAi && !this._geminiVehicleImage.isConfigured()) {
+      void Swal.fire({
+        icon: 'warning',
+        title: 'IA no disponible',
+        text: 'Configura geminiApiKey en environment.ts. En desarrollo activa geminiUseDevProxy y el archivo proxy.conf.json.',
+        confirmButtonColor: '#EEB838',
+      });
+      return;
+    }
+
+    const snapshot = [...this.imageFiles];
+    const useAi = this.processImagesWithAi;
+    const uuid = this.createdUuid;
+
+    this.applySelectedImageFiles(null);
+
+    this._imageAiQueue.enqueueBatchProcessAndUpload(uuid, snapshot, useAi);
+
+    void Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'info',
+      title: useAi
+        ? 'Procesando imágenes en segundo plano'
+        : 'Subiendo imágenes en segundo plano',
+      text: 'Puedes seguir usando el formulario y la galería.',
+      showConfirmButton: false,
+      timer: 3200,
     });
   }
 
@@ -585,7 +591,7 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
   }
 
   processGalleryImageWithAi(image: ImageOrder, index: number): void {
-    if (!this.createdUuid || this.galleryReplacing) return;
+    if (!this.createdUuid || this.galleryAiBusyIndices.has(index)) return;
     if (!this._geminiVehicleImage.isConfigured()) {
       void Swal.fire({
         icon: 'warning',
@@ -612,8 +618,9 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
   private async runProcessGalleryImageWithAi(image: ImageOrder, index: number): Promise<void> {
     const uuid = this.createdUuid;
     if (!uuid) return;
-    this.galleryReplacing = true;
-    this.galleryReplacingIndex = index;
+    if (this.galleryAiBusyIndices.has(index)) return;
+
+    this.galleryAiBusyIndices.add(index);
     try {
       const source = await fetchImageAsFile(image.path, `source_${image.id}.jpg`);
       const processed = await this._geminiVehicleImage.processFilesRecorteEmbellecer([source]);
@@ -626,8 +633,7 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
         .replaceAtIndex(uuid, image.id, index, outFile, idsSnapshot)
         .pipe(
           finalize(() => {
-            this.galleryReplacing = false;
-            this.galleryReplacingIndex = null;
+            this.galleryAiBusyIndices.delete(index);
           }),
         )
         .subscribe({
@@ -646,8 +652,7 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
           error: (err: unknown) => reload(err, this._router),
         });
     } catch (e) {
-      this.galleryReplacing = false;
-      this.galleryReplacingIndex = null;
+      this.galleryAiBusyIndices.delete(index);
       const msg =
         e instanceof Error
           ? e.message
@@ -697,6 +702,7 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
         const uuid = storeVehicleResponse.data.uuid;
         this.vehicle_uuid = uuid;
         this.createdUuid = uuid;
+        this.queueVehicleIdentity$.next(uuid);
 
         const afterCreate = () => {
           this.button = false;

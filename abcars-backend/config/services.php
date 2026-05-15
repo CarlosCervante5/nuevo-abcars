@@ -62,4 +62,18 @@ return [
         'picture_flatten_bg' => Env::get('INTELIMOTOR_PICTURE_BG_RGB', 'fafbfc'),
     ],
 
+    /*
+    | Imagen vehículo (Gemini): usado por proxy API para app móvil sin VITE_GEMINI_API_KEY.
+    */
+    'gemini' => [
+        /** Railway / .env: aceptar nombres habituales de Google AI Studio / Gemini */
+        'api_key' => Env::get('GEMINI_API_KEY')
+            ?: Env::get('GOOGLE_AI_STUDIO_KEY')
+            ?: Env::get('GEMINI_KEY')
+            ?: Env::get('GOOGLE_GEMINI_API_KEY')
+            ?: Env::get('AI_STUDIO_API_KEY'),
+        'model' => Env::get('GEMINI_IMAGE_MODEL', 'gemini-3.1-flash-image-preview'),
+        'base_url' => rtrim((string) Env::get('GEMINI_API_BASE_URL', 'https://generativelanguage.googleapis.com'), '/'),
+    ],
+
 ];

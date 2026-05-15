@@ -1,9 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { getApiBaseUrl } from '../config/apiBaseUrl';
+import { attachNativeHttpAdapter } from './capacitorAxiosAdapter';
 
-// Configuración de API - cambiar según el entorno
-// Para desarrollo local, usa: http://TU_IP_LOCAL:8000/api/
-// Para producción: https://backend.abcars.mx/api/
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://backend.abcars.mx/api/';
+const API_BASE_URL = getApiBaseUrl();
 
 class ApiService {
   private api: AxiosInstance;
@@ -22,13 +21,24 @@ class ApiService {
         'Accept': 'application/json',
       },
     });
+    attachNativeHttpAdapter(this.api);
 
-    // Interceptor para agregar token
+    // Interceptor para agregar token (no enviar Bearer en login/registro: token viejo puede interferir)
     this.api.interceptors.request.use(
       (config) => {
-        const token = this.getToken();
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+        const rel = (config.url || '').replace(/^\//, '');
+        const skipBearer =
+          rel.startsWith('auth/login') ||
+          rel.startsWith('auth/register') ||
+          rel.startsWith('auth/recover_account') ||
+          rel.startsWith('auth/reset_password') ||
+          rel.startsWith('auth/iternally_register');
+
+        if (!skipBearer) {
+          const token = this.getToken();
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
         }
         return config;
       },

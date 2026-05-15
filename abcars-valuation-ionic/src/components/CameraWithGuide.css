@@ -136,38 +136,131 @@
   width: 100%;
   height: 100%;
   background: transparent;
-  /* Forzar orientación horizontal - rotar si el SVG original es vertical */
   transform: rotate(0deg);
 }
 
-/* Filtro para la silueta: convertir a verde semitransparente preservando detalles internos */
-.silhouette-image {
-  opacity: 0.7;
-  filter: 
-    brightness(0.9)
-    contrast(1.3)
-    invert(1)
-    sepia(100%) 
-    saturate(4000%) 
-    hue-rotate(90deg)
-    brightness(1.1)
-    contrast(1.1);
-  mix-blend-mode: screen;
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
+/* Guías vectoriales: siluetas legibles sobre vídeo oscuro */
+.car-silhouette .guide-shape-outer {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 7px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.35));
+}
+
+.car-silhouette .guide-shape-fill {
+  fill: url(#cameraGuide-fill);
+}
+
+.car-silhouette .guide-shape-stroke {
+  fill: none;
+  stroke: url(#cameraGuide-stroke);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 0 10px rgba(14, 165, 233, 0.55));
+}
+
+.car-silhouette .guide-shape-glass {
+  fill: none;
+  stroke: rgba(240, 249, 255, 0.92);
+  stroke-width: 3.5px;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4));
+}
+
+.car-silhouette .guide-shape-hood {
+  fill: none;
+  stroke: rgba(186, 230, 253, 0.75);
+  stroke-width: 2.8px;
+  stroke-linejoin: round;
+}
+
+.car-silhouette .guide-shape-roofline {
+  fill: none;
+  stroke: rgba(240, 249, 255, 0.85);
+  stroke-width: 3.2px;
+  stroke-linecap: round;
+}
+
+.car-silhouette .guide-shape-lamp {
+  fill: none;
+  stroke: rgba(253, 224, 71, 0.95);
+  stroke-width: 3.5px;
+  filter: drop-shadow(0 0 6px rgba(253, 224, 71, 0.55));
+}
+
+.car-silhouette .guide-shape-grille {
+  stroke: rgba(226, 232, 240, 0.7);
+  stroke-width: 2.5px;
+  stroke-linecap: round;
+}
+
+.car-silhouette .guide-shape-plate {
+  stroke: rgba(226, 232, 240, 0.85);
+  stroke-width: 2.5px;
+}
+
+.car-silhouette .guide-shape-wheel {
+  stroke: rgba(248, 250, 252, 0.9);
+  stroke-width: 4px;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.35));
+}
+
+.car-silhouette .guide-shape-wheel-hub {
+  stroke: rgba(148, 163, 184, 0.95);
+  stroke-width: 2.5px;
+}
+
+.car-silhouette .guide-shape-accent {
+  stroke: rgba(125, 211, 252, 0.55);
+  stroke-width: 2px;
+}
+
+.car-silhouette .guide-shape-detail {
+  fill: none;
+  stroke: rgba(226, 232, 240, 0.65);
+  stroke-width: 2.4px;
+  stroke-linecap: round;
+}
+
+.car-silhouette .guide-shape-bracket {
+  fill: none;
+  stroke: rgba(56, 189, 248, 0.95);
+  stroke-width: 3px;
+  stroke-linecap: round;
+}
+
+.car-silhouette .guide-shape-cross {
+  stroke: rgba(56, 189, 248, 0.55);
+  stroke-width: 2px;
+}
+
+.car-silhouette circle.guide-shape-cross {
+  fill: rgba(255, 255, 255, 0.85);
+  stroke: rgba(56, 189, 248, 0.7);
+  stroke-width: 1.5px;
 }
 
 .guide-title-text {
-  text-shadow: 
-    0 0 10px rgba(0, 255, 0, 0.8),
-    0 0 5px rgba(0, 255, 0, 0.6),
-    2px 2px 4px rgba(0, 0, 0, 0.8);
+  fill: #f8fafc;
+  font-size: 21px;
+  font-weight: 700;
+  paint-order: stroke fill;
+  stroke: rgba(15, 23, 42, 0.55);
+  stroke-width: 3px;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
 }
 
 .guide-subtitle-text {
-  text-shadow: 
-    0 0 8px rgba(255, 255, 255, 0.6),
-    2px 2px 4px rgba(0, 0, 0, 0.8);
+  fill: rgba(248, 250, 252, 0.88);
+  font-size: 14.5px;
+  paint-order: stroke fill;
+  stroke: rgba(15, 23, 42, 0.35);
+  stroke-width: 2px;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
 }
 
 .camera-guide-actions {
