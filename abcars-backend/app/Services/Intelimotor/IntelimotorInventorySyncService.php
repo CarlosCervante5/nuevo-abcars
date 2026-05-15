@@ -60,6 +60,10 @@ class IntelimotorInventorySyncService
             ->orderBy('sort_id')
             ->pluck('service_image_url')
             ->filter(fn ($url) => filled($url) && str_starts_with($url, 'http'))
+            ->map(fn ($url) => IntelimotorPictureUrlTransformer::forPush(
+                (string) $url,
+                (string) config('services.intelimotor.picture_flatten_bg', 'fafbfc')
+            ))
             ->values()
             ->all();
 

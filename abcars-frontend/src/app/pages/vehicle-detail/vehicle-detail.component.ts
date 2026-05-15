@@ -97,13 +97,13 @@ interface MediaItem {
             <!-- Galería moderna -->
             <div class="bg-white rounded-3xl overflow-hidden mb-8 shadow-sm">
               <!-- Media principal -->
-              <div class="relative">
+              <div class="relative overflow-hidden rounded-t-3xl vdp-gallery-main-frame">
                 <!-- Imagen -->
                 <img 
                   *ngIf="mediaItems[selectedMediaIndex]?.type === 'image'"
                   [src]="mediaItems[selectedMediaIndex].url" 
                   [alt]="mediaItems[selectedMediaIndex].title"
-                  class="w-full h-96 lg:h-[500px] object-cover cursor-pointer transition-all duration-300 hover:scale-105 gallery-main-image gallery-transition"
+                  class="relative z-10 w-full h-96 lg:h-[500px] object-cover cursor-pointer transition-all duration-300 hover:scale-105 gallery-main-image gallery-transition block"
                   (click)="openLightbox()"
                 />
                 
@@ -152,7 +152,7 @@ interface MediaItem {
                 <!-- Botones de navegación -->
                 <button 
                   (click)="previousImage()"
-                  class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 backdrop-blur-sm gallery-button gallery-transition"
+                  class="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 backdrop-blur-sm gallery-button gallery-transition"
                 >
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -161,7 +161,7 @@ interface MediaItem {
                 
                 <button 
                   (click)="nextImage()"
-                  class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 backdrop-blur-sm gallery-button gallery-transition"
+                  class="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 backdrop-blur-sm gallery-button gallery-transition"
                 >
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -169,7 +169,7 @@ interface MediaItem {
                 </button>
 
                 <!-- Indicador de media -->
-                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
+                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 bg-black/50 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
                   {{ selectedMediaIndex + 1 }} / {{ mediaItems.length }}
                   <span class="ml-2 text-xs opacity-75">
                     {{ mediaItems[selectedMediaIndex].type === 'image' ? 'Imagen' : 
@@ -180,7 +180,7 @@ interface MediaItem {
                 <!-- Botón de expandir -->
                 <button 
                   (click)="openLightbox()"
-                  class="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-300 backdrop-blur-sm gallery-button gallery-transition"
+                  class="absolute top-4 right-4 z-20 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-300 backdrop-blur-sm gallery-button gallery-transition"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
@@ -198,15 +198,19 @@ interface MediaItem {
                     [class.opacity-100]="i === selectedMediaIndex"
                     [class.opacity-60]="i !== selectedMediaIndex"
                   >
-                    <!-- Thumbnail de imagen -->
-                    <img 
+                    <!-- Thumbnail de imagen (fondo estudio cuando la foto es PNG con alpha) -->
+                    <div 
                       *ngIf="media.type === 'image'"
-                      [src]="media.thumbnail" 
-                      [alt]="media.title"
-                      class="w-20 h-16 object-cover rounded-lg border-2 transition-all duration-300 gallery-thumbnail gallery-transition"
+                      class="vdp-gallery-thumb-frame w-20 h-16 rounded-lg border-2 transition-all duration-300 gallery-thumbnail gallery-transition overflow-hidden"
                       [class.border-yellow-500]="i === selectedMediaIndex"
                       [class.border-gray-300]="i !== selectedMediaIndex"
-                    />
+                    >
+                      <img 
+                        [src]="media.thumbnail" 
+                        [alt]="media.title"
+                        class="w-full h-full object-cover"
+                      />
+                    </div>
                     
                     <!-- Thumbnail de video -->
                     <div 
@@ -1251,15 +1255,19 @@ interface MediaItem {
       class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
       (click)="closeLightbox()"
     >
-      <div class="relative max-w-7xl max-h-full">
+      <div class="relative max-w-7xl max-h-full flex items-center justify-center">
         <!-- Imagen del lightbox -->
-        <img 
+        <div
           *ngIf="mediaItems[selectedMediaIndex]?.type === 'image'"
-          [src]="mediaItems[selectedMediaIndex].url" 
-          [alt]="mediaItems[selectedMediaIndex].title"
-          class="max-w-full max-h-full object-contain"
+          class="vdp-gallery-lightbox-frame max-h-[85vh] max-w-full overflow-hidden rounded-xl inline-flex"
           (click)="$event.stopPropagation()"
-        />
+        >
+          <img 
+            [src]="mediaItems[selectedMediaIndex].url" 
+            [alt]="mediaItems[selectedMediaIndex].title"
+            class="relative z-10 max-h-[85vh] max-w-full object-contain block"
+          />
+        </div>
         
         <!-- Video del lightbox -->
         <div 
@@ -1293,7 +1301,7 @@ interface MediaItem {
         <!-- Botones de navegación del lightbox -->
         <button 
           (click)="previousImage(); $event.stopPropagation()"
-          class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-4 rounded-full transition-all duration-300 backdrop-blur-sm"
+          class="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white p-4 rounded-full transition-all duration-300 backdrop-blur-sm"
         >
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -1302,7 +1310,7 @@ interface MediaItem {
         
         <button 
           (click)="nextImage(); $event.stopPropagation()"
-          class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-4 rounded-full transition-all duration-300 backdrop-blur-sm"
+          class="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white p-4 rounded-full transition-all duration-300 backdrop-blur-sm"
         >
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -1312,7 +1320,7 @@ interface MediaItem {
         <!-- Botón de cerrar -->
         <button 
           (click)="closeLightbox()"
-          class="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 backdrop-blur-sm"
+          class="absolute top-4 right-4 z-20 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 backdrop-blur-sm"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -1320,7 +1328,7 @@ interface MediaItem {
         </button>
 
         <!-- Indicador de media -->
-        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-lg backdrop-blur-sm">
+        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 bg-black/50 text-white px-4 py-2 rounded-full text-lg backdrop-blur-sm">
           {{ selectedMediaIndex + 1 }} / {{ mediaItems.length }}
           <span class="ml-2 text-sm opacity-75">
             {{ mediaItems[selectedMediaIndex].type === 'image' ? 'Imagen' : 
@@ -1329,7 +1337,7 @@ interface MediaItem {
         </div>
 
         <!-- Miniaturas en el lightbox -->
-        <div class="absolute bottom-20 left-1/2 transform -translate-x-1/2">
+        <div class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20">
           <div class="flex gap-2 bg-black/30 backdrop-blur-sm p-2 rounded-lg">
             <div 
               *ngFor="let media of mediaItems; let i = index"
@@ -1339,14 +1347,18 @@ interface MediaItem {
               [class.opacity-60]="i !== selectedMediaIndex"
             >
               <!-- Thumbnail de imagen -->
-              <img 
+              <div
                 *ngIf="media.type === 'image'"
-                [src]="media.thumbnail" 
-                [alt]="media.title"
-                class="w-16 h-12 object-cover rounded border-2 transition-all duration-300"
+                class="vdp-gallery-thumb-frame w-16 h-12 rounded overflow-hidden border-2 transition-all duration-300"
                 [class.border-yellow-500]="i === selectedMediaIndex"
                 [class.border-white]="i !== selectedMediaIndex"
-              />
+              >
+                <img 
+                  [src]="media.thumbnail" 
+                  [alt]="media.title"
+                  class="relative z-10 w-full h-full object-cover block"
+                />
+              </div>
               
               <!-- Thumbnail de video -->
               <div 
@@ -1724,6 +1736,22 @@ interface MediaItem {
     @keyframes fadeOut {
       from { opacity: 1; }
       to { opacity: 0; }
+    }
+
+    /*
+     * PNG con canal alpha (p. ej. recorte IA): evita rejilla/visual raro en vista grande al
+     * componer sobre un ciclorama neutro, alineado con catálogo / miniaturas (bg-gray-50).
+     */
+    .vdp-gallery-main-frame {
+      background: linear-gradient(180deg, #fafbfc 0%, #e8ebef 62%, #f2f4f7 100%);
+    }
+
+    .vdp-gallery-thumb-frame {
+      background: linear-gradient(180deg, #fafbfc 0%, #ebeff3 70%, #f4f6f9 100%);
+    }
+
+    .vdp-gallery-lightbox-frame {
+      background: linear-gradient(180deg, #fafbfc 0%, #e8ebef 62%, #f2f4f7 100%);
     }
 
     /* Mejoras para móviles */

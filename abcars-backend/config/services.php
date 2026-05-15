@@ -58,6 +58,8 @@ return [
     'intelimotor' => [
         'base_url' => Env::get('INTELIMOTOR_API_BASE_URL', 'https://app.intelimotor.com/api'),
         'timeout' => (int) Env::get('INTELIMOTOR_API_TIMEOUT', 30),
+        /** Fondo RGB (hex sin #) al aplanar PNG transparente → JPG para pictureUrls hacia Intelimotor */
+        'picture_flatten_bg' => Env::get('INTELIMOTOR_PICTURE_BG_RGB', 'fafbfc'),
     ],
 
 ];
