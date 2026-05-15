@@ -25,14 +25,6 @@ export const ADMINISTRATOR_NAV_ITEMS: AdministratorNavItem[] = [
     requiredPermissions: [...VEHICLE_INVENTORY_GUARD_PERMISSIONS]
   },
   {
-    title: 'Ciclorama catálogo',
-    icon: 'fi fi-rr-camera',
-    routerLink: ['/admin/administrator/studio-catalog'],
-    description: 'Fondo maestro para fotos con IA',
-    iconColor: 'purple',
-    requiredRoles: ['administrator', 'super_admin']
-  },
-  {
     title: 'Intelimotor',
     icon: 'fi fi-rr-link-alt',
     routerLink: ['/admin/administrator/intelimotor'],

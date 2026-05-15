@@ -26,7 +26,6 @@ export class AdminShellComponent implements OnInit, OnDestroy {
     '': 'Inicio',
     vehicles: 'Inventario',
     intelimotor: 'Intelimotor',
-    'studio-catalog': 'Ciclorama catálogo',
     'home-banner': 'Banner del inicio',
     'assing-valuations': 'Solicitudes',
     'valuation-appointments': 'Valuaciones',

@@ -1,12 +1,8 @@
 /**
- * Fondo de catálogo fijo (ciclorama). No se genera con IA en cada foto:
- * se usa un JPG maestro (Cloudinary) o la plantilla SVG local.
+ * Fondo de catálogo (ciclorama): referencia para prompts de Gemini y composición opcional en canvas.
+ * El ciclorama en fotos de inventario lo genera de nuevo el modelo en una sola pasada (prompt fijo).
  */
 
-/**
- * Ciclorama embebido (no depende de `/assets/...` en el host).
- * Evita 404 en despliegues donde los estáticos no coinciden con la ruta esperada.
- */
 const STUDIO_CATALOG_BACKGROUND_SVG = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="2048" height="1536" viewBox="0 0 2048 1536" preserveAspectRatio="xMidYMid slice">
   <defs>
@@ -43,108 +39,55 @@ function studioCatalogBackgroundDataUrl(): string {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(STUDIO_CATALOG_BACKGROUND_SVG)}`;
 }
 
-/** Ruta bajo `src/assets` (solo referencia; el runtime usa SVG embebido). */
+/** Referencia a asset estático (opcional); el runtime usa SVG embebido para evitar 404 en deploy. */
 export const STUDIO_CATALOG_BACKGROUND_ASSET = 'assets/catalog/studio-cyclorama-background.svg';
 
-export const STUDIO_CATALOG_DEFAULT_WIDTH = 2048;
-export const STUDIO_CATALOG_DEFAULT_HEIGHT = 1536;
-
-/** Colores principales del SVG (referencia visual). */
+/** Texto del prompt fijo de Gemini (recorte + ciclorama en una sola imagen). */
 export const STUDIO_CATALOG_COLOR_HINT =
-  'Ciclorama neutro continuo en TODO el encuadre (no solo el suelo): pared superior ~#fafbfc, horizonte ~#e4e8ec, suelo ~#e8ebef a #f2f4f7, sin texturas ni objetos.';
-
-function loadImageFromSrc(src: string, crossOrigin = false): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.decoding = 'async';
-    const isDataUrl = src.trimStart().toLowerCase().startsWith('data:');
-    // data: + crossOrigin anonymous puede fallar o degradar el canal alpha al componer en canvas.
-    if (crossOrigin && !isDataUrl) {
-      img.crossOrigin = 'anonymous';
-    }
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error('No se pudo cargar la imagen'));
-    img.src = src;
-  });
-}
-
-/** Fondo para composición IA: Cloudinary si carga; si CORS/red falla → plantilla SVG embebida. */
-async function loadStudioCatalogBackgroundForComposite(
-  backgroundUrl?: string | null,
-): Promise<HTMLImageElement> {
-  const trimmed = backgroundUrl?.trim();
-  if (trimmed) {
-    try {
-      return await loadImageFromSrc(trimmed, true);
-    } catch {
-      // Continuar con plantilla por defecto
-    }
-  }
-  return loadImageFromSrc(studioCatalogBackgroundDataUrl(), false);
-}
-
-/** Carga el fondo fijo: URL maestra (Cloudinary) o plantilla SVG local. */
-export async function loadStudioCatalogBackgroundImage(
-  backgroundUrl?: string | null,
-): Promise<HTMLImageElement> {
-  if (backgroundUrl?.trim()) {
-    return loadImageFromSrc(backgroundUrl.trim(), true);
-  }
-  return loadImageFromSrc(studioCatalogBackgroundDataUrl(), false);
-}
+  'Ciclorama neutro continuo en TODO el encuadre (no solo el suelo): pared superior ~#fafbfc, horizonte ~#e4e8ec, suelo ~#e8ebef a #f2f4f7, sin texturas ni objetos. Prohibido conservar techo, luces, columnas, cielo o cualquier resto del local original, aunque esté difuminado.';
 
 export type CompositeOverStudioOptions = {
-  backgroundUrl?: string | null;
   width?: number;
   height?: number;
   mime?: 'image/jpeg' | 'image/png';
   jpegQuality?: number;
 };
 
-/**
- * Rasteriza la plantilla SVG local a JPG (sin vehículo).
- */
-export async function renderDefaultStudioBackgroundBlob(
-  options: Omit<CompositeOverStudioOptions, 'backgroundUrl'> = {},
-): Promise<Blob> {
-  const width = options.width ?? STUDIO_CATALOG_DEFAULT_WIDTH;
-  const height = options.height ?? STUDIO_CATALOG_DEFAULT_HEIGHT;
-  const mime = options.mime ?? 'image/jpeg';
-  const jpegQuality = options.jpegQuality ?? 0.92;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) {
-    throw new Error('Canvas 2D no disponible');
-  }
-
-  const bg = await loadStudioCatalogBackgroundImage(null);
-  ctx.drawImage(bg, 0, 0, width, height);
-
+/** Carga la plantilla de ciclorama embebida (canvas / herramientas internas). */
+export function loadStudioCatalogBackgroundImage(): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (b) => (b ? resolve(b) : reject(new Error('toBlob falló'))),
-      mime,
-      mime === 'image/jpeg' ? jpegQuality : undefined,
-    );
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('No se pudo cargar la plantilla de ciclorama'));
+    img.src = studioCatalogBackgroundDataUrl();
+  });
+}
+
+function loadForegroundForComposite(src: string): Promise<HTMLImageElement> {
+  const isData = src.trimStart().toLowerCase().startsWith('data:');
+  return new Promise((resolve, reject) => {
+    const im = new Image();
+    im.decoding = 'async';
+    if (!isData) {
+      im.crossOrigin = 'anonymous';
+    }
+    im.onload = () => resolve(im);
+    im.onerror = () => reject(new Error('No se pudo cargar la imagen frontal'));
+    im.src = src;
   });
 }
 
 /**
- * Dibuja el fondo maestro y encima el vehículo (idealmente PNG con transparencia).
+ * Composición opcional: fondo embebido + capa frontal (p. ej. PNG con alpha).
+ * Si la frontal es opaca, cubrirá el fondo.
  */
 export async function compositeDataUrlOverStudioBackground(
   foregroundDataUrl: string,
   options: CompositeOverStudioOptions = {},
 ): Promise<Blob> {
-  const fgSrc = foregroundDataUrl.trim();
-  if (!fgSrc) {
-    throw new Error('Imagen de primer plano vacía');
-  }
-  const width = options.width ?? STUDIO_CATALOG_DEFAULT_WIDTH;
-  const height = options.height ?? STUDIO_CATALOG_DEFAULT_HEIGHT;
+  const width = options.width ?? 2048;
+  const height = options.height ?? 1536;
   const mime = options.mime ?? 'image/jpeg';
   const jpegQuality = options.jpegQuality ?? 0.92;
 
@@ -156,9 +99,10 @@ export async function compositeDataUrlOverStudioBackground(
     throw new Error('Canvas 2D no disponible');
   }
 
-  const bg = await loadStudioCatalogBackgroundForComposite(options.backgroundUrl);
-  // Salida Gemini llega como data URL; nunca forzar CORS aquí o el ciclorama no se ve tras superponer.
-  const fg = await loadImageFromSrc(fgSrc, false);
+  const [bg, fg] = await Promise.all([
+    loadStudioCatalogBackgroundImage(),
+    loadForegroundForComposite(foregroundDataUrl.trim()),
+  ]);
 
   ctx.drawImage(bg, 0, 0, width, height);
   ctx.drawImage(fg, 0, 0, width, height);
