@@ -2,18 +2,17 @@
  * URLs listos para inventario / fichas: JPEG opaco con fondo tipo estudio.
  * `f_auto` puede mantener PNG con canal alpha y el navegador muestra transparencia (rejilla).
  */
-const FLATTEN_SEGMENT = 'f_jpg,q_auto,b_rgb:fafbfc';
+/** Codificar ':' evita problemas con validadores o integraciones que rechazan ':' en el path. */
+const FLATTEN_SEGMENT = 'f_jpg,q_auto,b_rgb%3Afafbfc';
 
 /** URLs firmadas: alterar la ruta rompe la firma. */
 function isCloudinarySignedUpload(url: string): boolean {
   return /\/image\/upload\/s--/i.test(url);
 }
 
+/** Ya aplanado (Cloudinary acepta b_rgb: o b_rgb%3A). */
 function alreadyFlattened(url: string): boolean {
-  return (
-    url.includes(`/image/upload/${FLATTEN_SEGMENT}/`) ||
-    url.includes(`/image/upload/${FLATTEN_SEGMENT},`)
-  );
+  return /\/image\/upload\/f_jpg,q_auto,b_rgb(?:%3A|:)fafbfc(\/|,)/i.test(url);
 }
 
 /**

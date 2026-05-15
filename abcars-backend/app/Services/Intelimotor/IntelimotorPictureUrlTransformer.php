@@ -26,7 +26,9 @@ class IntelimotorPictureUrlTransformer
             $bg = 'fafbfc';
         }
 
-        $flatten = 'f_jpg,q_auto,b_rgb:'.$bg;
+        // %3A en lugar de ':' en la ruta: mismo efecto en Cloudinary y mejor compatibilidad
+        // (validadores de URL / integraciones que no aceptan dos puntos en el path).
+        $flatten = 'f_jpg,q_auto,b_rgb%3A'.$bg;
 
         // URLs firmadas: no insertar transformaciones (invalidarían la firma).
         if (preg_match('#/image/upload/s--#', $url)) {
@@ -37,7 +39,7 @@ class IntelimotorPictureUrlTransformer
             return $url;
         }
 
-        if (str_contains($url, '/image/upload/'.$flatten.'/')) {
+        if (preg_match('#/image/upload/f_jpg,q_auto,b_rgb(?:%3A|:)'.$bg.'/#i', $url)) {
             return $url;
         }
 

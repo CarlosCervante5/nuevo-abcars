@@ -12,7 +12,7 @@ class IntelimotorPictureUrlTransformerTest extends TestCase
         $in = 'https://res.cloudinary.com/demo/image/upload/v1693497123/abcars_images/uuid/photo.png';
         $out = IntelimotorPictureUrlTransformer::forPush($in, 'fafbfc');
 
-        $this->assertStringContainsString('/image/upload/f_jpg,q_auto,b_rgb:fafbfc/', $out);
+        $this->assertStringContainsString('/image/upload/f_jpg,q_auto,b_rgb%3Afafbfc/', $out);
         $this->assertStringEndsWith('v1693497123/abcars_images/uuid/photo.png', $out);
     }
 
@@ -21,7 +21,7 @@ class IntelimotorPictureUrlTransformerTest extends TestCase
         $in = 'https://res.cloudinary.com/x/image/upload/w_400,h_300,c_fill/v1/sample/file';
         $out = IntelimotorPictureUrlTransformer::forPush($in, 'e8ebef');
 
-        $this->assertStringContainsString('f_jpg,q_auto,b_rgb:e8ebef/', $out);
+        $this->assertStringContainsString('f_jpg,q_auto,b_rgb%3Ae8ebef/', $out);
         $this->assertStringContainsString('w_400,h_300,c_fill/', $out);
     }
 
@@ -45,5 +45,12 @@ class IntelimotorPictureUrlTransformerTest extends TestCase
         );
         $twice = IntelimotorPictureUrlTransformer::forPush($once, 'fafbfc');
         $this->assertSame($once, $twice);
+    }
+
+    /** URLs ya generadas con ':' siguen siendo reconocidas como aplanadas (no duplicar segmento). */
+    public function test_colon_background_syntax_is_idempotent(): void
+    {
+        $withColon = 'https://res.cloudinary.com/dpaoahbcf/image/upload/f_jpg,q_auto,b_rgb:fafbfc/v1778862922/abcars_vehicles_sandbox/uuid/1778862921_27.jpg';
+        $this->assertSame($withColon, IntelimotorPictureUrlTransformer::forPush($withColon));
     }
 }
