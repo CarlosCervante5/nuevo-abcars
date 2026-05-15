@@ -12,6 +12,7 @@ use App\Models\PostContent;
 use App\Models\Reward;
 use App\Models\UserProfile;
 use App\Models\VehicleImage;
+use App\Support\CloudinaryVehicleUploadTransform;
 use Cloudinary\Cloudinary;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
@@ -233,10 +234,7 @@ class MigrateImagesToCloudinary extends Command
                     $upload = $this->cloudinary->uploadApi()->upload($tempPath, [
                         'public_id' => $publicId,
                         'folder' => $folder,
-                        'transformation' => [
-                            'quality' => 'auto',
-                            'fetch_format' => 'jpg',
-                        ],
+                        'transformation' => CloudinaryVehicleUploadTransform::incomingFlattenTransformation(),
                     ]);
                     $newUrl = $upload['secure_url'] ?? null;
                     if ($newUrl === null) {

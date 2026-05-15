@@ -22,4 +22,14 @@ if (empty($url) && Env::get('CLOUDINARY_CLOUD_NAME') && Env::get('CLOUDINARY_API
 
 return [
     'url' => $url ?: null,
+
+    /*
+    | Hex RGB sin #: usado al subir fotos de vehículos para aplanar transparencia sobre
+    | fondo antes de guardar en Cloudinary (misma idea que b_rgb en URLs de entrega).
+    | Por defecto alinea con INTELIMOTOR_PICTURE_BG_RGB si está definido.
+    */
+    'vehicle_upload_flatten_bg_rgb' => Env::get(
+        'CLOUDINARY_VEHICLE_UPLOAD_BG_RGB',
+        Env::get('INTELIMOTOR_PICTURE_BG_RGB', 'fafbfc')
+    ),
 ];

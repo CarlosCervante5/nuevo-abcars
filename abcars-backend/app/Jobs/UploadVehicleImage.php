@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Helpers\ApiResponseHelper;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
+use App\Support\CloudinaryVehicleUploadTransform;
 use Cloudinary\Cloudinary;
 use Exception;
 use Illuminate\Bus\Queueable;
@@ -65,10 +66,7 @@ class UploadVehicleImage implements ShouldQueue
             $cloudinary_file = $cloudinary->uploadApi()->upload(storage_path('app/' . $this->path), [
                 'public_id' => $name,
                 'folder' => $this->base_folder . '/' . $this->vehicle_uuid,
-                'transformation' => [
-                    'quality' => 'auto',
-                    'fetch_format' => 'jpg'
-                ]
+                'transformation' => CloudinaryVehicleUploadTransform::incomingFlattenTransformation(),
             ]);
 
             $cloudinary_url = $cloudinary_file['secure_url'];
