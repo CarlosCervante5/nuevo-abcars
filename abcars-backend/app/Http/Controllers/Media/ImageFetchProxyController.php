@@ -41,14 +41,84 @@ class ImageFetchProxyController extends Controller
             abort(413, 'Imagen demasiado grande.');
         }
 
-        $contentType = $response->header('Content-Type');
-        if (! is_string($contentType) || ! str_starts_with(strtolower($contentType), 'image/')) {
-            abort(415, 'El recurso no es una imagen.');
-        }
+        $contentType = $this->resolveProxiedImageContentType($response->header('Content-Type'), $body, $url);
 
         return response($body, 200)
             ->header('Content-Type', $contentType)
             ->header('Cache-Control', 'private, max-age=300');
+    }
+
+    /**
+     * Intelimotor/S3 suele mandar application/octet-stream aunque el cuerpo sea JPEG/PNG.
+     */
+    private function resolveProxiedImageContentType(?string $header, string $body, string $url): string
+    {
+        if (is_string($header) && $header !== '') {
+            $main = strtolower(trim(explode(';', $header)[0]));
+            if (str_starts_with($main, 'image/')) {
+                return $main;
+            }
+        }
+
+        $sniffed = $this->sniffImageMimeFromBody($body);
+        if ($sniffed !== null) {
+            return $sniffed;
+        }
+
+        $fromPath = $this->guessImageMimeFromUrlPath($url);
+        if ($fromPath !== null) {
+            return $fromPath;
+        }
+
+        abort(415, 'El recurso no es una imagen reconocible.');
+    }
+
+    private function sniffImageMimeFromBody(string $body): ?string
+    {
+        $len = strlen($body);
+        if ($len < 12) {
+            return null;
+        }
+
+        if ($body[0] === "\xff" && $body[1] === "\xd8" && $body[2] === "\xff") {
+            return 'image/jpeg';
+        }
+
+        $pngSig = "\x89PNG\r\n\x1a\n";
+        if (strncmp($body, $pngSig, strlen($pngSig)) === 0) {
+            return 'image/png';
+        }
+
+        if (strncmp($body, 'GIF87a', 6) === 0 || strncmp($body, 'GIF89a', 6) === 0) {
+            return 'image/gif';
+        }
+
+        if (
+            strncmp($body, 'RIFF', 4) === 0
+            && $len >= 12
+            && strncmp(substr($body, 8, 4), 'WEBP', 4) === 0
+        ) {
+            return 'image/webp';
+        }
+
+        return null;
+    }
+
+    private function guessImageMimeFromUrlPath(string $url): ?string
+    {
+        $path = parse_url($url, PHP_URL_PATH);
+        if (! is_string($path) || $path === '') {
+            return null;
+        }
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        return match ($ext) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            'gif' => 'image/gif',
+            default => null,
+        };
     }
 
     private function isBlockedHost(string $host): bool
