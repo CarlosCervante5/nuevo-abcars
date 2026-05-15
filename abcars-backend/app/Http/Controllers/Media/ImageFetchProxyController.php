@@ -3,13 +3,24 @@
 namespace App\Http\Controllers\Media;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Throwable;
 
 class ImageFetchProxyController extends Controller
 {
     private const MAX_BYTES = 15 * 1024 * 1024;
+
+    /** @var array<string, string> */
+    private const OUTBOUND_HEADERS = [
+        'User-Agent' => 'Mozilla/5.0 (compatible; ABCarsImageProxy/1.0; +https://abcars.mx)',
+        'Accept' => 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+        'Accept-Language' => 'es-MX,es;q=0.9,en;q=0.8',
+    ];
 
     public function fetch(Request $request): Response
     {
@@ -28,11 +39,61 @@ class ImageFetchProxyController extends Controller
             abort(403, 'Host no permitido para descarga de imagen.');
         }
 
-        $response = Http::timeout(60)
-            ->withOptions(['allow_redirects' => ['max' => 3]])
-            ->get($url);
+        $redirectOptions = [
+            'max' => 10,
+            'referer' => true,
+            'protocols' => ['https'],
+            'track_redirects' => false,
+        ];
+
+        $tooLargeFromHead = false;
+        try {
+            $head = Http::timeout(25)
+                ->withHeaders(self::OUTBOUND_HEADERS)
+                ->withOptions(['allow_redirects' => $redirectOptions])
+                ->head($url);
+
+            if ($head->successful()) {
+                $lengthHeader = $head->header('Content-Length');
+                if (is_string($lengthHeader) && $lengthHeader !== '' && ctype_digit($lengthHeader)) {
+                    $tooLargeFromHead = (int) $lengthHeader > self::MAX_BYTES;
+                }
+            }
+        } catch (Throwable) {
+            // HEAD suele fallar (405, timeout); el GET sigue siendo la fuente de verdad.
+        }
+
+        if ($tooLargeFromHead) {
+            abort(413, 'Imagen demasiado grande.');
+        }
+
+        try {
+            $response = Http::timeout(60)
+                ->withHeaders(self::OUTBOUND_HEADERS)
+                ->withOptions(['allow_redirects' => $redirectOptions])
+                ->get($url);
+        } catch (ConnectionException $e) {
+            Log::warning('fetch-image: conexión o tiempo agotado', [
+                'host' => $host,
+                'message' => $e->getMessage(),
+            ]);
+            abort(504, 'Tiempo de espera agotado al obtener la imagen.');
+        } catch (Throwable $e) {
+            if ($e instanceof HttpExceptionInterface) {
+                throw $e;
+            }
+            Log::warning('fetch-image: error de cliente HTTP', [
+                'host' => $host,
+                'message' => $e->getMessage(),
+            ]);
+            abort(502, 'No se pudo contactar el origen de la imagen.');
+        }
 
         if (! $response->successful()) {
+            Log::warning('fetch-image: respuesta no exitosa del origen', [
+                'host' => $host,
+                'status' => $response->status(),
+            ]);
             abort(502, 'No se pudo obtener la imagen del origen.');
         }
 
@@ -41,11 +102,40 @@ class ImageFetchProxyController extends Controller
             abort(413, 'Imagen demasiado grande.');
         }
 
+        if ($this->looksLikeNonImagePayload($body)) {
+            Log::warning('fetch-image: cuerpo no es binario de imagen', ['host' => $host]);
+            abort(502, 'El origen no devolvió una imagen válida.');
+        }
+
         $contentType = $this->resolveProxiedImageContentType($response->header('Content-Type'), $body, $url);
 
         return response($body, 200)
             ->header('Content-Type', $contentType)
             ->header('Cache-Control', 'private, max-age=300');
+    }
+
+    /**
+     * Evita devolver HTML/XML de error del CDN (a veces con 200) como si fuera JPEG por la extensión .jpg.
+     */
+    private function looksLikeNonImagePayload(string $body): bool
+    {
+        if ($body === '') {
+            return true;
+        }
+
+        $probe = substr($body, 0, 64);
+        $trim = ltrim($probe);
+        if ($trim !== '' && (
+            str_starts_with($trim, '<!DOCTYPE')
+            || str_starts_with($trim, '<html')
+            || str_starts_with($trim, '<?xml')
+            || str_starts_with($trim, '<HTML')
+            || str_starts_with($trim, '{')
+        )) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
