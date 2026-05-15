@@ -98,7 +98,7 @@ export class GeminiVehicleImageService {
       throw new Error('Falta geminiApiKey en environment.');
     }
     const promptText = `${PROMPT_RECORTE.trim()}\n\n${STUDIO_RECORTE_SUFFIX}`;
-    const compositeOptions = await this.studioCatalog.resolveCompositeOptions();
+    const compositeOptions = await this.studioCatalog.resolveCompositeOptions(true);
     const out: File[] = [];
     const n = files.length;
     for (let i = 0; i < n; i++) {

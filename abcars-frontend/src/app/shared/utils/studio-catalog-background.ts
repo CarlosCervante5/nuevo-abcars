@@ -57,13 +57,30 @@ function loadImageFromSrc(src: string, crossOrigin = false): Promise<HTMLImageEl
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.decoding = 'async';
-    if (crossOrigin) {
+    const isDataUrl = src.trimStart().toLowerCase().startsWith('data:');
+    // data: + crossOrigin anonymous puede fallar o degradar el canal alpha al componer en canvas.
+    if (crossOrigin && !isDataUrl) {
       img.crossOrigin = 'anonymous';
     }
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error(`No se pudo cargar la imagen: ${src}`));
+    img.onerror = () => reject(new Error('No se pudo cargar la imagen'));
     img.src = src;
   });
+}
+
+/** Fondo para composición IA: Cloudinary si carga; si CORS/red falla → plantilla SVG embebida. */
+async function loadStudioCatalogBackgroundForComposite(
+  backgroundUrl?: string | null,
+): Promise<HTMLImageElement> {
+  const trimmed = backgroundUrl?.trim();
+  if (trimmed) {
+    try {
+      return await loadImageFromSrc(trimmed, true);
+    } catch {
+      // Continuar con plantilla por defecto
+    }
+  }
+  return loadImageFromSrc(studioCatalogBackgroundDataUrl(), false);
 }
 
 /** Carga el fondo fijo: URL maestra (Cloudinary) o plantilla SVG local. */
@@ -122,6 +139,10 @@ export async function compositeDataUrlOverStudioBackground(
   foregroundDataUrl: string,
   options: CompositeOverStudioOptions = {},
 ): Promise<Blob> {
+  const fgSrc = foregroundDataUrl.trim();
+  if (!fgSrc) {
+    throw new Error('Imagen de primer plano vacía');
+  }
   const width = options.width ?? STUDIO_CATALOG_DEFAULT_WIDTH;
   const height = options.height ?? STUDIO_CATALOG_DEFAULT_HEIGHT;
   const mime = options.mime ?? 'image/jpeg';
@@ -135,10 +156,9 @@ export async function compositeDataUrlOverStudioBackground(
     throw new Error('Canvas 2D no disponible');
   }
 
-  const [bg, fg] = await Promise.all([
-    loadStudioCatalogBackgroundImage(options.backgroundUrl),
-    loadImageFromSrc(foregroundDataUrl, true),
-  ]);
+  const bg = await loadStudioCatalogBackgroundForComposite(options.backgroundUrl);
+  // Salida Gemini llega como data URL; nunca forzar CORS aquí o el ciclorama no se ve tras superponer.
+  const fg = await loadImageFromSrc(fgSrc, false);
 
   ctx.drawImage(bg, 0, 0, width, height);
   ctx.drawImage(fg, 0, 0, width, height);
