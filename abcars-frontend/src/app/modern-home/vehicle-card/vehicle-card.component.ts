@@ -3,6 +3,7 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 import { Vehicle } from '../../interfaces/vehicle.interface';
 import { FALLBACK_HERO_IMAGE } from '../../shared/constants/fallback-media';
 import { optimizeCloudinaryVehicleDeliveryUrl } from '../../shared/utils/cloudinary-vehicle-delivery-url';
+import { formatFuelTypeLabel } from '../../shared/utils/fuel-type-label';
 
 @Component({
   selector: 'app-vehicle-card',
@@ -49,7 +50,7 @@ import { optimizeCloudinaryVehicleDeliveryUrl } from '../../shared/utils/cloudin
             </div>
             <div class="flex justify-between">
               <span class="text-gray-500">Combustible</span>
-              <span class="font-medium text-gray-900">{{ vehicle.fuel }}</span>
+              <span class="font-medium text-gray-900">{{ fuelLabel }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-500">Kilómetros</span>
@@ -86,6 +87,10 @@ export class VehicleCardComponent {
   @Output() viewDetails = new EventEmitter<Vehicle>();
   @Output() contact = new EventEmitter<Vehicle>();
   @Output() cardClick = new EventEmitter<Vehicle>();
+
+  get fuelLabel(): string {
+    return formatFuelTypeLabel(this.vehicle?.fuel);
+  }
 
   getVehicleImage(): string {
     if (this.vehicle.image_url && this.vehicle.image_url.trim() !== '') {

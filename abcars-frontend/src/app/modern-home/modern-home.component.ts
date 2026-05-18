@@ -17,6 +17,7 @@ import { Vehicle as ApiVehicle, Brand } from '../shared/interfaces/vehicle_data.
 import { Dealership } from '../shared/interfaces/admin.interfaces';
 import { sortDealershipsForPublic, branchPublicTitle } from '../shared/utils/public-dealerships';
 import { FALLBACK_HERO_IMAGE } from '../shared/constants/fallback-media';
+import { formatFuelTypeLabel } from '../shared/utils/fuel-type-label';
 
 interface Vehicle {
   id?: number;
@@ -462,7 +463,7 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
           year: v.model?.year || new Date().getFullYear(),
           price: v.sale_price || v.list_price || 0,
           mileage: v.mileage || 0,
-          fuel: v.fuel_type || 'Gasolina',
+          fuel: formatFuelTypeLabel(v.fuel_type),
           transmission: this.formatTransmission(v.transmission),
           status: 'active',
           image_url: imageUrl,
