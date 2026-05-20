@@ -1,3 +1,8 @@
+.main-banner-admin {
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
 .drop-container {
     position: relative;
     display: flex;

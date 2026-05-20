@@ -1,22 +1,83 @@
-<mat-card class="example-card">
+<div class="main-banner-admin">
+  <mat-card class="mb-4">
     <mat-card-header>
-        <mat-card-title>Cargar imagen del banner principal</mat-card-title>
+      <mat-card-title>Banner escritorio</mat-card-title>
+      <mat-card-subtitle>Hero en pantallas medianas y grandes (recomendado 1920×600 px, horizontal).</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content class="m-5">
-        <div class="avatar-edit">
-            <label for="main-banner-file" class="drop-container">
-                <span class="drop-title">Arrastra la imagen aquí</span>
-                o elige un archivo
-                <input type="file" id="main-banner-file" accept=".png,.jpg,.jpeg,.webp" (change)="assignImage($event)" />
-            </label>
-        </div>
+      <div *ngIf="previewDesktop" class="mb-4 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+        <p class="text-xs text-gray-500 px-3 py-2 border-b border-gray-100">Vista actual</p>
+        <img [src]="previewDesktop" alt="Banner escritorio actual" class="w-full max-h-48 object-contain object-center" />
+      </div>
+      <div class="avatar-edit">
+        <label for="main-banner-file-desktop" class="drop-container">
+          <span class="drop-title">Arrastra la imagen de escritorio</span>
+          o elige un archivo
+          <input
+            type="file"
+            id="main-banner-file-desktop"
+            accept=".png,.jpg,.jpeg,.webp"
+            (change)="assignImage($event, 'desktop')"
+          />
+        </label>
+      </div>
     </mat-card-content>
-    <mat-card-actions class="mx-auto">
-        <button mat-button class="btn abcars-background-color-blue mx-2" (click)="uploadImages()" [disabled]="disabled">Subir</button>
-        <button *ngIf="isInBottomSheet" mat-button type="button" class="btn abcars-background-color-black" (click)="close()">Cerrar</button>
-        <button *ngIf="!isInBottomSheet" mat-button type="button" class="btn abcars-background-color-black" (click)="goToPanel()">Volver al panel</button>
+    <mat-card-actions class="mx-auto pb-4">
+      <button
+        mat-button
+        class="btn abcars-background-color-blue mx-2"
+        (click)="upload('desktop')"
+        [disabled]="desktopDisabled || desktopLoading"
+      >
+        Subir escritorio
+      </button>
     </mat-card-actions>
-    <mat-card-footer *ngIf="loading">
-        <mat-progress-bar mode="indeterminate" class="mt-5"></mat-progress-bar>
+    <mat-card-footer *ngIf="desktopLoading">
+      <mat-progress-bar mode="indeterminate" class="mt-2"></mat-progress-bar>
     </mat-card-footer>
-</mat-card>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Banner móvil</mat-card-title>
+      <mat-card-subtitle>Hero en teléfonos (recomendado 1080×600 px o vertical 4:5).</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content class="m-5">
+      <div *ngIf="previewMobile" class="mb-4 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+        <p class="text-xs text-gray-500 px-3 py-2 border-b border-gray-100">Vista actual</p>
+        <img [src]="previewMobile" alt="Banner móvil actual" class="w-full max-h-48 object-contain object-center" />
+      </div>
+      <div class="avatar-edit">
+        <label for="main-banner-file-mobile" class="drop-container">
+          <span class="drop-title">Arrastra la imagen móvil</span>
+          o elige un archivo
+          <input
+            type="file"
+            id="main-banner-file-mobile"
+            accept=".png,.jpg,.jpeg,.webp"
+            (change)="assignImage($event, 'mobile')"
+          />
+        </label>
+      </div>
+    </mat-card-content>
+    <mat-card-actions class="mx-auto pb-4">
+      <button
+        mat-button
+        class="btn abcars-background-color-blue mx-2"
+        (click)="upload('mobile')"
+        [disabled]="mobileDisabled || mobileLoading"
+      >
+        Subir móvil
+      </button>
+      <button *ngIf="isInBottomSheet" mat-button type="button" class="btn abcars-background-color-black" (click)="close()">
+        Cerrar
+      </button>
+      <button *ngIf="!isInBottomSheet" mat-button type="button" class="btn abcars-background-color-black" (click)="goToPanel()">
+        Volver al panel
+      </button>
+    </mat-card-actions>
+    <mat-card-footer *ngIf="mobileLoading">
+      <mat-progress-bar mode="indeterminate" class="mt-2"></mat-progress-bar>
+    </mat-card-footer>
+  </mat-card>
+</div>

@@ -42,25 +42,59 @@ html {
   background: #94a3b8;
 }
 
-/* Hero home: banner promocional (móvil) */
-.hero-banner-img {
-  height: clamp(200px, 52vw, 420px);
-  object-fit: cover;
-  object-position: center;
+/* Hero home: banner promocional (reserva bajo nav fijo) */
+.hero-banner-section {
+  line-height: 0;
+  padding-top: 3rem;
+  background-color: #ffffff;
 }
 
 @media (min-width: 768px) {
-  .hero-banner-img {
-    height: 380px;
-    object-fit: contain;
-    object-position: center top;
-    background: #0f172a;
+  .hero-banner-section {
+    padding-top: 3.5rem;
   }
 }
 
-@media (min-width: 1024px) {
-  .hero-banner-img {
-    height: 500px;
+.hero-banner-img {
+  width: 100%;
+}
+
+.hero-banner-img--mobile {
+  display: block;
+}
+
+.hero-banner-img--desktop {
+  display: none;
+}
+
+/* Móvil: banner vertical (4:5) más alto */
+@media (max-width: 767px) {
+  .hero-banner-img--mobile {
+    aspect-ratio: 4 / 5;
+    min-height: clamp(360px, 108vw, 580px);
+    max-height: 78vh;
+    height: auto;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .hero-search-overlap--banner {
+    margin-top: -4.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .hero-banner-img--mobile {
+    display: none;
+  }
+
+  .hero-banner-img--desktop {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: clamp(280px, 52vw, 480px);
+    object-fit: contain;
+    object-position: center top;
   }
 }
 
@@ -81,7 +115,7 @@ html {
 }
 
 .hero-search-overlap--banner {
-  margin-top: -2.5rem;
+  margin-top: -3rem;
 }
 
 .hero-search-overlap--title {
@@ -90,11 +124,17 @@ html {
 
 @media (min-width: 768px) {
   .hero-search-overlap--banner {
-    margin-top: -3.5rem;
+    margin-top: -4.5rem;
   }
 
   .hero-search-overlap--title {
-    margin-top: -4rem;
+    margin-top: -4.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-search-overlap--banner {
+    margin-top: -6.5rem;
   }
 }
 

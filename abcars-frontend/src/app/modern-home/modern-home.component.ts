@@ -102,13 +102,29 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
   private readonly locationsMaxPages = 25;
   private locationsRequestSeq = 0;
 
-  // Hero: última URL remota en localStorage → pinta al instante (HTTP cache del navegador); sin caché → default ya, sin bloque negro
-  heroImagePath: string = 'assets/images/bg_hero.jpg';
+  // Hero: desktop y móvil (localStorage v2); sin caché → default con título
+  readonly defaultHeroImage = 'assets/images/bg_hero.jpg';
+  heroImagePathDesktop: string = this.defaultHeroImage;
+  heroImagePathMobile: string = this.defaultHeroImage;
   showHeroText: boolean = true;
   /** Tras init siempre true (default o URL en caché). */
   heroBannerReady = false;
   private heroBannerLoadGen = 0;
-  private readonly heroBannerStorageKey = 'abcars_hero_main_banner_v1';
+  private readonly heroBannerStorageKey = 'abcars_hero_main_banner_v2';
+  private readonly heroBannerStorageKeyLegacy = 'abcars_hero_main_banner_v1';
+
+  get heroBannerMobileUrl(): string {
+    return this.pickHeroUrl(this.heroImagePathMobile, this.heroImagePathDesktop);
+  }
+
+  get heroBannerDesktopUrl(): string {
+    return this.pickHeroUrl(this.heroImagePathDesktop, this.heroImagePathMobile);
+  }
+
+  /** Fondo del hero con título (solo default). */
+  get heroImagePath(): string {
+    return this.defaultHeroImage;
+  }
 
   // Filtros rápidos
   quickFilters: QuickFilter[] = [
@@ -275,49 +291,102 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
         if (gen !== this.heroBannerLoadGen) {
           return;
         }
-        const url = (resp?.data?.image_path || '').trim();
+        const desktop = this.normalizeBannerUrl(
+          resp?.data?.image_path_desktop || resp?.data?.image_path || '',
+        );
+        const mobile = this.normalizeBannerUrl(resp?.data?.image_path_mobile || '');
 
-        if (!url || !this.isPersistableBannerImageUrl(url)) {
+        if (!desktop && !mobile) {
           this.clearHeroBannerStorage();
           this.applyDefaultHeroBanner();
           return;
         }
 
-        if (this.heroImagePath === url && this.heroBannerReady && !this.showHeroText) {
-          this.persistHeroBannerUrl(url);
+        const sameAsCached =
+          this.heroBannerReady &&
+          !this.showHeroText &&
+          desktop === this.heroImagePathDesktop &&
+          mobile === this.heroImagePathMobile;
+
+        if (sameAsCached) {
+          this.persistHeroBannerUrls(desktop, mobile);
           return;
         }
 
-        const img = new Image();
-        img.onload = () => {
-          if (gen !== this.heroBannerLoadGen) {
-            return;
-          }
-          this.heroImagePath = url;
-          this.showHeroText = false;
-          this.heroBannerReady = true;
-          this.persistHeroBannerUrl(url);
-        };
-        img.onerror = () => {
-          if (gen !== this.heroBannerLoadGen) {
-            return;
-          }
-          this.clearHeroBannerStorage();
-          this.applyDefaultHeroBanner();
-        };
-        img.src = url;
+        this.preloadHeroBannerUrls(desktop, mobile, gen);
       },
       error: (error) => {
         if (gen !== this.heroBannerLoadGen) {
           return;
         }
         console.warn('Error al cargar el banner principal, usando imagen por defecto:', error);
-        if (this.heroBannerReady && !this.showHeroText && this.isPersistableBannerImageUrl(this.heroImagePath)) {
+        if (
+          this.heroBannerReady &&
+          !this.showHeroText &&
+          (this.isPersistableBannerImageUrl(this.heroImagePathDesktop) ||
+            this.isPersistableBannerImageUrl(this.heroImagePathMobile))
+        ) {
           return;
         }
         this.clearHeroBannerStorage();
         this.applyDefaultHeroBanner();
+      },
+    });
+  }
+
+  private normalizeBannerUrl(url: string): string {
+    const u = (url || '').trim();
+    return u && this.isPersistableBannerImageUrl(u) ? u : '';
+  }
+
+  private pickHeroUrl(primary: string, fallback: string): string {
+    if (this.isPersistableBannerImageUrl(primary)) {
+      return primary;
+    }
+    if (this.isPersistableBannerImageUrl(fallback)) {
+      return fallback;
+    }
+    return this.defaultHeroImage;
+  }
+
+  private preloadHeroBannerUrls(desktop: string, mobile: string, gen: number): void {
+    const urls = [desktop, mobile].filter((u) => !!u);
+    if (!urls.length) {
+      this.applyDefaultHeroBanner();
+      return;
+    }
+
+    let pending = urls.length;
+    let anyOk = false;
+
+    const done = (ok: boolean) => {
+      if (ok) {
+        anyOk = true;
       }
+      pending--;
+      if (pending > 0) {
+        return;
+      }
+      if (gen !== this.heroBannerLoadGen) {
+        return;
+      }
+      if (!anyOk) {
+        this.clearHeroBannerStorage();
+        this.applyDefaultHeroBanner();
+        return;
+      }
+      this.heroImagePathDesktop = desktop || mobile;
+      this.heroImagePathMobile = mobile || desktop;
+      this.showHeroText = false;
+      this.heroBannerReady = true;
+      this.persistHeroBannerUrls(desktop, mobile);
+    };
+
+    urls.forEach((url) => {
+      const img = new Image();
+      img.onload = () => done(true);
+      img.onerror = () => done(false);
+      img.src = url;
     });
   }
 
@@ -326,17 +395,25 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
       return;
     }
     try {
-      const raw = localStorage.getItem(this.heroBannerStorageKey);
+      const raw =
+        localStorage.getItem(this.heroBannerStorageKey) ||
+        localStorage.getItem(this.heroBannerStorageKeyLegacy);
       if (!raw) {
         return;
       }
-      const parsed = JSON.parse(raw) as { url?: string };
-      const url = (parsed?.url || '').trim();
-      if (!url || !this.isPersistableBannerImageUrl(url)) {
+      const parsed = JSON.parse(raw) as {
+        url?: string;
+        desktop?: string;
+        mobile?: string;
+      };
+      const desktop = this.normalizeBannerUrl(parsed?.desktop || parsed?.url || '');
+      const mobile = this.normalizeBannerUrl(parsed?.mobile || parsed?.url || '');
+      if (!desktop && !mobile) {
         this.clearHeroBannerStorage();
         return;
       }
-      this.heroImagePath = url;
+      this.heroImagePathDesktop = desktop || mobile;
+      this.heroImagePathMobile = mobile || desktop;
       this.showHeroText = false;
       this.heroBannerReady = true;
     } catch {
@@ -344,12 +421,25 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  private persistHeroBannerUrl(url: string): void {
-    if (typeof localStorage === 'undefined' || !this.isPersistableBannerImageUrl(url)) {
+  private persistHeroBannerUrls(desktop: string, mobile: string): void {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+    const payload: { desktop?: string; mobile?: string; savedAt: number } = {
+      savedAt: Date.now(),
+    };
+    if (this.isPersistableBannerImageUrl(desktop)) {
+      payload.desktop = desktop;
+    }
+    if (this.isPersistableBannerImageUrl(mobile)) {
+      payload.mobile = mobile;
+    }
+    if (!payload.desktop && !payload.mobile) {
       return;
     }
     try {
-      localStorage.setItem(this.heroBannerStorageKey, JSON.stringify({ url, savedAt: Date.now() }));
+      localStorage.setItem(this.heroBannerStorageKey, JSON.stringify(payload));
+      localStorage.removeItem(this.heroBannerStorageKeyLegacy);
     } catch {
       /* quota / privado */
     }
@@ -361,6 +451,7 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
     }
     try {
       localStorage.removeItem(this.heroBannerStorageKey);
+      localStorage.removeItem(this.heroBannerStorageKeyLegacy);
     } catch {
       /* ignore */
     }
@@ -379,7 +470,8 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
   }
 
   private applyDefaultHeroBanner(): void {
-    this.heroImagePath = 'assets/images/bg_hero.jpg';
+    this.heroImagePathDesktop = this.defaultHeroImage;
+    this.heroImagePathMobile = this.defaultHeroImage;
     this.showHeroText = true;
     this.heroBannerReady = true;
   }

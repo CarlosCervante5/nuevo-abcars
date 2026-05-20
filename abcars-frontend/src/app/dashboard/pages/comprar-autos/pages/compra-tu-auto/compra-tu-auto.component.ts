@@ -200,7 +200,8 @@ export class CompraTuAutoComponent implements OnInit {
     this._compraTuAutoService.loadMainBanner('Imagen banner principal')
     .subscribe({
       next: ( resp ) => {
-        this.image_path = resp.data.image_path;
+        this.image_path =
+          resp.data.image_path_desktop || resp.data.image_path || resp.data.image_path_mobile || '';
       }
     });
     

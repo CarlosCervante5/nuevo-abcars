@@ -1,27 +1,34 @@
 import { Component, Optional, type OnInit } from '@angular/core';
 import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { Router } from '@angular/router';
+import { CompraTuAutoService } from '@services/compra-tu-auto.service';
 import { LoadBannerImageService } from '@services/load-banner-image.service';
+import { MainBannerVariant } from '@interfaces/loadMainBanner.interfaces';
 import Swal from 'sweetalert2';
 
 interface Result {
   reload: boolean;
 }
+
 @Component({
   selector: 'app-main-banner',
   templateUrl: './main-banner.component.html',
   styleUrl: './main-banner.component.css',
-  standalone: false
+  standalone: false,
 })
 export class MainBannerComponent implements OnInit {
-  files: File[] = [];
-  disabled: Boolean = true;
-  loading: Boolean = false;
-  result: Result = {
-    reload: false
-  };
+  desktopFile: File | null = null;
+  mobileFile: File | null = null;
+  desktopDisabled = true;
+  mobileDisabled = true;
+  desktopLoading = false;
+  mobileLoading = false;
 
-  /** true cuando se abrió desde MatBottomSheet (marketing). */
+  previewDesktop: string | null = null;
+  previewMobile: string | null = null;
+
+  result: Result = { reload: false };
+
   get isInBottomSheet(): boolean {
     return this._bottomSheetRef != null;
   }
@@ -29,69 +36,106 @@ export class MainBannerComponent implements OnInit {
   constructor(
     @Optional() private _bottomSheetRef: MatBottomSheetRef<MainBannerComponent> | null,
     private _loadBannerService: LoadBannerImageService,
-    private _router: Router
+    private _compraTuAutoService: CompraTuAutoService,
+    private _router: Router,
   ) {}
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.loadCurrentBanners();
+  }
 
-  assignImage( event: Event) {
+  loadCurrentBanners(): void {
+    this._compraTuAutoService.loadMainBanner('Imagen banner principal').subscribe({
+      next: (resp) => {
+        const d = (resp?.data?.image_path_desktop || resp?.data?.image_path || '').trim();
+        const m = (resp?.data?.image_path_mobile || '').trim();
+        this.previewDesktop = d || null;
+        this.previewMobile = m || null;
+      },
+      error: () => {
+        this.previewDesktop = null;
+        this.previewMobile = null;
+      },
+    });
+  }
+
+  assignImage(event: Event, variant: MainBannerVariant): void {
     const element = event.currentTarget as HTMLInputElement;
-    let fileList: FileList | null = element.files;
-    if (fileList) {
-      this.files = Array.from(fileList);
-      if (this.files.length > 0) {
-        this.disabled = false;
-      }else{
-        this.disabled = true;
-      }
+    const fileList = element.files;
+    if (!fileList?.length) {
+      return;
+    }
+    const file = fileList[0];
+    if (variant === 'desktop') {
+      this.desktopFile = file;
+      this.desktopDisabled = false;
+    } else {
+      this.mobileFile = file;
+      this.mobileDisabled = false;
     }
   }
 
-  uploadImages(){
-    this.disabled = true;
-    this.loading = true;
-    // Swal.fire({
-    //   title: 'Procesando...',
-    //   allowOutsideClick: false
-    // });
-    // const formData = new FormData();
-    // formData.append('image', this.files[0]);
-    
-    this._loadBannerService.setBannerImage(this.files).subscribe({
+  upload(variant: MainBannerVariant): void {
+    const file = variant === 'desktop' ? this.desktopFile : this.mobileFile;
+    if (!file) {
+      return;
+    }
+
+    if (variant === 'desktop') {
+      this.desktopLoading = true;
+      this.desktopDisabled = true;
+    } else {
+      this.mobileLoading = true;
+      this.mobileDisabled = true;
+    }
+
+    this._loadBannerService.setBannerImage([file], variant).subscribe({
       next: () => {
         Swal.fire({
           icon: 'success',
           title: 'Listo',
-          text: 'El banner del inicio se actualizó correctamente.',
-          showConfirmButton: true,
+          text:
+            variant === 'mobile'
+              ? 'Banner móvil del inicio actualizado.'
+              : 'Banner escritorio del inicio actualizado.',
           confirmButtonColor: '#008bcc',
-          timer: 3500
+          timer: 3500,
         });
-        this.loading = false;
-        this.files = [];
-        this.disabled = true;
+        if (variant === 'desktop') {
+          this.desktopFile = null;
+          this.desktopLoading = false;
+          this.desktopDisabled = true;
+        } else {
+          this.mobileFile = null;
+          this.mobileLoading = false;
+          this.mobileDisabled = true;
+        }
+        this.loadCurrentBanners();
         this._bottomSheetRef?.dismiss(this.result);
       },
       error: (err) => {
-        console.log('Hubo un error', err);
-        this.loading = false;
-        this.disabled = this.files.length === 0;
+        if (variant === 'desktop') {
+          this.desktopLoading = false;
+          this.desktopDisabled = !this.desktopFile;
+        } else {
+          this.mobileLoading = false;
+          this.mobileDisabled = !this.mobileFile;
+        }
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: err?.error?.message || 'No se pudo subir la imagen.'
+          text: err?.error?.message || 'No se pudo subir la imagen.',
         });
         this._bottomSheetRef?.dismiss(this.result);
-      }
+      },
     });
-    
   }
 
-  close() {
+  close(): void {
     this._bottomSheetRef?.dismiss(this.result);
   }
 
-  goToPanel() {
+  goToPanel(): void {
     void this._router.navigate(['/admin/administrator']);
   }
 }

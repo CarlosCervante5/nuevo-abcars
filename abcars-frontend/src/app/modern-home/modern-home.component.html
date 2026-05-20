@@ -4,12 +4,25 @@
   <app-home-nav></app-home-nav>
 
   <!-- Hero: banner API = imagen ancho completo en móvil; default = fondo + título -->
-  <section class="relative w-full overflow-hidden bg-slate-900" *ngIf="heroBannerReady">
+  <section
+    class="relative w-full overflow-hidden"
+    [class.hero-banner-section]="heroBannerReady && !showHeroText"
+    [class.bg-white]="heroBannerReady && !showHeroText"
+    [class.bg-slate-900]="heroBannerReady && showHeroText"
+    *ngIf="heroBannerReady"
+  >
     <ng-container *ngIf="!showHeroText; else heroWithTitle">
       <img
-        [src]="heroImagePath"
+        [src]="heroBannerMobileUrl"
         alt="ABCars — promoción"
-        class="hero-banner-img block w-full"
+        class="hero-banner-img hero-banner-img--mobile w-full"
+        loading="eager"
+        fetchpriority="high"
+      />
+      <img
+        [src]="heroBannerDesktopUrl"
+        alt="ABCars — promoción"
+        class="hero-banner-img hero-banner-img--desktop w-full"
         loading="eager"
         fetchpriority="high"
       />

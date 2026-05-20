@@ -22,13 +22,12 @@ class MainBannerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            
             'begin_date' => 'required|max:255|string',
             'end_date' => 'required|max:255|string',
             'name' => 'required|max:255|string',
             'page_status' => 'required|max:255|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,pdf|max:5128'
-            
+            'variant' => 'nullable|in:desktop,mobile',
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:8192',
         ];
     }
 }
