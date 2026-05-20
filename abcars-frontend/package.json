@@ -6,7 +6,7 @@
   },
   "scripts": {
     "ng": "ng",
-    "start": "serve -s dist/abcars-frontend/browser -l ${PORT:-8080}",
+    "start": "serve -s dist/abcars-frontend/browser -l tcp://0.0.0.0:${PORT:-8080}",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
