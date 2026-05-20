@@ -3,24 +3,42 @@
   <!-- Header Superior -->
   <app-home-nav></app-home-nav>
 
-  <!-- Hero: URL en localStorage + HTTP cache del navegador = sin bloque negro; 1ª visita = default hasta API -->
-  <section
-    class="relative h-[500px] bg-center bg-no-repeat"
-    [ngClass]="showHeroText ? 'bg-cover' : 'bg-contain'"
-    [style.background-image]="showHeroText ? 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.4)), url(\'' + heroImagePath + '\')' : 'url(\'' + heroImagePath + '\')'"
-  >
-    <div *ngIf="!showHeroText" class="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/60 to-transparent z-[5] pointer-events-none" aria-hidden="true"></div>
-    <div class="relative z-10 flex flex-col justify-center h-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-8" *ngIf="showHeroText">
-        <h1 class="hero-title">
-          El Seminuevo que buscas<br>al precio que quieres
-        </h1>
+  <!-- Hero: banner API = imagen ancho completo en móvil; default = fondo + título -->
+  <section class="relative w-full overflow-hidden bg-slate-900" *ngIf="heroBannerReady">
+    <ng-container *ngIf="!showHeroText; else heroWithTitle">
+      <img
+        [src]="heroImagePath"
+        alt="ABCars — promoción"
+        class="hero-banner-img block w-full"
+        loading="eager"
+        fetchpriority="high"
+      />
+      <div
+        class="absolute inset-x-0 top-0 h-16 sm:h-24 bg-gradient-to-b from-black/55 to-transparent pointer-events-none"
+        aria-hidden="true"
+      ></div>
+    </ng-container>
+    <ng-template #heroWithTitle>
+      <div
+        class="hero-with-title relative bg-cover bg-center bg-no-repeat"
+        [style.background-image]="'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.4)), url(\'' + heroImagePath + '\')'"
+      >
+        <div class="relative z-10 flex flex-col justify-center h-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
+          <div class="text-center mb-4 sm:mb-8">
+            <h1 class="hero-title">
+              El Seminuevo que buscas<br>al precio que quieres
+            </h1>
+          </div>
+        </div>
       </div>
-    </div>
+    </ng-template>
   </section>
 
   <!-- Buscador Superpuesto -->
-  <div class="relative -mt-16 z-20 px-4 sm:px-6 lg:px-8">
+  <div
+    class="relative z-20 px-4 sm:px-6 lg:px-8 hero-search-overlap"
+    [ngClass]="showHeroText ? 'hero-search-overlap--title' : 'hero-search-overlap--banner'"
+  >
     <div class="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl p-4 border border-white/20 max-w-5xl mx-auto">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
         

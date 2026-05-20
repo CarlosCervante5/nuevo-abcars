@@ -42,6 +42,62 @@ html {
   background: #94a3b8;
 }
 
+/* Hero home: banner promocional (móvil) */
+.hero-banner-img {
+  height: clamp(200px, 52vw, 420px);
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (min-width: 768px) {
+  .hero-banner-img {
+    height: 380px;
+    object-fit: contain;
+    object-position: center top;
+    background: #0f172a;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-banner-img {
+    height: 500px;
+  }
+}
+
+.hero-with-title {
+  height: 280px;
+}
+
+@media (min-width: 640px) {
+  .hero-with-title {
+    height: 400px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-with-title {
+    height: 500px;
+  }
+}
+
+.hero-search-overlap--banner {
+  margin-top: -2.5rem;
+}
+
+.hero-search-overlap--title {
+  margin-top: -4rem;
+}
+
+@media (min-width: 768px) {
+  .hero-search-overlap--banner {
+    margin-top: -3.5rem;
+  }
+
+  .hero-search-overlap--title {
+    margin-top: -4rem;
+  }
+}
+
 /* Optimización para dispositivos móviles */
 @media (max-width: 768px) {
   .hero-content {
@@ -194,7 +250,7 @@ html {
 /* Título del hero */
 .hero-title {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 2.25rem !important; /* 36px */
+  font-size: 1.75rem !important; /* móvil */
   font-weight: 700 !important;
   line-height: 1.2 !important;
   letter-spacing: -0.02em !important;
