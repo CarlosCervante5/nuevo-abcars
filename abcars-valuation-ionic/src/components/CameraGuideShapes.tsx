@@ -230,8 +230,8 @@ export function CameraGuideDefs() {
         <stop offset="100%" stopColor="#0369a1" />
       </linearGradient>
       <linearGradient id={`${P}-fill`} x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stopColor="rgba(56, 189, 248, 0.22)" />
-        <stop offset="100%" stopColor="rgba(15, 23, 42, 0.45)" />
+        <stop offset="0%" stopColor="rgba(56, 189, 248, 0.14)" />
+        <stop offset="100%" stopColor="rgba(15, 23, 42, 0.28)" />
       </linearGradient>
     </defs>
   );

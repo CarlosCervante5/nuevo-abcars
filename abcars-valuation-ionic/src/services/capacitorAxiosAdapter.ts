@@ -119,7 +119,8 @@ export const capacitorHttpAdapter: AxiosAdapter = async (config) => {
 };
 
 export function attachNativeHttpAdapter(instance: ReturnType<typeof axios.create>): void {
-  if (Capacitor.isNativePlatform()) {
+  // HTTP nativo vía @capacitor-community/http: solo Android (SPM iOS no soporta el plugin mixto ObjC/Swift).
+  if (Capacitor.getPlatform() === 'android') {
     instance.defaults.adapter = capacitorHttpAdapter;
   }
 }

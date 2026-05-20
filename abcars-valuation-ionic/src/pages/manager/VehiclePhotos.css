@@ -57,6 +57,10 @@
   object-fit: cover;
 }
 
+.photo-image--preview {
+  cursor: pointer;
+}
+
 .photo-delete-btn {
   position: absolute;
   top: 8px;
@@ -67,12 +71,48 @@
   z-index: 10;
 }
 
+.photo-reorder-btns {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  z-index: 10;
+}
+
+.photo-reorder-btn {
+  --padding: 4px;
+  --background: rgba(255, 255, 255, 0.92);
+  margin: 0;
+  height: 28px;
+}
+
 .photo-ia-btn {
   position: absolute;
   bottom: 8px;
   left: 8px;
   --padding: 8px;
   z-index: 10;
+}
+
+.photo-item--processing .photo-image {
+  filter: brightness(0.82);
+}
+
+.photo-processing-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.38);
+  pointer-events: none;
+}
+
+.photo-processing-overlay ion-spinner {
+  transform: scale(1.35);
 }
 
 .ia-info-card {

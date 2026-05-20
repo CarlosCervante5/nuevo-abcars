@@ -101,22 +101,6 @@
   padding-top: 0;
 }
 
-.guide-placeholder {
-  width: 100%;
-  aspect-ratio: 1;
-  background: var(--ion-color-light);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px dashed var(--ion-color-medium);
-}
-
-.guide-icon {
-  font-size: 2.5rem;
-  opacity: 0.6;
-}
-
 .close-guide-button {
   margin-top: 24px;
   margin-bottom: 16px;
@@ -153,8 +137,5 @@
     font-size: 0.75rem;
   }
 
-  .guide-icon {
-    font-size: 2rem;
-  }
 }
 

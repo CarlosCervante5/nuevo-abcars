@@ -1,5 +1,7 @@
 # Documentación: módulo de edición de imágenes con IA (referencia para GrupoVecsa)
 
+> **Estado actual en ABCars:** ver el documento canónico [modulo-ia-imagenes-vehiculo.md](./modulo-ia-imagenes-vehiculo.md) (proxy servidor `studio-catalog/gemini/*`, app móvil Ionic, prompts en PHP). Este archivo se mantiene como guía de **portación** a GrupoVecsa.
+
 Este documento describe cómo está implementado en **ABCars** el flujo de **edición / reprocesamiento de imágenes de galería** con **Google Gemini (imagen)** y los elementos de soporte (proxy CORS, entorno, permisos). Sirve como guía para replicar o adaptar el módulo en **GrupoVecsa** u otro monorepo similar (Angular + Laravel).
 
 ---

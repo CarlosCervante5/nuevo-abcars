@@ -11,6 +11,13 @@
   --padding-bottom: 16px;
 }
 
+.photo-type-selector-hint {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--ion-color-medium-shade);
+}
+
 .type-category-filter {
   margin-bottom: 24px;
   --background: var(--ion-color-light);
@@ -37,6 +44,11 @@
 
 .photo-type-card ion-card-header {
   padding: 12px;
+  padding-bottom: 6px;
+}
+
+.photo-type-card ion-card-content {
+  padding: 0 10px 10px;
 }
 
 .photo-type-number {

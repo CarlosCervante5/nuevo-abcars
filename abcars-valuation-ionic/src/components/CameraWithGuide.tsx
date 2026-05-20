@@ -15,7 +15,7 @@ import { close, checkmark, camera, swapHorizontal } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { PhotoGuideType } from './PhotoTypeSelector';
 import PhotoTypeSelector from './PhotoTypeSelector';
-import { CameraGuideDefs, CameraGuideShape, CameraGuideThirdsGrid } from './CameraGuideShapes';
+import CameraGuideAssetOverlay from './CameraGuideAssetOverlay';
 import './CameraWithGuide.css';
 
 interface CameraImage {
@@ -316,57 +316,19 @@ const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
   };
 
   const renderGuide = () => {
-    const getGuideTitle = () => {
-      if (photoTitle) {
-        return photoTitle;
-      }
-      return `Guía: ${String(currentGuideType).replace(/_/g, ' ')}`;
-    };
-
-    const getGuideSubtitle = () => {
-      if (photoTitle) {
-        return `Encuadre: ${photoTitle}`;
-      }
-      return 'Mantén el horizonte estable y el sujeto dentro del contorno';
-    };
+    const guideTitle =
+      photoTitle || `Guía: ${String(currentGuideType).replace(/_/g, ' ')}`;
+    const guideSubtitle = photoTitle
+      ? 'Alinea el vehículo dentro del contorno'
+      : 'Mantén el horizonte estable y el sujeto dentro del encuadre';
 
     return (
-      <div 
-        className="camera-guide-overlay"
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '100%',
-          height: '100%',
-          maxWidth: '100%',
-          maxHeight: '100%',
-          aspectRatio: '4 / 3',
-          zIndex: 5,
-          pointerEvents: 'none',
-        }}
-      >
-        <svg
-          viewBox="0 0 800 600"
-          className="car-silhouette landscape-svg"
-          preserveAspectRatio="xMidYMid meet"
-          style={{
-            background: 'transparent',
-            width: '100%',
-            height: '100%',
-          }}
-        >
-          <CameraGuideDefs />
-          <CameraGuideThirdsGrid />
-          <CameraGuideShape type={currentGuideType || 'car'} />
-          <text x="400" y="48" textAnchor="middle" className="guide-title-text">
-            {getGuideTitle()}
-          </text>
-          <text x="400" y="78" textAnchor="middle" className="guide-subtitle-text">
-            {getGuideSubtitle()}
-          </text>
-        </svg>
+      <div className="camera-guide-overlay">
+        <div className="camera-guide-caption">
+          <p className="guide-title-text">{guideTitle}</p>
+          <p className="guide-subtitle-text">{guideSubtitle}</p>
+        </div>
+        <CameraGuideAssetOverlay type={currentGuideType || 'car'} />
       </div>
     );
   };
@@ -391,7 +353,7 @@ const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
             <div className="camera-guide-instructions">
               <IonIcon icon={camera} size="large" />
               <h3>Guía para Tomar la Foto</h3>
-              <p>Alinea el encuadre con la guía iluminada (4:3) para obtener la mejor foto</p>
+              <p>Alinea el encuadre con la ilustración de referencia (4:3)</p>
             </div>
             <div className="guide-preview-container">
               {renderGuide()}
@@ -406,7 +368,7 @@ const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
                 <IonIcon icon={camera} slot="start" />
                 {loading ? 'Abriendo cámara...' : 'Iniciar Vista Previa'}
               </IonButton>
-              <p className="guide-hint">La guía vectorial te ayuda a centrar el sujeto antes de abrir la cámara</p>
+              <p className="guide-hint">Revisa el ángulo en la ilustración antes de abrir la cámara</p>
             </div>
           </div>
         ) : !isPreviewMode ? (

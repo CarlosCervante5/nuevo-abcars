@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   IonContent,
   IonHeader,
@@ -12,6 +12,7 @@ import {
   IonCard,
   IonCardContent,
   IonLoading,
+  IonSpinner,
   IonToast,
   IonGrid,
   IonRow,
@@ -28,6 +29,8 @@ import {
   trashOutline,
   informationCircle,
   flashOutline,
+  chevronUpOutline,
+  chevronDownOutline,
 } from 'ionicons/icons';
 import { useParams } from 'react-router-dom';
 import { vehicleService } from '../../services/vehicleService';
@@ -38,7 +41,12 @@ import { fetchImageAsFile } from '../../utils/fetchImageAsFile';
 import CameraWithGuide from '../../components/CameraWithGuide';
 import PhotoGuideModal from '../../components/PhotoGuideModal';
 import PhotoTypeSelector, { PhotoGuideType } from '../../components/PhotoTypeSelector';
+import ImageLightbox from '../../components/ImageLightbox';
 import './VehiclePhotos.css';
+
+function galleryUrl(image: VehicleImage): string {
+  return image.service_image_url || image.image_path || '';
+}
 
 const VehiclePhotos: React.FC = () => {
   const { vehicleUuid } = useParams<{ vehicleUuid: string }>();
@@ -56,8 +64,29 @@ const VehiclePhotos: React.FC = () => {
   const [selectedPhotoTitle, setSelectedPhotoTitle] = useState<string>('');
   const [processNewWithAi, setProcessNewWithAi] = useState(false);
   const [geminiConfigured, setGeminiConfigured] = useState(false);
-  const [iaProgress, setIaProgress] = useState<{ cur: number; tot: number } | null>(null);
+  const [iaProgress, setIaProgress] = useState<{
+    cur: number;
+    tot: number;
+    step?: 'ia' | 'upload';
+  } | null>(null);
   const [processingImageUuid, setProcessingImageUuid] = useState<string | null>(null);
+  const [reordering, setReordering] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const galleryUrls = useMemo(
+    () => images.map(galleryUrl).filter((u) => Boolean(u)),
+    [images],
+  );
+
+  const openLightboxAt = useCallback(
+    (index: number) => {
+      if (galleryUrls.length === 0) return;
+      setLightboxIndex(Math.min(Math.max(0, index), galleryUrls.length - 1));
+      setLightboxOpen(true);
+    },
+    [galleryUrls.length],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -153,17 +182,24 @@ const VehiclePhotos: React.FC = () => {
       setUploading(true);
       setIaProgress(null);
 
-      let filesToSend = rawFiles;
       if (processNewWithAi) {
-        setIaProgress({ cur: 0, tot: rawFiles.length });
-        filesToSend = await geminiVehicleImageService.processFilesRecorteEmbellecer(
-          rawFiles,
-          (cur, tot) => setIaProgress({ cur, tot }),
-        );
+        const n = rawFiles.length;
+        for (let i = 0; i < n; i++) {
+          setIaProgress({ cur: i + 1, tot: n, step: 'ia' });
+          const processedBatch = await geminiVehicleImageService.processFilesRecorteEmbellecer([
+            rawFiles[i],
+          ]);
+          const processed = processedBatch[0];
+          if (!processed) {
+            throw new Error('La IA no devolvió imagen.');
+          }
+          setIaProgress({ cur: i + 1, tot: n, step: 'upload' });
+          await vehicleService.uploadVehicleImages(vehicleUuid, [processed]);
+        }
         setIaProgress(null);
+      } else {
+        await vehicleService.uploadVehicleImages(vehicleUuid, rawFiles);
       }
-
-      await vehicleService.uploadVehicleImages(vehicleUuid, filesToSend);
 
       setToastMessage(
         processNewWithAi ? 'Fotos procesadas con IA y subidas' : 'Fotos subidas correctamente',
@@ -249,14 +285,71 @@ const VehiclePhotos: React.FC = () => {
     }
   };
 
-  const loadingMessage =
-    iaProgress && iaProgress.tot > 0
-      ? `Procesando con IA… ${iaProgress.cur}/${iaProgress.tot}`
-      : uploading
-        ? 'Subiendo fotos…'
-        : 'Cargando fotos…';
+  const persistImageOrder = async (ordered: VehicleImage[]) => {
+    if (!vehicleUuid) return;
+    const imageOrder = ordered.map((img, i) => ({
+      uuid: img.uuid,
+      sort_id: i + 1,
+    }));
+    await vehicleService.updateImageOrder(vehicleUuid, imageOrder);
+  };
+
+  const handleMoveImage = async (index: number, delta: -1 | 1) => {
+    if (!vehicleUuid || reordering || uploading || busyExisting) return;
+    const target = index + delta;
+    if (target < 0 || target >= images.length) return;
+
+    const reordered = [...images];
+    const [moved] = reordered.splice(index, 1);
+    reordered.splice(target, 0, moved);
+    setImages(reordered);
+
+    try {
+      setReordering(true);
+      await persistImageOrder(reordered);
+      setToastMessage('Orden de fotos actualizado');
+      setShowToast(true);
+    } catch {
+      setToastMessage('No se pudo guardar el orden');
+      setShowToast(true);
+      await loadVehicle();
+    } finally {
+      setReordering(false);
+    }
+  };
 
   const busyExisting = Boolean(processingImageUuid);
+
+  /** Un solo overlay: carga inicial, subida, IA foto a foto y reprocesar una existente. */
+  const showBlockingOverlay = loading || uploading || busyExisting || reordering;
+
+  const blockingOverlayMessage = (() => {
+    if (busyExisting && loading) {
+      return 'Actualizando galería…';
+    }
+    if (busyExisting) {
+      return 'Descargando y procesando imagen con IA…';
+    }
+    if (uploading && iaProgress && iaProgress.tot > 0) {
+      if (iaProgress.cur <= 0) {
+        return 'Preparando procesamiento con IA…';
+      }
+      if (iaProgress.step === 'upload') {
+        return `Subiendo foto ${iaProgress.cur} de ${iaProgress.tot}…`;
+      }
+      return `IA: foto ${iaProgress.cur} de ${iaProgress.tot}…`;
+    }
+    if (reordering) {
+      return 'Guardando orden de fotos…';
+    }
+    if (uploading) {
+      return 'Subiendo fotos…';
+    }
+    if (loading) {
+      return 'Cargando fotos…';
+    }
+    return 'Procesando…';
+  })();
 
   return (
     <IonPage>
@@ -269,8 +362,6 @@ const VehiclePhotos: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen className="ion-padding">
-        <IonLoading isOpen={loading && !uploading} message="Cargando fotos..." />
-
         <div className="vehicle-photos-container">
           <h2 className="photos-section-title">
             {vehicle?.brand?.name} {vehicle?.model?.name}
@@ -281,12 +372,15 @@ const VehiclePhotos: React.FC = () => {
               <IonItem lines="none">
                 <IonToggle
                   checked={processNewWithAi}
-                  disabled={!geminiConfigured || uploading}
+                  disabled={!geminiConfigured || uploading || busyExisting}
                   onIonChange={(e) => setProcessNewWithAi(Boolean(e.detail.checked))}
                 >
                   <IonLabel>
                     <strong>IA antes de subir nuevas fotos</strong>
-                    <p>Ciclorama estudio ABCars con Gemini (una petición por foto).</p>
+                    <p>
+                      Ciclorama estudio ABCars con Gemini: cada foto se procesa y se sube de una en una (menos
+                      memoria y timeouts).
+                    </p>
                   </IonLabel>
                 </IonToggle>
               </IonItem>
@@ -303,22 +397,57 @@ const VehiclePhotos: React.FC = () => {
             <div className="existing-photos-section">
               <h3 className="photos-subtitle">Fotos existentes</h3>
               <p className="photos-hint-existing">
-                Rayo: reprocesar con IA y sustituir (usa proxy del servidor para CDN).
+                Flechas: cambiar orden. Rayo: reprocesar con IA (proxy CDN en servidor).
               </p>
               <IonGrid>
                 <IonRow>
                   {images.map((image, idx) => (
                     <IonCol size="6" sizeMd="4" key={image.uuid}>
-                      <div className="photo-item">
+                      <div
+                        className={`photo-item${
+                          processingImageUuid === image.uuid ? ' photo-item--processing' : ''
+                        }`}
+                      >
                         <img
                           src={image.service_image_url || image.image_path}
                           alt={`Foto ${image.sort_id}`}
-                          className="photo-image"
+                          className="photo-image photo-image--preview"
+                          onClick={() => openLightboxAt(idx)}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src =
                               'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2U1ZTdlOSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5Y2EzYWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4=';
                           }}
                         />
+                        {processingImageUuid === image.uuid && (
+                          <div className="photo-processing-overlay" aria-busy="true" aria-label="Procesando imagen">
+                            <IonSpinner name="crescent" color="light" />
+                          </div>
+                        )}
+                        <div className="photo-reorder-btns">
+                          <IonButton
+                            fill="clear"
+                            size="small"
+                            className="photo-reorder-btn"
+                            disabled={idx === 0 || reordering || uploading || busyExisting}
+                            onClick={() => handleMoveImage(idx, -1)}
+                          >
+                            <IonIcon icon={chevronUpOutline} slot="icon-only" />
+                          </IonButton>
+                          <IonButton
+                            fill="clear"
+                            size="small"
+                            className="photo-reorder-btn"
+                            disabled={
+                              idx >= images.length - 1 ||
+                              reordering ||
+                              uploading ||
+                              busyExisting
+                            }
+                            onClick={() => handleMoveImage(idx, 1)}
+                          >
+                            <IonIcon icon={chevronDownOutline} slot="icon-only" />
+                          </IonButton>
+                        </div>
                         <IonButton
                           fill="solid"
                           color="warning"
@@ -328,6 +457,7 @@ const VehiclePhotos: React.FC = () => {
                             !geminiConfigured ||
                             uploading ||
                             busyExisting ||
+                            reordering ||
                             processingImageUuid === image.uuid
                           }
                           onClick={() => handleProcessExistingWithAi(image, idx)}
@@ -370,7 +500,7 @@ const VehiclePhotos: React.FC = () => {
                 expand="block"
                 fill="outline"
                 onClick={handleTakePhoto}
-                disabled={uploading}
+                disabled={uploading || busyExisting}
               >
                 <IonIcon icon={cameraOutline} slot="start" />
                 Tomar foto
@@ -379,7 +509,7 @@ const VehiclePhotos: React.FC = () => {
                 expand="block"
                 fill="outline"
                 onClick={handleSelectFromGallery}
-                disabled={uploading}
+                disabled={uploading || busyExisting}
               >
                 <IonIcon icon={imageOutline} slot="start" />
                 Galería
@@ -404,7 +534,7 @@ const VehiclePhotos: React.FC = () => {
                             size="small"
                             onClick={() => handleRemoveNewImage(index)}
                             className="photo-delete-btn"
-                            disabled={uploading}
+                            disabled={uploading || busyExisting}
                           >
                             <IonIcon icon={trashOutline} />
                           </IonButton>
@@ -419,7 +549,7 @@ const VehiclePhotos: React.FC = () => {
                   fill="solid"
                   color="success"
                   onClick={handleUploadImages}
-                  disabled={uploading}
+                  disabled={uploading || busyExisting}
                   className="upload-button"
                 >
                   {uploading
@@ -435,7 +565,7 @@ const VehiclePhotos: React.FC = () => {
           </div>
         </div>
 
-        <IonLoading isOpen={uploading} message={loadingMessage} />
+        <IonLoading isOpen={showBlockingOverlay} message={blockingOverlayMessage} />
 
         <IonToast
           isOpen={showToast}
@@ -466,6 +596,14 @@ const VehiclePhotos: React.FC = () => {
         <PhotoGuideModal
           isOpen={showPhotoGuide}
           onClose={() => setShowPhotoGuide(false)}
+        />
+
+        <ImageLightbox
+          isOpen={lightboxOpen}
+          urls={galleryUrls}
+          initialIndex={lightboxIndex}
+          title="Foto"
+          onClose={() => setLightboxOpen(false)}
         />
       </IonContent>
     </IonPage>

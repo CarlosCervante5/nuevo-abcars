@@ -1,15 +1,36 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
 import { getApiBaseUrl } from '../config/apiBaseUrl';
 import { attachNativeHttpAdapter } from './capacitorAxiosAdapter';
 
 const API_BASE_URL = getApiBaseUrl();
 
+/** Sin esto, el default `Content-Type: application/json` rompe multipart y Laravel no ve `images.*`. */
+function isFormDataPayload(data: unknown): boolean {
+  if (typeof FormData === 'undefined' || data == null) return false;
+  if (data instanceof FormData) return true;
+  const name = (data as { constructor?: { name?: string } }).constructor?.name;
+  return name === 'FormData';
+}
+
+function stripContentTypeForMultipart(config: InternalAxiosRequestConfig): void {
+  if (!isFormDataPayload(config.data)) return;
+  const h = config.headers;
+  if (!h) return;
+  if (typeof (h as { delete?: (key: string) => void }).delete === 'function') {
+    (h as { delete: (key: string) => void }).delete('Content-Type');
+    (h as { delete: (key: string) => void }).delete('content-type');
+    return;
+  }
+  const plain = h as Record<string, unknown>;
+  delete plain['Content-Type'];
+  delete plain['content-type'];
+}
+
 class ApiService {
   private api: AxiosInstance;
 
   constructor() {
-    // Solo loguear una vez al inicializar
-    if (!(window as any).__API_SERVICE_INITIALIZED__) {
+    if (import.meta.env.DEV && !(window as any).__API_SERVICE_INITIALIZED__) {
       console.log('API Service initialized with baseURL:', API_BASE_URL);
       (window as any).__API_SERVICE_INITIALIZED__ = true;
     }
@@ -26,6 +47,8 @@ class ApiService {
     // Interceptor para agregar token (no enviar Bearer en login/registro: token viejo puede interferir)
     this.api.interceptors.request.use(
       (config) => {
+        stripContentTypeForMultipart(config);
+
         const rel = (config.url || '').replace(/^\//, '');
         const skipBearer =
           rel.startsWith('auth/login') ||
@@ -60,18 +83,20 @@ class ApiService {
           baseURL: error.config?.baseURL,
           fullUrl: error.config ? `${error.config.baseURL}${error.config.url}` : 'N/A'
         };
-        console.error('API Error:', JSON.stringify(errorInfo, null, 2));
-        console.error('Full error:', error);
-        
+        if (import.meta.env.DEV) {
+          console.error('API Error:', JSON.stringify(errorInfo, null, 2));
+        }
+
         if (error.response?.status === 401) {
-          console.warn('Token inválido o expirado. Limpiando token...');
+          if (import.meta.env.DEV) {
+            console.warn('Token inválido o expirado. Limpiando token...');
+          }
           this.clearToken();
           // Limpiar también el usuario
           localStorage.removeItem('user');
           // Redirigir al login después de un breve delay para permitir que el error se propague
           setTimeout(() => {
             if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-              console.log('Redirigiendo al login por token inválido');
               window.location.href = '/login';
             }
           }, 100);

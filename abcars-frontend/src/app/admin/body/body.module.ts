@@ -7,8 +7,6 @@ import { BodyRoutingModule } from './body-routing.module';
 import { AdminModule } from '../admin.module';
 import { AngularMaterialModule } from 'src/app/angular-material/angular-material.module';
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
-import { BodyImagenStudioComponent } from './pages/body-imagen-studio/body-imagen-studio.component';
-
 import { BodyDashboardComponent } from './pages/dashboard/body-dashboard.component';
 import { BodyHypOrdersListComponent } from './pages/body-hyp-orders-list/body-hyp-orders-list.component';
 import { BodyHypOrderDialogComponent } from './components/body-hyp-order-dialog/body-hyp-order-dialog.component';
@@ -23,7 +21,6 @@ import { BodyHypOrderDialogComponent } from './components/body-hyp-order-dialog/
     ReactiveFormsModule,
     RouterModule,
     NewNavComponent,
-    BodyImagenStudioComponent,
   ],
 })
 export class BodyModule {}

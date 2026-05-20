@@ -1,4 +1,7 @@
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 import { environment } from '@environments/environment';
 import {
   PROMPT_HYP_OPACA,
@@ -39,6 +42,7 @@ type GenResponse = {
 };
 
 const ATTEMPT_TIMEOUT_MS = 180_000;
+const SERVER_GENERATE_RECORTE_TIMEOUT_MS = 200_000;
 const MAX_FULL_ROUNDS = 3;
 
 function sleep(ms: number): Promise<void> {
@@ -63,10 +67,63 @@ function isRetriableNetworkError(e: unknown): boolean {
   return false;
 }
 
+type GeminiCapabilitiesResponse = {
+  status?: number;
+  data?: { server_gemini?: boolean | string | number };
+  server_gemini?: boolean | string | number;
+};
+
 @Injectable({ providedIn: 'root' })
 export class GeminiVehicleImageService {
+  private serverGeminiAvailable = false;
+
+  constructor(private readonly http: HttpClient) {}
+
   isConfigured(): boolean {
-    return Boolean(environment.geminiApiKey?.trim());
+    return Boolean(environment.geminiApiKey?.trim()) || this.serverGeminiAvailable;
+  }
+
+  /** Consulta GEMINI_API_KEY en Laravel (misma lógica que la app móvil). */
+  async refreshGenerationAvailability(): Promise<boolean> {
+    if (environment.geminiApiKey?.trim()) {
+      this.serverGeminiAvailable = false;
+      return true;
+    }
+    try {
+      const raw = await firstValueFrom(
+        this.http.get<GeminiCapabilitiesResponse>(
+          `${environment.baseUrl}/api/studio-catalog/gemini/capabilities`,
+          { headers: this.authHeaders() },
+        ),
+      );
+      this.serverGeminiAvailable = this.parseServerGeminiFlag(raw);
+      return this.isConfigured();
+    } catch {
+      this.serverGeminiAvailable = false;
+      return false;
+    }
+  }
+
+  private authHeaders(): HttpHeaders {
+    const token = localStorage.getItem('user_token') ?? '';
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+    });
+  }
+
+  private parseServerGeminiFlag(raw: GeminiCapabilitiesResponse): boolean {
+    const v =
+      raw?.data?.server_gemini ??
+      raw?.server_gemini;
+    if (v === true || v === 1) {
+      return true;
+    }
+    if (typeof v === 'string') {
+      const s = v.toLowerCase();
+      return s === 'true' || s === '1' || s === 'yes';
+    }
+    return false;
   }
 
   /**
@@ -100,22 +157,59 @@ export class GeminiVehicleImageService {
     files: File[],
     onProgress?: (index: number, total: number) => void,
   ): Promise<File[]> {
-    if (!this.isConfigured()) {
-      throw new Error('Falta geminiApiKey en environment.');
+    const useClient = Boolean(environment.geminiApiKey?.trim());
+    const useServer =
+      !useClient &&
+      (this.serverGeminiAvailable || (await this.refreshGenerationAvailability()));
+    if (!useClient && !useServer) {
+      throw new Error(
+        'IA no disponible. Configura geminiApiKey en environment o GEMINI_API_KEY en el backend.',
+      );
     }
-    const promptText = `${PROMPT_RECORTE.trim()}\n\n${STUDIO_RECORTE_SUFFIX}`;
+    const promptText = useClient
+      ? `${PROMPT_RECORTE.trim()}\n\n${STUDIO_RECORTE_SUFFIX}`
+      : '';
     const out: File[] = [];
     const n = files.length;
     for (let i = 0; i < n; i++) {
       onProgress?.(i + 1, n);
-      out.push(
-        await this.generateTransformedFile(files[i], promptText, {
-          aspectRatio: '4:3',
-          imageSize: '2K',
-        }, false),
-      );
+      if (useClient) {
+        out.push(
+          await this.generateTransformedFile(files[i], promptText, {
+            aspectRatio: '4:3',
+            imageSize: '2K',
+          }, false),
+        );
+      } else {
+        out.push(await this.generateRecorteViaServer(files[i]));
+      }
     }
     return out;
+  }
+
+  private async generateRecorteViaServer(file: File): Promise<File> {
+    const { mime, base64 } = await this.fileToBase64(file);
+    const raw = await firstValueFrom(
+      this.http
+        .post<{
+          status?: number;
+          message?: string;
+          data?: { mime?: string; base64?: string };
+        }>(
+          `${environment.baseUrl}/api/studio-catalog/gemini/generate-recorte`,
+          { mime, image_base64: base64 },
+          { headers: this.authHeaders().set('Content-Type', 'application/json') },
+        )
+        .pipe(timeout(SERVER_GENERATE_RECORTE_TIMEOUT_MS)),
+    );
+    if (Number(raw?.status) !== 200 || !raw?.data?.base64) {
+      throw new Error(raw?.message || 'Error al generar imagen en el servidor.');
+    }
+    const outMime = raw.data.mime || 'image/png';
+    return await this.dataUrlToFile(
+      `data:${outMime};base64,${raw.data.base64}`,
+      file.name,
+    );
   }
 
   private generateContentUrl(): string {

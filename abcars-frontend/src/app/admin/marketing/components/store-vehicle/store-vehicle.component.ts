@@ -122,6 +122,9 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.InitForm();
     this.geminiAiConfigured = this._geminiVehicleImage.isConfigured();
+    void this._geminiVehicleImage.refreshGenerationAvailability().then((ok) => {
+      this.geminiAiConfigured = ok;
+    });
     this.queueVehicleIdentity$.next(this.createdUuid);
 
     this._imageAiQueue.vehicleBatchFinished$

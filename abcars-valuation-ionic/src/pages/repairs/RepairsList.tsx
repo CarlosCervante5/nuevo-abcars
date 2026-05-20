@@ -20,7 +20,7 @@ import {
   IonButtons,
   IonTextarea,
 } from '@ionic/react';
-import { constructOutline } from 'ionicons/icons';
+import { constructOutline, trashOutline } from 'ionicons/icons';
 import { useParams } from 'react-router-dom';
 import { valuationService } from '../../services/valuationService';
 import { Repair } from '../../models';
@@ -35,6 +35,7 @@ const RepairsList: React.FC = () => {
   const [damageImage, setDamageImage] = useState<File | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [deletingUuid, setDeletingUuid] = useState<string | null>(null);
 
   useEffect(() => {
     if (valuationUuid) {
@@ -79,6 +80,22 @@ const RepairsList: React.FC = () => {
       setShowToast(true);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (repairUuid: string) => {
+    if (!window.confirm('¿Eliminar esta solicitud HyP?')) return;
+    try {
+      setDeletingUuid(repairUuid);
+      await valuationService.deleteBodywork(repairUuid);
+      setToastMessage('Solicitud HyP eliminada');
+      setShowToast(true);
+      await loadRepairs();
+    } catch {
+      setToastMessage('No se pudo eliminar la solicitud');
+      setShowToast(true);
+    } finally {
+      setDeletingUuid(null);
     }
   };
 
@@ -148,9 +165,20 @@ const RepairsList: React.FC = () => {
                       {repairs.map((repair) => (
                         <IonCard key={repair.uuid}>
                           <IonCardHeader>
-                          <IonCardTitle className="hyp-description">
-                            {repair.description}
-                          </IonCardTitle>
+                            <div className="hyp-card-header">
+                              <IonCardTitle className="hyp-description">
+                                {repair.description}
+                              </IonCardTitle>
+                              <IonButton
+                                fill="clear"
+                                color="danger"
+                                size="small"
+                                disabled={deletingUuid === repair.uuid}
+                                onClick={() => handleDelete(repair.uuid)}
+                              >
+                                <IonIcon icon={trashOutline} slot="icon-only" />
+                              </IonButton>
+                            </div>
                           </IonCardHeader>
                           {repair.image_path && (
                             <IonCardContent>

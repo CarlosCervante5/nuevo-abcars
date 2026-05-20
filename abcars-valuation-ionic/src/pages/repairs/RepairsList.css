@@ -95,6 +95,18 @@
   --color: var(--ion-color-danger);
 }
 
+.hyp-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.hyp-card-header .hyp-description {
+  flex: 1;
+}
+
 .hyp-description {
   font-size: 0.95rem;
   line-height: 1.25rem;

@@ -20,6 +20,8 @@ type GenResponse = {
 
 const ATTEMPT_TIMEOUT_MS = 180_000;
 const MAX_FULL_ROUNDS = 3;
+/** Debe ser ≥ tiempo de espera de Laravel a Gemini (`Http::timeout(180)`) + margen de red/JSON. */
+const SERVER_GENERATE_RECORTE_TIMEOUT_MS = 200_000;
 
 function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
@@ -293,10 +295,14 @@ async function fetchServerGeminiCapability(): Promise<boolean> {
 /** Generación vía Laravel (GEMINI_API_KEY en servidor); JSON, compatible con HTTP nativo en Android. */
 async function generateTransformedFileViaServer(file: File): Promise<File> {
   const { mime, base64 } = await fileToBase64(file);
-  const res = await api.post<unknown>('studio-catalog/gemini/generate-recorte', {
-    mime,
-    image_base64: base64,
-  });
+  const res = await api.post<unknown>(
+    'studio-catalog/gemini/generate-recorte',
+    {
+      mime,
+      image_base64: base64,
+    },
+    { timeout: SERVER_GENERATE_RECORTE_TIMEOUT_MS },
+  );
   const body = res.data as {
     status?: number;
     message?: string;

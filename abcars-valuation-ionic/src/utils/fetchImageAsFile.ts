@@ -46,10 +46,14 @@ export async function fetchImageAsFile(url: string, filename: string): Promise<F
   const useProxy = shouldUseApiImageProxy(resolved);
   const fetchUrl = useProxy ? buildProxyUrl(resolved) : resolved;
   const headers: Record<string, string> = {};
-  if (useProxy && typeof localStorage !== 'undefined') {
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
+  if (useProxy) {
+    // Laravel usa esto para devolver 401/403 JSON; sin él intentaba `route('login')` (inexistente) → 500.
+    headers.Accept = 'application/json';
+    if (typeof localStorage !== 'undefined') {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
     }
   }
 

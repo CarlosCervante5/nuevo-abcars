@@ -26,11 +26,6 @@ export class BodyDashboardComponent {
           icon: 'fi fi-rr-document',
           permalink: '/admin/body/ordenes',
         },
-        {
-          title: 'Imagen Studio',
-          icon: 'fi fi-rr-picture',
-          permalink: '/admin/body/imagen-studio',
-        },
       ],
     };
   }

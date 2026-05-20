@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   IonContent,
   IonHeader,
@@ -29,7 +29,17 @@ import { save, camera, trash } from 'ionicons/icons';
 import { useParams, useHistory } from 'react-router-dom';
 import { vehicleService } from '../../services/vehicleService';
 import { Vehicle, VehicleImage } from '../../models/Vehicle';
+import ImageLightbox from '../../components/ImageLightbox';
 import './VehicleDetail.css';
+
+function imageUrlFromRecord(image: VehicleImage): string {
+  return (
+    image.service_image_url ||
+    image.image_path ||
+    (image as { service_image_url?: string }).service_image_url ||
+    ''
+  );
+}
 
 const VehicleDetail: React.FC = () => {
   const { vehicleUuid } = useParams<{ vehicleUuid: string }>();
@@ -41,6 +51,19 @@ const VehicleDetail: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const galleryUrls = useMemo(
+    () => images.map(imageUrlFromRecord).filter((u) => Boolean(u)),
+    [images],
+  );
+
+  const openLightboxAt = useCallback((index: number) => {
+    if (galleryUrls.length === 0) return;
+    setLightboxIndex(Math.min(Math.max(0, index), galleryUrls.length - 1));
+    setLightboxOpen(true);
+  }, [galleryUrls.length]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -339,8 +362,8 @@ const VehicleDetail: React.FC = () => {
                   src={(vehicle.firstImage || (vehicle as any).first_image)?.service_image_url || (vehicle.firstImage || (vehicle as any).first_image)?.image_path}
                   alt={vehicle.name}
                   className="vehicle-main-image"
+                  onClick={() => openLightboxAt(0)}
                   onError={(e) => {
-                    // Si falla la carga, mostrar placeholder o ocultar
                     (e.target as HTMLImageElement).style.display = 'none';
                   }}
                 />
@@ -356,7 +379,8 @@ const VehicleDetail: React.FC = () => {
                 <IonGrid>
                   <IonRow>
                     {images.map((image, index) => {
-                      const imageUrl = image.service_image_url || image.image_path || (image as any).service_image_url || (image as any).image_path;
+                      const imageUrl = imageUrlFromRecord(image);
+                      const urlIndex = galleryUrls.indexOf(imageUrl);
                       return (
                         <IonCol size="6" sizeMd="4" sizeLg="3" key={image.uuid || `image-${index}`}>
                           <div className="gallery-item">
@@ -365,9 +389,8 @@ const VehicleDetail: React.FC = () => {
                               alt={`Imagen ${image.sort_id || index + 1}`}
                               className="gallery-image"
                               onClick={() => {
-                                // Abrir imagen en vista completa
-                                if (imageUrl) {
-                                  window.open(imageUrl, '_blank');
+                                if (imageUrl && urlIndex >= 0) {
+                                  openLightboxAt(urlIndex);
                                 }
                               }}
                               onError={(e) => {
@@ -500,6 +523,14 @@ const VehicleDetail: React.FC = () => {
             </div>
           </div>
         )}
+
+        <ImageLightbox
+          isOpen={lightboxOpen}
+          urls={galleryUrls}
+          initialIndex={lightboxIndex}
+          title="Galería"
+          onClose={() => setLightboxOpen(false)}
+        />
 
         <IonToast
           isOpen={showToast}

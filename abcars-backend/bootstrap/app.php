@@ -5,6 +5,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -28,5 +29,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('intelimotor:sync-scheduled')->everyMinute();
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Sin ruta web nombrada `login`, `AuthenticationException` intentaba `route('login')` y fallaba → 500 HTML.
+        // Todas las rutas en `routes/api.php` deben responder errores en JSON aunque `Accept` sea `*/*` (p. ej. fetch()).
+        $exceptions->shouldRenderJsonWhen(function (Request $request, \Throwable $e): bool {
+            return $request->is('api/*');
+        });
     })->create();

@@ -71,6 +71,10 @@
   cursor: pointer;
 }
 
+.gallery-image:active {
+  opacity: 0.92;
+}
+
 .no-images-message {
   text-align: center;
   padding: 24px 16px;

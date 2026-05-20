@@ -228,7 +228,12 @@ class ImageFetchProxyController extends Controller
 
     private function isAllowedHost(string $host): bool
     {
-        foreach (config('external_image_proxy.allowed_host_patterns', []) as $pattern) {
+        $patterns = config('external_image_proxy.allowed_host_patterns', []);
+        if (! is_array($patterns)) {
+            $patterns = [];
+        }
+
+        foreach ($patterns as $pattern) {
             $pattern = trim((string) $pattern);
             if ($pattern === '') {
                 continue;

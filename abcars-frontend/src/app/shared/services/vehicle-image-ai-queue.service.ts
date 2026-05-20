@@ -80,9 +80,12 @@ export class VehicleImageAiQueueService {
       let filesToUpload = files;
 
       if (processWithAi) {
-        if (!this.gemini.isConfigured()) {
+        const iaOk =
+          this.gemini.isConfigured() ||
+          (await this.gemini.refreshGenerationAvailability());
+        if (!iaOk) {
           throw new Error(
-            'IA no disponible: configura geminiApiKey en environment.ts.',
+            'IA no disponible: geminiApiKey en environment o GEMINI_API_KEY en el backend.',
           );
         }
         filesToUpload = await this.gemini.processFilesRecorteEmbellecer(

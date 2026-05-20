@@ -1,12 +1,13 @@
 {
   "name": "abcars-valuation-ionic",
   "private": true,
-  "version": "1.0.7",
+  "version": "1.0.8",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "build:android": "npm run build && node scripts/verify-dist-api-url.mjs && npx cap sync android",
+    "build:ios": "npm run build && npx cap sync ios && node scripts/patch-ios-spm-without-http.mjs",
     "preview": "vite preview",
     "test.e2e": "cypress run",
     "test.unit": "vitest",

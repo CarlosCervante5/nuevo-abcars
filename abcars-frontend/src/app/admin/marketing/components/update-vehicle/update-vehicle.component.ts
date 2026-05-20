@@ -126,6 +126,9 @@ export class UpdateVehicleComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.geminiAiConfigured = this._geminiVehicleImage.isConfigured();
+    void this._geminiVehicleImage.refreshGenerationAvailability().then((ok) => {
+      this.geminiAiConfigured = ok;
+    });
     this.getVehicle();
 
     this._imageAiQueue.vehicleBatchFinished$

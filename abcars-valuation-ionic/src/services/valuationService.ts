@@ -216,6 +216,13 @@ export const valuationService = {
   },
 
   // Solicitud HyP (carrocería y pintura)
+  async deleteBodywork(repairUuid: string) {
+    const response = await api.post<ApiResponse<void>>('bodyworks/delete', {
+      repair_uuid: repairUuid,
+    });
+    return response.data;
+  },
+
   async createBodyworkRequest(description: string, imageFile: File, valuationUuid: string) {
     if (!connectivityService.isOnline()) {
       const imageBase64 = await fileToDataUrl(imageFile);
