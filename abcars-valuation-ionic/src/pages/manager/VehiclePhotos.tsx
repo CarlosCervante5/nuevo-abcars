@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   IonContent,
   IonHeader,
@@ -14,6 +14,7 @@ import {
   IonLoading,
   IonSpinner,
   IonToast,
+  IonAlert,
   IonGrid,
   IonRow,
   IonCol,
@@ -22,6 +23,7 @@ import {
   IonToggle,
   IonNote,
   useIonViewWillEnter,
+  useIonViewWillLeave,
 } from '@ionic/react';
 import {
   cameraOutline,
@@ -31,6 +33,7 @@ import {
   flashOutline,
   chevronUpOutline,
   chevronDownOutline,
+  layersOutline,
 } from 'ionicons/icons';
 import { useParams } from 'react-router-dom';
 import { vehicleService } from '../../services/vehicleService';
@@ -41,7 +44,15 @@ import { fetchImageAsFile } from '../../utils/fetchImageAsFile';
 import CameraWithGuide from '../../components/CameraWithGuide';
 import PhotoGuideModal from '../../components/PhotoGuideModal';
 import PhotoTypeSelector, { PhotoGuideType } from '../../components/PhotoTypeSelector';
+import { PHOTO_GUIDE_ENTRIES } from '../../config/photoGuideDefinitions';
 import ImageLightbox from '../../components/ImageLightbox';
+import BatchAiProcessModal from '../../components/BatchAiProcessModal';
+import VehicleIaBatchBanner from '../../components/VehicleIaBatchBanner';
+import {
+  vehicleImageAiBatchService,
+} from '../../services/vehicleImageAiBatchService';
+import type { BatchImageTarget } from '../../services/vehicleImageAiBatch.types';
+import { formatUploadError, logUploadDiagnostic } from '../../utils/apiErrorMessage';
 import './VehiclePhotos.css';
 
 function galleryUrl(image: VehicleImage): string {
@@ -62,6 +73,8 @@ const VehiclePhotos: React.FC = () => {
   const [showPhotoTypeSelector, setShowPhotoTypeSelector] = useState(false);
   const [selectedPhotoType, setSelectedPhotoType] = useState<PhotoGuideType | 'car'>('car');
   const [selectedPhotoTitle, setSelectedPhotoTitle] = useState<string>('');
+  const [captureSession, setCaptureSession] = useState<{ index: number } | null>(null);
+  const [sessionAdvanceKey, setSessionAdvanceKey] = useState(0);
   const [processNewWithAi, setProcessNewWithAi] = useState(false);
   const [geminiConfigured, setGeminiConfigured] = useState(false);
   const [iaProgress, setIaProgress] = useState<{
@@ -73,6 +86,8 @@ const VehiclePhotos: React.FC = () => {
   const [reordering, setReordering] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [showBatchAiModal, setShowBatchAiModal] = useState(false);
+  const [uploadErrorAlert, setUploadErrorAlert] = useState<string | null>(null);
 
   const galleryUrls = useMemo(
     () => images.map(galleryUrl).filter((u) => Boolean(u)),
@@ -100,8 +115,38 @@ const VehiclePhotos: React.FC = () => {
     };
   }, []);
 
+  const hadBatchActiveRef = useRef(false);
+
   useIonViewWillEnter(() => {
     geminiVehicleImageService.refreshGenerationAvailability().then(setGeminiConfigured);
+    hadBatchActiveRef.current = Boolean(
+      vehicleUuid && vehicleImageAiBatchService.getJobForVehicle(vehicleUuid),
+    );
+  });
+
+  useEffect(() => {
+    return vehicleImageAiBatchService.subscribe(() => {
+      if (!vehicleUuid) return;
+      const active = Boolean(vehicleImageAiBatchService.getJobForVehicle(vehicleUuid));
+      if (hadBatchActiveRef.current && !active) {
+        loadVehicle({ blockUi: false });
+        setNewImages([]);
+      }
+      hadBatchActiveRef.current = active;
+    });
+  }, [vehicleUuid]);
+
+  useIonViewWillLeave(() => {
+    setUploading(false);
+    setLoading(false);
+    setIaProgress(null);
+    setProcessingImageUuid(null);
+    setReordering(false);
+    setShowCameraGuide(false);
+    setShowPhotoTypeSelector(false);
+    setCaptureSession(null);
+    setSessionAdvanceKey(0);
+    setLightboxOpen(false);
   });
 
   useEffect(() => {
@@ -110,11 +155,15 @@ const VehiclePhotos: React.FC = () => {
     }
   }, [vehicleUuid]);
 
-  const loadVehicle = async () => {
+  const loadVehicle = async (options?: { blockUi?: boolean }) => {
     if (!vehicleUuid) return;
 
+    const blockUi = options?.blockUi !== false;
+
     try {
-      setLoading(true);
+      if (blockUi) {
+        setLoading(true);
+      }
       const response = await vehicleService.getVehicleDetail(vehicleUuid);
       if (response.status === 200 && response.data) {
         setVehicle(response.data);
@@ -122,28 +171,128 @@ const VehiclePhotos: React.FC = () => {
         setImages([...raw].sort((a, b) => Number(a.sort_id) - Number(b.sort_id)));
         geminiVehicleImageService.refreshGenerationAvailability().then(setGeminiConfigured);
       }
-    } catch {
-      setToastMessage('Error al cargar el vehículo');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : '';
+      const isNetwork =
+        msg.includes('Network Error') ||
+        msg.includes('ERR_NETWORK') ||
+        msg.toLowerCase().includes('network') ||
+        msg.includes('IO Error') ||
+        msg.includes('timeout');
+      setToastMessage(
+        isNetwork
+          ? 'Error de red al cargar fotos. Revisa internet y que la API esté disponible.'
+          : msg || 'Error al cargar el vehículo',
+      );
       setShowToast(true);
     } finally {
-      setLoading(false);
+      if (blockUi) {
+        setLoading(false);
+      }
     }
   };
 
+  const applyGuideEntry = (index: number) => {
+    const entry = PHOTO_GUIDE_ENTRIES[index];
+    if (!entry) return;
+    setSelectedPhotoType(entry.type);
+    setSelectedPhotoTitle(entry.title);
+  };
+
+  const endCaptureSession = (message?: string) => {
+    setCaptureSession(null);
+    setSessionAdvanceKey(0);
+    setShowCameraGuide(false);
+    setSelectedPhotoType('car');
+    setSelectedPhotoTitle('');
+    if (message) {
+      setToastMessage(message);
+      setShowToast(true);
+    }
+  };
+
+  const advanceCaptureSession = () => {
+    setSessionAdvanceKey((k) => k + 1);
+  };
+
   const handleTakePhoto = () => {
+    setCaptureSession({ index: 0 });
+    setSessionAdvanceKey(0);
+    applyGuideEntry(0);
+    setShowCameraGuide(true);
+  };
+
+  const handleTakeSinglePhoto = () => {
+    setCaptureSession(null);
+    setSessionAdvanceKey(0);
     setShowPhotoTypeSelector(true);
   };
 
   const handlePhotoTypeSelected = (type: PhotoGuideType, title: string) => {
+    setCaptureSession(null);
+    setSessionAdvanceKey(0);
     setSelectedPhotoType(type);
     setSelectedPhotoTitle(title);
     setShowCameraGuide(true);
   };
 
   const handlePhotoTaken = (image: CameraImage) => {
-    if (image && image.file) {
-      setNewImages((prev) => [...prev, image]);
+    const session = captureSession;
+    const entry = session ? PHOTO_GUIDE_ENTRIES[session.index] : null;
+
+    if (image?.file) {
+      const file =
+        entry != null
+          ? new File(
+              [image.file],
+              `photo_${entry.type}_${Date.now()}.jpg`,
+              { type: image.file.type || 'image/jpeg' },
+            )
+          : image.file;
+      setNewImages((prev) => [
+        ...prev,
+        {
+          ...image,
+          file,
+          guideType: entry?.type,
+          guideTitle: entry?.title,
+        },
+      ]);
     }
+
+    if (session) {
+      const nextIndex = session.index + 1;
+      if (nextIndex >= PHOTO_GUIDE_ENTRIES.length) {
+        endCaptureSession(
+          `Sesión completada: ${PHOTO_GUIDE_ENTRIES.length} fotos según la guía.`,
+        );
+        return;
+      }
+      setCaptureSession({ index: nextIndex });
+      applyGuideEntry(nextIndex);
+      advanceCaptureSession();
+      return;
+    }
+
+    setShowCameraGuide(false);
+    setSelectedPhotoType('car');
+    setSelectedPhotoTitle('');
+  };
+
+  const handleSkipCaptureStep = () => {
+    if (!captureSession) return;
+    const nextIndex = captureSession.index + 1;
+    if (nextIndex >= PHOTO_GUIDE_ENTRIES.length) {
+      endCaptureSession('Sesión terminada.');
+      return;
+    }
+    setCaptureSession({ index: nextIndex });
+    applyGuideEntry(nextIndex);
+    advanceCaptureSession();
+  };
+
+  const handleFinishCaptureSession = () => {
+    endCaptureSession('Sesión de fotos terminada. Puedes subir las fotos tomadas.');
   };
 
   const handleSelectFromGallery = async () => {
@@ -162,7 +311,13 @@ const VehiclePhotos: React.FC = () => {
   };
 
   const handleRemoveNewImage = (index: number) => {
-    setNewImages((prev) => prev.filter((_, i) => i !== index));
+    setNewImages((prev) => {
+      const removed = prev[index];
+      if (removed?.webPath?.startsWith('blob:')) {
+        URL.revokeObjectURL(removed.webPath);
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const handleUploadImages = async () => {
@@ -198,18 +353,35 @@ const VehiclePhotos: React.FC = () => {
         }
         setIaProgress(null);
       } else {
-        await vehicleService.uploadVehicleImages(vehicleUuid, rawFiles);
+        const n = rawFiles.length;
+        for (let i = 0; i < n; i++) {
+          setIaProgress({ cur: i + 1, tot: n, step: 'upload' });
+          await vehicleService.uploadVehicleImages(vehicleUuid, [rawFiles[i]]);
+        }
+        setIaProgress(null);
       }
 
+      setUploadErrorAlert(null);
       setToastMessage(
         processNewWithAi ? 'Fotos procesadas con IA y subidas' : 'Fotos subidas correctamente',
       );
       setShowToast(true);
       setNewImages([]);
-      await loadVehicle();
+      await loadVehicle({ blockUi: false });
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Error al procesar o subir fotos';
-      setToastMessage(msg);
+      const msg = formatUploadError(e, {
+        vehicleUuid: vehicleUuid ?? undefined,
+        photoTotal: rawFiles.length,
+        step: processNewWithAi ? 'ia' : 'upload',
+      });
+      logUploadDiagnostic('VehiclePhotos.handleUploadImages', {
+        vehicleUuid,
+        photoCount: rawFiles.length,
+        processNewWithAi,
+        message: msg,
+      });
+      setUploadErrorAlert(msg);
+      setToastMessage(msg.split('\n')[0] || 'Error al subir fotos');
       setShowToast(true);
     } finally {
       setUploading(false);
@@ -258,7 +430,7 @@ const VehiclePhotos: React.FC = () => {
       }
       setToastMessage('Imagen procesada con IA y actualizada');
       setShowToast(true);
-      await loadVehicle();
+      await loadVehicle({ blockUi: false });
     } catch (e: unknown) {
       const msg =
         e instanceof Error
@@ -278,7 +450,7 @@ const VehiclePhotos: React.FC = () => {
       await vehicleService.deleteVehicleImage(imageUuid);
       setToastMessage('Imagen eliminada correctamente');
       setShowToast(true);
-      await loadVehicle();
+      await loadVehicle({ blockUi: false });
     } catch {
       setToastMessage('Error al eliminar imagen');
       setShowToast(true);
@@ -312,16 +484,46 @@ const VehiclePhotos: React.FC = () => {
     } catch {
       setToastMessage('No se pudo guardar el orden');
       setShowToast(true);
-      await loadVehicle();
+      await loadVehicle({ blockUi: false });
     } finally {
       setReordering(false);
     }
   };
 
   const busyExisting = Boolean(processingImageUuid);
+  const vehicleLabel = `${vehicle?.brand?.name ?? ''} ${vehicle?.model?.name ?? ''}`.trim() || 'Vehículo';
 
-  /** Un solo overlay: carga inicial, subida, IA foto a foto y reprocesar una existente. */
-  const showBlockingOverlay = loading || uploading || busyExisting || reordering;
+  const handleStartBatchAi = (targets: BatchImageTarget[]) => {
+    if (!vehicleUuid || !targets.length) return;
+    vehicleImageAiBatchService.startBatch(vehicleUuid, vehicleLabel, targets);
+    setShowBatchAiModal(false);
+    setToastMessage(
+      `Procesamiento en segundo plano (${targets.length} foto${targets.length === 1 ? '' : 's'}). Puedes ir a la siguiente unidad.`,
+    );
+    setShowToast(true);
+    const newIndices = new Set(
+      targets
+        .filter((t) => t.kind === 'new')
+        .map((t) => Number(t.localId.replace('new_', ''))),
+    );
+    if (newIndices.size > 0) {
+      setNewImages((prev) => {
+        prev.forEach((img, i) => {
+          if (newIndices.has(i) && img.webPath?.startsWith('blob:')) {
+            URL.revokeObjectURL(img.webPath);
+          }
+        });
+        return prev.filter((_, i) => !newIndices.has(i));
+      });
+    }
+  };
+
+  /** Overlay solo en carga inicial (sin fotos aún), subida, IA o reordenar. */
+  const showBlockingOverlay =
+    (loading && images.length === 0 && !vehicle) ||
+    uploading ||
+    busyExisting ||
+    reordering;
 
   const blockingOverlayMessage = (() => {
     if (busyExisting && loading) {
@@ -363,9 +565,9 @@ const VehiclePhotos: React.FC = () => {
       </IonHeader>
       <IonContent fullscreen className="ion-padding">
         <div className="vehicle-photos-container">
-          <h2 className="photos-section-title">
-            {vehicle?.brand?.name} {vehicle?.model?.name}
-          </h2>
+          <h2 className="photos-section-title">{vehicleLabel}</h2>
+
+          <VehicleIaBatchBanner vehicleUuid={vehicleUuid} />
 
           <IonCard className="ia-info-card">
             <IonCardContent>
@@ -390,6 +592,18 @@ const VehiclePhotos: React.FC = () => {
                   fotos (crear/actualizar vehículo) y vuelve a abrir esta pantalla.
                 </IonNote>
               )}
+              {geminiConfigured && (images.length > 0 || newImages.length > 0) && (
+                <IonButton
+                  expand="block"
+                  color="warning"
+                  className="batch-ia-open-btn"
+                  disabled={uploading || busyExisting}
+                  onClick={() => setShowBatchAiModal(true)}
+                >
+                  <IonIcon icon={layersOutline} slot="start" />
+                  Procesar varias con IA (seleccionar)
+                </IonButton>
+              )}
             </IonCardContent>
           </IonCard>
 
@@ -397,7 +611,7 @@ const VehiclePhotos: React.FC = () => {
             <div className="existing-photos-section">
               <h3 className="photos-subtitle">Fotos existentes</h3>
               <p className="photos-hint-existing">
-                Flechas: cambiar orden. Rayo: reprocesar con IA (proxy CDN en servidor).
+                Flechas: orden. Rayo: una foto con IA. Varias a la vez: botón «Procesar varias con IA».
               </p>
               <IonGrid>
                 <IonRow>
@@ -503,7 +717,17 @@ const VehiclePhotos: React.FC = () => {
                 disabled={uploading || busyExisting}
               >
                 <IonIcon icon={cameraOutline} slot="start" />
-                Tomar foto
+                Tomar fotos (guía completa)
+              </IonButton>
+              <IonButton
+                expand="block"
+                fill="clear"
+                size="small"
+                onClick={handleTakeSinglePhoto}
+                disabled={uploading || busyExisting}
+                className="single-photo-button"
+              >
+                Una foto (elegir ángulo)
               </IonButton>
               <IonButton
                 expand="block"
@@ -565,14 +789,33 @@ const VehiclePhotos: React.FC = () => {
           </div>
         </div>
 
-        <IonLoading isOpen={showBlockingOverlay} message={blockingOverlayMessage} />
+        {showBlockingOverlay ? (
+          <IonLoading
+            key={`photos-busy-${blockingOverlayMessage}`}
+            isOpen
+            message={blockingOverlayMessage}
+          />
+        ) : null}
 
         <IonToast
           isOpen={showToast}
-          onDidDismiss={() => setShowToast(false)}
+          onDidDismiss={() => {
+            setShowToast(false);
+            if (!uploadErrorAlert) return;
+          }}
           message={toastMessage}
-          duration={4000}
+          duration={uploadErrorAlert ? 8000 : 4000}
           position="top"
+          color={uploadErrorAlert ? 'danger' : undefined}
+        />
+
+        <IonAlert
+          isOpen={uploadErrorAlert != null}
+          onDidDismiss={() => setUploadErrorAlert(null)}
+          header="No se pudieron subir las fotos"
+          message={uploadErrorAlert ?? ''}
+          buttons={['Entendido']}
+          cssClass="upload-error-alert"
         />
 
         <PhotoTypeSelector
@@ -584,13 +827,23 @@ const VehiclePhotos: React.FC = () => {
         <CameraWithGuide
           isOpen={showCameraGuide}
           onClose={() => {
-            setShowCameraGuide(false);
-            setSelectedPhotoType('car');
-            setSelectedPhotoTitle('');
+            if (captureSession) {
+              endCaptureSession();
+            } else {
+              setShowCameraGuide(false);
+              setSelectedPhotoType('car');
+              setSelectedPhotoTitle('');
+            }
           }}
           onPhotoTaken={handlePhotoTaken}
           guideType={selectedPhotoType}
           photoTitle={selectedPhotoTitle}
+          continueAfterCapture={captureSession != null}
+          sessionStep={captureSession ? captureSession.index + 1 : 0}
+          sessionTotal={captureSession ? PHOTO_GUIDE_ENTRIES.length : 0}
+          sessionAdvanceKey={sessionAdvanceKey}
+          onSkipStep={captureSession ? handleSkipCaptureStep : undefined}
+          onFinishSession={captureSession ? handleFinishCaptureSession : undefined}
         />
 
         <PhotoGuideModal
@@ -604,6 +857,15 @@ const VehiclePhotos: React.FC = () => {
           initialIndex={lightboxIndex}
           title="Foto"
           onClose={() => setLightboxOpen(false)}
+        />
+
+        <BatchAiProcessModal
+          isOpen={showBatchAiModal}
+          onClose={() => setShowBatchAiModal(false)}
+          vehicleLabel={vehicleLabel}
+          existingImages={images}
+          newImages={newImages}
+          onConfirmStart={handleStartBatchAi}
         />
       </IonContent>
     </IonPage>

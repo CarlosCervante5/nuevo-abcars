@@ -1,4 +1,7 @@
+import { Capacitor } from '@capacitor/core';
+import { Http } from '@capacitor-community/http';
 import { getApiOrigin } from '../config/apiBaseUrl';
+import { fileToBase64 } from './fileToBase64';
 
 /** URLs scheme-relative (`//host/path`) → https */
 function normalizeRemoteImageUrl(url: string): string {
@@ -35,8 +38,57 @@ function buildProxyUrl(remoteUrl: string): string {
   return `${getApiOrigin()}/media/fetch-image?url=${encodeURIComponent(remoteUrl)}`;
 }
 
+function authHeadersForProxy(): Record<string, string> {
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  if (typeof localStorage !== 'undefined') {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return headers;
+}
+
+function base64ToBlob(base64: string, contentType: string): Blob {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new Blob([bytes], { type: contentType || 'image/jpeg' });
+}
+
+async function fetchImageNative(fetchUrl: string, headers: Record<string, string>): Promise<Blob> {
+  const res = await Http.request({
+    method: 'GET',
+    url: fetchUrl,
+    headers,
+    params: {},
+    responseType: 'blob',
+    readTimeout: 120000,
+    connectTimeout: 60000,
+  });
+
+  if (res.status >= 400) {
+    throw new Error(`No se pudo descargar la imagen (HTTP ${res.status}).`);
+  }
+
+  const ct =
+    (res.headers['content-type'] as string) ||
+    (res.headers['Content-Type'] as string) ||
+    'image/jpeg';
+
+  if (typeof res.data === 'string') {
+    return base64ToBlob(res.data, ct);
+  }
+  if (res.data instanceof Blob) {
+    return res.data;
+  }
+  throw new Error('Respuesta de imagen no válida.');
+}
+
 /**
- * Descarga URL remota a File. CDN sin CORS usa proxy Laravel (/api/media/fetch-image) con Bearer auth_token.
+ * Descarga URL remota a File. En app nativa usa HTTP sin CORS; CDN usa proxy Laravel.
  */
 export async function fetchImageAsFile(url: string, filename: string): Promise<File> {
   const resolved = normalizeRemoteImageUrl(url);
@@ -47,29 +99,26 @@ export async function fetchImageAsFile(url: string, filename: string): Promise<F
   const fetchUrl = useProxy ? buildProxyUrl(resolved) : resolved;
   const headers: Record<string, string> = {};
   if (useProxy) {
-    // Laravel usa esto para devolver 401/403 JSON; sin él intentaba `route('login')` (inexistente) → 500.
-    headers.Accept = 'application/json';
-    if (typeof localStorage !== 'undefined') {
-      const token = localStorage.getItem('auth_token');
-      if (token) {
-        headers.Authorization = `Bearer ${token}`;
-      }
-    }
+    Object.assign(headers, authHeadersForProxy());
   }
 
-  const res = await fetch(fetchUrl, {
-    mode: 'cors',
-    credentials: 'omit',
-    headers: Object.keys(headers).length ? headers : undefined,
-  });
-  if (!res.ok) {
-    throw new Error(`No se pudo descargar la imagen (HTTP ${res.status}).`);
+  let blob: Blob;
+  if (Capacitor.isNativePlatform()) {
+    blob = await fetchImageNative(fetchUrl, headers);
+  } else {
+    const res = await fetch(fetchUrl, {
+      mode: 'cors',
+      credentials: 'omit',
+      headers: Object.keys(headers).length ? headers : undefined,
+    });
+    if (!res.ok) {
+      throw new Error(`No se pudo descargar la imagen (HTTP ${res.status}).`);
+    }
+    blob = await res.blob();
   }
-  const blob = await res.blob();
-  const type =
-    blob.type && blob.type.startsWith('image/') ? blob.type : 'image/jpeg';
+
+  const type = blob.type && blob.type.startsWith('image/') ? blob.type : 'image/jpeg';
   const base = filename.replace(/\.[^/.]+$/, '') || 'imagen';
-  const ext =
-    type === 'image/png' ? 'png' : type === 'image/webp' ? 'webp' : 'jpg';
+  const ext = type === 'image/png' ? 'png' : type === 'image/webp' ? 'webp' : 'jpg';
   return new File([blob], `${base}.${ext}`, { type });
 }

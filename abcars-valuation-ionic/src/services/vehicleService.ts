@@ -1,4 +1,8 @@
+import { Capacitor } from '@capacitor/core';
 import api from './api';
+import { formatUploadError, logUploadDiagnostic } from '../utils/apiErrorMessage';
+import { fileToBase64 } from '../utils/fileToBase64';
+import { prepareImageFileForUpload } from '../utils/prepareImageFileForUpload';
 import { ApiResponse } from '../models';
 import { Vehicle, VehicleSearchResponse, CreateVehicleRequest, UpdateVehicleRequest } from '../models/Vehicle';
 
@@ -95,10 +99,20 @@ export const vehicleService = {
 
   // Obtener detalle de vehículo
   async getVehicleDetail(vehicleUuid: string): Promise<ApiResponse<Vehicle>> {
-    const response = await api.post<ApiResponse<Vehicle>>('vehicles/detail', {
-      uuid: vehicleUuid, // El backend espera 'uuid', no 'vehicle_uuid'
-      relationship_names: ['brand', 'line', 'model', 'version', 'body', 'dealership', 'specification', 'images', 'firstImage', 'campaigns.promotions']
-    });
+    const response = await api.post<ApiResponse<Vehicle>>(
+      'vehicles/detail',
+      {
+        uuid: vehicleUuid,
+        relationship_names: [
+          'brand',
+          'model',
+          'images',
+          'firstImage',
+          'dealership',
+        ],
+      },
+      { timeout: 90000 },
+    );
     
     // Mapear first_image a firstImage y asegurar que images esté disponible
     if (response.data && response.data.data) {
@@ -151,16 +165,73 @@ export const vehicleService = {
     return response.data;
   },
 
-  // Subir imágenes del vehículo
+  // Subir imágenes del vehículo (una por petición: evita 413/timeout y encaja con HTTP nativo en Android)
   async uploadVehicleImages(vehicleUuid: string, images: File[]): Promise<ApiResponse<void>> {
-    const formData = new FormData();
-    formData.append('vehicle_uuid', vehicleUuid);
-    images.forEach((file) => {
-      formData.append('images[]', file);
-    });
+    if (images.length === 0) {
+      throw new Error('No hay imágenes para subir');
+    }
 
-    const response = await api.post<ApiResponse<void>>('vehicle_images', formData);
-    return response.data;
+    const prepared = await Promise.all(images.map((f) => prepareImageFileForUpload(f)));
+    let lastResponse: ApiResponse<void> | null = null;
+
+    for (let i = 0; i < prepared.length; i++) {
+      const file = prepared[i];
+      const ctx = {
+        vehicleUuid,
+        photoIndex: i + 1,
+        photoTotal: prepared.length,
+        fileName: file.name,
+        fileSizeKb: Math.round(file.size / 1024),
+        step: 'upload' as const,
+      };
+
+      try {
+        logUploadDiagnostic('uploadVehicleImages:start', {
+          ...ctx,
+          transport: Capacitor.isNativePlatform() ? 'base64+json' : 'multipart',
+        });
+
+        const response = Capacitor.isNativePlatform()
+          ? await api.post<ApiResponse<void>>(
+              'vehicle_images/upload_base64',
+              {
+                vehicle_uuid: vehicleUuid,
+                filename: file.name,
+                image_base64: await fileToBase64(file),
+              },
+              { timeout: 180000 },
+            )
+          : await (async () => {
+              const formData = new FormData();
+              formData.append('vehicle_uuid', vehicleUuid);
+              formData.append('images[]', file, file.name);
+              return api.post<ApiResponse<void>>('vehicle_images', formData, {
+                timeout: 180000,
+              });
+            })();
+        lastResponse = response.data;
+        const status = Number(response.data?.status ?? response.status);
+        logUploadDiagnostic('uploadVehicleImages:response', {
+          ...ctx,
+          httpStatus: response.status,
+          apiStatus: response.data?.status,
+          message: response.data?.message,
+        });
+        if (status >= 400) {
+          throw new Error(
+            response.data?.message || `El servidor rechazó la foto (código ${status})`,
+          );
+        }
+      } catch (e: unknown) {
+        logUploadDiagnostic('uploadVehicleImages:error', {
+          ...ctx,
+          detail: formatUploadError(e, ctx),
+        });
+        throw new Error(formatUploadError(e, ctx));
+      }
+    }
+
+    return lastResponse ?? { status: 201, message: 'OK', data: undefined };
   },
 
   /**

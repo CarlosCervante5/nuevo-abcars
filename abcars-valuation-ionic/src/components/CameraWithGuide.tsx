@@ -13,6 +13,7 @@ import {
 } from '@ionic/react';
 import { close, checkmark, camera, swapHorizontal } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { captureVideoFrame } from '../utils/captureVideoFrame';
 import { PhotoGuideType } from './PhotoTypeSelector';
 import PhotoTypeSelector from './PhotoTypeSelector';
 import CameraGuideAssetOverlay from './CameraGuideAssetOverlay';
@@ -29,6 +30,14 @@ interface CameraWithGuideProps {
   onPhotoTaken: (image: CameraImage) => void;
   guideType?: PhotoGuideType | 'car';
   photoTitle?: string;
+  /** Sesión guiada: no cerrar tras cada foto; avanzar a la siguiente guía. */
+  continueAfterCapture?: boolean;
+  sessionStep?: number;
+  sessionTotal?: number;
+  onSkipStep?: () => void;
+  onFinishSession?: () => void;
+  /** Incrementa al pasar a la siguiente foto en sesión (confirmar o saltar). */
+  sessionAdvanceKey?: number;
 }
 
 const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
@@ -37,6 +46,12 @@ const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
   onPhotoTaken,
   guideType = 'car',
   photoTitle,
+  continueAfterCapture = false,
+  sessionStep = 0,
+  sessionTotal = 0,
+  onSkipStep,
+  onFinishSession,
+  sessionAdvanceKey = 0,
 }) => {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedFile, setCapturedFile] = useState<File | null>(null);
@@ -51,20 +66,43 @@ const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
   const [streamReady, setStreamReady] = useState(false);
   const [currentGuideType, setCurrentGuideType] = useState<PhotoGuideType | 'car'>(guideType || 'car');
   const [showGuideSelector, setShowGuideSelector] = useState(false);
+  const sessionActive = continueAfterCapture && sessionTotal > 0;
+  const sessionLabel =
+    sessionActive && sessionStep > 0
+      ? `Foto ${sessionStep} de ${sessionTotal}`
+      : photoTitle || 'Tomar Foto con Guía';
 
   useEffect(() => {
     if (!isOpen) {
       stopCamera();
+      setLoading(false);
       setCapturedImage(null);
       setCapturedFile(null);
       setIsPreviewMode(false);
       setShowInstructions(true);
       setStreamReady(false);
+      setShowError(false);
       setCurrentGuideType(guideType || 'car');
     } else {
       setCurrentGuideType(guideType || 'car');
     }
   }, [isOpen, guideType]);
+
+  useEffect(() => {
+    if (!isOpen || !continueAfterCapture || sessionAdvanceKey < 1) {
+      return;
+    }
+    setCapturedImage(null);
+    setCapturedFile(null);
+    setIsPreviewMode(false);
+    setShowInstructions(false);
+    setStreamReady(false);
+    stopCamera();
+    const timer = window.setTimeout(() => {
+      void startCamera();
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [sessionAdvanceKey, isOpen, continueAfterCapture]);
 
   // Forzar estilos en el DOM para WebView de Android
   useEffect(() => {
@@ -188,9 +226,7 @@ const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
         allowEditing: false,
         resultType: CameraResultType.Uri,
         source: CameraSource.Camera,
-        // Intentar forzar orientación horizontal si es posible
-        width: 1920,
-        height: 1080,
+        correctOrientation: true,
       });
 
       if (!image.webPath) {
@@ -198,42 +234,10 @@ const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
         return;
       }
 
-      // Convertir URI a File y verificar orientación
       const response = await fetch(image.webPath);
       const blob = await response.blob();
-      
-      // Crear imagen para verificar dimensiones
-      const img = new Image();
-      img.src = image.webPath;
-      
-      await new Promise((resolve) => {
-        img.onload = resolve;
-      });
-      
-      // Si la imagen está en vertical, rotarla a horizontal
-      let finalBlob = blob;
-      if (img.height > img.width) {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.height;
-        canvas.height = img.width;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.save();
-          ctx.translate(canvas.width, 0);
-          ctx.rotate(Math.PI / 2);
-          ctx.drawImage(img, 0, 0);
-          ctx.restore();
-          
-          finalBlob = await new Promise<Blob>((resolve) => {
-            canvas.toBlob((rotatedBlob) => {
-              resolve(rotatedBlob || blob);
-            }, 'image/jpeg', 0.9);
-          });
-        }
-      }
-      
-      const file = new File([finalBlob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
-      const url = URL.createObjectURL(finalBlob);
+      const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+      const url = URL.createObjectURL(blob);
 
       setCapturedImage(url);
       setCapturedFile(file);
@@ -249,63 +253,55 @@ const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
     }
   };
 
-  const captureFromVideo = () => {
-    if (!videoRef.current || !canvasRef.current) return;
+  const captureFromVideo = async () => {
+    if (!videoRef.current) return;
 
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    
-    // Asegurar que capturamos en orientación horizontal
-    // Si el video está en vertical, rotamos el canvas
-    const isPortrait = video.videoHeight > video.videoWidth;
-    
-    if (isPortrait) {
-      // Si está en vertical, intercambiamos dimensiones para forzar horizontal
-      canvas.width = video.videoHeight;
-      canvas.height = video.videoWidth;
-    } else {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-    }
-    
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      if (isPortrait) {
-        // Rotar 90 grados para convertir a horizontal
-        ctx.save();
-        ctx.translate(canvas.width, 0);
-        ctx.rotate(Math.PI / 2);
-        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-        ctx.restore();
-      } else {
-        ctx.drawImage(video, 0, 0);
-      }
-      
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
-          const url = URL.createObjectURL(blob);
-          
-          setCapturedImage(url);
-          setCapturedFile(file);
-          stopCamera();
-          setIsPreviewMode(true);
-        }
-      }, 'image/jpeg', 0.9);
+    try {
+      setLoading(true);
+      const blob = await captureVideoFrame(videoRef.current);
+      const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+      const url = URL.createObjectURL(blob);
+
+      setCapturedImage(url);
+      setCapturedFile(file);
+      stopCamera();
+      setIsPreviewMode(true);
+    } catch (error) {
+      console.error('Error al capturar frame:', error);
+      setErrorMessage('No se pudo guardar la foto. Intenta de nuevo.');
+      setShowError(true);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const resetForNextShot = () => {
+    setCapturedImage(null);
+    setCapturedFile(null);
+    setIsPreviewMode(false);
+    setLoading(false);
+    setShowInstructions(false);
+    setStreamReady(false);
+    stopCamera();
+  };
+
   const handleConfirm = () => {
-    if (capturedImage && capturedFile) {
-      onPhotoTaken({
-        webPath: capturedImage,
-        file: capturedFile,
-      });
-      setCapturedImage(null);
-      setCapturedFile(null);
-      setIsPreviewMode(false);
-      onClose();
+    if (!capturedImage || !capturedFile) {
+      return;
     }
+    const payload = {
+      webPath: capturedImage,
+      file: capturedFile,
+    };
+    onPhotoTaken(payload);
+
+    if (continueAfterCapture) {
+      resetForNextShot();
+      return;
+    }
+
+    resetForNextShot();
+    onClose();
   };
 
   const handleRetake = () => {
@@ -334,11 +330,27 @@ const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
   };
 
   return (
-    <IonModal isOpen={isOpen} onDidDismiss={onClose}>
+    <IonModal isOpen={isOpen} onDidDismiss={onClose} keepContentsMounted={false}>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>{photoTitle || 'Tomar Foto con Guía'}</IonTitle>
+          <IonTitle className="camera-session-title">
+            {sessionActive ? (
+              <>
+                <span className="camera-session-title__step">{sessionLabel}</span>
+                {photoTitle ? (
+                  <span className="camera-session-title__name">{photoTitle}</span>
+                ) : null}
+              </>
+            ) : (
+              photoTitle || 'Tomar Foto con Guía'
+            )}
+          </IonTitle>
           <IonButtons slot="end">
+            {sessionActive && onFinishSession ? (
+              <IonButton fill="clear" onClick={onFinishSession}>
+                Terminar
+              </IonButton>
+            ) : null}
             <IonButton onClick={onClose}>
               <IonIcon icon={close} />
             </IonButton>
@@ -346,7 +358,9 @@ const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
         </IonToolbar>
       </IonHeader>
       <IonContent className="camera-guide-content">
-        <IonLoading isOpen={loading} message="Abriendo cámara..." />
+        {isOpen && loading ? (
+          <IonLoading isOpen message="Abriendo cámara..." />
+        ) : null}
 
         {showInstructions ? (
           <div className="camera-guide-instructions-screen">
@@ -499,8 +513,13 @@ const CameraWithGuide: React.FC<CameraWithGuideProps> = ({
               </IonButton>
               <IonButton expand="block" color="success" onClick={handleConfirm}>
                 <IonIcon icon={checkmark} slot="start" />
-                Usar Esta Foto
+                {continueAfterCapture ? 'Usar y siguiente foto' : 'Usar Esta Foto'}
               </IonButton>
+              {sessionActive && onSkipStep ? (
+                <IonButton expand="block" fill="outline" onClick={onSkipStep}>
+                  Saltar esta foto
+                </IonButton>
+              ) : null}
             </div>
           </div>
         )}

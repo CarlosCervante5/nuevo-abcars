@@ -2,6 +2,23 @@
   --background: #000;
 }
 
+.camera-session-title {
+  font-size: 0.95rem;
+  line-height: 1.25;
+}
+
+.camera-session-title__step {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.camera-session-title__name {
+  display: block;
+  font-weight: 700;
+}
+
 .camera-video-container {
   position: relative !important;
   width: 100% !important;

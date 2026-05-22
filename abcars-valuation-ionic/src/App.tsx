@@ -45,6 +45,7 @@ import PublicInventoryList from './pages/inventory/PublicInventoryList';
 import PublicVehicleDetail from './pages/inventory/PublicVehicleDetail';
 import { connectivityService } from './services/connectivityService';
 import { processOfflineQueue } from './services/offlineSync';
+import { vehicleImageAiBatchService } from './services/vehicleImageAiBatchService';
 
 setupIonicReact();
 
@@ -90,8 +91,62 @@ const App: React.FC = () => {
     return unsubscribe;
   }, []);
 
+  const [batchToast, setBatchToast] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const prev = new Map<string, string>();
+    vehicleImageAiBatchService.getJobs().forEach((j) => {
+      prev.set(j.id, j.status);
+    });
+
+    return vehicleImageAiBatchService.subscribe(() => {
+      for (const job of vehicleImageAiBatchService.getJobs()) {
+        const was = prev.get(job.id);
+        if (
+          was &&
+          (was === 'processing' || was === 'saving') &&
+          (job.status === 'completed' || job.status === 'failed')
+        ) {
+          if (job.status === 'completed') {
+            setBatchToast(
+              `IA terminada: ${job.saved}/${job.total} foto(s) de ${job.vehicleLabel}`,
+            );
+          } else {
+            setBatchToast(
+              job.lastError
+                ? `IA falló (${job.vehicleLabel}): ${job.lastError}`
+                : `IA falló en ${job.vehicleLabel}`,
+            );
+          }
+        }
+        prev.set(job.id, job.status);
+      }
+    });
+  }, []);
+
   return (
     <IonApp>
+      {batchToast ? (
+        <div
+          role="status"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 99999,
+            padding: '10px 14px',
+            background: '#1e293b',
+            color: '#fff',
+            fontSize: '13px',
+            textAlign: 'center',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+          }}
+          onClick={() => setBatchToast(null)}
+        >
+          {batchToast}
+        </div>
+      ) : null}
       <IonReactRouter>
         <IonRouterOutlet>
           <Route exact path="/login">

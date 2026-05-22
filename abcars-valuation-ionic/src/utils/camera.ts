@@ -4,6 +4,8 @@ export interface CameraImage {
   webPath: string;
   base64?: string;
   file?: File;
+  guideType?: string;
+  guideTitle?: string;
 }
 
 /**
@@ -30,6 +32,7 @@ export const cameraHelper = {
         allowEditing: false,
         resultType: CameraResultType.Uri,
         source: source === 'camera' ? CameraSource.Camera : CameraSource.Photos,
+        correctOrientation: true,
       });
 
       if (!image.webPath) {

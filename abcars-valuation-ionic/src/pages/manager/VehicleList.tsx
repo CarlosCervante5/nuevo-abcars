@@ -29,6 +29,7 @@ import { useHistory } from 'react-router-dom';
 import { vehicleService } from '../../services/vehicleService';
 import { Vehicle } from '../../models/Vehicle';
 import { authService } from '../../services/authService';
+import VehicleIaBatchBanner from '../../components/VehicleIaBatchBanner';
 import './VehicleList.css';
 
 const VehicleList: React.FC = () => {
@@ -145,6 +146,10 @@ const VehicleList: React.FC = () => {
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           <IonRefresherContent></IonRefresherContent>
         </IonRefresher>
+
+        <div className="ion-padding-horizontal ion-padding-top">
+          <VehicleIaBatchBanner />
+        </div>
 
         <IonLoading isOpen={loading && vehicles.length === 0} message="Cargando inventario..." />
 

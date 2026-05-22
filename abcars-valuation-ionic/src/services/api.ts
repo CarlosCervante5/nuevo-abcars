@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import axios, { AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
 import { getApiBaseUrl } from '../config/apiBaseUrl';
 import { attachNativeHttpAdapter } from './capacitorAxiosAdapter';
@@ -43,6 +44,9 @@ class ApiService {
       },
     });
     attachNativeHttpAdapter(this.api);
+    if (Capacitor.isNativePlatform()) {
+      this.api.defaults.timeout = 90000;
+    }
 
     // Interceptor para agregar token (no enviar Bearer en login/registro: token viejo puede interferir)
     this.api.interceptors.request.use(
@@ -83,8 +87,14 @@ class ApiService {
           baseURL: error.config?.baseURL,
           fullUrl: error.config ? `${error.config.baseURL}${error.config.url}` : 'N/A'
         };
-        if (import.meta.env.DEV) {
-          console.error('API Error:', JSON.stringify(errorInfo, null, 2));
+        const isUpload =
+          typeof error.config?.url === 'string' &&
+          error.config.url.includes('vehicle_images');
+        if (import.meta.env.DEV || isUpload) {
+          console.error(
+            isUpload ? '[ABCarsUpload] API Error:' : 'API Error:',
+            JSON.stringify(errorInfo, null, 2),
+          );
         }
 
         if (error.response?.status === 401) {

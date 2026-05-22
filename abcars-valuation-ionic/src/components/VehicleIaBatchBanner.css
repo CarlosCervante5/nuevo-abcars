@@ -1,0 +1,31 @@
+.vehicle-ia-batch-banners {
+  margin-bottom: 12px;
+}
+
+.vehicle-ia-batch-card {
+  margin: 0;
+}
+
+.vehicle-ia-batch-card__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.vehicle-ia-batch-card__icon {
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.vehicle-ia-batch-card__note {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+}
+
+.vehicle-ia-batch-card__hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.78rem;
+}

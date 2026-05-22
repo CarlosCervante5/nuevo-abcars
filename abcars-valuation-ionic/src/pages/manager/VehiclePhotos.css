@@ -2,6 +2,16 @@
   padding: 16px;
 }
 
+/* Detalle de error de subida (móvil) */
+.upload-error-alert .alert-message {
+  white-space: pre-wrap;
+  text-align: left;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
 .photos-section-title {
   font-size: 1.5rem;
   font-weight: 600;
@@ -139,6 +149,10 @@
 
 .upload-button {
   margin-top: 24px;
+}
+
+.batch-ia-open-btn {
+  margin-top: 12px;
 }
 
 /* Responsive para tablets */

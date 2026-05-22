@@ -23,8 +23,8 @@ class UploadVehicleImageRequest extends FormRequest
     {
         return [
             'vehicle_uuid' => 'required|uuid',
-            'images' => 'required|array',
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,pdf|max:5128',
+            'images' => 'required|array|min:1',
+            'images.*' => 'required|file|mimes:jpeg,jpg,png,webp|max:10240',
         ];
     }
 }

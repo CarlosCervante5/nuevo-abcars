@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Vehicles;
 
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Files\UploadVehicleImageBase64Request;
 use App\Http\Requests\Files\UploadVehicleImageRequest;
 use App\Http\Requests\Vehicles\VehicleImages\DeleteVehicleImageBatchRequest;
 use App\Http\Requests\Vehicles\VehicleImages\DeleteVehicleImageRequest;
@@ -12,6 +13,7 @@ use App\Jobs\UploadVehicleImage;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class VehicleImageController extends Controller
@@ -29,6 +31,13 @@ class VehicleImageController extends Controller
             $vehicle_uuid = $request->input('vehicle_uuid');
             $images = $request->file('images');
 
+            if ($images === null) {
+                $fallback = $request->file('images.0');
+                $images = $fallback !== null ? [$fallback] : [];
+            } elseif (! is_array($images)) {
+                $images = [$images];
+            }
+
             $vehicle = Vehicle::findByUuid($vehicle_uuid);
 
             if (!$vehicle) {
@@ -36,12 +45,13 @@ class VehicleImageController extends Controller
                 return ApiResponseHelper::apiError('El vehiculo no existe', 'No existe el id: '. $vehicle_uuid ,404, 'CREATE_VEHICLE_IMAGES_ERROR');
             }
 
-            $jobs_in_queue = DB::table('jobs')
-                ->where('payload', 'like', '%'.$vehicle_uuid.'%')
-                ->exists();
-            
-            if ($jobs_in_queue) {
-                return ApiResponseHelper::apiError('Ya hay una carga de imágenes en progreso para este vehículo. Por favor espere a que se complete.', null, 429, 'IMAGE_UPLOAD_IN_PROGRESS');
+            if (count($images) === 0) {
+                return ApiResponseHelper::apiError(
+                    'No se recibió ningún archivo de imagen. Verifica la conexión de la app.',
+                    null,
+                    422,
+                    'CREATE_VEHICLE_IMAGES_EMPTY'
+                );
             }
 
             // Obtener el sort_id más alto de las imágenes del vehículo, sino regresa 1
@@ -83,6 +93,98 @@ class VehicleImageController extends Controller
         } catch (\Exception $e) {
             // Manejar otros errores y retornar respuesta de error
             return ApiResponseHelper::apiError('Error al crear el set de imagenes', $e->getMessage(), 500, 'CREATE_VEHICLE_IMAGES_ERROR');
+        }
+    }
+
+    /**
+     * Subida de una imagen en base64 (app móvil: evita multipart nativo que falla con HTTP 0).
+     */
+    public function storeBase64(UploadVehicleImageBase64Request $request)
+    {
+        try {
+            $vehicle_uuid = $request->input('vehicle_uuid');
+            $filename = $request->input('filename');
+            $raw = (string) $request->input('image_base64');
+
+            if (str_contains($raw, ',')) {
+                $raw = explode(',', $raw, 2)[1];
+            }
+
+            $bytes = base64_decode($raw, true);
+            if ($bytes === false || strlen($bytes) < 128) {
+                return ApiResponseHelper::apiError(
+                    'Imagen base64 inválida o vacía',
+                    null,
+                    422,
+                    'CREATE_VEHICLE_IMAGES_INVALID_BASE64'
+                );
+            }
+
+            if (strlen($bytes) > 10 * 1024 * 1024) {
+                return ApiResponseHelper::apiError(
+                    'La imagen supera el tamaño máximo (10 MB)',
+                    null,
+                    422,
+                    'CREATE_VEHICLE_IMAGES_TOO_LARGE'
+                );
+            }
+
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = $finfo ? finfo_buffer($finfo, $bytes) : null;
+            if ($finfo) {
+                finfo_close($finfo);
+            }
+
+            $allowed = ['image/jpeg', 'image/png', 'image/webp'];
+            if ($mime === false || $mime === null || ! in_array($mime, $allowed, true)) {
+                return ApiResponseHelper::apiError(
+                    'Tipo de imagen no permitido: '.($mime ?: 'desconocido'),
+                    null,
+                    422,
+                    'CREATE_VEHICLE_IMAGES_INVALID_MIME'
+                );
+            }
+
+            $vehicle = Vehicle::findByUuid($vehicle_uuid);
+            if (! $vehicle) {
+                return ApiResponseHelper::apiError(
+                    'El vehiculo no existe',
+                    'No existe el id: '.$vehicle_uuid,
+                    404,
+                    'CREATE_VEHICLE_IMAGES_ERROR'
+                );
+            }
+
+            $ext = match ($mime) {
+                'image/png' => 'png',
+                'image/webp' => 'webp',
+                default => 'jpg',
+            };
+
+            $storagePath = 'temp_images/mobile_'.uniqid('', true).'.'.$ext;
+            Storage::put($storagePath, $bytes);
+
+            $sort_id = ($vehicle->images->max('sort_id') ?? 0) + 1;
+
+            UploadVehicleImage::dispatchSync(
+                $storagePath,
+                $vehicle->uuid,
+                $vehicle->id,
+                $sort_id,
+                $filename,
+                true
+            );
+
+            return ApiResponseHelper::apiSuccess(201, 'Imagen enviada a procesar');
+        } catch (ValidationException $e) {
+            return ApiResponseHelper::validationError($e);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError(
+                'Error al crear la imagen',
+                $e->getMessage(),
+                500,
+                'CREATE_VEHICLE_IMAGES_ERROR'
+            );
         }
     }
 

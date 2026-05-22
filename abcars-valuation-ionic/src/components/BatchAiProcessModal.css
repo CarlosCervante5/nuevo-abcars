@@ -1,0 +1,27 @@
+.batch-ai-intro {
+  font-size: 0.9rem;
+  color: var(--ion-color-medium-shade, #555);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.batch-ai-toggle-all {
+  margin-bottom: 8px;
+}
+
+.batch-ai-list {
+  margin-top: 8px;
+}
+
+.batch-ai-thumb {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.batch-ai-footer ion-toolbar {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-bottom: 12px;
+}

@@ -2,6 +2,7 @@ import { Capacitor } from '@capacitor/core';
 import { Http } from '@capacitor-community/http';
 import axios, { AxiosError, type AxiosAdapter, type InternalAxiosRequestConfig } from 'axios';
 import xhrAdapter from 'axios/lib/adapters/xhr.js';
+import { postFormDataViaNativeHttp, shouldUseNativeFormUpload } from './nativeHttpFormUpload';
 
 function headersToRecord(config: InternalAxiosRequestConfig): Record<string, string> {
   const out: Record<string, string> = {};
@@ -28,61 +29,80 @@ function base64ToBlob(base64: string, contentType: string): Blob {
   return new Blob([bytes], { type: contentType || 'application/octet-stream' });
 }
 
+function prepareRequestBody(
+  data: unknown,
+  headers: Record<string, string>,
+): string | Record<string, unknown> | undefined {
+  if (data === undefined || data === null) {
+    return undefined;
+  }
+  if (typeof data === 'string') {
+    return data;
+  }
+  if (
+    typeof data === 'object' &&
+    !(data instanceof ArrayBuffer) &&
+    !ArrayBuffer.isView(data)
+  ) {
+    const ct = (headers['Content-Type'] || headers['content-type'] || '').toLowerCase();
+    if (!ct || ct.includes('application/json')) {
+      headers['Content-Type'] = 'application/json';
+      return JSON.stringify(data);
+    }
+  }
+  return data as string | Record<string, unknown>;
+}
+
+function parsePayload(data: unknown): unknown {
+  if (typeof data === 'string') {
+    const t = data.trim();
+    if (t.startsWith('{') || t.startsWith('[')) {
+      try {
+        return JSON.parse(t) as unknown;
+      } catch {
+        return data;
+      }
+    }
+  }
+  return data;
+}
+
 /**
  * Peticiones HTTP nativas (sin CORS). En Android el WebView usa Origin https://localhost
  * y el backend a veces no devuelve ACAO; Axios falla con «Network Error».
  */
 export const capacitorHttpAdapter: AxiosAdapter = async (config) => {
-  const method = (config.method || 'get').toUpperCase();
-  const url = axios.getUri(config);
-  const headers = headersToRecord(config);
-
   if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    if (shouldUseNativeFormUpload()) {
+      return postFormDataViaNativeHttp(config);
+    }
     return xhrAdapter(config);
   }
 
-  const data = config.data;
-  if (
-    data !== undefined &&
-    data !== null &&
-    typeof data === 'object' &&
-    !(data instanceof ArrayBuffer) &&
-    !ArrayBuffer.isView(data) &&
-    typeof data !== 'string'
-  ) {
-    const ct = (headers['Content-Type'] || headers['content-type'] || '').toLowerCase();
-    if (!ct) {
-      headers['Content-Type'] = 'application/json';
-    }
-  }
+  const method = (config.method || 'get').toUpperCase();
+  const url = axios.getUri(config);
+  const headers = headersToRecord(config);
+  const body = prepareRequestBody(config.data, headers);
 
   const wantsBlob = config.responseType === 'blob' || config.responseType === 'arraybuffer';
   const httpResponseType = wantsBlob ? 'blob' : 'json';
 
-  // Android HttpRequestHandler.request() hace params.keys() sin null-check: sin `params` revienta toda petición (p. ej. GET con query en la URL).
+  const timeout =
+    typeof config.timeout === 'number' && config.timeout > 0 ? config.timeout : 30000;
+
   const res = await Http.request({
     method,
     url,
     headers,
-    data,
+    data: body,
     params: {},
-    connectTimeout: config.timeout,
-    readTimeout: config.timeout,
+    connectTimeout: timeout,
+    readTimeout: timeout,
     responseType: httpResponseType,
     shouldEncodeUrlParams: true,
   });
 
-  let payload: unknown = res.data;
-  if (typeof payload === 'string') {
-    const t = payload.trim();
-    if (t.startsWith('{') || t.startsWith('[')) {
-      try {
-        payload = JSON.parse(t) as unknown;
-      } catch {
-        /* dejar como string */
-      }
-    }
-  }
+  let payload: unknown = parsePayload(res.data);
   if (config.responseType === 'blob' && typeof payload === 'string') {
     const ct =
       (res.headers['content-type'] as string) ||
@@ -92,7 +112,7 @@ export const capacitorHttpAdapter: AxiosAdapter = async (config) => {
   }
 
   if (res.status >= 400) {
-    const err = new AxiosError(
+    throw new AxiosError(
       `Request failed with status code ${res.status}`,
       AxiosError.ERR_BAD_RESPONSE,
       config,
@@ -105,7 +125,6 @@ export const capacitorHttpAdapter: AxiosAdapter = async (config) => {
         config,
       },
     );
-    throw err;
   }
 
   return {
@@ -119,8 +138,7 @@ export const capacitorHttpAdapter: AxiosAdapter = async (config) => {
 };
 
 export function attachNativeHttpAdapter(instance: ReturnType<typeof axios.create>): void {
-  // HTTP nativo vía @capacitor-community/http: solo Android (SPM iOS no soporta el plugin mixto ObjC/Swift).
-  if (Capacitor.getPlatform() === 'android') {
+  if (Capacitor.isNativePlatform()) {
     instance.defaults.adapter = capacitorHttpAdapter;
   }
 }

@@ -293,8 +293,9 @@ Route::prefix('vehicles')->middleware('bandwidth_usage')->group(function () {
 // Segmento Imágenes de Vehículos
 
 Route::prefix('vehicle_images')->middleware(['bandwidth_usage', 'auth:sanctum'])->group(function () {
-    Route::middleware('role_or_permission:super_admin|administrator|marketing|create vehicles|update vehicles')->group(function () {
+    Route::middleware('role_or_permission:super_admin|administrator|marketing|manager|create vehicles|update vehicles')->group(function () {
         Route::post('/', [VehicleImageController::class, 'store']);
+        Route::post('/upload_base64', [VehicleImageController::class, 'storeBase64']);
         Route::post('/sort_update', [VehicleImageController::class, 'sortUpdate']);
     });
     Route::middleware('role_or_permission:super_admin|administrator|marketing|delete vehicles')->group(function () {
