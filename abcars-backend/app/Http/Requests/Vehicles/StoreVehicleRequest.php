@@ -32,7 +32,7 @@ class StoreVehicleRequest extends FormRequest
             'offer_price' => 'nullable|numeric',
             'mileage' => 'required|integer',
             'type' => 'required|in:car,moto,truck,other',
-            'category' => 'required|in:new,pre_owned,demo',
+            'category' => 'required|in:new,pre_owned,demo,consignment',
             'cylinders' => 'required|integer',
             'engine_displacement_cc' => 'nullable|integer|min:0|max:9999',
             'wet_weight_kg' => 'nullable|integer|min:0|max:999999',

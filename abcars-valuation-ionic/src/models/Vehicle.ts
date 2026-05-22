@@ -78,7 +78,7 @@ export interface CreateVehicleRequest {
   list_price: number;
   mileage: number;
   type: 'car' | 'moto' | 'truck' | 'other';
-  category: 'new' | 'pre_owned' | 'demo';
+  category: 'new' | 'pre_owned' | 'demo' | 'consignment';
   cylinders: number;
   engine_displacement_cc?: number | null;
   wet_weight_kg?: number | null;

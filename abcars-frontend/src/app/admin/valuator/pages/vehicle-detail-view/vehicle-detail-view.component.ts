@@ -7,6 +7,7 @@ import { environment } from '@environments/environment';
 import { VehicleService } from '@services/vehicle.service';
 import { UpdateVehicle, FullDetailResponse } from '@interfaces/vehicle_data.interface';
 import { Overview } from '@interfaces/admin.interfaces';
+import { formatVehicleCategoryLabel } from '../../../../shared/utils/vehicle-category-label';
 
 @Component({
     selector: 'app-vehicle-detail-view',
@@ -108,12 +109,7 @@ export class VehicleDetailViewComponent implements OnInit {
     }
 
     getCategoryLabel(cat: string): string {
-        const map: Record<string, string> = {
-            new: 'Nuevo',
-            pre_owned: 'Seminuevo',
-            demo: 'Demo'
-        };
-        return map[cat] || cat;
+        return formatVehicleCategoryLabel(cat) || cat;
     }
 
     getTransmissionLabel(t: string): string {

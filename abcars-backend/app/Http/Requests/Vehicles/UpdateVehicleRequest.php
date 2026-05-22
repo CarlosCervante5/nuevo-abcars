@@ -33,7 +33,7 @@ class UpdateVehicleRequest extends FormRequest
             'offer_price' => 'nullable|numeric',
             'mileage' => 'nullable|integer',
             'type' => 'nullable|in:car,moto,truck,other',
-            'category' => 'nullable|in:new,pre_owned,demo',
+            'category' => 'nullable|in:new,pre_owned,demo,consignment',
             'cylinders' => 'nullable|integer',
             'engine_displacement_cc' => 'nullable|integer|min:0|max:9999',
             'wet_weight_kg' => 'nullable|integer|min:0|max:999999',

@@ -12,6 +12,7 @@ import { Vehicle as ApiVehicle } from '../../shared/interfaces/vehicle_data.inte
 import { Dealership, DealerShipResponse } from '../../shared/interfaces/admin.interfaces';
 import { FALLBACK_HERO_IMAGE } from '../../shared/constants/fallback-media';
 import { optimizeCloudinaryVehicleDeliveryUrl } from '../../shared/utils/cloudinary-vehicle-delivery-url';
+import { formatVehicleCategoryLabel } from '../../shared/utils/vehicle-category-label';
 import Swal from 'sweetalert2';
 
 interface Vehicle {
@@ -3107,13 +3108,8 @@ export class VehicleDetailComponent implements OnInit {
       truck: 'Camión',
       other: 'Otro',
     };
-    const categoryMap: { [key: string]: string } = {
-      new: 'Nuevo',
-      pre_owned: 'Seminuevo',
-      demo: 'Demostrador',
-    };
     const typeLabel = api?.type ? typeMap[api.type] : '';
-    const catLabel = api?.category ? categoryMap[api.category] : '';
+    const catLabel = api?.category ? formatVehicleCategoryLabel(api.category) : '';
     if (typeLabel && catLabel) {
       return `${typeLabel} (${catLabel})`;
     }
