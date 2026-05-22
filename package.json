@@ -1,0 +1,9 @@
+{
+  "name": "nuevo-abcars",
+  "private": true,
+  "description": "Monorepo ABCars — scripts de integración Gantt / Cursor",
+  "scripts": {
+    "gantt:sync": "node scripts/sync-gantt-tasks.mjs",
+    "gantt:commit-msg": "node scripts/gantt-commit-msg.mjs"
+  }
+}
