@@ -9,6 +9,7 @@ export interface Vehicle {
   fuel: string;
   transmission: string;
   status: string;
+  category?: string;
   image_url?: string;
   certification?: string;
   name?: string;

@@ -4,6 +4,7 @@ import { Vehicle } from '../../interfaces/vehicle.interface';
 import { FALLBACK_HERO_IMAGE } from '../../shared/constants/fallback-media';
 import { optimizeCloudinaryVehicleDeliveryUrl } from '../../shared/utils/cloudinary-vehicle-delivery-url';
 import { formatFuelTypeLabel } from '../../shared/utils/fuel-type-label';
+import { formatVehicleCategoryBadgeLabel } from '../../shared/utils/vehicle-category-label';
 
 @Component({
   selector: 'app-vehicle-card',
@@ -21,10 +22,10 @@ import { formatFuelTypeLabel } from '../../shared/utils/fuel-type-label';
           [alt]="vehicle.brand + ' ' + vehicle.model"
           class="w-full h-full object-cover"
         >
-        <!-- Etiqueta NUEVO -->
+        <!-- Etiqueta categoría -->
         <div class="absolute top-3 left-3">
           <span class="px-2 py-1 bg-black text-white text-xs font-bold rounded tracking-wide">
-            NUEVO
+            {{ categoryBadgeLabel }}
           </span>
         </div>
         <!-- Etiqueta PREMIUM -->
@@ -90,6 +91,14 @@ export class VehicleCardComponent {
 
   get fuelLabel(): string {
     return formatFuelTypeLabel(this.vehicle?.fuel);
+  }
+
+  get categoryBadgeLabel(): string {
+    return (
+      formatVehicleCategoryBadgeLabel(this.vehicle?.category) ||
+      formatVehicleCategoryBadgeLabel(this.vehicle?.apiData?.category) ||
+      'N/A'
+    );
   }
 
   getVehicleImage(): string {

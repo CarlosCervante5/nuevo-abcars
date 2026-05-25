@@ -30,6 +30,7 @@ interface Vehicle {
   fuel: string;
   transmission: string;
   status: string;
+  category?: string;
   image_url?: string;
   certification?: string;
   name?: string;
@@ -558,6 +559,7 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
           fuel: formatFuelTypeLabel(v.fuel_type),
           transmission: this.formatTransmission(v.transmission),
           status: 'active',
+          category: v.category,
           image_url: imageUrl,
           name: v.name,
           apiData: v
@@ -610,11 +612,11 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
   loadFallbackVehicles() {
     // Vehículos de ejemplo en caso de error de conexión
     this.vehicles = [
-      { uuid: '1', brand: 'Chevrolet', model: 'Trax LT', year: 2020, price: 300000, mileage: 63626, fuel: 'Gasolina', transmission: 'Automático', status: 'active' },
-      { uuid: '2', brand: 'Honda', model: 'Civic', year: 2021, price: 420000, mileage: 28500, fuel: 'Gasolina', transmission: 'Manual', status: 'active' },
-      { uuid: '3', brand: 'Toyota', model: 'Camry', year: 2023, price: 650000, mileage: 12000, fuel: 'Híbrido', transmission: 'Automático', status: 'active' },
+      { uuid: '1', brand: 'Chevrolet', model: 'Trax LT', year: 2020, price: 300000, mileage: 63626, fuel: 'Gasolina', transmission: 'Automático', status: 'active', category: 'pre_owned' },
+      { uuid: '2', brand: 'Honda', model: 'Civic', year: 2021, price: 420000, mileage: 28500, fuel: 'Gasolina', transmission: 'Manual', status: 'active', category: 'pre_owned' },
+      { uuid: '3', brand: 'Toyota', model: 'Camry', year: 2023, price: 650000, mileage: 12000, fuel: 'Híbrido', transmission: 'Automático', status: 'active', category: 'new' },
       { type: 'banner' },
-      { uuid: '4', brand: 'Nissan', model: 'Versa', year: 2022, price: 280000, mileage: 15000, fuel: 'Gasolina', transmission: 'Automático', status: 'active' }
+      { uuid: '4', brand: 'Nissan', model: 'Versa', year: 2022, price: 280000, mileage: 15000, fuel: 'Gasolina', transmission: 'Automático', status: 'active', category: 'pre_owned' }
     ];
     // Comentado: ya no filtra en el Showroom
     // this.filteredVehicles = [...this.vehicles];
