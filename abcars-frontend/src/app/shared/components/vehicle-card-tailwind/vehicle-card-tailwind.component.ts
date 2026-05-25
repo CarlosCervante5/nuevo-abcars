@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { ScrollService } from '../../services/scroll.service';
 import { ReferralService } from '../../services/referral.service';
 import { optimizeCloudinaryVehicleDeliveryUrl } from '../../utils/cloudinary-vehicle-delivery-url';
+import { formatVehicleCategoryBadgeLabel } from '../../utils/vehicle-category-label';
 
 export interface Vehicle {
   uuid: string;
@@ -123,13 +124,9 @@ export class VehicleCardTailwindComponent {
 
   @Input() vehicle!: Vehicle;
 
-  /** Marca del vehículo, o CONSIGNACIÓN si category es consignment. */
+  /** Categoría del vehículo (NUEVO, SEMINUEVO, DEMO, CONSIGNACIÓN). */
   get topLeftBadgeLabel(): string {
-    const cat = (this.vehicle?.category ?? '').trim().toLowerCase();
-    if (cat === 'consignment') {
-      return 'CONSIGNACIÓN';
-    }
-    return this.vehicle.brand?.name || 'N/A';
+    return formatVehicleCategoryBadgeLabel(this.vehicle?.category) || 'N/A';
   }
 
   constructor(
