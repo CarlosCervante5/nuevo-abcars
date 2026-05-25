@@ -211,6 +211,7 @@ export class FinancingComponent implements OnInit {
             mileage: v.mileage || 0,
             exterior_color: v.exterior_color || '',
             year: v.model?.year || new Date().getFullYear(),
+            category: v.category,
             brand: v.brand ? { name: v.brand.name } : undefined,
             model: v.model ? { name: v.model.name, year: v.model.year || new Date().getFullYear() } : undefined,
             dealership: v.dealership ? { name: v.dealership.name, location: v.dealership.location } : undefined,

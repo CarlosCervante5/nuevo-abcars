@@ -12,6 +12,7 @@ export interface Vehicle {
   mileage: number;
   exterior_color: string;
   year: number;
+  category?: string;
   brand?: { name: string };
   model?: { name: string; year: number };
   dealership?: { name: string; location: string };
@@ -37,10 +38,10 @@ export interface Vehicle {
             {{ formatPrice(vehicle.sale_price) }}
           </span>
         </div>
-        <!-- Brand Badge -->
+        <!-- Brand / categoría badge -->
         <div class="absolute top-4 left-4 z-20 bg-black bg-opacity-70 backdrop-blur-sm rounded-full px-3 py-1">
           <span class="text-white text-sm font-medium uppercase">
-            {{ vehicle.brand?.name || 'N/A' }}
+            {{ topLeftBadgeLabel }}
           </span>
         </div>
       </div>
@@ -121,6 +122,15 @@ export class VehicleCardTailwindComponent {
   private readonly placeholderThumb = '/assets/placeholder-image.jpg';
 
   @Input() vehicle!: Vehicle;
+
+  /** Marca del vehículo, o CONSIGNACIÓN si category es consignment. */
+  get topLeftBadgeLabel(): string {
+    const cat = (this.vehicle?.category ?? '').trim().toLowerCase();
+    if (cat === 'consignment') {
+      return 'CONSIGNACIÓN';
+    }
+    return this.vehicle.brand?.name || 'N/A';
+  }
 
   constructor(
     private router: Router,
