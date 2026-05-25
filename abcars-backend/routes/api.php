@@ -13,6 +13,7 @@ use App\Http\Controllers\Events\EventController;
 use App\Http\Controllers\Promotions\PromotionController;
 use App\Http\Controllers\Leads\LeadController;
 use App\Http\Controllers\DeliveryPhotos\DeliveryPhotoController;
+use App\Http\Controllers\Integrations\IntelimotorIntegrationController;
 use App\Http\Controllers\MainBanner\MainBannerController;
 use App\Http\Controllers\Media\ImageFetchProxyController;
 use App\Http\Controllers\Multimedia\MultimediaController;
