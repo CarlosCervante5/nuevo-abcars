@@ -1,6 +1,6 @@
-/** Límite backend: UploadVehicleImageRequest images.* max:5128 (KB). Dejamos margen. */
-const MAX_UPLOAD_BYTES = 4.75 * 1024 * 1024;
-const MAX_DIMENSION = 2560;
+/** Evita JSON > ~1 MB en el bridge Capacitor (UnknownHostException). Backend max ~10 MB. */
+const MAX_UPLOAD_BYTES = 380 * 1024;
+const MAX_DIMENSION = 1920;
 
 /**
  * Asegura JPEG y tamaño dentro del límite del servidor (evita 422 por max/tipo).

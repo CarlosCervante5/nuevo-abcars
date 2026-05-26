@@ -1,4 +1,5 @@
 import axios, { type AxiosError } from 'axios';
+import { getApiBaseUrl } from '../config/apiBaseUrl';
 
 const LOG_TAG = '[ABCarsUpload]';
 
@@ -54,8 +55,11 @@ function validationLines(errors?: Record<string, string[]>): string {
 
 function networkHint(code?: string, message?: string): string {
   const m = (message || '').toLowerCase();
+  if (m.includes('unknownhostexception') || m.includes('unknown host')) {
+    return `No se pudo resolver el servidor (${getApiBaseUrl()}). Prueba otra red (datos móviles/WiFi) o reinstala la última versión de la app.`;
+  }
   if (code === 'ERR_NETWORK' || m.includes('network error') || m.includes('io error')) {
-    return 'Sin conexión o bloqueo de red. Revisa WiFi/datos y que la API sandbox esté activa.';
+    return 'Sin conexión o bloqueo de red. Revisa WiFi/datos y que la API esté disponible.';
   }
   if (m.includes('timeout') || code === 'ECONNABORTED') {
     return 'Tiempo de espera agotado. La imagen puede ser muy pesada o el servidor tardó demasiado.';
@@ -110,7 +114,10 @@ export function formatUploadError(error: unknown, ctx?: UploadErrorContext): str
       parts.push(`Ruta: ${error.config.url}`);
     }
   } else if (error instanceof Error) {
-    parts.push(error.message || 'Error desconocido');
+    const msg = error.message || 'Error desconocido';
+    parts.push(msg);
+    const hint = networkHint(undefined, msg);
+    if (hint) parts.push(hint);
   } else {
     parts.push(String(error));
   }

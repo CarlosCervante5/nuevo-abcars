@@ -495,10 +495,17 @@ const VehiclePhotos: React.FC = () => {
 
   const handleStartBatchAi = (targets: BatchImageTarget[]) => {
     if (!vehicleUuid || !targets.length) return;
-    vehicleImageAiBatchService.startBatch(vehicleUuid, vehicleLabel, targets);
+    const jobId = vehicleImageAiBatchService.startBatch(vehicleUuid, vehicleLabel, targets);
+    if (!jobId) {
+      setToastMessage(
+        'Ya hay un lote de IA en curso. Espera a que termine o falla antes de iniciar otro.',
+      );
+      setShowToast(true);
+      return;
+    }
     setShowBatchAiModal(false);
     setToastMessage(
-      `Procesamiento en segundo plano (${targets.length} foto${targets.length === 1 ? '' : 's'}). Puedes ir a la siguiente unidad.`,
+      `Procesamiento en segundo plano (${targets.length} foto${targets.length === 1 ? '' : 's'}, una a la vez). Puedes ir a la siguiente unidad.`,
     );
     setShowToast(true);
     const newIndices = new Set(

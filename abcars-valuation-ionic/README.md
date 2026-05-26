@@ -19,8 +19,10 @@ No es obligatorio poner `VITE_GEMINI_API_KEY` en el build. Si en **el mismo proy
 Edita **`abcars-valuation-ionic/.env.production`**:
 
 ```env
-VITE_API_BASE_URL=https://TU-DOMINIO-RAILWAY-DEL-LARAVEL/api/
+VITE_API_BASE_URL=https://nuevo-abcars-production.up.railway.app/api/
 ```
+
+(Sandbox de pruebas: `https://nuevo-abcars-sandbox.up.railway.app/api/`.)
 
 - Debe acabar en `/api/` (o solo el dominio: el código puede añadir `/api`).
 - Debe ser el servicio donde está **`GEMINI_API_KEY`** en Variables.

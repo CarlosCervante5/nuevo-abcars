@@ -29,6 +29,10 @@ export type BatchJob = {
   startedAt: number;
   finishedAt?: number;
   lastError?: string;
+  /** Foto actual del lote (1..total) */
+  currentStep?: number;
+  /** Texto visible en el banner */
+  phaseDetail?: string;
 };
 
 export const BATCH_JOB_EVENT = 'abcars-vehicle-ia-batch-update';

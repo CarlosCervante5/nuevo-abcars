@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useIonViewWillEnter } from '@ionic/react';
 import {
   IonContent,
   IonHeader,
@@ -41,22 +42,36 @@ const VehicleList: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const searchAbortRef = useRef<AbortController | null>(null);
+  const searchTermRef = useRef(searchTerm);
+  searchTermRef.current = searchTerm;
 
-  useEffect(() => {
-    loadVehicles();
-  }, [searchTerm]);
+  const loadVehicles = useCallback(async (page: number = 1, append: boolean = false) => {
+    searchAbortRef.current?.abort();
+    const ac = new AbortController();
+    searchAbortRef.current = ac;
 
-  const loadVehicles = async (page: number = 1, append: boolean = false) => {
+    const timeoutId = window.setTimeout(() => ac.abort(), 60000);
+
     try {
       setLoading(true);
-      console.log('Loading vehicles with params:', { page, per_page: 20, search: searchTerm || undefined });
-      const response = await vehicleService.searchVehicles({
+      setLoadError(null);
+      console.log('Loading vehicles with params:', {
         page,
         per_page: 20,
-        search: searchTerm || undefined,
-        status: 'active,inactive',
-        has_images: false,
+        search: searchTermRef.current || undefined,
       });
+      const response = await vehicleService.searchVehicles(
+        {
+          page,
+          per_page: 20,
+          search: searchTermRef.current || undefined,
+          status: 'active,inactive',
+          has_images: false,
+        },
+        { signal: ac.signal },
+      );
 
       console.log('Vehicle search response:', JSON.stringify(response, null, 2));
 
@@ -76,22 +91,58 @@ const VehicleList: React.FC = () => {
         setToastMessage(response.message || 'Error al cargar vehículos');
         setShowToast(true);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      if (ac.signal.aborted) {
+        if (searchAbortRef.current !== ac) {
+          return;
+        }
+        if (!append) {
+          setLoadError(
+            'La carga tardó demasiado. Si hay IA en segundo plano, espera un momento y pulsa Reintentar.',
+          );
+        }
+        return;
+      }
       console.error('Error loading vehicles:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
-      setToastMessage(
-        error?.response?.data?.message ||
-          (error?.message === 'Network Error'
-            ? 'Sin conexión. Revisa datos/Wi‑Fi y que la API responda.'
-            : error?.message) ||
-          'Error al cargar vehículos',
-      );
+      const err = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+        code?: string;
+      };
+      const msg =
+        err?.response?.data?.message ||
+        (err?.message === 'Network Error'
+          ? 'Sin conexión. Revisa datos/Wi‑Fi y que la API responda.'
+          : err?.message) ||
+        'Error al cargar vehículos';
+      setLoadError(msg);
+      setToastMessage(msg);
       setShowToast(true);
-      setVehicles([]);
+      if (!append) {
+        setVehicles([]);
+      }
     } finally {
-      setLoading(false);
+      window.clearTimeout(timeoutId);
+      if (searchAbortRef.current === ac) {
+        setLoading(false);
+      }
     }
-  };
+  }, []);
+
+  const skipViewEnterReload = useRef(true);
+
+  useEffect(() => {
+    void loadVehicles(1, false);
+    return () => searchAbortRef.current?.abort();
+  }, [searchTerm, loadVehicles]);
+
+  useIonViewWillEnter(() => {
+    if (skipViewEnterReload.current) {
+      skipViewEnterReload.current = false;
+      return;
+    }
+    void loadVehicles(1, false);
+  });
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -161,7 +212,17 @@ const VehicleList: React.FC = () => {
             className="vehicle-searchbar"
           />
 
-          {vehicles.length === 0 && !loading ? (
+          {loadError && !loading ? (
+            <div className="empty-state">
+              <IonIcon icon={car} size="large" color="warning" />
+              <p>{loadError}</p>
+              <IonButton onClick={() => void loadVehicles(1, false)}>
+                Reintentar
+              </IonButton>
+            </div>
+          ) : null}
+
+          {vehicles.length === 0 && !loading && !loadError ? (
             <div className="empty-state">
               <IonIcon icon={car} size="large" color="medium" />
               <p>No se encontraron vehículos</p>
@@ -170,7 +231,7 @@ const VehicleList: React.FC = () => {
                 Agregar Vehículo
               </IonButton>
             </div>
-          ) : (
+          ) : vehicles.length > 0 ? (
             <>
               <div className="vehicles-grid">
                 {vehicles.map((vehicle) => {
@@ -238,7 +299,7 @@ const VehicleList: React.FC = () => {
                 ></IonInfiniteScrollContent>
               </IonInfiniteScroll>
             </>
-          )}
+          ) : null}
         </div>
 
         <IonFab vertical="bottom" horizontal="end" slot="fixed">
