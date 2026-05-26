@@ -36,15 +36,12 @@ const VehicleIaBatchBanner: React.FC<VehicleIaBatchBannerProps> = ({ vehicleUuid
     <div className="vehicle-ia-batch-banners">
       {jobs.map((job) => {
         const progress =
-          job.total > 0
-            ? job.status === 'saving'
-              ? Math.min(1, 0.55 + (job.saved / job.total) * 0.45)
-              : Math.min(1, (job.geminiDone / job.total) * 0.55)
-            : 0;
+          job.total > 0 ? Math.min(1, job.saved / job.total) : 0;
         const phase =
-          job.status === 'saving'
-            ? 'Guardando en servidor…'
-            : `IA en paralelo: ${job.geminiDone}/${job.total}`;
+          job.phaseDetail ||
+          (job.status === 'saving'
+            ? `Guardando ${job.saved}/${job.total}…`
+            : `IA ${job.geminiDone}/${job.total}`);
         return (
           <IonCard key={job.id} className="vehicle-ia-batch-card" color="warning">
             <IonCardContent>

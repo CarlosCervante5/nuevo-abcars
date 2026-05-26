@@ -21,7 +21,8 @@ import { CameraImage } from '../utils/camera';
 import type { BatchImageTarget } from '../services/vehicleImageAiBatch.types';
 import './BatchAiProcessModal.css';
 
-const MAX_PARALLEL = 4;
+/** Debe coincidir con vehicleImageAiBatchService (una foto a la vez). */
+const BATCH_HINT = 'una foto a la vez';
 
 export type BatchSelectionKey = string;
 
@@ -146,8 +147,9 @@ const BatchAiProcessModal: React.FC<BatchAiProcessModalProps> = ({
       </IonHeader>
       <IonContent className="ion-padding">
         <p className="batch-ai-intro">
-          Elige las fotos de <strong>{vehicleLabel}</strong>. Se procesarán en paralelo (hasta{' '}
-          {MAX_PARALLEL} a la vez) con ciclorama ABCars.
+          Elige las fotos de <strong>{vehicleLabel}</strong>. Se procesarán en segundo plano (
+          {BATCH_HINT}) con ciclorama ABCars. Con muchas fotos puede tardar varios minutos; el
+          avance se verá en el banner amarillo.
         </p>
         {selectableKeys.length === 0 ? (
           <IonNote color="medium">No hay fotos para procesar.</IonNote>

@@ -1,4 +1,6 @@
+import { Capacitor } from '@capacitor/core';
 import { buildRecortePrompt } from '../config/studioCatalogPrompts';
+import { postJsonViaWebView } from '../utils/nativeWebViewHttp';
 import api from './api';
 
 const MODEL = 'gemini-3.1-flash-image-preview';
@@ -280,14 +282,27 @@ function parseServerGeminiFlag(raw: unknown): boolean {
   return false;
 }
 
+let serverGeminiCapabilityCache: { at: number; value: boolean } | null = null;
+const CAPABILITY_CACHE_MS = 5 * 60 * 1000;
+
 async function fetchServerGeminiCapability(): Promise<boolean> {
+  const now = Date.now();
+  if (
+    serverGeminiCapabilityCache &&
+    now - serverGeminiCapabilityCache.at < CAPABILITY_CACHE_MS
+  ) {
+    return serverGeminiCapabilityCache.value;
+  }
   try {
     const r = await api.get<unknown>('studio-catalog/gemini/capabilities');
-    return parseServerGeminiFlag(r.data);
+    const value = parseServerGeminiFlag(r.data);
+    serverGeminiCapabilityCache = { at: now, value };
+    return value;
   } catch (e) {
     if (import.meta.env.DEV) {
       console.warn('[Gemini] capabilities falló:', e);
     }
+    serverGeminiCapabilityCache = { at: now, value: false };
     return false;
   }
 }
@@ -295,19 +310,24 @@ async function fetchServerGeminiCapability(): Promise<boolean> {
 /** Generación vía Laravel (GEMINI_API_KEY en servidor); JSON, compatible con HTTP nativo en Android. */
 async function generateTransformedFileViaServer(file: File): Promise<File> {
   const { mime, base64 } = await fileToBase64(file);
-  const res = await api.post<unknown>(
-    'studio-catalog/gemini/generate-recorte',
-    {
-      mime,
-      image_base64: base64,
-    },
-    { timeout: SERVER_GENERATE_RECORTE_TIMEOUT_MS },
-  );
-  const body = res.data as {
-    status?: number;
-    message?: string;
-    data?: { mime?: string; base64?: string };
-  };
+  const payload = { mime, image_base64: base64 };
+  const body = Capacitor.isNativePlatform()
+    ? await postJsonViaWebView<{
+        status?: number;
+        message?: string;
+        data?: { mime?: string; base64?: string };
+      }>('studio-catalog/gemini/generate-recorte', payload, {
+        timeoutMs: SERVER_GENERATE_RECORTE_TIMEOUT_MS,
+      })
+    : ((
+        await api.post<unknown>('studio-catalog/gemini/generate-recorte', payload, {
+          timeout: SERVER_GENERATE_RECORTE_TIMEOUT_MS,
+        })
+      ).data as {
+        status?: number;
+        message?: string;
+        data?: { mime?: string; base64?: string };
+      });
   if (Number(body?.status) !== 200 || !body?.data?.base64) {
     throw new Error(body?.message || 'Error al generar imagen en el servidor.');
   }
@@ -330,13 +350,24 @@ export const geminiVehicleImageService = {
     return fetchServerGeminiCapability();
   },
 
+  /** Una sola consulta por lote IA (evita N llamadas a /capabilities). */
+  async resolveServerGeminiMode(): Promise<boolean> {
+    if (Boolean(geminiApiKey())) {
+      return false;
+    }
+    return fetchServerGeminiCapability();
+  },
+
   /** Recorte estudio + ciclorama + embellecimiento (misma lógica que el panel web). */
   async processFilesRecorteEmbellecer(
     files: File[],
     onProgress?: (index: number, total: number) => void,
+    serverGeminiMode?: boolean,
   ): Promise<File[]> {
     const useClient = Boolean(geminiApiKey());
-    const useServer = !useClient && (await fetchServerGeminiCapability());
+    const useServer =
+      !useClient &&
+      (serverGeminiMode ?? (await fetchServerGeminiCapability()));
     if (!useClient && !useServer) {
       throw new Error(
         'IA no disponible. Define GEMINI_API_KEY en el backend o VITE_GEMINI_API_KEY al compilar la app.',

@@ -53,6 +53,35 @@ function prepareRequestBody(
   return data as string | Record<string, unknown>;
 }
 
+function prefersWebViewTransport(
+  config: InternalAxiosRequestConfig,
+  method: string,
+  wantsBlob: boolean,
+): boolean {
+  if (method === 'GET' || method === 'HEAD' || method === 'DELETE') {
+    return true;
+  }
+  if (wantsBlob) {
+    return false;
+  }
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    return false;
+  }
+  if (config.data === undefined || config.data === null) {
+    return false;
+  }
+  if (
+    typeof config.data === 'object' &&
+    !(config.data instanceof ArrayBuffer) &&
+    !ArrayBuffer.isView(config.data)
+  ) {
+    return true;
+  }
+  const headers = headersToRecord(config);
+  const ct = (headers['Content-Type'] || headers['content-type'] || '').toLowerCase();
+  return typeof config.data === 'string' && ct.includes('application/json');
+}
+
 function parsePayload(data: unknown): unknown {
   if (typeof data === 'string') {
     const t = data.trim();
@@ -80,11 +109,15 @@ export const capacitorHttpAdapter: AxiosAdapter = async (config) => {
   }
 
   const method = (config.method || 'get').toUpperCase();
+  const wantsBlob =
+    config.responseType === 'blob' || config.responseType === 'arraybuffer';
+
+  if (prefersWebViewTransport(config, method, wantsBlob)) {
+    return xhrAdapter(config);
+  }
   const url = axios.getUri(config);
   const headers = headersToRecord(config);
   const body = prepareRequestBody(config.data, headers);
-
-  const wantsBlob = config.responseType === 'blob' || config.responseType === 'arraybuffer';
   const httpResponseType = wantsBlob ? 'blob' : 'json';
 
   const timeout =

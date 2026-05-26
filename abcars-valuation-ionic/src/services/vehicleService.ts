@@ -1,26 +1,29 @@
 import { Capacitor } from '@capacitor/core';
 import api from './api';
 import { formatUploadError, logUploadDiagnostic } from '../utils/apiErrorMessage';
-import { fileToBase64 } from '../utils/fileToBase64';
+import { uploadVehicleImageBase64Native } from '../utils/nativeUploadBase64';
 import { prepareImageFileForUpload } from '../utils/prepareImageFileForUpload';
 import { ApiResponse } from '../models';
 import { Vehicle, VehicleSearchResponse, CreateVehicleRequest, UpdateVehicleRequest } from '../models/Vehicle';
 
 export const vehicleService = {
   // Buscar vehículos
-  async searchVehicles(params: {
-    page?: number;
-    per_page?: number;
-    search?: string;
-    status?: string;
-    brand?: string;
-    model?: string;
-    body_names?: string;
-    min_price?: number;
-    max_price?: number;
-    /** Misma convención que el panel Angular (`has_images=false` en inventario). Por defecto no se envía → backend usa `true`. */
-    has_images?: boolean;
-  }): Promise<VehicleSearchResponse> {
+  async searchVehicles(
+    params: {
+      page?: number;
+      per_page?: number;
+      search?: string;
+      status?: string;
+      brand?: string;
+      model?: string;
+      body_names?: string;
+      min_price?: number;
+      max_price?: number;
+      /** Misma convención que el panel Angular (`has_images=false` en inventario). Por defecto no se envía → backend usa `true`. */
+      has_images?: boolean;
+    },
+    options?: { signal?: AbortSignal },
+  ): Promise<VehicleSearchResponse> {
     const queryParams = new URLSearchParams();
     
     // El backend usa 'paginate' en lugar de 'per_page'
@@ -46,10 +49,12 @@ export const vehicleService = {
     // Laravel SearchVehiclesRequest usa `relationship_names` (CSV). Sin esto el backend aplica su lista por defecto.
     queryParams.append('relationship_names', 'firstImage,brand,model,version');
 
-    console.log('Vehicle search request:', `vehicles/search?${queryParams.toString()}`);
-    const response = await api.get<any>(
-      `vehicles/search?${queryParams.toString()}`
-    );
+    const path = `vehicles/search?${queryParams.toString()}`;
+    console.log('Vehicle search request:', path);
+    const response = await api.get<any>(path, {
+      signal: options?.signal,
+      timeout: 60000,
+    });
     
     console.log('Vehicle search raw response:', JSON.stringify(response.data, null, 2));
     
@@ -188,20 +193,16 @@ export const vehicleService = {
       try {
         logUploadDiagnostic('uploadVehicleImages:start', {
           ...ctx,
-          transport: Capacitor.isNativePlatform() ? 'base64+json' : 'multipart',
+          transport: Capacitor.isNativePlatform() ? 'xhr+base64' : 'multipart',
         });
 
-        const response = Capacitor.isNativePlatform()
-          ? await api.post<ApiResponse<void>>(
-              'vehicle_images/upload_base64',
-              {
-                vehicle_uuid: vehicleUuid,
-                filename: file.name,
-                image_base64: await fileToBase64(file),
-              },
-              { timeout: 180000 },
-            )
-          : await (async () => {
+        if (Capacitor.isNativePlatform()) {
+          await uploadVehicleImageBase64Native(vehicleUuid, file, 180000);
+          lastResponse = { status: 201, message: 'Imagen enviada a procesar' };
+          continue;
+        }
+
+        const response = await (async () => {
               const formData = new FormData();
               formData.append('vehicle_uuid', vehicleUuid);
               formData.append('images[]', file, file.name);

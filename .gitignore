@@ -22,6 +22,9 @@ abcars-imagen-studio/.env
 **/yarn-debug.log*
 **/yarn-error.log*
 
+# Gantt (credentials locales)
+.env.gantt
+
 # Gantt / Cursor sync local
 .gantt/
 

@@ -6,7 +6,7 @@ export function getApiBaseUrl(): string {
   const raw = String(import.meta.env.VITE_API_BASE_URL ?? '')
     .trim()
     .replace(/^["']|["']$/g, '');
-  const fallback = 'https://nuevo-abcars-sandbox.up.railway.app/api';
+  const fallback = 'https://nuevo-abcars-production.up.railway.app/api';
   let base = raw || fallback;
   base = base.replace(/\/+$/, '');
   if (!/\/api$/i.test(base)) {

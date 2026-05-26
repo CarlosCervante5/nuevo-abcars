@@ -33,7 +33,7 @@ function normalizeApiNeedle(url) {
 
 const fromEnv =
   parseViteApiBase(['.env.production.local', '.env.production']) ||
-  'https://nuevo-abcars-sandbox.up.railway.app/api/';
+  'https://nuevo-abcars-production.up.railway.app/api/';
 const NEEDLE = normalizeApiNeedle(fromEnv);
 
 if (!NEEDLE) {

@@ -9,7 +9,10 @@ import {
 } from './vehicleImageAiBatch.types';
 
 const STORAGE_KEY = 'abcars_vehicle_ia_batch_jobs';
-const MAX_CONCURRENT_GEMINI = 4;
+/** Solo un lote activo: varios lotes saturan red y el plugin HTTP nativo. */
+const MAX_ACTIVE_BATCH_JOBS = 1;
+/** Tras este tiempo sin finalizar, se marca fallido (app cerrada o petición colgada). */
+const STALE_JOB_MS = 40 * 60 * 1000;
 
 type GeminiResult = {
   target: BatchImageTarget;
@@ -22,19 +25,45 @@ function emitUpdate(): void {
   }
 }
 
+function recoverStaleJobs(jobs: BatchJob[]): BatchJob[] {
+  const now = Date.now();
+  let changed = false;
+  const out = jobs.map((j) => {
+    if (
+      (j.status === 'processing' || j.status === 'saving') &&
+      now - j.startedAt > STALE_JOB_MS
+    ) {
+      changed = true;
+      return {
+        ...j,
+        status: 'failed' as BatchJobStatus,
+        finishedAt: now,
+        lastError:
+          'El proceso quedó incompleto (app cerrada o tiempo agotado). Vuelve a intentar con menos fotos.',
+      };
+    }
+    return j;
+  });
+  if (changed) {
+    saveJobsRaw(out);
+  }
+  return out;
+}
+
 function loadJobs(): BatchJob[] {
   if (typeof localStorage === 'undefined') return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as BatchJob[];
-    return Array.isArray(parsed) ? parsed : [];
+    const list = Array.isArray(parsed) ? parsed : [];
+    return recoverStaleJobs(list);
   } catch {
     return [];
   }
 }
 
-function saveJobs(jobs: BatchJob[]): void {
+function saveJobsRaw(jobs: BatchJob[]): void {
   if (typeof localStorage === 'undefined') return;
   const active = jobs.filter(
     (j) => j.status === 'processing' || j.status === 'saving',
@@ -46,6 +75,10 @@ function saveJobs(jobs: BatchJob[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify([...active, ...recentDone]));
 }
 
+function saveJobs(jobs: BatchJob[]): void {
+  saveJobsRaw(jobs);
+}
+
 function updateJob(jobId: string, patch: Partial<BatchJob>): void {
   const jobs = loadJobs();
   const idx = jobs.findIndex((j) => j.id === jobId);
@@ -55,34 +88,21 @@ function updateJob(jobId: string, patch: Partial<BatchJob>): void {
   emitUpdate();
 }
 
-async function mapWithConcurrency<T, R>(
-  items: T[],
-  limit: number,
-  fn: (item: T, index: number) => Promise<R>,
-): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let nextIndex = 0;
-
-  async function worker(): Promise<void> {
-    while (nextIndex < items.length) {
-      const i = nextIndex++;
-      results[i] = await fn(items[i], i);
-    }
-  }
-
-  const workers = Array.from({ length: Math.min(limit, items.length) }, () => worker());
-  await Promise.all(workers);
-  return results;
-}
-
-async function processOneWithGemini(target: BatchImageTarget): Promise<GeminiResult> {
+async function processOneWithGemini(
+  target: BatchImageTarget,
+  serverGemini: boolean,
+): Promise<GeminiResult> {
   let source: File;
   if (target.kind === 'existing') {
     source = await fetchImageAsFile(target.remoteUrl, `src_${target.imageUuid}.jpg`);
   } else {
     source = target.file;
   }
-  const batch = await geminiVehicleImageService.processFilesRecorteEmbellecer([source]);
+  const batch = await geminiVehicleImageService.processFilesRecorteEmbellecer(
+    [source],
+    undefined,
+    serverGemini,
+  );
   const file = batch[0];
   if (!file) {
     throw new Error('La IA no devolvió imagen.');
@@ -90,96 +110,121 @@ async function processOneWithGemini(target: BatchImageTarget): Promise<GeminiRes
   return { target, file };
 }
 
+/**
+ * Una foto a la vez: IA → guardar. Evita acumular N resultados en memoria y
+ * actualiza el progreso en cada paso (antes parecía “colgado” en IA 0/N).
+ */
 async function runJob(
   jobId: string,
   vehicleUuid: string,
   targets: BatchImageTarget[],
 ): Promise<void> {
-  const geminiResults: GeminiResult[] = [];
   const errors: string[] = [];
+  const pendingNewUploads: File[] = [];
+
+  let serverGemini = false;
+  try {
+    serverGemini = await geminiVehicleImageService.resolveServerGeminiMode();
+  } catch {
+    serverGemini = false;
+  }
 
   try {
-    await mapWithConcurrency(targets, MAX_CONCURRENT_GEMINI, async (target) => {
+    for (let i = 0; i < targets.length; i++) {
+      const target = targets[i];
+      const step = i + 1;
+
+      updateJob(jobId, {
+        status: 'processing',
+        currentStep: step,
+        phaseDetail: `IA foto ${step}/${targets.length}`,
+      });
+
+      let result: GeminiResult;
       try {
-        const result = await processOneWithGemini(target);
-        geminiResults.push(result);
-        const jobs = loadJobs();
-        const job = jobs.find((j) => j.id === jobId);
-        if (job) {
-          updateJob(jobId, { geminiDone: job.geminiDone + 1 });
-        }
+        result = await processOneWithGemini(target, serverGemini);
+        updateJob(jobId, { geminiDone: step });
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Error IA';
-        errors.push(msg);
-        const jobs = loadJobs();
-        const job = jobs.find((j) => j.id === jobId);
+        errors.push(`${target.label}: ${msg}`);
+        const job = loadJobs().find((j) => j.id === jobId);
         if (job) {
           updateJob(jobId, { failed: job.failed + 1 });
         }
+        continue;
       }
-    });
 
-    updateJob(jobId, { status: 'saving' });
+      updateJob(jobId, {
+        status: 'saving',
+        phaseDetail: `Guardando foto ${step}/${targets.length}`,
+      });
 
-    const newProcessed: File[] = [];
-
-    for (const { target, file } of geminiResults) {
       try {
-        if (target.kind === 'existing') {
+        if (result.target.kind === 'existing') {
           await vehicleService.replaceGalleryImageAtIndex(
             vehicleUuid,
-            target.imageUuid,
-            target.slotIndex,
-            file,
+            result.target.imageUuid,
+            result.target.slotIndex,
+            result.file,
           );
+          const job = loadJobs().find((j) => j.id === jobId);
+          if (job) {
+            updateJob(jobId, { saved: job.saved + 1 });
+          }
         } else {
-          newProcessed.push(file);
-        }
-        const jobs = loadJobs();
-        const job = jobs.find((j) => j.id === jobId);
-        if (job) {
-          updateJob(jobId, { saved: job.saved + 1 });
+          pendingNewUploads.push(result.file);
         }
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Error al guardar';
-        errors.push(msg);
-        const jobs = loadJobs();
-        const job = jobs.find((j) => j.id === jobId);
+        errors.push(`${result.target.label}: ${msg}`);
+        const job = loadJobs().find((j) => j.id === jobId);
         if (job) {
           updateJob(jobId, { failed: job.failed + 1 });
         }
       }
     }
 
-    if (newProcessed.length > 0) {
+    if (pendingNewUploads.length > 0) {
+      updateJob(jobId, {
+        status: 'saving',
+        phaseDetail: `Subiendo ${pendingNewUploads.length} foto(s) nueva(s)…`,
+      });
       try {
-        await vehicleService.uploadVehicleImages(vehicleUuid, newProcessed);
-        const jobAfterUpload = loadJobs().find((j) => j.id === jobId);
-        if (jobAfterUpload) {
-          updateJob(jobId, { saved: jobAfterUpload.saved + newProcessed.length });
+        await vehicleService.uploadVehicleImages(vehicleUuid, pendingNewUploads);
+        const jobOk = loadJobs().find((j) => j.id === jobId);
+        if (jobOk) {
+          updateJob(jobId, { saved: jobOk.saved + pendingNewUploads.length });
         }
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Error al subir nuevas fotos';
         errors.push(msg);
         const jobFail = loadJobs().find((j) => j.id === jobId);
         if (jobFail) {
-          updateJob(jobId, { failed: jobFail.failed + newProcessed.length });
+          updateJob(jobId, {
+            failed: jobFail.failed + pendingNewUploads.length,
+          });
         }
       }
     }
 
+    const jobNow = loadJobs().find((j) => j.id === jobId);
+    const anyOk = (jobNow?.saved ?? 0) > 0;
     const finalStatus: BatchJobStatus =
-      errors.length > 0 && geminiResults.length === 0 ? 'failed' : 'completed';
+      errors.length > 0 && !anyOk ? 'failed' : 'completed';
     updateJob(jobId, {
       status: finalStatus,
       finishedAt: Date.now(),
-      lastError: errors.length ? errors[0] : undefined,
+      lastError: errors.length ? errors.slice(0, 2).join(' · ') : undefined,
+      phaseDetail: undefined,
+      currentStep: undefined,
     });
   } catch (e: unknown) {
     updateJob(jobId, {
       status: 'failed',
       finishedAt: Date.now(),
       lastError: e instanceof Error ? e.message : 'Error en lote IA',
+      phaseDetail: undefined,
+      currentStep: undefined,
     });
   }
 }
@@ -201,11 +246,18 @@ export const vehicleImageAiBatchService = {
     );
   },
 
+  /**
+   * @returns job id o null si ya hay un lote activo
+   */
   startBatch(
     vehicleUuid: string,
     vehicleLabel: string,
     targets: BatchImageTarget[],
-  ): string {
+  ): string | null {
+    if (vehicleImageAiBatchService.getActiveJobs().length >= MAX_ACTIVE_BATCH_JOBS) {
+      return null;
+    }
+
     const id = `batch_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const job: BatchJob = {
       id,
@@ -217,6 +269,8 @@ export const vehicleImageAiBatchService = {
       saved: 0,
       failed: 0,
       startedAt: Date.now(),
+      currentStep: 0,
+      phaseDetail: 'Iniciando…',
     };
     const jobs = loadJobs();
     jobs.unshift(job);

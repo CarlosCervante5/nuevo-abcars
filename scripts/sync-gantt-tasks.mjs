@@ -2,6 +2,7 @@
 /**
  * Sincroniza tareas del Gantt (API Railway) → .gantt/TAREAS.md para Cursor IDE.
  * Env: GANTT_API_URL, GANTT_GITHUB_USER, opcional GANTT_SYNC_TOKEN, GANTT_REPO_NAME
+ * Archivo opcional en la raíz: `.env.gantt` (ver `.env.gantt.example`)
  */
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -12,6 +13,34 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
+
+/**
+ * Carga variables desde `.env.gantt` en la raíz del repo (opcional, no versionar).
+ */
+function loadLocalGanttEnv() {
+  const filePath = path.join(repoRoot, '.env.gantt');
+  if (!fs.existsSync(filePath)) return;
+  const lines = fs.readFileSync(filePath, 'utf8').split(/\r?\n/);
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+    const eq = t.indexOf('=');
+    if (eq <= 0) continue;
+    const key = t.slice(0, eq).trim();
+    let val = t.slice(eq + 1).trim();
+    if (
+      (val.startsWith('"') && val.endsWith('"')) ||
+      (val.startsWith("'") && val.endsWith("'"))
+    ) {
+      val = val.slice(1, -1);
+    }
+    if (!(key in process.env) || process.env[key] === '') {
+      process.env[key] = val;
+    }
+  }
+}
+
+loadLocalGanttEnv();
 
 function env(name, fallback = '') {
   const v = process.env[name];
