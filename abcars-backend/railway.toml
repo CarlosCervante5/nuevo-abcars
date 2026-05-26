@@ -7,6 +7,7 @@ builder = "nixpacks"
 [deploy]
 # Un solo comando; Railway solo permite 1 elemento en el array
 preDeployCommand = ["chmod +x ./railway/init-app.sh && sh ./railway/init-app.sh"]
-# Sirve toda la petición vía public/index.php (rutas /api/*, /up, etc.). Si falta, Nixpacks puede
-# dejar un docroot equivocado y devolver 404 aunque el código tenga la ruta registrada.
-startCommand = "php artisan serve --host=0.0.0.0 --port $PORT"
+# Arranque por rol (ABCARS_PROCESS_ROLE en Variables de cada servicio):
+#   web (default) → serve | scheduler → schedule:run | queue → queue:work
+# Ver railway/start.sh y railway/RAILWAY.md
+startCommand = "chmod +x ./railway/start.sh && sh ./railway/start.sh"
