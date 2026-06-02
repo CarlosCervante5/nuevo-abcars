@@ -13,7 +13,8 @@ import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 import {UpdateVehicle,  FullDetailResponse, BrandsResponse, Brand, Model, Body, ModelsResponse, VersionsResponse, Version, BodiesResponse, VehicleUpdateResponse, GralResponse, ImageOrder} from '@interfaces/vehicle_data.interface';
-import { GetcampaingResponse } from '@interfaces/admin.interfaces';
+import { Dealership, DealerShipResponse, GetcampaingResponse } from '@interfaces/admin.interfaces';
+import { sortDealershipsForPublic } from 'src/app/shared/utils/public-dealerships';
 // import { CampaingService } from 'src/app/admin/gestor/services/campaing.service';
 import { AdminService } from '@services/admin.service';
 
@@ -95,6 +96,10 @@ export class UpdateVehicleComponent implements OnInit, OnDestroy {
   public bodies:Body[] = [];
   filteredBodies: Observable<Body[]> = of([]);
 
+  /** Catálogo de sucursales (BD) para el select de edición. */
+  dealershipsForSelect: Dealership[] = [];
+  loadingDealerships = false;
+
   constructor(
     @Inject(MAT_BOTTOM_SHEET_DATA) public data: { uuid: string; initialTab?: number },
     private _formBuilder: UntypedFormBuilder,
@@ -129,6 +134,10 @@ export class UpdateVehicleComponent implements OnInit, OnDestroy {
     void this._geminiVehicleImage.refreshGenerationAvailability().then((ok) => {
       this.geminiAiConfigured = ok;
     });
+    this.form.get('dealership_name')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((name) => this.syncLocationFromDealership(name));
+    this.loadDealerships();
     this.getVehicle();
 
     this._imageAiQueue.vehicleBatchFinished$
@@ -428,12 +437,67 @@ export class UpdateVehicleComponent implements OnInit, OnDestroy {
 
             this.filters();
             this.syncImagesFromVehicle();
+            this.refreshDealershipsForSelect();
+            this.syncLocationFromDealership(this.form.get('dealership_name')?.value);
           }, 500);
         },
         error: (err: unknown) => {
           reload(err, this._router);
         }
       });
+  }
+
+  private loadDealerships(): void {
+    this.loadingDealerships = true;
+    this._campaignService.getDealerships().subscribe({
+      next: (res: DealerShipResponse) => {
+        this.dealershipsForSelect = sortDealershipsForPublic(res.data ?? []);
+        this.refreshDealershipsForSelect();
+        this.syncLocationFromDealership(this.form.get('dealership_name')?.value);
+        this.loadingDealerships = false;
+      },
+      error: () => {
+        this.dealershipsForSelect = [];
+        this.loadingDealerships = false;
+      },
+    });
+  }
+
+  /** Incluye la sucursal actual del vehículo si ya no está en catálogo. */
+  private refreshDealershipsForSelect(): void {
+    const currentName = String(
+      this.form.get('dealership_name')?.value ?? this.vehicle?.dealership?.name ?? '',
+    ).trim();
+    const currentLoc = String(
+      this.form.get('location')?.value ?? this.vehicle?.dealership?.location ?? '',
+    ).trim();
+    if (!currentName) {
+      return;
+    }
+    const exists = this.dealershipsForSelect.some(
+      (d) => (d.name ?? '').trim().toLowerCase() === currentName.toLowerCase(),
+    );
+    if (!exists) {
+      this.dealershipsForSelect = [
+        { name: currentName, location: currentLoc } as Dealership,
+        ...this.dealershipsForSelect,
+      ];
+    }
+  }
+
+  private syncLocationFromDealership(name: string | null | undefined): void {
+    const key = String(name ?? '').trim().toLowerCase();
+    if (!key) {
+      this.form.patchValue({ location: '' }, { emitEvent: false });
+      return;
+    }
+    const match = this.dealershipsForSelect.find(
+      (d) => (d.name ?? '').trim().toLowerCase() === key,
+    );
+    this.form.patchValue(
+      { location: (match?.location ?? '').trim() },
+      { emitEvent: false },
+    );
   }
 
   private syncImagesFromVehicle(): void {

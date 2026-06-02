@@ -1,4 +1,4 @@
-import { Campaign } from '@interfaces/admin.interfaces';
+import { Campaign, Dealership, DealerShipResponse, GetcampaingResponse } from '@interfaces/admin.interfaces';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { AbstractControl, FormControl, FormGroup, UntypedFormBuilder, ValidatorFn, Validators } from '@angular/forms';
@@ -10,8 +10,8 @@ import { map, startWith, finalize, takeUntil } from 'rxjs/operators';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 
 import {UpdateVehicle, BrandsResponse, Brand, Line, Model, Body, ModelsResponse, VersionsResponse, Version, BodiesResponse, GralResponse, VehicleStoreResponse, FullDetailResponse, ImageOrder} from '@interfaces/vehicle_data.interface';
-import { GetcampaingResponse } from '@interfaces/admin.interfaces';
 import { AdminService } from '@services/admin.service';
+import { sortDealershipsForPublic } from 'src/app/shared/utils/public-dealerships';
 
 import { suggestBrandsByName } from '@helpers/brand-suggest.helper';
 import {reload} from '@helpers/session.helper';
@@ -97,6 +97,10 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
   public bodies:Body[] = [];
   filteredBodies: Observable<Body[]> = of([]);
 
+  /** Catálogo de sucursales (BD) para el select de alta. */
+  dealershipsForSelect: Dealership[] = [];
+  loadingDealerships = false;
+
   constructor(
     private _formBuilder: UntypedFormBuilder,
     private _vehicleService:VehicleService,
@@ -125,6 +129,10 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
     void this._geminiVehicleImage.refreshGenerationAvailability().then((ok) => {
       this.geminiAiConfigured = ok;
     });
+    this.form.get('dealership_name')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((name) => this.syncLocationFromDealership(name));
+    this.loadDealerships();
     this.queueVehicleIdentity$.next(this.createdUuid);
 
     this._imageAiQueue.vehicleBatchFinished$
@@ -470,6 +478,35 @@ export class StoreVehicleComponent implements OnInit, OnDestroy {
     this.getBrands();
     this.getBodies();
     this.getCampaigns();
+  }
+
+  private loadDealerships(): void {
+    this.loadingDealerships = true;
+    this._campaignService.getDealerships().subscribe({
+      next: (res: DealerShipResponse) => {
+        this.dealershipsForSelect = sortDealershipsForPublic(res.data ?? []);
+        this.loadingDealerships = false;
+      },
+      error: () => {
+        this.dealershipsForSelect = [];
+        this.loadingDealerships = false;
+      },
+    });
+  }
+
+  private syncLocationFromDealership(name: string | null | undefined): void {
+    const key = String(name ?? '').trim().toLowerCase();
+    if (!key) {
+      this.form.patchValue({ location: '' }, { emitEvent: false });
+      return;
+    }
+    const match = this.dealershipsForSelect.find(
+      (d) => (d.name ?? '').trim().toLowerCase() === key,
+    );
+    this.form.patchValue(
+      { location: (match?.location ?? '').trim() },
+      { emitEvent: false },
+    );
   }
 
   get vehicleCreated(): boolean {

@@ -77,17 +77,21 @@
             <!-- Sucursal -->
             <div class="store-vehicle-form-field">
               <label class="store-vehicle-label">Sucursal del vehículo <span style="color: red;">*</span></label>
-              <input
-                type="text"
+              <select
                 formControlName="dealership_name"
-                placeholder="Nueva sucursal"
-                minlength="1"
-                maxlength="191"
                 required
                 class="store-vehicle-input"
                 [class.store-vehicle-input-error]="dealershipInvalid"
-              />
-              <span *ngIf="dealershipInvalid" class="store-vehicle-hint">Escribe la nueva sucursal del vehículo.</span>
+                [disabled]="loadingDealerships"
+              >
+                <option value="" disabled>
+                  {{ loadingDealerships ? 'Cargando sucursales…' : 'Seleccione sucursal' }}
+                </option>
+                <option *ngFor="let d of dealershipsForSelect" [value]="d.name">
+                  {{ d.name | titlecase }}<ng-container *ngIf="d.location"> — {{ d.location | titlecase }}</ng-container>
+                </option>
+              </select>
+              <span *ngIf="dealershipInvalid" class="store-vehicle-hint">Seleccione la sucursal del vehículo.</span>
             </div>
 
             <!-- Ubicación -->
@@ -96,14 +100,15 @@
               <input
                 type="text"
                 formControlName="location"
-                placeholder="Nueva ubicación"
+                placeholder="Se completa al elegir sucursal"
                 minlength="1"
                 maxlength="191"
                 required
+                readonly
                 class="store-vehicle-input"
                 [class.store-vehicle-input-error]="locationInvalid"
               />
-              <span *ngIf="locationInvalid" class="store-vehicle-hint">Escribe la nueva ubicación del vehículo.</span>
+              <span *ngIf="locationInvalid" class="store-vehicle-hint">Seleccione una sucursal para asignar la ubicación.</span>
             </div>
 
             <!-- Fecha de compra -->
