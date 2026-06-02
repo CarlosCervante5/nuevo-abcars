@@ -2,7 +2,6 @@
 
 namespace App\Services\Intelimotor;
 
-use App\Models\Dealership;
 use App\Models\IntelimotorAccount;
 use App\Models\LineModel;
 use App\Models\ModelVersion;
@@ -296,7 +295,6 @@ class IntelimotorInventorySyncService
         $vin = $this->resolveVin($unit);
         $pictureUrls = $this->extractPictureUrls($unit);
 
-        $dealership = $this->resolveDealership($account);
         $brand = VehicleBrand::firstOrCreate(['name' => strtolower($brandName)]);
         $model = LineModel::firstOrCreate([
             'name' => strtolower($modelName),
@@ -331,7 +329,6 @@ class IntelimotorInventorySyncService
         $vehicle->category = 'pre_owned';
         $vehicle->type = 'car';
         $vehicle->page_status = $this->resolvePageStatusFromIntelimotor($unit, $pictureUrls);
-        $vehicle->dealership_id = $dealership->id;
         $vehicle->brand_id = $brand->id;
         $vehicle->model_id = $model->id;
         $vehicle->version_id = $version->id;
@@ -488,22 +485,5 @@ class IntelimotorInventorySyncService
     private function isUsableVin(string $vin): bool
     {
         return strlen($vin) >= 8;
-    }
-
-    private function resolveDealership(IntelimotorAccount $account): Dealership
-    {
-        if ($account->default_dealership_id) {
-            $dealership = Dealership::query()->find($account->default_dealership_id);
-            if ($dealership) {
-                return $dealership;
-            }
-        }
-
-        $dealership = Dealership::query()->orderBy('id')->first();
-        if (! $dealership) {
-            throw new IntelimotorIntegrationException('No hay sucursales en ABCars para asignar vehículos importados.', 422);
-        }
-
-        return $dealership;
     }
 }
