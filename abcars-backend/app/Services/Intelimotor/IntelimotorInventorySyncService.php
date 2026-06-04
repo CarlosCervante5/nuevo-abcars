@@ -158,7 +158,7 @@ class IntelimotorInventorySyncService
                     }
 
                     if ($syncImages) {
-                        $imageCount = $this->syncImagesFromIntelimotor($vehicle, $unit);
+                        $imageCount = $this->syncImagesFromIntelimotor($vehicle, $unit, $isCreate);
                         $summary['images_synced'] += $imageCount;
                     }
                 } catch (\Throwable $exception) {
@@ -317,6 +317,8 @@ class IntelimotorInventorySyncService
             $vehicle->vin = $vin;
         }
 
+        $isNew = ! $vehicle->exists;
+
         $vehicle->intelimotor_account_id = $account->id;
         $vehicle->intelimotor_unit_id = $unitId;
         $vehicle->intelimotor_ref = (string) ($unit['ref'] ?? null) ?: null;
@@ -328,7 +330,9 @@ class IntelimotorInventorySyncService
         $vehicle->sale_price = (float) ($unit['listPrice'] ?? 0);
         $vehicle->category = 'pre_owned';
         $vehicle->type = 'car';
-        $vehicle->page_status = $this->resolvePageStatusFromIntelimotor($unit, $pictureUrls);
+        if ($isNew) {
+            $vehicle->page_status = $this->resolvePageStatusFromIntelimotor($unit, $pictureUrls);
+        }
         $vehicle->brand_id = $brand->id;
         $vehicle->model_id = $model->id;
         $vehicle->version_id = $version->id;
@@ -345,7 +349,7 @@ class IntelimotorInventorySyncService
         return $vehicle->fresh();
     }
 
-    private function syncImagesFromIntelimotor(Vehicle $vehicle, array $unit): int
+    private function syncImagesFromIntelimotor(Vehicle $vehicle, array $unit, bool $isCreate = false): int
     {
         $remoteUrls = $this->extractPictureUrls($unit);
         if ($remoteUrls === []) {
@@ -375,7 +379,7 @@ class IntelimotorInventorySyncService
             $created++;
         }
 
-        if ($vehicle->page_status !== 'sale') {
+        if ($isCreate && $vehicle->page_status !== 'sale') {
             $vehicle->page_status = $created > 0 ? 'active' : 'inactive';
             $vehicle->save();
         }
