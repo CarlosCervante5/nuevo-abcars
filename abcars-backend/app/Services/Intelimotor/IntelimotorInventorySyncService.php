@@ -326,13 +326,13 @@ class IntelimotorInventorySyncService
         $vehicle->name = $vehicleName;
         $vehicle->description = $vehicle->description ?: 'Importado desde Intelimotor';
         $vehicle->mileage = (int) ($unit['kms'] ?? 0);
-        if ($isNew) {
-            $vehicle->list_price = (float) ($unit['listPrice'] ?? 0);
-            $vehicle->sale_price = (float) ($unit['listPrice'] ?? 0);
-            $vehicle->page_status = $this->resolvePageStatusFromIntelimotor($unit, $pictureUrls);
-        }
+        $vehicle->list_price = (float) ($unit['listPrice'] ?? 0);
+        $vehicle->sale_price = (float) ($unit['listPrice'] ?? 0);
         $vehicle->category = 'pre_owned';
         $vehicle->type = 'car';
+        if ($isNew) {
+            $vehicle->page_status = $this->resolvePageStatusFromIntelimotor($unit, $pictureUrls);
+        }
         $vehicle->brand_id = $brand->id;
         $vehicle->model_id = $model->id;
         $vehicle->version_id = $version->id;
