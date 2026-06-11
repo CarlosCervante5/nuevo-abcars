@@ -512,8 +512,14 @@
 
 ::ng-deep .inv-mat-table .mat-column-actions {
   width: 1%;
-  min-width: 15rem;
-  padding-right: 1rem !important;
+  min-width: 17.5rem;
+  padding-right: 0.75rem !important;
+  white-space: nowrap;
+}
+
+::ng-deep .inv-mat-table .mat-column-actions .mat-mdc-cell,
+::ng-deep .inv-mat-table .mat-column-actions .mat-cell {
+  white-space: nowrap;
 }
 
 /* Paginator */
