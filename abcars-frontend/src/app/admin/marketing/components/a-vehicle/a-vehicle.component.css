@@ -75,6 +75,36 @@
   cursor: not-allowed;
 }
 
+.inv-act--consignment {
+  border-color: #ddd6fe;
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.inv-act--consignment:hover:not(:disabled) {
+  background: #ede9fe;
+  border-color: #c4b5fd;
+  color: #5b21b6;
+}
+
+.inv-act--consignment-active {
+  border-color: #a78bfa;
+  background: #7c3aed;
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(124, 58, 237, 0.35);
+}
+
+.inv-act--consignment-active:hover:not(:disabled) {
+  background: #6d28d9;
+  border-color: #8b5cf6;
+  color: #fff;
+}
+
+.inv-act--consignment:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .inv-act-check {
   margin-left: 0.25rem;
 }

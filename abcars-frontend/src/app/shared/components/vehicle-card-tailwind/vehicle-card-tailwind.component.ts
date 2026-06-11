@@ -4,7 +4,11 @@ import { Router, RouterModule } from '@angular/router';
 import { ScrollService } from '../../services/scroll.service';
 import { ReferralService } from '../../services/referral.service';
 import { optimizeCloudinaryVehicleDeliveryUrl } from '../../utils/cloudinary-vehicle-delivery-url';
-import { formatVehicleCategoryBadgeLabel } from '../../utils/vehicle-category-label';
+import {
+  getPrimaryVehicleCategoryBadgeLabel,
+  getVehicleCardLocationLabel,
+  shouldShowConsignmentBadge,
+} from '../../utils/vehicle-category-label';
 
 export interface Vehicle {
   uuid: string;
@@ -14,6 +18,7 @@ export interface Vehicle {
   exterior_color: string;
   year: number;
   category?: string;
+  is_consignment?: boolean;
   brand?: { name: string };
   model?: { name: string; year: number };
   dealership?: { name: string; location: string };
@@ -40,9 +45,15 @@ export interface Vehicle {
           </span>
         </div>
         <!-- Brand / categoría badge -->
-        <div class="absolute top-4 left-4 z-20 bg-black bg-opacity-70 backdrop-blur-sm rounded-full px-3 py-1">
-          <span class="text-white text-sm font-medium uppercase">
+        <div class="absolute top-4 left-4 z-20 flex flex-col items-start gap-1">
+          <span class="bg-black bg-opacity-70 backdrop-blur-sm rounded-full px-3 py-1 text-white text-sm font-medium uppercase">
             {{ topLeftBadgeLabel }}
+          </span>
+          <span
+            *ngIf="showConsignmentBadge"
+            class="bg-black bg-opacity-70 backdrop-blur-sm rounded-full px-3 py-1 text-white text-sm font-medium uppercase"
+          >
+            CONSIGNACIÓN
           </span>
         </div>
       </div>
@@ -81,12 +92,12 @@ export interface Vehicle {
           </div>
 
           <!-- Location -->
-          <div class="flex items-center text-gray-600" *ngIf="vehicle.dealership">
+          <div class="flex items-center text-gray-600" *ngIf="cardLocationLabel">
             <svg class="w-5 h-5 mr-2 text-abcars-secondary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
-            <span class="text-sm capitalize truncate">{{ vehicle.dealership.location }}</span>
+            <span class="text-sm capitalize truncate">{{ cardLocationLabel }}</span>
           </div>
         </div>
 
@@ -124,9 +135,21 @@ export class VehicleCardTailwindComponent {
 
   @Input() vehicle!: Vehicle;
 
-  /** Categoría del vehículo (NUEVO, SEMINUEVO, DEMO, CONSIGNACIÓN). */
+  /** Categoría del vehículo (NUEVO, SEMINUEVO, DEMO). */
   get topLeftBadgeLabel(): string {
-    return formatVehicleCategoryBadgeLabel(this.vehicle?.category) || 'N/A';
+    return getPrimaryVehicleCategoryBadgeLabel(this.vehicle?.category, this.vehicle?.is_consignment);
+  }
+
+  get showConsignmentBadge(): boolean {
+    return shouldShowConsignmentBadge(this.vehicle?.category, this.vehicle?.is_consignment);
+  }
+
+  get cardLocationLabel(): string {
+    return getVehicleCardLocationLabel(
+      this.vehicle?.dealership?.location,
+      this.vehicle?.category,
+      this.vehicle?.is_consignment,
+    );
   }
 
   constructor(

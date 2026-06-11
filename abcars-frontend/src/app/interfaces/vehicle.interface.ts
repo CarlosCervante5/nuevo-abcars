@@ -10,6 +10,7 @@ export interface Vehicle {
   transmission: string;
   status: string;
   category?: string;
+  is_consignment?: boolean;
   image_url?: string;
   certification?: string;
   name?: string;

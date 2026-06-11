@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Vehicles\DeleteVehicleBatchRequest;
 use App\Http\Requests\Vehicles\DeleteVehicleRequest;
 use App\Http\Requests\Vehicles\DetailVehicleRequest;
+use App\Http\Requests\Vehicles\MarkVehicleConsignmentRequest;
 use App\Http\Requests\Vehicles\RandomSearchVehiclesRequest;
 use App\Http\Requests\Vehicles\RestoreVehicleRequest;
 use App\Http\Requests\Vehicles\SearchVehiclesRequest;
@@ -149,6 +150,25 @@ class VehicleController extends Controller
             return ApiResponseHelper::validationError($e);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al actualizar el vehículo', $e->getMessage(), 500, 'UPDATE_VEHICLE_ERROR');
+        }
+    }
+
+    /**
+     * Marcar vehículo como consignación (activo + badge en catálogo).
+     */
+    public function markConsignment(MarkVehicleConsignmentRequest $request)
+    {
+        try {
+            $user = auth()->user();
+            $data = $request->validated();
+
+            $vehicle = $this->vehicleService->markAsConsignment($data['uuid'], $user->id);
+
+            return ApiResponseHelper::apiSuccess(200, 'Vehículo marcado como consignación', $vehicle);
+        } catch (ValidationException $e) {
+            return ApiResponseHelper::validationError($e);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al marcar consignación', $e->getMessage(), 500, 'MARK_CONSIGNMENT_ERROR');
         }
     }
 

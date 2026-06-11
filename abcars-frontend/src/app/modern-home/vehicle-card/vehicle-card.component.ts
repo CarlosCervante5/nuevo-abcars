@@ -4,7 +4,10 @@ import { Vehicle } from '../../interfaces/vehicle.interface';
 import { FALLBACK_HERO_IMAGE } from '../../shared/constants/fallback-media';
 import { optimizeCloudinaryVehicleDeliveryUrl } from '../../shared/utils/cloudinary-vehicle-delivery-url';
 import { formatFuelTypeLabel } from '../../shared/utils/fuel-type-label';
-import { formatVehicleCategoryBadgeLabel } from '../../shared/utils/vehicle-category-label';
+import {
+  getPrimaryVehicleCategoryBadgeLabel,
+  shouldShowConsignmentBadge,
+} from '../../shared/utils/vehicle-category-label';
 
 @Component({
   selector: 'app-vehicle-card',
@@ -23,9 +26,15 @@ import { formatVehicleCategoryBadgeLabel } from '../../shared/utils/vehicle-cate
           class="w-full h-full object-cover"
         >
         <!-- Etiqueta categoría -->
-        <div class="absolute top-3 left-3">
+        <div class="absolute top-3 left-3 flex flex-col items-start gap-1">
           <span class="px-2 py-1 bg-black text-white text-xs font-bold rounded tracking-wide">
             {{ categoryBadgeLabel }}
+          </span>
+          <span
+            *ngIf="showConsignmentBadge"
+            class="px-2 py-1 bg-black text-white text-xs font-bold rounded tracking-wide"
+          >
+            CONSIGNACIÓN
           </span>
         </div>
         <!-- Etiqueta PREMIUM -->
@@ -95,9 +104,16 @@ export class VehicleCardComponent {
 
   get categoryBadgeLabel(): string {
     return (
-      formatVehicleCategoryBadgeLabel(this.vehicle?.category) ||
-      formatVehicleCategoryBadgeLabel(this.vehicle?.apiData?.category) ||
+      getPrimaryVehicleCategoryBadgeLabel(this.vehicle?.category, this.vehicle?.is_consignment) ||
+      getPrimaryVehicleCategoryBadgeLabel(this.vehicle?.apiData?.category, this.vehicle?.apiData?.is_consignment) ||
       'N/A'
+    );
+  }
+
+  get showConsignmentBadge(): boolean {
+    return (
+      shouldShowConsignmentBadge(this.vehicle?.category, this.vehicle?.is_consignment) ||
+      shouldShowConsignmentBadge(this.vehicle?.apiData?.category, this.vehicle?.apiData?.is_consignment)
     );
   }
 

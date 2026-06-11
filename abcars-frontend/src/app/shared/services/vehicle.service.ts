@@ -101,6 +101,17 @@ constructor(
 
         return this._http.post<VehicleUpdateResponse>(`${ this.baseUrl }/api/vehicles/update`, form, { headers });
     }
+
+    public markVehicleConsignment(uuid: string): Observable<GralResponse> {
+        const user_token = localStorage.getItem('user_token');
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
+
+        return this._http.post<GralResponse>(
+            `${this.baseUrl}/api/vehicles/mark-consignment`,
+            { uuid },
+            { headers },
+        );
+    }
     
 
     public getVehicles(

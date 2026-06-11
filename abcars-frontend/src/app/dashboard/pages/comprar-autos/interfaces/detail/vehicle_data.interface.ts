@@ -164,6 +164,7 @@ export interface Vehicle {
     mileage:        number;
     type:           string;
     category:       string;
+    is_consignment?: boolean;
     cylinders:      number;
     interior_color: string;
     exterior_color: string;

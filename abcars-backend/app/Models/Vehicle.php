@@ -57,6 +57,7 @@ class Vehicle extends Model
         'type',
         'fuel_type',
         'category',
+        'is_consignment',
         'cylinders',
         'engine_displacement_cc',
         'wet_weight_kg',
@@ -107,6 +108,7 @@ class Vehicle extends Model
 
     protected $casts = [
         'intelimotor_synced_at' => 'datetime',
+        'is_consignment' => 'boolean',
     ];
 
     public function getCreatedAtAttribute($value)

@@ -217,6 +217,36 @@ class VehicleService
     }
 
     /**
+     * Marca el vehículo como consignación: activo en inventario y badge en catálogo.
+     * No cambia la categoría base (Nuevo/Seminuevo) salvo legacy category=consignment.
+     */
+    public function markAsConsignment(string $uuid, $user_id): Vehicle
+    {
+        $vehicle = Vehicle::findByUuid($uuid);
+
+        $updates = [
+            'is_consignment' => true,
+            'page_status' => 'active',
+        ];
+
+        if (strtolower((string) $vehicle->category) === 'consignment') {
+            $updates['category'] = 'pre_owned';
+        }
+
+        $vehicle->update($updates);
+
+        $this->userService->vehicleUpdate(
+            'Vehicle Controller: Mark consignment',
+            json_encode($vehicle),
+            json_encode(['uuid' => $uuid, 'is_consignment' => true]),
+            $user_id,
+            $vehicle->id
+        );
+
+        return $vehicle->fresh();
+    }
+
+    /**
      * Elimina un vehículo basado en su UUID.
      *
      * @param string $uuid UUID del vehículo a eliminar.

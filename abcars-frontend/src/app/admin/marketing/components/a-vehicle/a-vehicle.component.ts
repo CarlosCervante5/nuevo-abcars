@@ -2,6 +2,7 @@ import { Component, Input, EventEmitter, Output  } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { CompraTuAutoService } from '@services/compra-tu-auto.service';
 import { IntelimotorService } from '@services/intelimotor.service';
+import { VehicleService } from '@services/vehicle.service';
 import Swal from 'sweetalert2';
 import { UpdateVehicleComponent } from '../update-vehicle/update-vehicle.component';
 import {reload} from '@helpers/session.helper';
@@ -24,14 +25,20 @@ export class AVehicleComponent {
 
   checked = false;
   pushingIntelimotor = false;
+  markingConsignment = false;
 
   constructor(
     private _compraTuAutoService: CompraTuAutoService,
     private _bottomSheet: MatBottomSheet,
     private _router: Router,
-    private _intelimotorService: IntelimotorService
+    private _intelimotorService: IntelimotorService,
+    private _vehicleService: VehicleService,
   ) { 
     
+  }
+
+  get isConsignment(): boolean {
+    return !!this.vehicle?.is_consignment || String(this.vehicle?.category ?? '').toLowerCase() === 'consignment';
   }
 
   get canPushIntelimotorPhotos(): boolean {
@@ -116,6 +123,45 @@ export class AVehicleComponent {
           const message = err?.error?.message || 'No se pudieron subir las fotos a Intelimotor';
           Swal.fire('Error', message.replace(/^Hubo un problema con su solicitud:\s*/i, ''), 'error');
         }
+      });
+    });
+  }
+
+  markAsConsignment(): void {
+    if (this.markingConsignment) {
+      return;
+    }
+
+    Swal.fire({
+      title: '¿Marcar como consignación?',
+      text: 'El vehículo quedará activo y mostrará el badge Consignación en el catálogo.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Marcar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#7c3aed',
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      this.markingConsignment = true;
+      this._vehicleService.markVehicleConsignment(this.vehicle.uuid).subscribe({
+        next: (resp) => {
+          this.markingConsignment = false;
+          this.vehicle.is_consignment = true;
+          this.vehicle.page_status = 'active';
+          if (String(this.vehicle.category ?? '').toLowerCase() === 'consignment') {
+            this.vehicle.category = 'pre_owned';
+          }
+          this.reload.emit(true);
+          Swal.fire('Listo', resp.message || 'Vehículo marcado como consignación', 'success');
+        },
+        error: (err) => {
+          this.markingConsignment = false;
+          const message = err?.error?.message || 'No se pudo marcar como consignación';
+          Swal.fire('Error', message.replace(/^Hubo un problema con su solicitud:\s*/i, ''), 'error');
+        },
       });
     });
   }

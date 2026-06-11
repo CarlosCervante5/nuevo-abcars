@@ -276,6 +276,7 @@ Route::prefix('vehicles')->middleware('bandwidth_usage')->group(function () {
         Route::middleware('role_or_permission:super_admin|administrator|marketing|update vehicles')->group(function () {
             Route::post('/update', [VehicleController::class, 'update']);
             Route::post('/status', [VehicleController::class, 'status']);
+            Route::post('/mark-consignment', [VehicleController::class, 'markConsignment']);
             Route::post('/restore', [VehicleController::class, 'restore']);
             Route::post('/inverse_delete_batch', [VehicleController::class, 'inverseDeleteBatch']);
             Route::post('/status-batch', [VehicleController::class, 'statusBatch']);
