@@ -143,6 +143,7 @@ export interface Vehicle {
     mileage:        number;
     type:           string;
     category:       string;
+    is_consignment?: boolean;
     cylinders:      number;
     engine_displacement_cc?: number | null;
     wet_weight_kg?: number | null;
