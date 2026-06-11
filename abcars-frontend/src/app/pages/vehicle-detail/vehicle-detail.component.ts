@@ -12,7 +12,7 @@ import { Vehicle as ApiVehicle } from '../../shared/interfaces/vehicle_data.inte
 import { Dealership, DealerShipResponse } from '../../shared/interfaces/admin.interfaces';
 import { FALLBACK_HERO_IMAGE } from '../../shared/constants/fallback-media';
 import { optimizeCloudinaryVehicleDeliveryUrl } from '../../shared/utils/cloudinary-vehicle-delivery-url';
-import { formatVehicleCategoryLabel } from '../../shared/utils/vehicle-category-label';
+import { getVehicleCardLocationLabel, getVehicleDetailCategoryLabel } from '../../shared/utils/vehicle-category-label';
 import Swal from 'sweetalert2';
 
 interface Vehicle {
@@ -373,11 +373,11 @@ interface MediaItem {
                 <div class="bg-white rounded-3xl p-6 shadow-sm">
                   <h4 class="font-bold text-gray-900 mb-4">Showroom ABCars</h4>
                   <div class="space-y-3 text-sm text-gray-600">
-                    <div class="flex items-center space-x-2" *ngIf="vehicle?.location || vehicle?.apiData?.dealership?.location">
+                    <div class="flex items-center space-x-2" *ngIf="showroomLocationLabel">
                       <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                       </svg>
-                      <span>{{ capitalizeFirst(vehicle.location || vehicle.apiData?.dealership?.location || '') }}</span>
+                      <span>{{ capitalizeFirst(showroomLocationLabel) }}</span>
                     </div>
                   </div>
                 </div>
@@ -636,11 +636,11 @@ interface MediaItem {
               <div class="bg-white rounded-3xl p-6 shadow-sm">
                 <h4 class="font-bold text-gray-900 mb-4">Showroom ABCars</h4>
                 <div class="space-y-3 text-sm text-gray-600">
-                  <div class="flex items-center space-x-2" *ngIf="vehicle?.location || vehicle?.apiData?.dealership?.location">
+                  <div class="flex items-center space-x-2" *ngIf="showroomLocationLabel">
                     <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                     </svg>
-                    <span>{{ capitalizeFirst(vehicle.location || vehicle.apiData?.dealership?.location || '') }}</span>
+                    <span>{{ capitalizeFirst(showroomLocationLabel) }}</span>
                   </div>
                 </div>
               </div>
@@ -3109,7 +3109,7 @@ export class VehicleDetailComponent implements OnInit {
       other: 'Otro',
     };
     const typeLabel = api?.type ? typeMap[api.type] : '';
-    const catLabel = api?.category ? formatVehicleCategoryLabel(api.category) : '';
+    const catLabel = getVehicleDetailCategoryLabel(api?.category, api?.is_consignment);
     if (typeLabel && catLabel) {
       return `${typeLabel} (${catLabel})`;
     }
@@ -3120,6 +3120,14 @@ export class VehicleDetailComponent implements OnInit {
       return catLabel;
     }
     return '-';
+  }
+
+  get showroomLocationLabel(): string {
+    return getVehicleCardLocationLabel(
+      this.vehicle?.location || this.vehicle?.apiData?.dealership?.location,
+      this.vehicle?.apiData?.category,
+      this.vehicle?.apiData?.is_consignment,
+    );
   }
 
   formatBodyType(): string {

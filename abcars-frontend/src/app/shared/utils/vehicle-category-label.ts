@@ -52,6 +52,17 @@ export function shouldShowConsignmentBadge(
   return String(category ?? '').trim().toLowerCase() === 'consignment';
 }
 
+/** Etiqueta para detalle / paréntesis en tipo de vehículo. */
+export function getVehicleDetailCategoryLabel(
+  category: string | null | undefined,
+  isConsignment?: boolean | null,
+): string {
+  if (shouldShowConsignmentBadge(category, isConsignment)) {
+    return 'Consignación';
+  }
+  return formatVehicleCategoryLabel(category);
+}
+
 /** Ubicación en tarjeta: Consignación solo para unidades marcadas. */
 export function getVehicleCardLocationLabel(
   dealershipLocation: string | null | undefined,
