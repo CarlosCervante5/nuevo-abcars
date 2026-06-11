@@ -24,6 +24,7 @@ use App\Models\Valuations\ValuationCheckpoint;
 use App\Models\Valuations\ValuationPart;
 use App\Models\Valuations\ValuationRepair;
 use App\Models\CustomerAppointment;
+use App\Models\Dealership;
 use App\Models\Valuations\VehicleValuation;
 use App\Services\UserService;
 use App\Services\ValuationService;
@@ -569,6 +570,7 @@ class ValuationController extends Controller
             }
 
             if(!$valuation->vehicle_id) {
+                $data = $this->applyValuationDealershipToVehicleData($valuation, $data);
                 $vehicle = $this->vehicleService->createOrUpdateVehicle($data, $user->id);
                 $valuation->vehicle_id = $vehicle->id;
                 $valuation->save();
@@ -718,6 +720,44 @@ class ValuationController extends Controller
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener el reporte', $e->getMessage(), 500, 'GET_REPORT_ERROR');
         }
+    }
+
+    /**
+     * Usa la sucursal ya ligada a la valuación (catálogo) al crear el vehículo,
+     * en lugar del par name/location del request (el front envía location = nombre).
+     */
+    private function applyValuationDealershipToVehicleData(VehicleValuation $valuation, array $data): array
+    {
+        $dealership = $this->resolveDealershipForValuationVehicle($valuation);
+
+        if ($dealership) {
+            $data['dealership_name'] = $dealership->name;
+            $data['location'] = $dealership->location;
+        }
+
+        return $data;
+    }
+
+    private function resolveDealershipForValuationVehicle(VehicleValuation $valuation): ?Dealership
+    {
+        if ($valuation->dealership_id) {
+            $dealership = Dealership::query()->find($valuation->dealership_id);
+            if ($dealership) {
+                return $dealership;
+            }
+        }
+
+        $valuation->loadMissing('appointment');
+        $appointmentName = trim((string) ($valuation->appointment?->dealership_name ?? ''));
+        if ($appointmentName === '') {
+            return null;
+        }
+
+        return Dealership::query()
+            ->whereRaw('LOWER(TRIM(name)) = ?', [
+                mb_strtolower($appointmentName, 'UTF-8'),
+            ])
+            ->first();
     }
 
 }
