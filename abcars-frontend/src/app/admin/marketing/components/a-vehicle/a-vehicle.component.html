@@ -43,10 +43,14 @@
   >
     <mat-icon aria-hidden="true">delete</mat-icon>
   </button>
-  <mat-checkbox
-    [(ngModel)]="checked"
-    (change)="cardChecked()"
-    class="inv-act-check"
+  <span
+    class="inv-act-check-wrap"
     matTooltip="Seleccionar para acciones masivas"
-  ></mat-checkbox>
+  >
+    <mat-checkbox
+      [(ngModel)]="checked"
+      (change)="cardChecked()"
+      class="inv-act-check"
+    ></mat-checkbox>
+  </span>
 </div>
