@@ -73,6 +73,7 @@ class Vehicle extends Model
         'transmission',
         'drive_train',
         'page_status',
+        'page_status_manual_at',
         'spec_sheet',
         'brand_id',
         'line_id',
@@ -108,6 +109,7 @@ class Vehicle extends Model
 
     protected $casts = [
         'intelimotor_synced_at' => 'datetime',
+        'page_status_manual_at' => 'datetime',
         'is_consignment' => 'boolean',
     ];
 

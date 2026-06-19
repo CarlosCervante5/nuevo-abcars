@@ -149,6 +149,9 @@ class VehicleService
 
         if (!empty($changedData)) {
             $vehicle->fill($changedData);
+            if (array_key_exists('page_status', $changedData) && $vehicle->exists) {
+                $vehicle->page_status_manual_at = now();
+            }
         }
 
         // Asignar las IDs de las relaciones
@@ -209,7 +212,10 @@ class VehicleService
         // Crear o actualizar el vehículo
         $vehicle = Vehicle::findByUuid([$data['uuid']]);
 
-        $vehicle->update(['page_status' => $data['page_status']]);
+        $vehicle->update([
+            'page_status' => $data['page_status'],
+            'page_status_manual_at' => now(),
+        ]);
 
         $this->userService->vehicleUpdate('Vehicle Controller: Update vehicle', json_encode([$vehicle, null]) , json_encode($data), $user_id, $vehicle->id);
 
@@ -227,6 +233,7 @@ class VehicleService
         $updates = [
             'is_consignment' => true,
             'page_status' => 'active',
+            'page_status_manual_at' => now(),
         ];
 
         if (strtolower((string) $vehicle->category) === 'consignment') {
@@ -323,7 +330,10 @@ class VehicleService
         
         if ($vehiclesExist) {
             
-            Vehicle::whereIn('uuid', $uuids)->update(['page_status' => $page_status]);
+            Vehicle::whereIn('uuid', $uuids)->update([
+                'page_status' => $page_status,
+                'page_status_manual_at' => now(),
+            ]);
 
             $this->userService->vehicleUpdate('Vehicle Controller: Status vehicle batch ('.$page_status.')', null, json_encode($uuids), $user_id);
 

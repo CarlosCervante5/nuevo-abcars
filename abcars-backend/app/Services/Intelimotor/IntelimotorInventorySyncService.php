@@ -169,6 +169,7 @@ class IntelimotorInventorySyncService
                 }
             }
 
+            $summary['skipped_manual_status'] += $this->countMissingUnitsWithManualStatus($seenUnitIds, $account);
             $summary['marked_sold'] += $this->markMissingUnitsAsSold($seenUnitIds, $account);
         });
 
@@ -218,6 +219,7 @@ class IntelimotorInventorySyncService
             'created' => 0,
             'updated' => 0,
             'marked_sold' => 0,
+            'skipped_manual_status' => 0,
             'images_synced' => 0,
             'skipped' => 0,
             'skipped_not_visible' => 0,
@@ -228,7 +230,7 @@ class IntelimotorInventorySyncService
 
     private function mergeSummary(array &$aggregate, array $accountSummary): void
     {
-        foreach (['total_remote', 'visible_remote', 'created', 'updated', 'marked_sold', 'images_synced', 'skipped', 'skipped_not_visible'] as $key) {
+        foreach (['total_remote', 'visible_remote', 'created', 'updated', 'marked_sold', 'skipped_manual_status', 'images_synced', 'skipped', 'skipped_not_visible'] as $key) {
             $aggregate[$key] += (int) ($accountSummary[$key] ?? 0);
         }
 
@@ -403,10 +405,26 @@ class IntelimotorInventorySyncService
             ->whereNotNull('intelimotor_unit_id')
             ->whereNotIn('intelimotor_unit_id', $seenUnitIds)
             ->where('page_status', '!=', 'sale')
+            ->whereNull('page_status_manual_at')
             ->update([
                 'page_status' => 'sale',
                 'intelimotor_synced_at' => now(),
             ]);
+    }
+
+    private function countMissingUnitsWithManualStatus(array $seenUnitIds, IntelimotorAccount $account): int
+    {
+        if ($seenUnitIds === []) {
+            return 0;
+        }
+
+        return Vehicle::query()
+            ->where('intelimotor_account_id', $account->id)
+            ->whereNotNull('intelimotor_unit_id')
+            ->whereNotIn('intelimotor_unit_id', $seenUnitIds)
+            ->where('page_status', '!=', 'sale')
+            ->whereNotNull('page_status_manual_at')
+            ->count();
     }
 
     private function resolvePageStatusFromIntelimotor(array $unit, array $pictureUrls): string
