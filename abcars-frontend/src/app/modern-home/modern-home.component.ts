@@ -479,7 +479,7 @@ export class ModernHomeComponent implements OnInit, OnDestroy {
 
   loadActivePromotions() {
     // Llamar al endpoint público sin headers de autenticación
-    this.campaingService.getCampaingPublic().subscribe({
+    this.campaingService.getCampaingPublic('showroom').subscribe({
       next: (response) => {
         if (response.status === 200 && response.data && response.data.campaigns) {
           const promotionImages: string[] = [];

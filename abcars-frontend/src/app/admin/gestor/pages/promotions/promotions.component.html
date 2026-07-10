@@ -9,7 +9,7 @@
     <div class="w-full mt-5 mb-5">
         <!-- Breadcrumb -->
         <div class="w-full">
-            <h4 class="promotions-page-title">Administrar Campañas</h4>
+            <h4 class="promotions-page-title">{{ pageTitle }}</h4>
             <nav class="promotions-breadcrumb" aria-label="breadcrumb">
                 <ol class="promotions-breadcrumb-list">
                     <li
@@ -18,7 +18,7 @@
                     >
                       {{ embedInShell ? 'Panel' : 'Overview' }}
                     </li>
-                    <li class="promotions-breadcrumb-item promotions-breadcrumb-item-active" aria-current="page">Campañas</li>
+                    <li class="promotions-breadcrumb-item promotions-breadcrumb-item-active" aria-current="page">{{ breadcrumbLabel }}</li>
                 </ol>
                 <div class="flex justify-end p-3">
                     <a mat-button (click)="newCampaing()" class="promotions-add-btn">

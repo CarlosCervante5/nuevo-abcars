@@ -8,7 +8,8 @@ import { DeliveryPhotosComponent } from './pages/delivery-photos/delivery-photos
 
 const routes: Routes = [
   { path: '', component: DashboardComponent },
-  { path: 'promotions', component: PromotionsComponent },
+  { path: 'promotions', component: PromotionsComponent, data: { placement: 'showroom' } },
+  { path: 'inventory-promotions', component: PromotionsComponent, data: { placement: 'inventory' } },
   { path: 'scheduled-events', component: ScheduleEventsComponent },
   { path: 'rewards', component: RewardsComponent },
   { path: 'delivery-photos', component: DeliveryPhotosComponent },

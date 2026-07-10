@@ -9,7 +9,7 @@ import { VehicleService, resolveVehicleTypesFilter } from '../shared/services/ve
 import { CampaingService } from '../shared/services/campaing.service';
 import { ReferralService } from '../shared/services/referral.service';
 import { Vehicle as ApiVehicle } from '../shared/interfaces/vehicle_data.interface';
-import { FALLBACK_HERO_IMAGE } from '../shared/constants/fallback-media';
+import { FALLBACK_HERO_IMAGE, INVENTORY_PROMO_FALLBACK_IMAGE } from '../shared/constants/fallback-media';
 
 // Extender Vehicle para incluir apiData
 interface VehicleWithApiData extends Vehicle {
@@ -821,7 +821,7 @@ export class InventoryComponent implements OnInit {
 
   loadActivePromotions() {
     // Llamar al endpoint público sin headers de autenticación
-    this.campaingService.getCampaingPublic().subscribe({
+    this.campaingService.getCampaingPublic('inventory').subscribe({
       next: (response) => {
         if (response.status === 200 && response.data && response.data.campaigns) {
           const promotionImages: string[] = [];
@@ -1238,13 +1238,13 @@ export class InventoryComponent implements OnInit {
         return item.imageUrl;
       }
     }
-    return FALLBACK_HERO_IMAGE;
+    return INVENTORY_PROMO_FALLBACK_IMAGE;
   }
 
   onBannerImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     if (img) {
-      img.src = FALLBACK_HERO_IMAGE;
+      img.src = INVENTORY_PROMO_FALLBACK_IMAGE;
     }
   }
 

@@ -4,6 +4,7 @@ import { environment } from '@environments/environment';
 import { Observable } from 'rxjs';
 import { FormGroup } from '@angular/forms';
 import { ChangeOrder } from '../../../shared/interfaces/admin.interfaces';
+import { CampaignPlacement } from '../../../shared/constants/fallback-media';
 
 //prueba
 import {createcampaing , GetcampaingResponse, DeleteVehicleImage, ImageOrderPromo, DeleteCampaign} from '@interfaces/admin.interfaces';
@@ -29,12 +30,12 @@ export class CampaingService {
         return this._http.post<createcampaing>(`${this.baseUrl}/api/campaigns`, form, {headers: headers });
     }
 
-    public getCampaing (){
+    public getCampaing (placement: CampaignPlacement = 'showroom'){
 
         let user_token = localStorage.getItem('user_token');
         let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
 
-        return this._http.post<GetcampaingResponse>(`${this.baseUrl}/api/campaigns/active`, {headers: headers });
+        return this._http.post<GetcampaingResponse>(`${this.baseUrl}/api/campaigns/active`, { placement }, {headers: headers });
     }
 
     public changeOrder( imagesData:  ImageOrderPromo[]):Observable<ChangeOrder>{

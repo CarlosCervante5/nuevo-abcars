@@ -27,6 +27,7 @@ class StoreCampaignRequest extends FormRequest
             'end_date' => 'required|max:255|string',
             'name' => 'required|max:255|string',
             'category' => 'required|max:255|string',
+            'placement' => 'nullable|in:showroom,inventory',
             'segment_name' => 'nullable|max:255|string',
             'visits' => 'nullable|integer',
             'description' => 'nullable|max:1000|string',
@@ -40,6 +41,7 @@ class StoreCampaignRequest extends FormRequest
     {
         $this->merge([
             'page_status' => $this->page_status ?? 'public',
+            'placement' => $this->placement ?? 'showroom',
         ]);
     }
 }

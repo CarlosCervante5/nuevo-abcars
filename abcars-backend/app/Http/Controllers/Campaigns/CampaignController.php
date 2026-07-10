@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Campaigns;
 
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Campaigns\ActiveCampaignRequest;
 use App\Http\Requests\Campaigns\AttachVehicleRequest;
 use App\Http\Requests\Campaigns\DeleteCampaignRequest;
 use App\Http\Requests\Campaigns\SearchCampaignRequest;
@@ -68,6 +69,7 @@ class CampaignController extends Controller
                 'end_date',
                 'name',
                 'category',
+                'placement',
                 'description',
                 'segment_name',
                 'visits',
@@ -128,11 +130,17 @@ class CampaignController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function active()
+    public function active(ActiveCampaignRequest $request)
     {
         try {
-            
-            $campaigns = MarketingCampaign::with('promotions')->active()->orderBy('created_at', 'asc')->get();
+
+            $placement = $request->validated()['placement'] ?? 'showroom';
+
+            $campaigns = MarketingCampaign::with('promotions')
+                ->active()
+                ->placement($placement)
+                ->orderBy('created_at', 'asc')
+                ->get();
 
             return ApiResponseHelper::apiSuccess(200, 'Campañas obtenidas exitosamente', ['campaigns' => $campaigns]);
         } catch (\Exception $e) {

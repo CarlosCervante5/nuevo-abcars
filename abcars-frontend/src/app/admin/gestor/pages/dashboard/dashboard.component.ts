@@ -27,6 +27,11 @@ export class DashboardComponent {
         permalink: '/admin/gestor/promotions'
       },
       {
+        title: 'Promociones Inventario',
+        icon: 'fi fi-rr-shopping-cart',
+        permalink: '/admin/gestor/inventory-promotions'
+      },
+      {
         title: 'Fotos de entregas',
         icon: 'fi fi-rr-gift',
         permalink: '/admin/gestor/delivery-photos',

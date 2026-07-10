@@ -31,6 +31,7 @@ export class AdminShellComponent implements OnInit, OnDestroy {
     'valuation-appointments': 'Valuaciones',
     'delivery-photos': 'Fotos de entregas',
     promotions: 'Promociones',
+    'inventory-promotions': 'Promociones Inventario',
     users: 'Usuarios',
     permissions: 'Roles y permisos',
     dealerships: 'Sucursales',

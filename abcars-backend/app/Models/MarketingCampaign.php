@@ -35,6 +35,7 @@ class MarketingCampaign extends Model
         'end_date',
         'name',
         'category',
+        'placement',
         'segment_name',
         'visits',
         'page_status',
@@ -69,6 +70,11 @@ class MarketingCampaign extends Model
     public function scopeActive($query)
     {
         return $query->where('end_date', '>', Carbon::now());
+    }
+
+    public function scopePlacement($query, string $placement)
+    {
+        return $query->where('placement', $placement);
     }
 
     public function vehicles()

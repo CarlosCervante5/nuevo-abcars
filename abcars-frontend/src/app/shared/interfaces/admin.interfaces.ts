@@ -75,6 +75,7 @@ export interface Campaign {
     promotions:  any[];
     promo_Path: string;
     category:   string;
+    placement?: string;
     segment_name: string;
     visitis:    null | number;
 }

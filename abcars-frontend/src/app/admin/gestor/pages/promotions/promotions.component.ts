@@ -4,14 +4,11 @@ import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { LoadImagesPromoComponent } from '../../components/load-images-promo/load-images-promo.component';
 import { environment } from '@environments/environment';
 import { CreateCampaingComponent } from '../../components/create-campaing/create-campaing.component';
-//import {  GetcampaingResponse, Campaign } from '../../interfaces/createCampaing.interface';
 import { CampaingService } from '../../services/campaing.service';
 import { UpdateImagesComponent } from '../../components/update-images/update-images.component';
-
-//pruebas
 import {GetcampaingResponse, Campaign, Overview} from '@interfaces/admin.interfaces';
+import { CampaignPlacement } from '../../../../shared/constants/fallback-media';
 import Swal from 'sweetalert2';
-
 import {reload} from '@helpers/session.helper';
 import { Router } from '@angular/router';
 
@@ -30,11 +27,15 @@ export class PromotionsComponent implements OnInit {
   /** Dentro de AdminShell (/admin/administrator/promotions). */
   embedInShell = false;
 
+  placement: CampaignPlacement = 'showroom';
+  pageTitle = 'Administrar Campañas';
+  breadcrumbLabel = 'Campañas';
+  moduleTitle = 'Promociones';
+
   public baseUrl: string = environment.baseUrl;
   @Output() reload = new EventEmitter<Boolean>();
   public img_campaign_path!:string;
 
-  // References Overview para el encabezado
   public itemOverview: Overview;
 
   constructor(
@@ -43,7 +44,6 @@ export class PromotionsComponent implements OnInit {
     private _router: Router,
     private _route: ActivatedRoute
   ) {
-    // Inicializar itemOverview
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       this.itemOverview = {
@@ -63,7 +63,6 @@ export class PromotionsComponent implements OnInit {
         ]
       };
     } catch (error) {
-      // Fallback si hay error al parsear
       this.itemOverview = {
         user: {
           name: 'Usuario',
@@ -81,22 +80,36 @@ export class PromotionsComponent implements OnInit {
         ]
       };
     }
-    
-    // this.promotionsByBrand(this.brands);
-    this.showcampaing();
+
+    // La carga se hace en ngOnInit cuando placement ya viene de la ruta.
   }
 
   ngOnInit(): void {
     this.embedInShell = this._route.snapshot.data['embedInShell'] === true;
-    if (this.embedInShell && this.itemOverview?.pages?.[0]) {
-      this.itemOverview.pages[0].permalink = '/admin/administrator/promotions';
+    const routePlacement = this._route.snapshot.data['placement'];
+    if (routePlacement === 'inventory' || routePlacement === 'showroom') {
+      this.placement = routePlacement;
     }
+
+    if (this.placement === 'inventory') {
+      this.pageTitle = 'Administrar Campañas de Inventario';
+      this.breadcrumbLabel = 'Promociones Inventario';
+      this.moduleTitle = 'Promociones Inventario';
+    }
+
+    if (this.itemOverview?.pages?.[0]) {
+      this.itemOverview.pages[0].title = this.moduleTitle;
+      this.itemOverview.pages[0].permalink = this.embedInShell
+        ? `/admin/administrator/${this.placement === 'inventory' ? 'inventory-promotions' : 'promotions'}`
+        : `/admin/gestor/${this.placement === 'inventory' ? 'inventory-promotions' : 'promotions'}`;
+    }
+
+    this.showcampaing();
   }
 
   public campaigns: Campaign[] = [];
   public length: number = 0;
 
-  //abre el modal para agregar promociones
   public openBottomSheet(campaign: string): void{
     const openLoadImages = this._bottomSheet.open(LoadImagesPromoComponent , {
       data: {
@@ -110,7 +123,6 @@ export class PromotionsComponent implements OnInit {
     });
   }
 
-  //ordenamiento de imagenes
   openUpdateOrder( campaign_id:string, promotions:any[] ): void {
     const bottomSheetRef2 = this._bottomSheet.open(UpdateImagesComponent, {
       data: {
@@ -120,17 +132,16 @@ export class PromotionsComponent implements OnInit {
     });  
     bottomSheetRef2.afterDismissed().subscribe((dataFromChild) => {                  
       if( dataFromChild != undefined && dataFromChild.first_image === true) {
-        // this.vehicle.vehicle_images.shift();    
         this.reload.emit(true);                                
       }
       this.showcampaing();   
     }); 
   }
 
-  //Agregar una nueva campaña
-
   newCampaing(): void {
-    const bottomSheetRef = this._bottomSheet.open(CreateCampaingComponent);
+    const bottomSheetRef = this._bottomSheet.open(CreateCampaingComponent, {
+      data: { placement: this.placement }
+    });
     bottomSheetRef.afterDismissed().subscribe((dataFromChild) => {      
       if(dataFromChild != undefined && dataFromChild.reload === true ){        
         this.reload.emit(true);
@@ -139,9 +150,8 @@ export class PromotionsComponent implements OnInit {
     });
   }
 
-  //mostrar las campañas existente
   public showcampaing () {
-    this._campaingService.getCampaing()
+    this._campaingService.getCampaing(this.placement)
     .subscribe({
       next: (response: GetcampaingResponse) => {
      this.campaigns = response.data.campaigns;
@@ -170,7 +180,7 @@ export class PromotionsComponent implements OnInit {
     public formatDate(dateString: any): string {
     const date = new Date(dateString  + 'T00:00:00Z');
     const day = (String(date.getUTCDate()).padStart(2, '0'));
-    const month = String(date.getUTCMonth()+1).padStart(2, '0'); // Los meses empiezan en 0
+    const month = String(date.getUTCMonth()+1).padStart(2, '0');
     const year = date.getUTCFullYear();
     return `${day}-${month}-${year}`;
 }
@@ -182,7 +192,6 @@ export class PromotionsComponent implements OnInit {
       confirmButtonText: 'Eliminar',
       confirmButtonColor: '#008bcc',
     }).then((result) => {
-      /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
         this._campaingService.deleteCampaign( uuid )
             .subscribe({

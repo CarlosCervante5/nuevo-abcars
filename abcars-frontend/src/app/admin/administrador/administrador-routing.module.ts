@@ -58,7 +58,13 @@ const routes: Routes = [
         path: 'promotions',
         component: PromotionsComponent,
         canActivate: [GestorPromotionsGuard],
-        data: { embedInShell: true }
+        data: { embedInShell: true, placement: 'showroom' }
+      },
+      {
+        path: 'inventory-promotions',
+        component: PromotionsComponent,
+        canActivate: [GestorPromotionsGuard],
+        data: { embedInShell: true, placement: 'inventory' }
       },
       { path: 'users', component: AdminUsersComponent, data: { embedInShell: true } },
       { path: 'permissions', component: AdminPermisosComponent, data: { embedInShell: true } },

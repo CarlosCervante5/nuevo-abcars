@@ -134,7 +134,15 @@ export const ADMINISTRATOR_NAV_ITEMS: AdministratorNavItem[] = [
     title: 'Promociones',
     icon: 'fi fi-rr-badge-percent',
     routerLink: ['promotions'],
-    description: 'Campañas e imágenes promocionales',
+    description: 'Campañas del showroom',
+    iconColor: 'purple',
+    requiredRoles: ['gestor', 'administrator', 'super_admin']
+  },
+  {
+    title: 'Promociones Inventario',
+    icon: 'fi fi-rr-shopping-cart',
+    routerLink: ['inventory-promotions'],
+    description: 'Campañas del listado de inventario',
     iconColor: 'purple',
     requiredRoles: ['gestor', 'administrator', 'super_admin']
   }

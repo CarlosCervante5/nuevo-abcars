@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
-import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
-//import { CampaingService } from '../../services/campaing.service';
+import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { AdminService } from '@services/admin.service';
+import { CampaignPlacement } from '../../../../shared/constants/fallback-media';
 import Swal from 'sweetalert2';
 import {reload} from '@helpers/session.helper';
 import { Router } from '@angular/router';
@@ -20,12 +20,14 @@ export class CreateCampaingComponent {
     private _formBuilder: UntypedFormBuilder,
     private _bottomSheetRef: MatBottomSheetRef<any>,
     private _campaingService: AdminService,
-    private _router: Router
+    private _router: Router,
+    @Inject(MAT_BOTTOM_SHEET_DATA) private sheetData: { placement?: CampaignPlacement } | null
   ){
     this.formInit();
   }
 
   private formInit() {
+    const placement: CampaignPlacement = this.sheetData?.placement === 'inventory' ? 'inventory' : 'showroom';
     this.form = this._formBuilder.group({
         name:               ['', [Validators.required]],
         begin_date:         ['', [Validators.required]],
@@ -33,7 +35,8 @@ export class CreateCampaingComponent {
         description:        ['', ],
         segment_name:       ['', [Validators.required]],
         category:           ['', [Validators.required]],
-        visits:             [0]
+        visits:             [0],
+        placement:          [placement, [Validators.required]],
     });
 }
 
