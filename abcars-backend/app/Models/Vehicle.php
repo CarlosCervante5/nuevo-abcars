@@ -74,6 +74,7 @@ class Vehicle extends Model
         'drive_train',
         'page_status',
         'page_status_manual_at',
+        'sold_at',
         'spec_sheet',
         'brand_id',
         'line_id',
@@ -110,8 +111,26 @@ class Vehicle extends Model
     protected $casts = [
         'intelimotor_synced_at' => 'datetime',
         'page_status_manual_at' => 'datetime',
+        'sold_at' => 'datetime',
         'is_consignment' => 'boolean',
     ];
+
+    /**
+     * Mantiene sold_at al entrar/salir de page_status = sale.
+     * Solo reasigna sold_at cuando el cambio es hacia sale (no si ya estaba vendido).
+     */
+    public function syncSoldAtForStatusChange(?string $previousStatus, string $newStatus): void
+    {
+        if ($newStatus === 'sale') {
+            if ($previousStatus !== 'sale') {
+                $this->sold_at = now();
+            }
+
+            return;
+        }
+
+        $this->sold_at = null;
+    }
 
     public function getCreatedAtAttribute($value)
     {   

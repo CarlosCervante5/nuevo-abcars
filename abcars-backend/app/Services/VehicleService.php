@@ -148,9 +148,17 @@ class VehicleService
         $changedData = array_diff_assoc($vehicleSubset, $vehicle->toArray());
 
         if (!empty($changedData)) {
+            $wasExisting = $vehicle->exists;
+            $previousStatus = $wasExisting ? $vehicle->page_status : null;
             $vehicle->fill($changedData);
-            if (array_key_exists('page_status', $changedData) && $vehicle->exists) {
-                $vehicle->page_status_manual_at = now();
+            if (array_key_exists('page_status', $changedData)) {
+                if ($wasExisting) {
+                    $vehicle->page_status_manual_at = now();
+                }
+                $vehicle->syncSoldAtForStatusChange(
+                    is_string($previousStatus) ? $previousStatus : null,
+                    (string) $vehicle->page_status
+                );
             }
         }
 
@@ -212,10 +220,14 @@ class VehicleService
         // Crear o actualizar el vehículo
         $vehicle = Vehicle::findByUuid([$data['uuid']]);
 
-        $vehicle->update([
-            'page_status' => $data['page_status'],
-            'page_status_manual_at' => now(),
-        ]);
+        $previousStatus = $vehicle->page_status;
+        $vehicle->page_status = $data['page_status'];
+        $vehicle->page_status_manual_at = now();
+        $vehicle->syncSoldAtForStatusChange(
+            is_string($previousStatus) ? $previousStatus : null,
+            (string) $data['page_status']
+        );
+        $vehicle->save();
 
         $this->userService->vehicleUpdate('Vehicle Controller: Update vehicle', json_encode([$vehicle, null]) , json_encode($data), $user_id, $vehicle->id);
 
@@ -234,6 +246,7 @@ class VehicleService
             'is_consignment' => true,
             'page_status' => 'active',
             'page_status_manual_at' => now(),
+            'sold_at' => null,
         ];
 
         if (strtolower((string) $vehicle->category) === 'consignment') {
@@ -329,11 +342,17 @@ class VehicleService
         $vehiclesExist = Vehicle::whereIn('uuid', $uuids)->exists();
         
         if ($vehiclesExist) {
-            
-            Vehicle::whereIn('uuid', $uuids)->update([
-                'page_status' => $page_status,
-                'page_status_manual_at' => now(),
-            ]);
+
+            Vehicle::whereIn('uuid', $uuids)->get()->each(function (Vehicle $vehicle) use ($page_status) {
+                $previousStatus = $vehicle->page_status;
+                $vehicle->page_status = $page_status;
+                $vehicle->page_status_manual_at = now();
+                $vehicle->syncSoldAtForStatusChange(
+                    is_string($previousStatus) ? $previousStatus : null,
+                    (string) $page_status
+                );
+                $vehicle->save();
+            });
 
             $this->userService->vehicleUpdate('Vehicle Controller: Status vehicle batch ('.$page_status.')', null, json_encode($uuids), $user_id);
 

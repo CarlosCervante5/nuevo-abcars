@@ -334,6 +334,9 @@ class IntelimotorInventorySyncService
             $vehicle->category = 'pre_owned';
             $vehicle->type = 'car';
             $vehicle->page_status = $this->resolvePageStatusFromIntelimotor($unit, $pictureUrls);
+            if ($vehicle->page_status === 'sale') {
+                $vehicle->sold_at = now();
+            }
         }
         $vehicle->brand_id = $brand->id;
         $vehicle->model_id = $model->id;
@@ -408,6 +411,7 @@ class IntelimotorInventorySyncService
             ->whereNull('page_status_manual_at')
             ->update([
                 'page_status' => 'sale',
+                'sold_at' => now(),
                 'intelimotor_synced_at' => now(),
             ]);
     }

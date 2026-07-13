@@ -119,10 +119,10 @@ constructor(
         word: string,
         paginate: number,
         relationshipNames: string[],
-        statusFilter: 'all' | 'active' | 'inactive' = 'all'
+        statusFilter: 'all' | 'active' | 'inactive' | 'sale' = 'all'
     ): Observable<SearchResponse> {
-        
-        let params = new HttpParams(); 
+
+        let params = new HttpParams();
 
         if (word) {
             params = params.set('keyword', word);
@@ -145,7 +145,9 @@ constructor(
                 ? 'active'
                 : statusFilter === 'inactive'
                   ? 'inactive'
-                  : 'active,inactive';
+                  : statusFilter === 'sale'
+                    ? 'sale'
+                    : 'active,inactive';
         params = params.set('status', statusParam);
 
         params = params.set('has_images', false);

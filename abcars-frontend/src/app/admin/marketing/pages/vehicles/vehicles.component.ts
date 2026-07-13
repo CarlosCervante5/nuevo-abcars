@@ -36,7 +36,7 @@ export class VehiclesComponent implements OnInit {
   public pageSizeOptions: number[] = [12, 15, 30, 45, 60, 150];
 
   /** Filtro de estado enviado al API (listado admin). */
-  public statusFilter: 'all' | 'active' | 'inactive' = 'all';
+  public statusFilter: 'all' | 'active' | 'inactive' | 'sale' = 'all';
 
   // MatPaginator Output
   pageEvent!: PageEvent;
@@ -167,7 +167,7 @@ export class VehiclesComponent implements OnInit {
       this.getVehicles(1);
     }
 
-    setStatusFilter(mode: 'all' | 'active' | 'inactive'): void {
+    setStatusFilter(mode: 'all' | 'active' | 'inactive' | 'sale'): void {
       if (this.statusFilter === mode) {
         return;
       }
@@ -322,8 +322,14 @@ export class VehiclesComponent implements OnInit {
     }
 
     deleteSelectedVehicles():void {
+      const soldFilter = this.statusFilter === 'sale';
       Swal.fire({
-        title: 'Estas segur@ que quieres eliminar estas unidades?',      
+        title: soldFilter
+          ? '¿Eliminar estos vehículos vendidos?'
+          : 'Estas segur@ que quieres eliminar estas unidades?',
+        text: soldFilter
+          ? 'Se hará soft-delete del automóvil y de sus imágenes. Podrás restaurarlos durante ~1 mes. Después las imágenes se borran de forma definitiva (el registro del auto puede quedar en papelera).'
+          : undefined,
         showCancelButton: true,
         confirmButtonText: 'Eliminar', 
         confirmButtonColor: '#008bcc',           

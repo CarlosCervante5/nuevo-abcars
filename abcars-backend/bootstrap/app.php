@@ -27,6 +27,10 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withSchedule(function (Schedule $schedule) {
         $schedule->command('intelimotor:sync-scheduled')->everyMinute();
+        // Soft-delete de vendidos por Intelimotor tras 1 mes calendario (sold_at). El auto permanece soft-deleted.
+        $schedule->command('vehicles:purge-sold')->dailyAt('03:15');
+        // Hard-delete de imágenes soft-deleted tras 1 mes calendario (Cloudinary + BD). No toca el vehículo.
+        $schedule->command('vehicles:hard-delete-images')->dailyAt('03:30');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Sin ruta web nombrada `login`, `AuthenticationException` intentaba `route('login')` y fallaba → 500 HTML.

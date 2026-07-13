@@ -137,6 +137,14 @@
         >
           Inactivos
         </button>
+        <button
+          type="button"
+          class="inv-chip"
+          [class.inv-chip--active]="statusFilter === 'sale'"
+          (click)="setStatusFilter('sale')"
+        >
+          Vendidos
+        </button>
       </div>
     </div>
   </section>
@@ -176,9 +184,16 @@
             <span
               class="inv-badge"
               [class.inv-badge--active]="element.page_status === 'active'"
-              [class.inv-badge--inactive]="element.page_status !== 'active'"
+              [class.inv-badge--inactive]="element.page_status === 'inactive' || element.page_status === 'valuing'"
+              [class.inv-badge--sale]="element.page_status === 'sale'"
             >
-              {{ element.page_status === 'active' ? 'Activo' : 'Inactivo' }}
+              {{
+                element.page_status === 'active'
+                  ? 'Activo'
+                  : element.page_status === 'sale'
+                    ? 'Vendido'
+                    : 'Inactivo'
+              }}
             </span>
           </td>
         </ng-container>

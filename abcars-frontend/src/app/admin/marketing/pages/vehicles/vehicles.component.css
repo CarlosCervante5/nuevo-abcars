@@ -464,6 +464,11 @@
   color: #64748b;
 }
 
+.inv-badge--sale {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
 .inv-cell-name {
   font-weight: 600;
   color: #0f172a;
