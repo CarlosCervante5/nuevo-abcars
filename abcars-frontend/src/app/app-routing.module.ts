@@ -41,6 +41,20 @@ const routes: Routes = [
     component: VehicleDetailComponent,
     canActivate: [ScrollTopGuard]
   },
+
+  // Legacy Facebook Catalog / Google Ads (antes /compra-tu-auto/detail/:uuid).
+  // Conserva query params (utm_*, fbclid) al redirigir a /vehiculo/:id.
+  {
+    path: 'compra-tu-auto/detail/:id',
+    redirectTo: 'vehiculo/:id',
+    pathMatch: 'full'
+  },
+  {
+    path: 'compra-tu-auto',
+    redirectTo: 'inventario',
+    pathMatch: 'prefix'
+  },
+
   {
     path: 'servicios',
     component: ServicesComponent,

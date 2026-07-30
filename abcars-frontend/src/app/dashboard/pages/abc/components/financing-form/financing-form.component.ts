@@ -253,7 +253,7 @@ export class FinancingFormComponent implements OnInit{
                 q_brand_interest: this.form.get('vehicle_brand')?.value,
                 q_initial_investment: this.form.get('offer_price')?.value,
                 q_time_to_buy: this.form.get('monthly_fees')?.value, 
-                q_comments: ((this.vin != undefined)) ? 'Auto de interes: http://abcars.mx/compra-tu-auto/detail/'+this.vin: '',
+                q_comments: ((this.vin != undefined)) ? 'Auto de interes: https://www.abcars.mx/vehiculo/'+this.vin: '',
                 
                 opportunity_type: 'lead',
                 dealership_name: 'Chevrolet Serdán',
