@@ -12,12 +12,15 @@ use App\Http\Requests\Vehicles\VehicleImages\UpdateSortVehicleImageRequest;
 use App\Jobs\UploadVehicleImage;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
+use App\Services\VehiclePublishAuditService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class VehicleImageController extends Controller
 {
+    public function __construct(private VehiclePublishAuditService $publishAudit) {}
+
     /**
      * Crear nuevo set de imágenes de vehículo.
      *
@@ -59,6 +62,8 @@ class VehicleImageController extends Controller
 
             $invalidImages = [];
 
+            $userId = auth()->id();
+
             foreach ($images as $index => $image) {
 
                 // Validar si el archivo es válido
@@ -76,7 +81,7 @@ class VehicleImageController extends Controller
                 $is_last = $index === count($images) - 1;
 
                 // Ejecutar en el mismo proceso para asegurar acceso al archivo temporal en Railway
-                UploadVehicleImage::dispatchSync($path, $vehicle->uuid, $vehicle->id, ($sort_id + $index), $image->getClientOriginalName(), $is_last);
+                UploadVehicleImage::dispatchSync($path, $vehicle->uuid, $vehicle->id, ($sort_id + $index), $image->getClientOriginalName(), $is_last, $userId);
             }
 
             if (!empty($invalidImages)) {
@@ -172,7 +177,8 @@ class VehicleImageController extends Controller
                 $vehicle->id,
                 $sort_id,
                 $filename,
-                true
+                true,
+                auth()->id(),
             );
 
             return ApiResponseHelper::apiSuccess(201, 'Imagen enviada a procesar');
@@ -236,7 +242,15 @@ class VehicleImageController extends Controller
                 $vehicle_images = $vehicle->images()->count();
 
                 if ($vehicle_images === 0) {
+                    $before = $vehicle->page_status;
                     $vehicle->update(['page_status' => 'inactive']);
+                    $this->publishAudit->logPageStatusChange(
+                        $vehicle->fresh(),
+                        $before,
+                        'inactive',
+                        'images_empty_auto_inactive',
+                        auth()->id(),
+                    );
                 }
 
                 return ApiResponseHelper::apiSuccess(200, 'Imagen de vehículo eliminada exitosamente');
@@ -272,7 +286,15 @@ class VehicleImageController extends Controller
         
             $vehicle->images()->delete();
 
+            $before = $vehicle->page_status;
             $vehicle->update(['page_status' => 'inactive']);
+            $this->publishAudit->logPageStatusChange(
+                $vehicle->fresh(),
+                $before,
+                'inactive',
+                'images_batch_deleted',
+                auth()->id(),
+            );
 
             return ApiResponseHelper::apiSuccess(200, 'Imagenes de vehículo eliminadas exitosamente');
 

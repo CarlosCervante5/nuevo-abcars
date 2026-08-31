@@ -44,3 +44,11 @@ Correos en cola relevantes: valuaciones (`AppointmentService` usa `dispatch()`),
 ## Alternativa: otro `railway.toml` por servicio
 
 En **Settings → Config file path** del worker puedes apuntar a otro archivo (ej. `abcars-backend/railway.scheduler.toml`) con otro `startCommand`, sin tocar el del API.
+
+## Imágenes de vehículos (sin Cloudinary)
+
+Por defecto `VEHICLE_IMAGE_OPTIMIZER=local`: el worker optimiza con **Imagick** o **GD** y sube a S3/CloudFront.
+
+Requisito: extensión PHP `imagick` o `gd` en el servicio **queue** (y web si usas `dispatchSync`).
+
+Variables útiles: `VEHICLE_IMAGE_MAX_WIDTH`, `VEHICLE_IMAGE_JPEG_QUALITY`, `VEHICLE_IMAGE_FLATTEN_BG_RGB`, `VEHICLE_IMAGE_DRIVER`.
