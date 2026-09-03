@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Helpers\ApiResponseHelper;
 use App\Models\Valuations\ValuationImage;
-use Cloudinary\Cloudinary;
+use App\Services\LocalImageS3Uploader;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -30,9 +30,6 @@ class UploadValuationImage implements ShouldQueue
     public $backoff = 60;
     protected $base_folder;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(string $path, string $valuation_uuid, int $valuation_id, int $index, string $original_filename, string $name, string $group_name)
     {
         $this->path = $path;
@@ -42,36 +39,24 @@ class UploadValuationImage implements ShouldQueue
         $this->original_filename = $original_filename;
         $this->name = $name;
         $this->group_name = $group_name;
-        $this->base_folder = env('CLOUDINARY_VALUATIONS_FOLDER_BASE', 'abcars_valuations');
+        $this->base_folder = env('AWS_VALUATIONS_FOLDER_BASE', env('CLOUDINARY_VALUATIONS_FOLDER_BASE', 'abcars_valuations'));
     }
 
-    /**
-     * Execute the job.
-     */
-    public function handle(Cloudinary $cloudinary): void
+    public function handle(LocalImageS3Uploader $uploader): void
     {
         $this->validateInputs();
 
         try {
-            Log::info('Valuation image job:', [
+            Log::info('Uploading valuation image (local optimize → S3)', [
                 'valuation_id' => $this->valuation_id,
                 'valuation_uuid' => $this->valuation_uuid,
                 'path' => $this->path,
                 'sort_id' => $this->sort_id,
             ]);
 
-            $name = time() . '_' . $this->sort_id . '_' . Str::lower(Str::random(8));
-
-            $cloudinary_file = $cloudinary->uploadApi()->upload(storage_path('app/' . $this->path), [
-                'public_id' => $name,
-                'folder' => $this->base_folder . '/' . $this->valuation_uuid,
-                'transformation' => [
-                    'quality' => 'auto',
-                    'fetch_format' => 'jpg',
-                ],
-            ]);
-
-            $cloudinary_url = $cloudinary_file['secure_url'];
+            $name = time().'_'.$this->sort_id.'_'.Str::lower(Str::random(8));
+            $s3Path = $this->base_folder.'/'.$this->valuation_uuid.'/'.$name.'.jpg';
+            $uploaded = $uploader->putJpeg($this->path, $s3Path);
 
             $groupLower = strtolower($this->group_name);
             if ($groupLower === 'interior' || $groupLower === 'exterior') {
@@ -85,21 +70,21 @@ class UploadValuationImage implements ShouldQueue
                 'sort_id' => $this->sort_id,
                 'name' => $this->name,
                 'group_name' => $groupLower,
-                'image_path' => $cloudinary_url,
+                'image_path' => $uploaded['url'],
                 'valuation_id' => $this->valuation_id,
             ]);
 
             Storage::delete($this->path);
 
-            Log::info('Valuation image uploaded to Cloudinary:', [
+            Log::info('Valuation image uploaded to S3/CloudFront', [
                 'valuation_id' => $this->valuation_id,
             ]);
 
-            ApiResponseHelper::imageSuccess(200, 'Imagen subida correctamente al servicio externo.', ['url' => $cloudinary_url]);
+            ApiResponseHelper::imageSuccess(200, 'Imagen subida correctamente al servicio externo.', ['url' => $uploaded['url']]);
         } catch (Exception $e) {
             Log::error('Error uploading valuation image:', ['exception' => $e->getMessage()]);
             ApiResponseHelper::imageError(
-                'Error en el job para subir la imagen de valuación (id: ' . $this->valuation_id . ')',
+                'Error en el job para subir la imagen de valuación (id: '.$this->valuation_id.')',
                 $e->getMessage(),
                 500,
                 'UPLOAD_IMAGE_ERROR'

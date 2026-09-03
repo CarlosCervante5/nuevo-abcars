@@ -5,17 +5,14 @@ namespace App\Jobs;
 use App\Helpers\ApiResponseHelper;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
-use App\Services\VehicleImageOptimizer;
+use App\Services\LocalImageS3Uploader;
 use App\Services\VehiclePublishAuditService;
-use App\Support\CloudinaryVehicleUploadTransform;
-use Cloudinary\Cloudinary;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -75,37 +72,23 @@ class UploadVehicleImage implements ShouldQueue
         $this->cloudinary_temp_folder = env('CLOUDINARY_VEHICLES_FOLDER_BASE', 'abcars_images');
     }
 
-    public function handle(VehicleImageOptimizer $optimizer, VehiclePublishAuditService $publishAudit): void
+    public function handle(LocalImageS3Uploader $uploader, VehiclePublishAuditService $publishAudit): void
     {
         $this->validateInputs();
-
-        $mode = strtolower((string) Config::get('vehicle_images.optimizer', 'local'));
 
         try {
             $name = time().'_'.$this->sort_id;
             $s3_path = $this->base_folder.'/'.$this->vehicle_uuid.'/'.$name.'.jpg';
 
-            if ($mode === 'cloudinary') {
-                $image_contents = $this->optimizeViaCloudinary($name);
-            } else {
-                Log::info('Uploading image for vehicle (local optimize → S3 → CloudFront)', [
-                    'vehicle_id' => $this->vehicle_id,
-                    'vehicle_uuid' => $this->vehicle_uuid,
-                    'path' => $this->path,
-                    'sort_id' => $this->sort_id,
-                ]);
+            Log::info('Uploading image for vehicle (local optimize → S3 → CloudFront)', [
+                'vehicle_id' => $this->vehicle_id,
+                'vehicle_uuid' => $this->vehicle_uuid,
+                'path' => $this->path,
+                'sort_id' => $this->sort_id,
+            ]);
 
-                $optimized = $optimizer->optimizeFileToJpeg(storage_path('app/'.$this->path));
-                $image_contents = $optimized['binary'];
-            }
-
-            $s3_result = Storage::disk('s3')->put($s3_path, $image_contents);
-
-            if (! $s3_result) {
-                throw new Exception('Failed to upload image to S3');
-            }
-
-            $cdn_url = $this->aws_url.'/'.$s3_path;
+            $uploaded = $uploader->putJpeg($this->path, $s3_path);
+            $cdn_url = $uploaded['url'];
 
             VehicleImage::create([
                 'sort_id' => $this->sort_id,
@@ -131,7 +114,7 @@ class UploadVehicleImage implements ShouldQueue
                             'filename' => $this->original_filename,
                             'sort_id' => $this->sort_id,
                             'channel' => $this->user_id ? 'authenticated_upload' : 'system_upload',
-                            'optimizer' => $mode === 'cloudinary' ? 'cloudinary' : 'local',
+                            'optimizer' => $uploaded['driver'],
                         ],
                     );
                 }
@@ -146,53 +129,6 @@ class UploadVehicleImage implements ShouldQueue
             ApiResponseHelper::imageError('Imagen guardada localmente para vehículo uuid: '.$this->vehicle_uuid, 'Guardada en: '.$this->path, 500, 'SAVE_LOCAL_IMAGE_ERROR');
             throw $e;
         }
-    }
-
-    /**
-     * Legacy: Cloudinary solo como paso de optimización; el archivo definitivo vive en S3.
-     */
-    protected function optimizeViaCloudinary(string $name): string
-    {
-        Log::info('Uploading image for vehicle (Cloudinary → S3 → CloudFront)', [
-            'vehicle_id' => $this->vehicle_id,
-            'vehicle_uuid' => $this->vehicle_uuid,
-            'path' => $this->path,
-            'sort_id' => $this->sort_id,
-        ]);
-
-        /** @var Cloudinary $cloudinary */
-        $cloudinary = app(Cloudinary::class);
-
-        $cloudinary_file = $cloudinary->uploadApi()->upload(storage_path('app/'.$this->path), [
-            'public_id' => $name,
-            'folder' => $this->cloudinary_temp_folder.'/'.$this->vehicle_uuid,
-            'transformation' => CloudinaryVehicleUploadTransform::incomingFlattenTransformation(),
-        ]);
-
-        $cloudinary_url = $cloudinary_file['secure_url'] ?? null;
-        $cloudinary_public_id = $cloudinary_file['public_id'] ?? null;
-
-        if (! $cloudinary_url) {
-            throw new Exception('Cloudinary upload did not return secure_url');
-        }
-
-        $image_contents = file_get_contents($cloudinary_url);
-        if ($image_contents === false) {
-            throw new Exception('Failed to download optimized image from Cloudinary');
-        }
-
-        if ($cloudinary_public_id) {
-            try {
-                $cloudinary->uploadApi()->destroy($cloudinary_public_id);
-            } catch (\Throwable $e) {
-                Log::warning('No se pudo borrar temporal en Cloudinary tras subir a S3', [
-                    'public_id' => $cloudinary_public_id,
-                    'message' => $e->getMessage(),
-                ]);
-            }
-        }
-
-        return $image_contents;
     }
 
     protected function validateInputs(): void

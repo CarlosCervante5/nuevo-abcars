@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Helpers\ApiResponseHelper;
 use App\Models\Quiz;
-use Cloudinary\Cloudinary;
+use App\Services\LocalImageS3Uploader;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -21,84 +21,45 @@ class UploadQuizImage
     protected $quiz;
     protected $original_filename;
     protected $base_folder;
-    protected $aws_url;
 
-    /**
-     * Create a new job instance.
-     */
-    public function __construct( String $path, Quiz $quiz, String $original_filename)
+    public function __construct(String $path, Quiz $quiz, String $original_filename)
     {
         $this->path = $path;
         $this->quiz = $quiz;
         $this->original_filename = $original_filename;
-        $this->base_folder = env('AWS_QUIZZES_FOLDER_BASE', 'default_folder');
-        $this->aws_url = env('AWS_CLOUDFRONT_URL');
-
+        $this->base_folder = env('AWS_QUIZZES_FOLDER_BASE', 'abcars_quizzes');
     }
 
-    /**
-     * Execute the job.
-     */
-    public function handle(Cloudinary $cloudinary): void
-    {   
-        // Validaciones
+    public function handle(LocalImageS3Uploader $uploader): void
+    {
         $this->validateInputs();
 
         try {
-
-            Log::info('Job details:', [
-                'reward_uuid' => $this->quiz->uuid,
+            Log::info('Uploading quiz image (local optimize → S3)', [
+                'quiz_uuid' => $this->quiz->uuid,
                 'path' => $this->path,
             ]);
 
             $name = time().'_'.$this->quiz->uuid;
+            $s3Path = $this->base_folder.'/'.$this->quiz->uuid.'/'.$name.'.jpg';
+            $uploaded = $uploader->putJpeg($this->path, $s3Path);
 
-            $cloudinary_file = $cloudinary->uploadApi()->upload(storage_path('app/' . $this->path), [
-                'public_id' => $name,
-                'folder' => $this->base_folder . '/' . $this->quiz->uuid,
-                'transformation' => [
-                    'quality' => 'auto',
-                    'fetch_format' => 'jpg'
-                ]
-            ]);
-
-            $s3_path = $this->base_folder . '/' . $this->quiz->uuid . '/' . $name . '.jpg';
-            
-            $image_contents = file_get_contents($cloudinary_file['secure_url']);
-            
-            $s3_result = Storage::disk('s3')->put($s3_path, $image_contents);
-
-            if ($s3_result) {
-
-                $this->quiz->update(['image_path' => $this->aws_url . '/' . $s3_path]);
-                
-            } else {
-                throw new Exception('Failed to upload image to S3');
-            }
-
-            $cloudinary->uploadApi()->destroy($cloudinary_file['public_id']);
-
+            $this->quiz->update(['image_path' => $uploaded['url']]);
             Storage::delete($this->path);
 
-            ApiResponseHelper::imageSuccess(200, 'Imagen subida correctamente al servicio externo', ['url' => $this->aws_url . '/' . $s3_path]);
-
+            ApiResponseHelper::imageSuccess(200, 'Imagen subida correctamente al servicio externo', ['url' => $uploaded['url']]);
         } catch (\Exception $e) {
-        
             ApiResponseHelper::imageError('Error en el job para subir la imagen para uuid: '.$this->quiz->uuid, $e->getMessage(), 500, 'UPLOAD_IMAGE_ERROR');
-
-            ApiResponseHelper::imageError('Imagen guardada localmente para quiz uuid: '.$this->quiz->uuid, 'Guardada en: ' . $this->path, 500, 'SAVE_LOCAL_IMAGE_ERROR');
+            ApiResponseHelper::imageError('Imagen guardada localmente para quiz uuid: '.$this->quiz->uuid, 'Guardada en: '.$this->path, 500, 'SAVE_LOCAL_IMAGE_ERROR');
         }
     }
 
-    /**
-     * Validates the required inputs.
-     */
     protected function validateInputs(): void
     {
         $requiredFields = [
             'path' => $this->path,
             'event' => $this->quiz,
-            'original_filename' => $this->original_filename
+            'original_filename' => $this->original_filename,
         ];
 
         foreach ($requiredFields as $field => $value) {

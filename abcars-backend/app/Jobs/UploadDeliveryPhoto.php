@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\DeliveryPhoto;
-use Cloudinary\Cloudinary;
+use App\Services\LocalImageS3Uploader;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -29,36 +29,26 @@ class UploadDeliveryPhoto
         $this->originalFilename = $originalFilename;
     }
 
-    public function handle(Cloudinary $cloudinary): void
+    public function handle(LocalImageS3Uploader $uploader): void
     {
         $this->validateInputs();
 
         try {
-            $baseFolder = env('CLOUDINARY_DELIVERY_PHOTOS_FOLDER_BASE', 'abcars_images/delivery_photos');
-            $name = 'delivery_' . time() . '_' . uniqid();
-
-            $cloudinaryFile = $cloudinary->uploadApi()->upload(storage_path('app/' . $this->path), [
-                'public_id' => $name,
-                'folder' => $baseFolder,
-                'transformation' => [
-                    'quality' => 'auto',
-                    'fetch_format' => 'jpg'
-                ]
-            ]);
-
-            $cloudinaryUrl = $cloudinaryFile['secure_url'];
-            $publicId = $cloudinaryFile['public_id'] ?? null;
+            $baseFolder = env('AWS_DELIVERY_PHOTOS_FOLDER_BASE', env('CLOUDINARY_DELIVERY_PHOTOS_FOLDER_BASE', 'abcars_images/delivery_photos'));
+            $name = 'delivery_'.time().'_'.uniqid();
+            $s3Path = rtrim($baseFolder, '/').'/'.$name.'.jpg';
+            $uploaded = $uploader->putJpeg($this->path, $s3Path);
 
             DeliveryPhoto::create([
-                'service_image_url' => $cloudinaryUrl,
-                'service_public_id' => $publicId,
+                'service_image_url' => $uploaded['url'],
+                'service_public_id' => $uploaded['path'],
                 'caption' => $this->caption,
                 'sort_order' => $this->sortOrder,
             ]);
 
             Storage::delete($this->path);
 
-            Log::info('Delivery photo uploaded', ['url' => $cloudinaryUrl]);
+            Log::info('Delivery photo uploaded to S3/CloudFront', ['url' => $uploaded['url']]);
         } catch (\Exception $e) {
             Log::error('Error uploading delivery photo', ['error' => $e->getMessage()]);
             Storage::delete($this->path);

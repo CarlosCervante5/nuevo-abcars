@@ -5,8 +5,8 @@ namespace App\Http\Controllers\StudioCatalog;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Models\StudioCatalogSetting;
+use App\Services\LocalImageS3Uploader;
 use App\Support\VehicleGeminiRecortePrompt;
-use Cloudinary\Cloudinary;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -24,7 +24,7 @@ class StudioCatalogController extends Controller
         );
     }
 
-    public function storeBackground(Request $request, Cloudinary $cloudinary): JsonResponse
+    public function storeBackground(Request $request, LocalImageS3Uploader $uploader): JsonResponse
     {
         $validated = $request->validate([
             'image' => 'required|image|mimes:jpeg,jpg,png,webp|max:8192',
@@ -36,29 +36,20 @@ class StudioCatalogController extends Controller
         $path = $validated['image']->store('temp_images');
 
         try {
-            $folder = env('CLOUDINARY_STUDIO_FOLDER', 'abcars_studio');
-            $upload = $cloudinary->uploadApi()->upload(storage_path('app/' . $path), [
-                'public_id' => 'cyclorama-master-' . time(),
-                'folder' => $folder,
-                'overwrite' => true,
-                'resource_type' => 'image',
-                'format' => 'jpg',
-                'transformation' => [
-                    'quality' => 'auto:good',
-                    'fetch_format' => 'jpg',
-                ],
-            ]);
+            $folder = env('AWS_STUDIO_FOLDER_BASE', env('CLOUDINARY_STUDIO_FOLDER', 'abcars_studio'));
+            $s3Path = rtrim($folder, '/').'/cyclorama-master-'.time().'.jpg';
+            $uploaded = $uploader->putJpeg($path, $s3Path);
 
-            if (filled($settings->cyclorama_public_id)) {
+            if (filled($settings->cyclorama_public_id) && str_contains((string) $settings->cyclorama_public_id, '/')) {
                 try {
-                    $cloudinary->uploadApi()->destroy($settings->cyclorama_public_id);
+                    Storage::disk('s3')->delete($settings->cyclorama_public_id);
                 } catch (\Throwable) {
                     // No bloquear si el asset anterior ya no existe.
                 }
             }
 
-            $settings->cyclorama_image_url = $upload['secure_url'] ?? null;
-            $settings->cyclorama_public_id = $upload['public_id'] ?? null;
+            $settings->cyclorama_image_url = $uploaded['url'];
+            $settings->cyclorama_public_id = $uploaded['path'];
             $settings->width = (int) ($validated['width'] ?? StudioCatalogSetting::DEFAULT_WIDTH);
             $settings->height = (int) ($validated['height'] ?? StudioCatalogSetting::DEFAULT_HEIGHT);
             $settings->save();
@@ -73,13 +64,13 @@ class StudioCatalogController extends Controller
         }
     }
 
-    public function resetBackground(Cloudinary $cloudinary): JsonResponse
+    public function resetBackground(): JsonResponse
     {
         $settings = StudioCatalogSetting::current();
 
-        if (filled($settings->cyclorama_public_id)) {
+        if (filled($settings->cyclorama_public_id) && str_contains((string) $settings->cyclorama_public_id, '/')) {
             try {
-                $cloudinary->uploadApi()->destroy($settings->cyclorama_public_id);
+                Storage::disk('s3')->delete($settings->cyclorama_public_id);
             } catch (\Throwable) {
                 // Continuar aunque falle el borrado remoto.
             }
