@@ -167,7 +167,8 @@ class IntelimotorIntegrationController extends Controller
         try {
             $summary = $this->intelimotorInventorySyncService->syncInventory(
                 (bool) ($validated['sync_images'] ?? true),
-                $validated['account_uuid'] ?? null
+                $validated['account_uuid'] ?? null,
+                auth()->id(),
             );
 
             return ApiResponseHelper::apiSuccess(200, 'Inventario sincronizado desde Intelimotor', $summary);
@@ -243,7 +244,11 @@ class IntelimotorIntegrationController extends Controller
         $settings = IntelimotorSchedulerSetting::current();
 
         try {
-            $summary = $this->intelimotorInventorySyncService->syncInventory((bool) $settings->sync_images);
+            $summary = $this->intelimotorInventorySyncService->syncInventory(
+                (bool) $settings->sync_images,
+                null,
+                auth()->id(),
+            );
 
             $settings->last_run_at = now();
             $settings->last_run_summary = json_encode($summary);

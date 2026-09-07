@@ -1,0 +1,131 @@
+<div class="min-h-0 rounded-xl adm-shell-page">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-12">
+    <div class="bg-white shadow-sm rounded-xl p-6">
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Historial de publicaciones</h1>
+        <nav class="mt-2 text-sm text-gray-500" aria-label="breadcrumb">
+          <a class="text-gray-500 hover:text-gray-700" [routerLink]="['/admin/administrator']">Inicio</a>
+          <span class="mx-2">/</span>
+          <span class="text-gray-700 font-medium">Historial de publicaciones</span>
+        </nav>
+        <p class="mt-3 text-sm text-gray-600">
+          Registro de quién publicó o dio de baja unidades en inventario, y desde qué flujo (panel, app móvil, Intelimotor, etc.).
+        </p>
+      </div>
+
+      <div class="flex flex-col lg:flex-row lg:items-end gap-3 mb-6">
+        <mat-form-field appearance="outline" class="filter-field flex-1 min-w-[180px]">
+          <mat-label>Periodo</mat-label>
+          <mat-select [(ngModel)]="selectedPeriod" (selectionChange)="onFilterChange()">
+            @for (opt of periodOptions; track opt.value) {
+              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field flex-1 min-w-[220px]">
+          <mat-label>Tipo de cambio</mat-label>
+          <mat-select [(ngModel)]="toStatus" (selectionChange)="onFilterChange()">
+            @for (opt of statusOptions; track opt.label) {
+              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field flex-1 min-w-[240px]">
+          <mat-label>UUID del vehículo</mat-label>
+          <input
+            matInput
+            [(ngModel)]="vehicleUuid"
+            placeholder="Filtrar por UUID"
+            (keyup.enter)="onFilterChange()"
+          />
+        </mat-form-field>
+
+        <button
+          mat-stroked-button
+          type="button"
+          class="mb-[22px]"
+          (click)="onFilterChange()"
+        >
+          <mat-icon class="mr-1">search</mat-icon>
+          Buscar
+        </button>
+      </div>
+
+      @if (loading) {
+        <div class="flex justify-center py-16">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      } @else if (error) {
+        <div class="text-center text-red-500 py-12">
+          <mat-icon class="text-red-400 mb-2">error_outline</mat-icon>
+          <p>{{ error }}</p>
+        </div>
+      } @else if (items.length === 0) {
+        <div class="text-center text-gray-400 py-12">
+          <mat-icon class="mb-2">history</mat-icon>
+          <p>Sin registros para los filtros seleccionados</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="adm-plain-table w-full text-sm">
+            <thead>
+              <tr>
+                <th class="text-left p-2 font-medium text-gray-600">Fecha</th>
+                <th class="text-left p-2 font-medium text-gray-600">Vehículo</th>
+                <th class="text-left p-2 font-medium text-gray-600">VIN</th>
+                <th class="text-left p-2 font-medium text-gray-600">Cambio</th>
+                <th class="text-left p-2 font-medium text-gray-600">Origen</th>
+                <th class="text-left p-2 font-medium text-gray-600">Usuario</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of items; track item.id) {
+                <tr class="border-b border-gray-50 hover:bg-gray-50/60">
+                  <td class="p-2 text-gray-500 whitespace-nowrap">{{ formatDate(item.at) }}</td>
+                  <td class="p-2 text-gray-800">
+                    <div class="font-medium">{{ item.vehicle_name || '—' }}</div>
+                    @if (item.vehicle_uuid) {
+                      <div class="text-xs text-gray-400 font-mono truncate max-w-[180px]" [title]="item.vehicle_uuid">
+                        {{ item.vehicle_uuid }}
+                      </div>
+                    }
+                  </td>
+                  <td class="p-2 text-gray-600 font-mono text-xs">{{ item.vin || '—' }}</td>
+                  <td class="p-2 whitespace-nowrap">
+                    <span
+                      class="inline-flex px-2 py-0.5 rounded text-xs font-medium"
+                      [ngClass]="statusBadgeClass(item.from_status)"
+                    >
+                      {{ statusLabel(item.from_status) }}
+                    </span>
+                    <span class="mx-1 text-gray-400">→</span>
+                    <span
+                      class="inline-flex px-2 py-0.5 rounded text-xs font-medium"
+                      [ngClass]="statusBadgeClass(item.to_status)"
+                    >
+                      {{ statusLabel(item.to_status) }}
+                    </span>
+                  </td>
+                  <td class="p-2 text-gray-700">{{ sourceLabel(item.source) }}</td>
+                  <td class="p-2 text-gray-600">
+                    @if (item.user_email) {
+                      {{ item.user_email }}
+                    } @else {
+                      <span class="text-gray-400 italic">Sistema / cron</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <p class="mt-4 text-xs text-gray-400">
+          Mostrando hasta {{ limit }} registros más recientes del periodo.
+        </p>
+      }
+    </div>
+  </div>
+</div>

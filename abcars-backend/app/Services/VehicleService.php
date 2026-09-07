@@ -32,9 +32,22 @@ class VehicleService
         'warranty_manual', 'intake_engine'
     ];
 
-    public function __construct(UserService $userService)
+    public function __construct(UserService $userService, private VehiclePublishAuditService $publishAudit)
     {
         $this->userService = $userService;
+    }
+
+    private function auditPageStatusIfChanged(Vehicle $vehicle, ?string $before, ?int $userId, string $source, array $meta = []): void
+    {
+        $vehicle->refresh();
+        $this->publishAudit->logPageStatusChange(
+            $vehicle,
+            $before,
+            (string) $vehicle->page_status,
+            $source,
+            $userId,
+            $meta,
+        );
     }
 
     /**
@@ -85,7 +98,9 @@ class VehicleService
             $vehicle->body_id = $body->id;
 
             // Guardar el vehículo
+            $pageStatusBefore = $vehicle->exists ? $vehicle->page_status : null;
             $vehicle->save();
+            $this->auditPageStatusIfChanged($vehicle, $pageStatusBefore, $user_id, 'vehicle_create_update');
 
             // Extraer las especificaciones del vehículo
             $specificationSubset = array_intersect_key($data, array_flip($this->specificationKeys));
@@ -170,7 +185,9 @@ class VehicleService
         $vehicle->body_id = $body->id;
 
         // Guardar el vehículo
+        $pageStatusBefore = $vehicle->exists ? $vehicle->page_status : null;
         $vehicle->save();
+        $this->auditPageStatusIfChanged($vehicle, $pageStatusBefore, $user_id, 'vehicle_create_update');
 
         // Extraer las especificaciones del vehículo
         $specificationSubset = array_intersect_key($data, array_flip($this->specificationKeys));
@@ -219,6 +236,7 @@ class VehicleService
     
         // Crear o actualizar el vehículo
         $vehicle = Vehicle::findByUuid([$data['uuid']]);
+        $before = $vehicle->page_status;
 
         $previousStatus = $vehicle->page_status;
         $vehicle->page_status = $data['page_status'];
@@ -229,9 +247,16 @@ class VehicleService
         );
         $vehicle->save();
 
-        $this->userService->vehicleUpdate('Vehicle Controller: Update vehicle', json_encode([$vehicle, null]) , json_encode($data), $user_id, $vehicle->id);
+        $this->userService->vehicleUpdate(
+            'Vehicle Controller: Update status',
+            json_encode(['page_status' => $before]),
+            json_encode($data),
+            $user_id,
+            $vehicle->id,
+        );
+        $this->auditPageStatusIfChanged($vehicle, $before, $user_id, 'manual_status');
 
-        return $vehicle;
+        return $vehicle->fresh();
     }
 
     /**
@@ -339,27 +364,44 @@ class VehicleService
      */
     public function statusVehicleBatch($uuids, $page_status, $user_id)
     {
-        $vehiclesExist = Vehicle::whereIn('uuid', $uuids)->exists();
-        
-        if ($vehiclesExist) {
+        $vehicles = Vehicle::whereIn('uuid', $uuids)->get();
 
-            Vehicle::whereIn('uuid', $uuids)->get()->each(function (Vehicle $vehicle) use ($page_status) {
-                $previousStatus = $vehicle->page_status;
-                $vehicle->page_status = $page_status;
-                $vehicle->page_status_manual_at = now();
-                $vehicle->syncSoldAtForStatusChange(
-                    is_string($previousStatus) ? $previousStatus : null,
-                    (string) $page_status
-                );
-                $vehicle->save();
-            });
-
-            $this->userService->vehicleUpdate('Vehicle Controller: Status vehicle batch ('.$page_status.')', null, json_encode($uuids), $user_id);
-
-            return true;
+        if ($vehicles->isEmpty()) {
+            return false;
         }
 
-        return false;
+        $beforeById = $vehicles->mapWithKeys(fn (Vehicle $v) => [$v->id => $v->page_status]);
+
+        foreach ($vehicles as $vehicle) {
+            $previousStatus = $vehicle->page_status;
+            $vehicle->page_status = $page_status;
+            $vehicle->page_status_manual_at = now();
+            $vehicle->syncSoldAtForStatusChange(
+                is_string($previousStatus) ? $previousStatus : null,
+                (string) $page_status
+            );
+            $vehicle->save();
+        }
+
+        $this->userService->vehicleUpdate(
+            'Vehicle Controller: Status vehicle batch ('.$page_status.')',
+            null,
+            json_encode($uuids),
+            $user_id,
+        );
+
+        foreach ($vehicles as $vehicle) {
+            $vehicle->refresh();
+            $this->auditPageStatusIfChanged(
+                $vehicle,
+                $beforeById[$vehicle->id] ?? null,
+                $user_id,
+                'status_batch',
+                ['batch_uuids' => $uuids],
+            );
+        }
+
+        return true;
     }
 
 

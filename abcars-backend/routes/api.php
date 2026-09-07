@@ -353,6 +353,7 @@ Route::prefix('admin/analytics')->middleware([
     Route::get('/most-valuated', [AdminAnalyticsDashboardController::class, 'mostValuated']);
     Route::get('/longest-inventory', [AdminAnalyticsDashboardController::class, 'longestInventory']);
     Route::get('/price-history', [AdminAnalyticsDashboardController::class, 'priceHistory']);
+    Route::get('/publish-log', [AdminAnalyticsDashboardController::class, 'publishLog']);
 });
 // Fin Segmento Analytics Dashboard
 

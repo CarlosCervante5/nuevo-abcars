@@ -9,6 +9,7 @@ use App\Models\Vehicle;
 use App\Models\VehicleBody;
 use App\Models\VehicleBrand;
 use App\Models\VehicleImage;
+use App\Services\VehiclePublishAuditService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -17,10 +18,11 @@ class IntelimotorInventorySyncService
 {
     public function __construct(
         private IntelimotorApiService $intelimotorApi,
-        private IntelimotorAccountService $accountService
+        private IntelimotorAccountService $accountService,
+        private VehiclePublishAuditService $publishAudit,
     ) {}
 
-    public function syncInventory(bool $syncImages = true, ?string $accountUuid = null): array
+    public function syncInventory(bool $syncImages = true, ?string $accountUuid = null, ?int $userId = null): array
     {
         $accounts = $this->resolveAccountsForSync($accountUuid);
 
@@ -32,7 +34,7 @@ class IntelimotorInventorySyncService
         $aggregate['accounts'] = [];
 
         foreach ($accounts as $account) {
-            $accountSummary = $this->syncAccountInventory($account, $syncImages);
+            $accountSummary = $this->syncAccountInventory($account, $syncImages, $userId);
             $aggregate['accounts'][] = [
                 'account_uuid' => $account->uuid,
                 'account_name' => $account->name,
@@ -126,7 +128,7 @@ class IntelimotorInventorySyncService
             ->all();
     }
 
-    private function syncAccountInventory(IntelimotorAccount $account, bool $syncImages): array
+    private function syncAccountInventory(IntelimotorAccount $account, bool $syncImages, ?int $userId = null): array
     {
         $units = $this->intelimotorApi->fetchVisibleUnits($account);
 
@@ -136,7 +138,7 @@ class IntelimotorInventorySyncService
 
         $seenUnitIds = [];
 
-        DB::transaction(function () use ($units, $account, $syncImages, &$summary, &$seenUnitIds) {
+        DB::transaction(function () use ($units, $account, $syncImages, $userId, &$summary, &$seenUnitIds) {
             foreach ($units as $unit) {
                 $unitId = (string) ($unit['id'] ?? '');
                 if ($unitId === '') {
@@ -149,7 +151,7 @@ class IntelimotorInventorySyncService
                 try {
                     $existing = $this->findVehicleForUnit($unit, $account);
                     $isCreate = $existing === null;
-                    $vehicle = $this->upsertVehicleFromUnit($unit, $account, $existing);
+                    $vehicle = $this->upsertVehicleFromUnit($unit, $account, $existing, $userId);
 
                     if ($isCreate) {
                         $summary['created']++;
@@ -158,7 +160,7 @@ class IntelimotorInventorySyncService
                     }
 
                     if ($syncImages) {
-                        $imageCount = $this->syncImagesFromIntelimotor($vehicle, $unit, $isCreate);
+                        $imageCount = $this->syncImagesFromIntelimotor($vehicle, $unit, $isCreate, $userId);
                         $summary['images_synced'] += $imageCount;
                     }
                 } catch (\Throwable $exception) {
@@ -170,7 +172,7 @@ class IntelimotorInventorySyncService
             }
 
             $summary['skipped_manual_status'] += $this->countMissingUnitsWithManualStatus($seenUnitIds, $account);
-            $summary['marked_sold'] += $this->markMissingUnitsAsSold($seenUnitIds, $account);
+            $summary['marked_sold'] += $this->markMissingUnitsAsSold($seenUnitIds, $account, $userId);
         });
 
         $account->last_sync_at = now();
@@ -279,8 +281,12 @@ class IntelimotorInventorySyncService
         return null;
     }
 
-    private function upsertVehicleFromUnit(array $unit, IntelimotorAccount $account, ?Vehicle $vehicle = null): Vehicle
-    {
+    private function upsertVehicleFromUnit(
+        array $unit,
+        IntelimotorAccount $account,
+        ?Vehicle $vehicle = null,
+        ?int $userId = null,
+    ): Vehicle {
         $unitId = (string) $unit['id'];
         $brandName = $unit['brands'][0]['name'] ?? $unit['externalBrand'] ?? 'sin marca';
         $modelName = $unit['models'][0]['name'] ?? $unit['externalModel'] ?? 'sin modelo';
@@ -330,6 +336,7 @@ class IntelimotorInventorySyncService
         $vehicle->mileage = (int) ($unit['kms'] ?? 0);
         $vehicle->list_price = (float) ($unit['listPrice'] ?? 0);
         $vehicle->sale_price = (float) ($unit['listPrice'] ?? 0);
+        $beforeStatus = $isNew ? null : $vehicle->page_status;
         if ($isNew) {
             $vehicle->category = 'pre_owned';
             $vehicle->type = 'car';
@@ -353,10 +360,25 @@ class IntelimotorInventorySyncService
 
         $vehicle->save();
 
+        if ($isNew) {
+            $this->publishAudit->logPageStatusChange(
+                $vehicle->fresh(),
+                $beforeStatus,
+                (string) $vehicle->page_status,
+                'intelimotor_sync',
+                $userId,
+                [
+                    'intelimotor_unit_id' => $unitId,
+                    'account_uuid' => $account->uuid,
+                    'account_name' => $account->name,
+                ],
+            );
+        }
+
         return $vehicle->fresh();
     }
 
-    private function syncImagesFromIntelimotor(Vehicle $vehicle, array $unit, bool $isCreate = false): int
+    private function syncImagesFromIntelimotor(Vehicle $vehicle, array $unit, bool $isCreate = false, ?int $userId = null): int
     {
         $remoteUrls = $this->extractPictureUrls($unit);
         if ($remoteUrls === []) {
@@ -387,8 +409,18 @@ class IntelimotorInventorySyncService
         }
 
         if ($isCreate && $vehicle->page_status !== 'sale') {
-            $vehicle->page_status = $created > 0 ? 'active' : 'inactive';
+            $before = $vehicle->page_status;
+            $to = $created > 0 ? 'active' : 'inactive';
+            $vehicle->page_status = $to;
             $vehicle->save();
+            $this->publishAudit->logPageStatusChange(
+                $vehicle->fresh(),
+                $before,
+                $to,
+                'intelimotor_images_sync',
+                $userId,
+                ['images_created' => $created],
+            );
         }
 
         return $created;
@@ -397,23 +429,42 @@ class IntelimotorInventorySyncService
     /**
      * @param  array<int, string>  $seenUnitIds
      */
-    private function markMissingUnitsAsSold(array $seenUnitIds, IntelimotorAccount $account): int
+    private function markMissingUnitsAsSold(array $seenUnitIds, IntelimotorAccount $account, ?int $userId = null): int
     {
         if ($seenUnitIds === []) {
             return 0;
         }
 
-        return Vehicle::query()
+        $vehicles = Vehicle::query()
             ->where('intelimotor_account_id', $account->id)
             ->whereNotNull('intelimotor_unit_id')
             ->whereNotIn('intelimotor_unit_id', $seenUnitIds)
             ->where('page_status', '!=', 'sale')
             ->whereNull('page_status_manual_at')
-            ->update([
+            ->get();
+
+        if ($vehicles->isEmpty()) {
+            return 0;
+        }
+
+        foreach ($vehicles as $vehicle) {
+            $before = $vehicle->page_status;
+            $vehicle->update([
                 'page_status' => 'sale',
                 'sold_at' => now(),
                 'intelimotor_synced_at' => now(),
             ]);
+            $this->publishAudit->logPageStatusChange(
+                $vehicle->fresh(),
+                $before,
+                'sale',
+                'intelimotor_marked_sold',
+                $userId,
+                ['account_uuid' => $account->uuid],
+            );
+        }
+
+        return $vehicles->count();
     }
 
     private function countMissingUnitsWithManualStatus(array $seenUnitIds, IntelimotorAccount $account): int

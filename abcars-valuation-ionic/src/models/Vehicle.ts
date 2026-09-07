@@ -14,6 +14,7 @@ export interface Vehicle {
   cylinders?: number;
   engine_displacement_cc?: number | null;
   wet_weight_kg?: number | null;
+  motorcycle_power_hp?: number | null;
   interior_color?: string;
   exterior_color?: string;
   transmission?: string;

@@ -28,6 +28,7 @@ import { PromotionsPageModule } from "../gestor/promotions-page.module";
 import { AdminMainBannerComponent } from "./pages/admin-main-banner/admin-main-banner.component";
 import { AdminBrandsModelsComponent } from "./pages/admin-brands-models/admin-brands-models.component";
 import { IntelimotorIntegrationComponent } from "./pages/intelimotor-integration/intelimotor-integration.component";
+import { InventoryPublishLogComponent } from "./pages/inventory-publish-log/inventory-publish-log.component";
 @NgModule({
     declarations: [
         AdminShellComponent,
@@ -61,7 +62,8 @@ import { IntelimotorIntegrationComponent } from "./pages/intelimotor-integration
         DeliveryPhotosPageModule,
         PromotionsPageModule,
         AdminMainBannerComponent,
-        IntelimotorIntegrationComponent
+        IntelimotorIntegrationComponent,
+        InventoryPublishLogComponent
     ]
   })
   export class AdministradorModule { }

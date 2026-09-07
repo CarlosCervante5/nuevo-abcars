@@ -24,6 +24,7 @@ import { AdminMainBannerComponent } from './pages/admin-main-banner/admin-main-b
 import { MainBannerGuard } from './guards/main-banner.guard';
 import { AdminBrandsModelsComponent } from './pages/admin-brands-models/admin-brands-models.component';
 import { IntelimotorIntegrationComponent } from './pages/intelimotor-integration/intelimotor-integration.component';
+import { InventoryPublishLogComponent } from './pages/inventory-publish-log/inventory-publish-log.component';
 const routes: Routes = [
   {
     path: '',
@@ -78,6 +79,7 @@ const routes: Routes = [
         data: { embedInShell: true }
       },
       { path: 'analytics', component: AnalyticsComponent, data: { embedInShell: true } },
+      { path: 'publish-log', component: InventoryPublishLogComponent, data: { embedInShell: true } },
       { path: 'assistant', component: AssistantComponent, data: { embedInShell: true } },
       { path: 'api-info', component: ApiInfoComponent, data: { embedInShell: true } },
       { path: 'intelimotor', component: IntelimotorIntegrationComponent, data: { embedInShell: true } },

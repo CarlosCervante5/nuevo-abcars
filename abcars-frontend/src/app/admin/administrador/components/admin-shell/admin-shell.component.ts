@@ -37,6 +37,7 @@ export class AdminShellComponent implements OnInit, OnDestroy {
     dealerships: 'Sucursales',
     'brands-models': 'Marcas y modelos',
     analytics: 'Analytics',
+    'publish-log': 'Historial de publicaciones',
     assistant: 'Asistente de datos',
     'api-info': 'Información de la API',
     documentation: 'Documentación'

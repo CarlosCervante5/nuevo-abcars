@@ -114,6 +114,14 @@ export const ADMINISTRATOR_NAV_ITEMS: AdministratorNavItem[] = [
     requiredPermissions: ['view analytics dashboard']
   },
   {
+    title: 'Historial de publicaciones',
+    icon: 'fi fi-rr-time-past',
+    routerLink: ['publish-log'],
+    description: 'Quién publicó o dio de baja unidades',
+    iconColor: 'blue',
+    requiredPermissions: ['view analytics dashboard']
+  },
+  {
     title: 'Asistente de datos',
     icon: 'fi fi-rr-comment-dots',
     routerLink: ['assistant'],

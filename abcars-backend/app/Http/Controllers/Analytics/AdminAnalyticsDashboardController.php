@@ -11,6 +11,7 @@ use App\Models\CustomerAppointment;
 use App\Models\Leads\AskInformation;
 use App\Models\Valuations\VehicleValuation;
 use App\Models\VehicleUpdate;
+use App\Services\VehiclePublishAuditService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -535,6 +536,34 @@ class AdminAnalyticsDashboardController extends Controller
                     'dealership_id' => $filters['dealership_id'],
                 ],
             ]);
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ], $e->getStatusCode());
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => true,
+                'message' => 'Error al procesar la solicitud',
+            ], 500);
+        }
+    }
+
+    /**
+     * Historial de publicación / cambios de page_status en inventario.
+     */
+    public function publishLog(Request $request, VehiclePublishAuditService $publishAudit): JsonResponse
+    {
+        try {
+            $filters = $this->getFilters($request);
+            $filters['vehicle_uuid'] = $request->query('vehicle_uuid');
+            $filters['user_id'] = $request->query('user_id') ? (int) $request->query('user_id') : null;
+            $filters['to_status'] = $request->query('to_status');
+            $filters['limit'] = min(500, max(1, (int) ($request->query('limit') ?? 100)));
+
+            $result = $publishAudit->listPublishLog($filters);
+
+            return response()->json($result);
         } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
             return response()->json([
                 'error' => true,

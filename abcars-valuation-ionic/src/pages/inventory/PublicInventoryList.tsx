@@ -9,6 +9,8 @@ import {
   IonToast,
   IonRefresher,
   IonRefresherContent,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
   IonIcon,
   RefresherEventDetail,
 } from '@ionic/react';
@@ -18,6 +20,7 @@ const LOGO_ABCARS = '/logo.svg';
 import { useHistory } from 'react-router-dom';
 import { vehicleService } from '../../services/vehicleService';
 import { Vehicle } from '../../models/Vehicle';
+import { getEngineMotorLabel } from '../../utils/vehicleSpecLabel';
 import './PublicInventoryList.css';
 
 const CATEGORIES = [
@@ -82,7 +85,7 @@ const PublicInventoryList: React.FC = () => {
         per_page: 20,
         search: searchTerm || undefined,
         status: 'active,sale',
-        has_images: false,
+        has_images: true,
       };
       if (category?.bodyNames?.length) {
         params.body_names = category.bodyNames.join(',');
@@ -112,10 +115,19 @@ const PublicInventoryList: React.FC = () => {
             : 'Error al cargar vehículos'),
       );
       setShowToast(true);
-      setVehicles([]);
+      if (!append) {
+        setVehicles([]);
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadMore = async (event: CustomEvent<void>) => {
+    if (currentPage < totalPages) {
+      await loadVehicles(currentPage + 1, true);
+    }
+    (event.target as HTMLIonInfiniteScrollElement).complete();
   };
 
   const handleSearch = (value: string) => {
@@ -216,12 +228,16 @@ const PublicInventoryList: React.FC = () => {
                 <p>No se encontraron vehículos</p>
               </div>
             ) : (
+              <>
               <div className="vehicle-cards">
                 {vehicles.map((vehicle) => {
                   const vehicleImage = vehicle.firstImage || (vehicle as any).first_image;
                   const imgUrl = vehicleImage?.service_image_url || vehicleImage?.image_path;
                   const isFavorite = favorites.has(vehicle.uuid);
                   const badge = vehicle.category === 'new' ? 'NUEVO' : vehicle.status === 'sale' ? 'DESTACADO' : null;
+                  const engineLabel = getEngineMotorLabel(vehicle);
+                  const engineBadge =
+                    engineLabel !== 'N/D' ? engineLabel : translateTransmission(vehicle.transmission);
 
                   return (
                     <div
@@ -278,7 +294,7 @@ const PublicInventoryList: React.FC = () => {
                         <div className="vehicle-card-badges">
                           <span className="spec-badge">
                             <IonIcon icon={car} />
-                            {vehicle.cylinders ? `${vehicle.cylinders} HP` : translateFuelType(vehicle.fuel_type)}
+                            {engineBadge}
                           </span>
                           <span className="spec-badge">
                             {vehicle.fuel_type ? translateFuelType(vehicle.fuel_type) : 'GASOLINA'}
@@ -289,6 +305,15 @@ const PublicInventoryList: React.FC = () => {
                   );
                 })}
               </div>
+
+              <IonInfiniteScroll
+                onIonInfinite={loadMore}
+                threshold="100px"
+                disabled={currentPage >= totalPages}
+              >
+                <IonInfiniteScrollContent loadingText="Cargando más vehículos..." />
+              </IonInfiniteScroll>
+              </>
             )}
           </div>
         </div>

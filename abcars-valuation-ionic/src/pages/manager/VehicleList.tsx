@@ -67,7 +67,7 @@ const VehicleList: React.FC = () => {
           page,
           per_page: 20,
           search: searchTermRef.current || undefined,
-          status: 'active,inactive',
+          status: 'active',
           has_images: false,
         },
         { signal: ac.signal },

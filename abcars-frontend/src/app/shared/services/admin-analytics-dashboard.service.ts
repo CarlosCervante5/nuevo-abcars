@@ -66,6 +66,29 @@ export interface DealershipItem {
   location: string;
 }
 
+export interface PublishLogFilters {
+  start_date: string;
+  end_date: string;
+  vehicle_uuid?: string | null;
+  user_id?: number | null;
+  to_status?: string | null;
+  limit?: number;
+}
+
+export interface PublishLogItem {
+  id: number;
+  at: string;
+  source: string;
+  from_status: string | null;
+  to_status: string | null;
+  vehicle_uuid: string | null;
+  vehicle_name: string | null;
+  vin: string | null;
+  user_email: string | null;
+  user_id: number | null;
+  meta: Record<string, unknown>;
+}
+
 interface ApiResponse<T> {
   data: T;
   filters: DashboardFilters;
@@ -148,6 +171,28 @@ export class AdminAnalyticsDashboardService {
     return this.http.get<{ data: DealershipItem[] }>(
       `${this.baseUrl}/api/admin/analytics/dealerships`,
       { headers: this.getHeaders() }
+    ).pipe(catchError(this.handleError));
+  }
+
+  getPublishLog(filters: PublishLogFilters): Observable<{ data: PublishLogItem[]; filters: PublishLogFilters }> {
+    let params = new HttpParams()
+      .set('start_date', filters.start_date)
+      .set('end_date', filters.end_date)
+      .set('limit', String(filters.limit ?? 100));
+
+    if (filters.vehicle_uuid?.trim()) {
+      params = params.set('vehicle_uuid', filters.vehicle_uuid.trim());
+    }
+    if (filters.user_id) {
+      params = params.set('user_id', filters.user_id.toString());
+    }
+    if (filters.to_status) {
+      params = params.set('to_status', filters.to_status);
+    }
+
+    return this.http.get<{ data: PublishLogItem[]; filters: PublishLogFilters }>(
+      `${this.baseUrl}/api/admin/analytics/publish-log`,
+      { headers: this.getHeaders(), params }
     ).pipe(catchError(this.handleError));
   }
 }

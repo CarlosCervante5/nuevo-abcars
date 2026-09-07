@@ -17,6 +17,7 @@ import { Share } from '@capacitor/share';
 import { Capacitor } from '@capacitor/core';
 import { vehicleService } from '../../services/vehicleService';
 import { Vehicle, VehicleImage } from '../../models/Vehicle';
+import { getEngineMotorLabel } from '../../utils/vehicleSpecLabel';
 import SimulatorModal, { SimulatorData } from '../../components/SimulatorModal';
 import FinancingFormModal from '../../components/FinancingFormModal';
 import './PublicVehicleDetail.css';
@@ -109,12 +110,7 @@ const PublicVehicleDetail: React.FC = () => {
     return firstImg?.service_image_url || firstImg?.image_path;
   };
 
-  const getEngineDisplay = () => {
-    const spec = (vehicle as any)?.specification;
-    if (spec?.intake_engine) return spec.intake_engine;
-    if (spec?.engine_type) return spec.engine_type;
-    return vehicle?.cylinders ? `${vehicle.cylinders}L` : 'N/D';
-  };
+  const getEngineDisplay = () => getEngineMotorLabel(vehicle);
 
   const getKeyFeatures = (): string[] => {
     const features: string[] = [];

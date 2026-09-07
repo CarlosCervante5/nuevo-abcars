@@ -31,30 +31,36 @@ class LogBandwidthUsage
 
         $responseSize = strlen($response->getContent());
 
-        // Contar solicitudes de la misma IP en el tiempo definido
-        $requestCount = DB::table(env('DB_TABLE_PREFIX', '') . 'request_logs')
-            ->where('ip_address', $ip)
-            ->where('created_at', '>=', $timeFrame)
-            ->count();
+        try {
+            $table = env('DB_TABLE_PREFIX', '') . 'request_logs';
 
-        // Registrar la solicitud en la base de datos
-        DB::table(env('DB_TABLE_PREFIX', '') . 'request_logs')->insert([
-            'ip_address' => $ip,
-            'path' => $request->path(),
-            'method' => $request->method(),
-            'request_size' => $requestSize,
-            'response_size' => $responseSize,
-            'total_size' => $requestSize + $responseSize,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        
-        if ($requestCount > $this->maxRequests) {
-            // Enviar correo de alerta
-            // Mail::mailer('logs')->to('jgcl.proyectos@gmail.com')->send(new AlertAnomalousRequest($ip, $request->path(), $request->method()));
-            Mail::mailer('logs')->to('lesamaoyabi@gmail.com')->send(new AlertAnomalousRequest($ip, $request->path(), $request->method()));
+            // Contar solicitudes de la misma IP en el tiempo definido
+            $requestCount = DB::table($table)
+                ->where('ip_address', $ip)
+                ->where('created_at', '>=', $timeFrame)
+                ->count();
 
-            throw new ThrottleRequestsException('Too many requests from this IP.');
+            DB::table($table)->insert([
+                'ip_address' => $ip,
+                'path' => $request->path(),
+                'method' => $request->method(),
+                'request_size' => $requestSize,
+                'response_size' => $responseSize,
+                'total_size' => $requestSize + $responseSize,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            if ($requestCount > $this->maxRequests) {
+                Mail::mailer('logs')->to('lesamaoyabi@gmail.com')->send(new AlertAnomalousRequest($ip, $request->path(), $request->method()));
+
+                throw new ThrottleRequestsException('Too many requests from this IP.');
+            }
+        } catch (ThrottleRequestsException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            // No bloquear la API si request_logs falta o la BD falla al registrar ancho de banda.
+            report($e);
         }
 
         return $response;
