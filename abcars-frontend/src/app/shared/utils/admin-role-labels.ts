@@ -23,6 +23,11 @@ const ROLE_LABELS_ES: Record<string, string> = {
   'strega-seller': 'Strega — vendedor',
   'strega-manager': 'Strega — manager',
   'strega-administrator': 'Strega — administrador',
+  carwash_admin: 'CarWash — administrador',
+  carwash_supervisor: 'CarWash — supervisor',
+  carwash_cashier: 'CarWash — cajero',
+  carwash_washer: 'CarWash — lavador',
+  carwash_agent: 'CarWash — agente WhatsApp',
 };
 
 export function displayAdminRoleNameEs(technical: string | null | undefined): string {

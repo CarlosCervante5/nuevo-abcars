@@ -115,12 +115,20 @@ export class LoginComponent implements OnInit {
                 // Limpiar historial del chat público al iniciar sesión
                 sessionStorage.removeItem('abcars_chat_history');
 
-                // Lista de roles válidos con vistas
+                // Lista de roles válidos con vistas (rutas /admin/{role} salvo excepciones abajo)
                 const validRoles = [
                     'client', 'administrator', 'super_admin', 'marketing', 'blog_manager', 
                     'gestor', 'receptionist', 'valuator', 'technician', 
                     'appointment_manager', 'bodywork_paint_technician', 'body',
                     'spare_parts', 'valuation_manager', 'seller'
+                ];
+
+                const carwashRoles = [
+                    'carwash_admin',
+                    'carwash_supervisor',
+                    'carwash_cashier',
+                    'carwash_washer',
+                    'carwash_agent'
                 ];
 
                 if( loginResponse.data.role === 'client') {
@@ -132,6 +140,8 @@ export class LoginComponent implements OnInit {
                 } else if (loginResponse.data.role === 'manager') {
                     // Rol backend Spatie "manager" (inventario vehículos); no hay ruta /admin/manager — mismo panel que marketing.
                     this._router.navigateByUrl('/admin/marketing');
+                } else if (carwashRoles.includes(loginResponse.data.role)) {
+                    this._router.navigateByUrl('/admin/administrator/carwash/board');
                 } else if (validRoles.includes(loginResponse.data.role)) {
                     this._router.navigateByUrl(`/admin/${loginResponse.data.role}`);
                 } else {

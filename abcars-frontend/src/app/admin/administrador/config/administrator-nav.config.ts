@@ -136,7 +136,7 @@ export const ADMINISTRATOR_NAV_ITEMS: AdministratorNavItem[] = [
     description: 'Tablero, agenda y POS',
     iconColor: 'green',
     requiredPermissions: ['view carwash', 'manage carwash appointments', 'manage carwash pos'],
-    requiredRoles: ['administrator', 'super_admin', 'carwash_admin', 'carwash_supervisor', 'carwash_cashier']
+    requiredRoles: ['administrator', 'super_admin', 'carwash_admin', 'carwash_supervisor', 'carwash_cashier', 'carwash_washer', 'carwash_agent']
   },
   {
     title: 'CarWash POS',

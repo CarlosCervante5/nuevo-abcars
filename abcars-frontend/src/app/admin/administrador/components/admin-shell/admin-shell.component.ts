@@ -40,7 +40,8 @@ export class AdminShellComponent implements OnInit, OnDestroy {
     'publish-log': 'Historial de publicaciones',
     assistant: 'Asistente de datos',
     'api-info': 'Información de la API',
-    documentation: 'Documentación'
+    documentation: 'Documentación',
+    carwash: 'CarWash'
   };
 
   constructor(
