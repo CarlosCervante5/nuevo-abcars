@@ -111,7 +111,7 @@ export class CarWashService {
   constructor(private http: HttpClient) {}
 
   private authHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+    const token = localStorage.getItem('user_token') || sessionStorage.getItem('user_token') || '';
     return new HttpHeaders({
       Authorization: token ? `Bearer ${token}` : '',
       Accept: 'application/json'
