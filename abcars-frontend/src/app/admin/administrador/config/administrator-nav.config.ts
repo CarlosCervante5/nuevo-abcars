@@ -14,7 +14,9 @@ export const ADMINISTRATOR_NAV_ITEMS: AdministratorNavItem[] = [
     icon: 'fi fi-rr-home',
     routerLink: ['/admin/administrator'],
     description: 'Resumen y métricas',
-    iconColor: 'amber'
+    iconColor: 'amber',
+    requiredPermissions: ['view analytics dashboard'],
+    requiredRoles: ['administrator', 'super_admin']
   },
   {
     title: 'Inventario',

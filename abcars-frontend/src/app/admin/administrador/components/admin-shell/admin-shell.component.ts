@@ -72,6 +72,20 @@ export class AdminShellComponent implements OnInit, OnDestroy {
     return ADMINISTRATOR_NAV_ITEMS.filter((item) => this.adminPermission.canShowOverviewPage(item));
   }
 
+  get homeLink(): string {
+    const carwashRoles = [
+      'carwash_admin',
+      'carwash_supervisor',
+      'carwash_cashier',
+      'carwash_washer',
+      'carwash_agent'
+    ];
+    if (carwashRoles.includes(this.rawRole)) {
+      return '/admin/administrator/carwash/board';
+    }
+    return '/admin/administrator';
+  }
+
   isInicioItem(item: AdministratorNavItem): boolean {
     return item.title === 'Inicio';
   }
