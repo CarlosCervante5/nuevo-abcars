@@ -1,0 +1,87 @@
+<div class="cw-root adm-shell-page">
+  <div class="cw-toolbar">
+    <div class="cw-toolbar-title">
+      <p class="cw-toolbar-meta">Loyalty · Cuponera virtual</p>
+      <span class="cw-chip">{{ form.slots }} sellos · {{ form.enabled ? 'Activo' : 'Pausado' }}</span>
+    </div>
+    <button type="button" class="cw-btn cw-btn--ghost" (click)="load()" [disabled]="loading || saving">Recargar</button>
+    <button type="button" class="cw-btn cw-btn--primary" (click)="save()" [disabled]="loading || saving">
+      {{ saving ? 'Guardando…' : 'Guardar programa' }}
+    </button>
+  </div>
+
+  <p class="cw-alert cw-alert--error" *ngIf="error">{{ error }}</p>
+  <p class="cw-alert cw-alert--ok" *ngIf="success">{{ success }}</p>
+
+  <div class="cw-loading" *ngIf="loading"><mat-spinner diameter="40"></mat-spinner></div>
+
+  <div class="cw-layout" *ngIf="!loading">
+    <section class="cw-panel">
+      <h2>Programa</h2>
+      <p class="cw-hint">
+        Cada cita marcada como <strong>entregada</strong> suma 1 sello (🛒). El cliente consulta su cuponera por WhatsApp.
+      </p>
+
+      <label class="cw-check">
+        <input type="checkbox" [(ngModel)]="form.enabled" name="enabled" />
+        Programa habilitado
+      </label>
+
+      <div class="cw-edit-grid">
+        <label class="cw-field">
+          <span>Espacios en la tarjeta</span>
+          <input
+            type="number"
+            min="1"
+            max="20"
+            [(ngModel)]="form.slots"
+            name="slots"
+            (ngModelChange)="updatePreview()"
+          />
+        </label>
+        <label class="cw-field">
+          <span>Emoji sello (lleno)</span>
+          <input [(ngModel)]="form.stamp_emoji" name="stamp_emoji" (ngModelChange)="updatePreview()" maxlength="8" />
+        </label>
+        <label class="cw-field">
+          <span>Emoji vacío</span>
+          <input [(ngModel)]="form.empty_emoji" name="empty_emoji" (ngModelChange)="updatePreview()" maxlength="8" />
+        </label>
+        <label class="cw-field cw-field--full">
+          <span>Recompensa al completar</span>
+          <textarea
+            rows="3"
+            [(ngModel)]="form.reward_text"
+            name="reward_text"
+            placeholder="Ej. Lavado gratis del paquete básico"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="cw-preview">
+        <span class="cw-preview-label">Vista previa (ejemplo 3/{{ form.slots }})</span>
+        <p class="cw-punch">{{ previewCard }}</p>
+        <p class="cw-reward">Recompensa: {{ form.reward_text }}</p>
+      </div>
+    </section>
+
+    <section class="cw-panel">
+      <h2>Cuponeras activas</h2>
+      <p class="cw-hint" *ngIf="!cards.length">Aún no hay sellos. Se crean al entregar la primera cita del cliente.</p>
+
+      <div class="cw-cards" *ngIf="cards.length">
+        <article class="cw-card-row" *ngFor="let c of cards">
+          <div class="cw-card-main">
+            <strong>{{ c.customer_name || 'Cliente' }}</strong>
+            <small>{{ c.customer_phone }}</small>
+            <p class="cw-punch cw-punch--sm">{{ c.punch_card }}</p>
+          </div>
+          <div class="cw-card-meta">
+            <span>{{ c.stamps_count }}/{{ c.slots }}</span>
+            <span class="cw-muted">{{ c.completed_cycles }} completada(s)</span>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,264 @@
+:host {
+  display: block;
+}
+
+.cw-root {
+  --cw-ink: #0f172a;
+  --cw-muted: #64748b;
+  --cw-line: #e2e8f0;
+  --cw-card: #ffffff;
+  --cw-surface: #f8fafc;
+  --cw-accent: #ca8a04;
+  max-width: 56rem;
+  margin: 0 auto;
+  color: var(--cw-ink);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.cw-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+  background: var(--cw-card);
+  border: 1px solid var(--cw-line);
+  border-radius: 0.9rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.cw-toolbar-title {
+  margin-right: auto;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.cw-toolbar-meta {
+  margin: 0;
+  font-weight: 650;
+}
+
+.cw-chip {
+  width: fit-content;
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: #854d0e;
+  background: #fef9c3;
+  border: 1px solid #fde68a;
+  border-radius: 999px;
+  padding: 0.12rem 0.55rem;
+}
+
+.cw-layout {
+  display: grid;
+  gap: 1rem;
+}
+
+.cw-panel {
+  background: var(--cw-card);
+  border: 1px solid var(--cw-line);
+  border-radius: 1rem;
+  padding: 1.1rem 1.2rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.cw-panel h2 {
+  margin: 0 0 0.65rem;
+  font-size: 1.05rem;
+}
+
+.cw-hint {
+  margin: 0 0 0.9rem;
+  font-size: 0.85rem;
+  color: var(--cw-muted);
+  line-height: 1.45;
+}
+
+.cw-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.85rem;
+}
+
+.cw-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.cw-field {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.cw-field--full {
+  grid-column: 1 / -1;
+}
+
+.cw-field span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--cw-muted);
+}
+
+.cw-field input,
+.cw-field textarea {
+  border: 1px solid var(--cw-line);
+  border-radius: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  background: #fff;
+  font-size: 0.9rem;
+  color: var(--cw-ink);
+}
+
+.cw-field input:focus,
+.cw-field textarea:focus {
+  outline: 2px solid rgba(202, 138, 4, 0.35);
+  border-color: var(--cw-accent);
+}
+
+.cw-preview {
+  margin-top: 1rem;
+  background: var(--cw-surface);
+  border: 1px dashed var(--cw-line);
+  border-radius: 0.85rem;
+  padding: 0.9rem 1rem;
+}
+
+.cw-preview-label {
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: var(--cw-muted);
+}
+
+.cw-punch {
+  margin: 0.45rem 0 0.35rem;
+  font-size: 1.45rem;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.cw-punch--sm {
+  font-size: 1.05rem;
+  margin: 0.35rem 0 0;
+}
+
+.cw-reward {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #854d0e;
+  font-weight: 600;
+}
+
+.cw-cards {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.cw-card-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  border: 1px solid var(--cw-line);
+  border-radius: 0.85rem;
+  padding: 0.75rem 0.9rem;
+  background: linear-gradient(180deg, #fff, #f8fafc);
+}
+
+.cw-card-main {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.cw-card-main small {
+  color: var(--cw-muted);
+  font-size: 0.78rem;
+}
+
+.cw-card-meta {
+  display: grid;
+  gap: 0.2rem;
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.cw-muted {
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--cw-muted);
+}
+
+.cw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.6rem;
+  padding: 0.55rem 0.95rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.cw-btn--primary {
+  background: var(--cw-accent);
+  color: #fff;
+}
+
+.cw-btn--ghost {
+  background: var(--cw-surface);
+  color: #334155;
+  border-color: var(--cw-line);
+}
+
+.cw-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cw-loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.cw-alert {
+  border-radius: 0.7rem;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.85rem;
+  margin: 0 0 0.85rem;
+}
+
+.cw-alert--error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.cw-alert--ok {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #047857;
+}
+
+@media (max-width: 720px) {
+  .cw-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cw-card-row {
+    flex-direction: column;
+  }
+
+  .cw-card-meta {
+    text-align: left;
+  }
+}

@@ -23,14 +23,27 @@ export interface CarWashServiceType {
   sort_order?: number;
 }
 
-export interface CarWashProduct {
-  uuid: string;
-  name: string;
-  sku?: string | null;
-  description?: string | null;
-  price: number | string;
-  stock: number;
-  is_active: boolean;
+export interface CarWashLoyaltySettings {
+  enabled: boolean;
+  slots: number;
+  reward_text: string;
+  stamp_emoji: string;
+  empty_emoji: string;
+}
+
+export interface CarWashLoyaltyCard {
+  uuid?: string;
+  customer_phone?: string | null;
+  customer_name?: string | null;
+  stamps_count: number;
+  slots: number;
+  remaining: number;
+  completed_cycles: number;
+  reward_text: string;
+  punch_card: string;
+  punch_card_lines?: string[];
+  last_stamp_at?: string | null;
+  message?: string;
 }
 
 export interface CarWashWasher {
@@ -444,6 +457,36 @@ export class CarWashService {
         { needs_human: needsHuman },
         { headers: this.authHeaders() }
       )
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  getLoyaltySettings() {
+    return this.http
+      .get<{
+        status: number;
+        message: string;
+        data: { settings: CarWashLoyaltySettings; tables_ready: boolean };
+      }>(`${this.baseUrl}/api/carwash/loyalty/settings`, { headers: this.authHeaders() })
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  updateLoyaltySettings(payload: Partial<CarWashLoyaltySettings>) {
+    return this.http
+      .put<{
+        status: number;
+        message: string;
+        data: { settings: CarWashLoyaltySettings; tables_ready: boolean };
+      }>(`${this.baseUrl}/api/carwash/loyalty/settings`, payload, { headers: this.authHeaders() })
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  listLoyaltyCards() {
+    return this.http
+      .get<{
+        status: number;
+        message: string;
+        data: { settings: CarWashLoyaltySettings; cards: CarWashLoyaltyCard[] };
+      }>(`${this.baseUrl}/api/carwash/loyalty/cards`, { headers: this.authHeaders() })
       .pipe(catchError((e) => this.handleError(e)));
   }
 

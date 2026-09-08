@@ -36,6 +36,12 @@ class CarWashBootstrapController extends Controller
             ]);
             $migrateOutput .= Artisan::output();
 
+            Artisan::call('migrate', [
+                '--force' => true,
+                '--path' => 'database/migrations/2026_09_08_220000_create_carwash_loyalty_tables.php',
+            ]);
+            $migrateOutput .= Artisan::output();
+
             Artisan::call('db:seed', [
                 '--class' => CarWashSeeder::class,
                 '--force' => true,

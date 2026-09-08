@@ -186,6 +186,15 @@ export const ADMINISTRATOR_NAV_ITEMS: AdministratorNavItem[] = [
     requiredRoles: ['administrator', 'super_admin', 'carwash_admin', 'carwash_supervisor', 'carwash_agent', 'carwash_cashier']
   },
   {
+    title: 'CarWash Loyalty',
+    icon: 'fi fi-rr-badge',
+    routerLink: ['carwash/loyalty'],
+    description: 'Cuponera virtual y recompensa',
+    iconColor: 'amber',
+    requiredPermissions: ['view carwash', 'manage carwash appointments', 'manage carwash whatsapp'],
+    requiredRoles: ['administrator', 'super_admin', 'carwash_admin', 'carwash_supervisor', 'carwash_cashier', 'carwash_agent']
+  },
+  {
     title: 'Fotos de entregas',
     icon: 'fi fi-rr-gift',
     routerLink: ['delivery-photos'],

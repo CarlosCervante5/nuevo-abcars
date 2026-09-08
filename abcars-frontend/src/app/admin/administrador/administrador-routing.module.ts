@@ -32,6 +32,7 @@ import { CarWashWhatsAppComponent } from './pages/carwash-whatsapp/carwash-whats
 import { CarWashCalendarComponent } from './pages/carwash-calendar/carwash-calendar.component';
 import { CarWashCatalogComponent } from './pages/carwash-catalog/carwash-catalog.component';
 import { CarWashSettingsComponent } from './pages/carwash-settings/carwash-settings.component';
+import { CarWashLoyaltyComponent } from './pages/carwash-loyalty/carwash-loyalty.component';
 const routes: Routes = [
   {
     path: '',
@@ -94,6 +95,7 @@ const routes: Routes = [
       { path: 'carwash/pos', component: CarWashPosComponent, data: { embedInShell: true } },
       { path: 'carwash/whatsapp', component: CarWashWhatsAppComponent, data: { embedInShell: true } },
       { path: 'carwash/settings', component: CarWashSettingsComponent, data: { embedInShell: true } },
+      { path: 'carwash/loyalty', component: CarWashLoyaltyComponent, data: { embedInShell: true } },
       { path: 'carwash', redirectTo: 'carwash/board', pathMatch: 'full' },
       { path: 'assistant', component: AssistantComponent, data: { embedInShell: true } },
       { path: 'api-info', component: ApiInfoComponent, data: { embedInShell: true } },

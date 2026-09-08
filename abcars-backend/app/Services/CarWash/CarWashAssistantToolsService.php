@@ -13,7 +13,10 @@ use Illuminate\Support\Str;
 
 class CarWashAssistantToolsService
 {
-    public function __construct(private CarWashAppointmentService $appointments) {}
+    public function __construct(
+        private CarWashAppointmentService $appointments,
+        private CarWashLoyaltyService $loyalty,
+    ) {}
 
     public function execute(string $toolName, array $arguments, ?string $callerPhone = null): array
     {
@@ -24,6 +27,7 @@ class CarWashAssistantToolsService
             'carwash_create_appointment' => $this->createAppointment($arguments, $callerPhone),
             'carwash_cancel_appointment' => $this->cancelAppointment($arguments, $callerPhone),
             'carwash_get_appointment_status' => $this->getAppointmentStatus($arguments, $callerPhone),
+            'carwash_get_loyalty_stamps' => $this->getLoyaltyStamps($arguments, $callerPhone),
             'carwash_handoff_to_human' => $this->handoff($arguments, $callerPhone),
             default => ['error' => "Herramienta desconocida: {$toolName}"],
         };
@@ -116,6 +120,20 @@ class CarWashAssistantToolsService
                             'phone' => ['type' => 'string'],
                         ],
                         'required' => ['appointment_uuid'],
+                    ],
+                ],
+            ],
+            [
+                'type' => 'function',
+                'function' => [
+                    'name' => 'carwash_get_loyalty_stamps',
+                    'description' => 'Consulta la cuponera virtual (sellos de lealtad) del cliente. Úsala si preguntan por sellos, cuponera, puntos o recompensa.',
+                    'parameters' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'phone' => ['type' => 'string', 'description' => 'Teléfono opcional; por defecto el del chat.'],
+                        ],
+                        'required' => [],
                     ],
                 ],
             ],
@@ -658,6 +676,13 @@ class CarWashAssistantToolsService
         } catch (Exception $e) {
             return ['error' => $e->getMessage()];
         }
+    }
+
+    private function getLoyaltyStamps(array $args, ?string $callerPhone): array
+    {
+        $phone = (string) ($args['phone'] ?? $callerPhone ?? '');
+
+        return $this->loyalty->lookupByPhone($phone);
     }
 
     private function handoff(array $args, ?string $callerPhone): array

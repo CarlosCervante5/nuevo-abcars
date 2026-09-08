@@ -11,7 +11,10 @@ use Illuminate\Support\Facades\DB;
 
 class CarWashAppointmentService
 {
-    public function __construct(private CarWashNotificationService $notifications) {}
+    public function __construct(
+        private CarWashNotificationService $notifications,
+        private CarWashLoyaltyService $loyalty,
+    ) {}
 
     /**
      * @param  array<string, mixed>  $data
@@ -105,6 +108,10 @@ class CarWashAppointmentService
 
         $this->logStatus($appointment, $from, $toStatus, $userId, $source);
         $this->notifications->queueStatusNotification($appointment, $toStatus);
+
+        if ($toStatus === 'delivered') {
+            $this->loyalty->awardOnDelivered($appointment->fresh() ?? $appointment);
+        }
 
         return $appointment->fresh(['location', 'serviceType', 'bay', 'washer']);
     }
