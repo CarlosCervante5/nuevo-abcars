@@ -5,6 +5,7 @@ namespace App\Services\CarWash;
 use App\Models\CarWash\CarWashAppointment;
 use App\Models\CarWash\CarWashNotificationOutbox;
 use App\Jobs\SendCarWashWhatsAppNotification;
+use App\Services\CarWash\WhatsApp\CarWashPhoneNormalizer;
 
 class CarWashNotificationService
 {
@@ -18,7 +19,7 @@ class CarWashNotificationService
             return null;
         }
 
-        $phone = trim((string) $appointment->customer_phone);
+        $phone = CarWashPhoneNormalizer::e164((string) $appointment->customer_phone);
         if ($phone === '') {
             return null;
         }

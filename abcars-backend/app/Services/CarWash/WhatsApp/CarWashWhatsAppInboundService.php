@@ -94,20 +94,16 @@ class CarWashWhatsAppInboundService
         $gateway = $this->gateways->default();
         $result = $gateway->sendText($conversation->phone, $body);
 
-        CarWashWhatsAppMessage::create([
-            'conversation_id' => $conversation->id,
-            'direction' => 'outbound',
-            'twilio_sid' => $result['provider_message_id'] ?? null,
-            'body' => $body,
-            'status' => ($result['ok'] ?? false) ? 'sent' : 'failed',
-            'payload' => [
+        $this->storeOutboundMessage(
+            $conversation,
+            $body,
+            ($result['ok'] ?? false) ? 'sent' : 'failed',
+            $result['provider_message_id'] ?? null,
+            [
                 'provider' => $gateway->provider(),
                 'result' => $result,
-            ],
-        ]);
-
-        $conversation->last_message_at = now();
-        $conversation->save();
+            ]
+        );
 
         if (! ($result['ok'] ?? false)) {
             Log::warning('CarWash WhatsApp outbound failed', [
@@ -115,5 +111,80 @@ class CarWashWhatsAppInboundService
                 'error' => $result['error'] ?? null,
             ]);
         }
+    }
+
+    /**
+     * Persiste un outbound ya enviado (p. ej. notificación de estatus) sin reenviar.
+     * Busca/crea la conversación por teléfono normalizado para que aparezca en el inbox admin.
+     *
+     * @param  array<string, mixed>|null  $payload
+     */
+    public function storeOutboundAlreadySent(
+        string $phone,
+        string $body,
+        ?string $providerMessageId = null,
+        ?array $payload = null,
+        ?string $customerName = null,
+    ): ?CarWashWhatsAppMessage {
+        $phone = CarWashPhoneNormalizer::e164($phone);
+        $body = trim($body);
+        if ($phone === '' || $body === '') {
+            return null;
+        }
+
+        if ($providerMessageId) {
+            $exists = CarWashWhatsAppMessage::query()->where('twilio_sid', $providerMessageId)->exists();
+            if ($exists) {
+                return null;
+            }
+        }
+
+        $conversation = CarWashWhatsAppConversation::query()->firstOrCreate(
+            ['phone' => $phone],
+            [
+                'customer_name' => $customerName,
+                'status' => 'open',
+                'needs_human' => false,
+                'meta' => ['provider' => $payload['provider'] ?? config('carwash.whatsapp_provider')],
+            ]
+        );
+
+        if ($customerName && empty($conversation->customer_name)) {
+            $conversation->customer_name = $customerName;
+            $conversation->save();
+        }
+
+        return $this->storeOutboundMessage(
+            $conversation,
+            $body,
+            'sent',
+            $providerMessageId,
+            $payload
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $payload
+     */
+    private function storeOutboundMessage(
+        CarWashWhatsAppConversation $conversation,
+        string $body,
+        string $status,
+        ?string $providerMessageId = null,
+        ?array $payload = null,
+    ): CarWashWhatsAppMessage {
+        $message = CarWashWhatsAppMessage::create([
+            'conversation_id' => $conversation->id,
+            'direction' => 'outbound',
+            'twilio_sid' => $providerMessageId,
+            'body' => $body,
+            'status' => $status,
+            'payload' => $payload,
+        ]);
+
+        $conversation->last_message_at = now();
+        $conversation->save();
+
+        return $message;
     }
 }

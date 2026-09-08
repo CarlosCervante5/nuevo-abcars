@@ -2,7 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Models\CarWash\CarWashAppointment;
 use App\Models\CarWash\CarWashNotificationOutbox;
+use App\Services\CarWash\WhatsApp\CarWashWhatsAppInboundService;
 use App\Services\CarWash\WhatsApp\WhatsAppGatewayResolver;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -21,7 +23,7 @@ class SendCarWashWhatsAppNotification implements ShouldQueue
 
     public function __construct(public int $outboxId) {}
 
-    public function handle(WhatsAppGatewayResolver $gateways): void
+    public function handle(WhatsAppGatewayResolver $gateways, CarWashWhatsAppInboundService $whatsapp): void
     {
         $outbox = CarWashNotificationOutbox::query()->find($this->outboxId);
         if (! $outbox || $outbox->status === 'sent') {
@@ -44,6 +46,36 @@ class SendCarWashWhatsAppNotification implements ShouldQueue
             $meta['provider_message_id'] = $result['provider_message_id'] ?? null;
             $outbox->meta = $meta;
             $outbox->save();
+
+            // Misma bandeja admin: persistir en el hilo WhatsApp (sin reenviar).
+            try {
+                $customerName = null;
+                if (! empty($outbox->appointment_id)) {
+                    $customerName = CarWashAppointment::query()
+                        ->where('id', $outbox->appointment_id)
+                        ->value('customer_name');
+                }
+
+                $whatsapp->storeOutboundAlreadySent(
+                    (string) $outbox->to_phone,
+                    (string) $outbox->body,
+                    $result['provider_message_id'] ?? null,
+                    [
+                        'source' => 'status_notification',
+                        'provider' => $gateway->provider(),
+                        'outbox_id' => $outbox->id,
+                        'template_key' => $outbox->template_key,
+                        'appointment_uuid' => $meta['appointment_uuid'] ?? null,
+                        'to_status' => $meta['to_status'] ?? null,
+                    ],
+                    $customerName ? (string) $customerName : null,
+                );
+            } catch (\Throwable $e) {
+                Log::warning('CarWash status notification not mirrored to inbox', [
+                    'outbox_id' => $outbox->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             return;
         }
