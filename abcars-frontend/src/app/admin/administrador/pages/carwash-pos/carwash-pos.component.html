@@ -146,48 +146,50 @@
         </div>
       </ng-template>
 
-      <div class="cw-pay">
-        <span class="cw-pay-label">Método de pago</span>
-        <div class="cw-pay-options">
-          <button
-            type="button"
-            class="cw-pay-opt"
-            *ngFor="let opt of paymentOptions"
-            [class.active]="paymentMethod === opt.value"
-            (click)="paymentMethod = opt.value"
-          >
-            {{ opt.label }}
-          </button>
+      <div class="cw-ticket-footer">
+        <div class="cw-pay">
+          <span class="cw-pay-label">Método de pago</span>
+          <div class="cw-pay-options">
+            <button
+              type="button"
+              class="cw-pay-opt"
+              *ngFor="let opt of paymentOptions"
+              [class.active]="paymentMethod === opt.value"
+              (click)="paymentMethod = opt.value"
+            >
+              {{ opt.label }}
+            </button>
+          </div>
         </div>
-      </div>
 
-      <label class="cw-field">
-        <span>Notas</span>
-        <textarea rows="2" [(ngModel)]="notes" name="notes" placeholder="Opcional"></textarea>
-      </label>
+        <label class="cw-field">
+          <span>Notas</span>
+          <textarea rows="2" [(ngModel)]="notes" name="notes" placeholder="Opcional"></textarea>
+        </label>
 
-      <div class="cw-total">
-        <div>
-          <span>Total a cobrar</span>
-          <small>{{ cartCount }} línea(s)</small>
+        <div class="cw-total">
+          <div>
+            <span>Total a cobrar</span>
+            <small>{{ cartCount }} línea(s)</small>
+          </div>
+          <strong>${{ subtotal | number: '1.2-2' }}</strong>
         </div>
-        <strong>${{ subtotal | number: '1.2-2' }}</strong>
+
+        <button
+          type="button"
+          class="cw-btn cw-btn--primary cw-btn--block"
+          (click)="checkout()"
+          [disabled]="checkingOut || !cart.length"
+        >
+          {{ checkingOut ? 'Cobrando…' : 'Cobrar ahora' }}
+        </button>
+
+        <p class="cw-alert cw-alert--error" *ngIf="error">{{ error }}</p>
+        <p class="cw-alert cw-alert--ok" *ngIf="lastOrder">
+          Cobro OK · #{{ lastOrder.uuid | slice: 0:8 }} · ${{ lastOrder.total | number: '1.2-2' }}
+          ({{ paymentLabel(lastOrder.payment_method) }})
+        </p>
       </div>
-
-      <button
-        type="button"
-        class="cw-btn cw-btn--primary cw-btn--block"
-        (click)="checkout()"
-        [disabled]="checkingOut || !cart.length"
-      >
-        {{ checkingOut ? 'Cobrando…' : 'Cobrar ahora' }}
-      </button>
-
-      <p class="cw-alert cw-alert--error" *ngIf="error">{{ error }}</p>
-      <p class="cw-alert cw-alert--ok" *ngIf="lastOrder">
-        Cobro OK · #{{ lastOrder.uuid | slice: 0:8 }} · ${{ lastOrder.total | number: '1.2-2' }}
-        ({{ paymentLabel(lastOrder.payment_method) }})
-      </p>
     </aside>
   </div>
 </div>
