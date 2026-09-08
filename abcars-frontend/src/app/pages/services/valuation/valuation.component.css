@@ -1,267 +1,376 @@
-/* ============================================
-   ESTILOS PROTEGIDOS PARA VALUATION
-   Evita conflictos con ViewEncapsulation.None
-   ============================================ */
+/* Programa de Venta Asistida — tokens del mockup */
+.valuation-page {
+  --val-teal: #006d60;
+  --val-teal-deep: #004d40;
+  --val-gold: #ffb703;
+  --val-magenta: #e056fd;
+  --val-ink: #111827;
+  --val-muted: #4b5563;
+  --val-border: #d1d5db;
+  --val-font: 'Poppins', 'Raleway', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  background: #f3f4f6;
+  font-family: var(--val-font);
+}
 
-/* Título principal del hero "Valuación Gratuita" */
+.valuation-hero {
+  background: linear-gradient(180deg, var(--val-teal-deep) 0%, var(--val-teal) 100%);
+  color: #fff;
+  padding: 7.5rem 1rem 4.5rem;
+  text-align: center;
+}
+
+.valuation-hero-inner {
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
 .valuation-hero-title {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 2rem !important; /* 32px - móvil */
+  font-family: var(--val-font) !important;
+  font-size: clamp(1.75rem, 4vw, 2.75rem) !important;
   font-weight: 700 !important;
   line-height: 1.2 !important;
   letter-spacing: -0.02em !important;
   color: #ffffff !important;
-  margin-bottom: 1rem !important; /* 16px */
+  margin: 0 0 1rem !important;
 }
 
-@media (min-width: 1024px) {
-  .valuation-hero-title {
-    font-size: 3rem !important; /* 48px - desktop */
+.valuation-hero-description {
+  font-family: var(--val-font) !important;
+  font-size: clamp(1rem, 2vw, 1.2rem) !important;
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  margin: 0 auto !important;
+  max-width: 40rem;
+}
+
+.valuation-body {
+  margin-top: -2.5rem;
+  padding: 0 1rem 4rem;
+}
+
+.valuation-container {
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.valuation-value-card {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  padding: 1.75rem 1.5rem 2rem;
+  margin-bottom: 2rem;
+}
+
+.valuation-value-title {
+  font-family: var(--val-font) !important;
+  font-size: clamp(1.15rem, 2.5vw, 1.5rem) !important;
+  font-weight: 700 !important;
+  color: var(--val-ink) !important;
+  text-align: center;
+  margin: 0 0 1.75rem !important;
+  line-height: 1.35 !important;
+}
+
+.valuation-value-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .valuation-value-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
   }
 }
 
-/* Texto descriptivo del hero */
-.valuation-hero-description {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 1.25rem !important; /* 20px */
-  font-weight: 400 !important;
-  line-height: 1.6 !important;
-  color: #b2f5ea !important; /* teal-200 */
-  margin-bottom: 2rem !important; /* 32px */
+.valuation-value-item {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-/* Badges de características */
-.hero-feature-badge {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 0.875rem !important; /* 14px */
-  font-weight: 500 !important;
-  line-height: 1.5 !important;
-  color: #ffffff !important;
+.valuation-value-item p {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--val-ink);
+  max-width: 16rem;
 }
 
-/* Título de sección */
+.valuation-icon-lg,
+.valuation-icon-sm {
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--val-gold);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.valuation-icon-lg {
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+.valuation-icon-sm {
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+}
+
+.valuation-main-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* Móvil: vehículo → contacto → cajas info */
+.valuation-block-vehicle { order: 1; }
+.valuation-block-contact { order: 2; }
+.valuation-block-info {
+  order: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .valuation-main-grid {
+    grid-template-columns: minmax(0, 1.55fr) minmax(18rem, 0.9fr);
+    gap: 1.75rem;
+  }
+
+  .valuation-block-vehicle {
+    order: 1;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .valuation-block-info {
+    order: 2;
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .valuation-block-contact {
+    order: 1;
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    position: sticky;
+    top: 5.5rem;
+    align-self: start;
+  }
+}
+
+.valuation-panel,
+.valuation-contact-card {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  padding: 1.5rem 1.35rem;
+}
+
+.valuation-fields-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .valuation-fields-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.valuation-magenta-box {
+  background: #fff;
+  border: 2px solid var(--val-magenta);
+  border-radius: 0.85rem;
+  padding: 1.35rem 1.25rem;
+}
+
+.magenta-box-title {
+  font-family: var(--val-font) !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: var(--val-ink) !important;
+  margin: 0 0 1.15rem !important;
+  line-height: 1.35 !important;
+}
+
+.valuation-services-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.9rem 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .valuation-services-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.valuation-service-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--val-ink);
+}
+
+.valuation-modalities {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .valuation-modalities {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+}
+
+.modality-title {
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: var(--val-ink) !important;
+  margin: 0 0 0.65rem !important;
+}
+
+.modality-list {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: var(--val-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.modality-list li {
+  margin-bottom: 0.35rem;
+}
+
+.valuation-contact-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
 .section-title {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 1.5rem !important; /* 24px */
+  font-family: var(--val-font) !important;
+  font-size: 1.35rem !important;
   font-weight: 700 !important;
   line-height: 1.3 !important;
-  letter-spacing: -0.01em !important;
-  color: #111827 !important; /* gray-900 */
-  margin-bottom: 1.5rem !important; /* 24px */
+  color: var(--val-ink) !important;
+  margin: 0 0 0.75rem !important;
 }
 
-/* Subtítulo de sección */
 .subsection-title {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 1.125rem !important; /* 18px */
+  font-family: var(--val-font) !important;
+  font-size: 1rem !important;
   font-weight: 600 !important;
-  line-height: 1.5 !important;
-  color: #111827 !important; /* gray-900 */
-  margin-bottom: 1rem !important; /* 16px */
-}
-
-/* ============================================
-   ESTILOS DEL FORMULARIO PRINCIPAL
-   ============================================ */
-
-/* Labels del formulario principal */
-.form-label {
-  display: block !important;
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 0.875rem !important; /* 14px */
-  font-weight: 500 !important;
-  line-height: 1.5 !important;
-  color: #374151 !important; /* gray-700 */
-  margin-bottom: 0.5rem !important; /* 8px */
-}
-
-/* Inputs del formulario principal */
-.form-input {
-  width: 100% !important;
-  padding: 0.75rem 1rem !important; /* 12px 16px */
-  border: 1px solid #d1d5db !important; /* gray-300 */
-  border-radius: 0.5rem !important; /* 8px */
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 1rem !important; /* 16px */
-  font-weight: 400 !important;
-  line-height: 1.5 !important;
-  color: #111827 !important; /* gray-900 */
-  background-color: #ffffff !important;
-  transition: all 0.2s ease !important;
-}
-
-.form-input:focus {
-  outline: none !important;
-  border-color: #14b8a6 !important; /* teal-500 */
-  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2) !important;
-}
-
-/* Input con error */
-.form-input-error {
-  width: 100% !important;
-  padding: 0.75rem 1rem !important; /* 12px 16px */
-  border: 1px solid #ef4444 !important; /* red-500 */
-  border-radius: 0.5rem !important; /* 8px */
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 1rem !important; /* 16px */
-  font-weight: 400 !important;
-  line-height: 1.5 !important;
-  color: #111827 !important; /* gray-900 */
-  background-color: #ffffff !important;
-  transition: all 0.2s ease !important;
-}
-
-.form-input-error:focus {
-  outline: none !important;
-  border-color: #ef4444 !important; /* red-500 */
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
-}
-
-/* Mensaje de error */
-.form-error-message {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 0.75rem !important; /* 12px */
-  font-weight: 400 !important;
-  line-height: 1.5 !important;
-  color: #ef4444 !important; /* red-500 */
-  margin-top: 0.25rem !important; /* 4px */
-}
-
-/* ============================================
-   ESTILOS DEL PROCESO DE VALUACIÓN
-   ============================================ */
-
-/* Títulos de los pasos */
-.process-step-title {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 1.125rem !important; /* 18px */
-  font-weight: 600 !important;
-  line-height: 1.5 !important;
-  color: #111827 !important; /* gray-900 */
-  margin-bottom: 0.5rem !important; /* 8px */
-}
-
-/* Descripciones de los pasos */
-.process-step-description {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 0.875rem !important; /* 14px */
-  font-weight: 400 !important;
-  line-height: 1.6 !important;
-  color: #4b5563 !important; /* gray-600 */
-}
-
-/* ============================================
-   ESTILOS DE BENEFICIOS
-   ============================================ */
-
-/* Títulos de beneficios */
-.benefit-title {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 1.125rem !important; /* 18px */
-  font-weight: 600 !important;
-  line-height: 1.5 !important;
-  color: #111827 !important; /* gray-900 */
-  margin-bottom: 0.5rem !important; /* 8px */
-}
-
-/* Descripciones de beneficios */
-.benefit-description {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 1rem !important; /* 16px */
-  font-weight: 400 !important;
-  line-height: 1.6 !important;
-  color: #4b5563 !important; /* gray-600 */
-}
-
-/* ============================================
-   ESTILOS DEL FORMULARIO DE SOLICITUD (SIDEBAR)
-   ============================================ */
-
-/* Título del formulario de solicitud */
-.form-request-title {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 1.25rem !important; /* 20px */
-  font-weight: 700 !important;
   line-height: 1.4 !important;
-  color: #111827 !important; /* gray-900 */
-  margin-bottom: 1rem !important; /* 16px */
+  color: var(--val-ink) !important;
+  margin: 0 0 1rem !important;
 }
 
-/* Labels del formulario de solicitud */
+.form-label,
 .form-request-label {
   display: block !important;
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 0.875rem !important; /* 14px */
-  font-weight: 500 !important;
+  font-family: var(--val-font) !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
   line-height: 1.5 !important;
-  color: #374151 !important; /* gray-700 */
-  margin-bottom: 0.5rem !important; /* 8px */
+  color: #374151 !important;
+  margin-bottom: 0.4rem !important;
 }
 
-/* Inputs del formulario de solicitud */
-.form-request-input {
-  width: 100% !important;
-  padding: 0.75rem 1rem !important; /* 12px 16px */
-  border: 1px solid #d1d5db !important; /* gray-300 */
-  border-radius: 0.5rem !important; /* 8px */
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 1rem !important; /* 16px */
-  font-weight: 400 !important;
-  line-height: 1.5 !important;
-  color: #111827 !important; /* gray-900 */
-  background-color: #ffffff !important;
-  transition: all 0.2s ease !important;
-}
-
-.form-request-input:focus {
-  outline: none !important;
-  border-color: #14b8a6 !important; /* teal-500 */
-  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2) !important;
-}
-
-/* Input con error */
+.form-input,
+.form-request-input,
+.form-input-error,
 .form-request-input-error {
   width: 100% !important;
-  padding: 0.75rem 1rem !important; /* 12px 16px */
-  border: 1px solid #ef4444 !important; /* red-500 */
-  border-radius: 0.5rem !important; /* 8px */
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 1rem !important; /* 16px */
+  padding: 0.7rem 0.9rem !important;
+  border-radius: 0.45rem !important;
+  font-family: var(--val-font) !important;
+  font-size: 1rem !important;
   font-weight: 400 !important;
   line-height: 1.5 !important;
-  color: #111827 !important; /* gray-900 */
+  color: var(--val-ink) !important;
   background-color: #ffffff !important;
-  transition: all 0.2s ease !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 
+.form-input,
+.form-request-input {
+  border: 1px solid var(--val-border) !important;
+}
+
+.form-input:focus,
+.form-request-input:focus {
+  outline: none !important;
+  border-color: var(--val-teal) !important;
+  box-shadow: 0 0 0 2px rgba(0, 109, 96, 0.2) !important;
+}
+
+.form-input-error,
+.form-request-input-error {
+  border: 1px solid #ef4444 !important;
+}
+
+.form-input-error:focus,
 .form-request-input-error:focus {
   outline: none !important;
-  border-color: #ef4444 !important; /* red-500 */
+  border-color: #ef4444 !important;
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
 }
 
-/* Botón de envío */
+.form-error-message {
+  font-family: var(--val-font) !important;
+  font-size: 0.75rem !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  color: #ef4444 !important;
+  margin-top: 0.25rem !important;
+}
+
+.form-request-title {
+  font-family: var(--val-font) !important;
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
+  line-height: 1.35 !important;
+  color: var(--val-ink) !important;
+  margin: 0 0 1rem !important;
+}
+
 .form-submit-btn {
   width: 100% !important;
-  padding: 0.75rem 1.5rem !important; /* 12px 24px */
-  border-radius: 0.75rem !important; /* 12px */
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-size: 1rem !important; /* 16px */
+  margin-top: 0.35rem !important;
+  padding: 0.85rem 1.25rem !important;
+  border-radius: 0.55rem !important;
+  font-family: var(--val-font) !important;
+  font-size: 1rem !important;
   font-weight: 700 !important;
-  line-height: 1.5 !important;
+  line-height: 1.4 !important;
   color: #ffffff !important;
-  background-color: #14b8a6 !important; /* teal-500 */
+  background-color: var(--val-teal) !important;
   border: none !important;
   cursor: pointer !important;
-  transition: background-color 0.3s ease !important;
+  transition: background-color 0.25s ease !important;
 }
 
 .form-submit-btn:hover:not(:disabled) {
-  background-color: #0d9488 !important; /* teal-600 */
+  background-color: var(--val-teal-deep) !important;
 }
 
 .form-submit-btn:disabled {
-  background-color: #9ca3af !important; /* gray-400 */
+  background-color: #9ca3af !important;
   cursor: not-allowed !important;
 }
-
