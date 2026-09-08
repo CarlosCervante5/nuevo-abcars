@@ -3,6 +3,7 @@
 namespace App\Services\CarWash;
 
 use App\Models\CarWash\CarWashSetting;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -11,10 +12,31 @@ class CarWashSettingsService
     public const KEY_WHATSAPP = 'whatsapp';
 
     /**
+     * Asegura tabla de settings (útil en sandbox tras deploy).
+     */
+    public function ensureTable(): void
+    {
+        if (CarWashSetting::tableReady()) {
+            return;
+        }
+
+        try {
+            Artisan::call('migrate', [
+                '--force' => true,
+                '--path' => 'database/migrations/2026_09_08_140000_create_carwash_settings_table.php',
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('CarWash settings migrate failed', ['message' => $e->getMessage()]);
+        }
+    }
+
+    /**
      * Config efectiva: .env/config + overrides guardados en BD.
      */
     public function whatsappConfig(): array
     {
+        $this->ensureTable();
+
         $defaults = [
             'whatsapp_provider' => (string) config('carwash.whatsapp_provider', 'evolution'),
             'evolution' => [

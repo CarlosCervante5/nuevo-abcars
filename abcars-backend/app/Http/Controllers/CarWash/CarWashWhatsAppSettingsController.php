@@ -13,20 +13,33 @@ class CarWashWhatsAppSettingsController extends Controller
 {
     public function show(CarWashSettingsService $settings, WhatsAppGatewayResolver $gateways)
     {
-        $settings->applyRuntime();
-        $gateway = $gateways->default();
-        $payload = $settings->publicWhatsappPayload();
-        $payload['status'] = [
-            'provider' => $gateway->provider(),
-            'configured' => $gateway->isConfigured(),
-            'agent_enabled' => (bool) config('carwash.agent.enabled', true),
-        ];
+        try {
+            $settings->applyRuntime();
+            $gateway = $gateways->default();
+            $payload = $settings->publicWhatsappPayload();
+            $payload['status'] = [
+                'provider' => $gateway->provider(),
+                'configured' => $gateway->isConfigured(),
+                'agent_enabled' => (bool) config('carwash.agent.enabled', true),
+            ];
 
-        if ($gateway->provider() === 'evolution') {
-            $payload['connection'] = $settings->evolutionConnectionState();
+            if ($gateway->provider() === 'evolution') {
+                // No tumbar settings si Evolution no responde
+                try {
+                    $payload['connection'] = $settings->evolutionConnectionState();
+                } catch (\Throwable $e) {
+                    $payload['connection'] = [
+                        'ok' => false,
+                        'state' => null,
+                        'error' => $e->getMessage(),
+                    ];
+                }
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Settings WhatsApp CarWash', $payload);
+        } catch (\Throwable $e) {
+            return ApiResponseHelper::apiError('No se pudieron cargar settings', $e->getMessage(), 500, 'CARWASH_WA_SETTINGS_SHOW');
         }
-
-        return ApiResponseHelper::apiSuccess(200, 'Settings WhatsApp CarWash', $payload);
     }
 
     public function update(Request $request, CarWashSettingsService $settings, WhatsAppGatewayResolver $gateways)
@@ -72,9 +85,17 @@ class CarWashWhatsAppSettingsController extends Controller
 
     public function connection(CarWashSettingsService $settings)
     {
-        $settings->applyRuntime();
-        $result = $settings->evolutionConnectionState();
+        try {
+            $settings->applyRuntime();
+            $result = $settings->evolutionConnectionState();
 
-        return ApiResponseHelper::apiSuccess(200, 'Estado conexión Evolution', $result);
+            return ApiResponseHelper::apiSuccess(200, 'Estado conexión Evolution', $result);
+        } catch (\Throwable $e) {
+            return ApiResponseHelper::apiSuccess(200, 'Estado conexión Evolution', [
+                'ok' => false,
+                'state' => null,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }
