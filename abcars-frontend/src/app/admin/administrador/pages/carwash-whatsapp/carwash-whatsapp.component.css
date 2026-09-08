@@ -15,6 +15,8 @@
   --cw-wa-in: #ffffff;
   --cw-chat-bg: #ece5dd;
   --cw-handoff: #b45309;
+  /* Header shell + paddings del outlet ≈ 8.5rem */
+  --cw-chat-frame: calc(100dvh - 8.5rem);
   max-width: 96rem;
   margin: 0 auto;
   color: var(--cw-ink);
@@ -22,7 +24,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  min-height: calc(100vh - 7.5rem);
+  height: var(--cw-chat-frame);
+  max-height: var(--cw-chat-frame);
+  min-height: 22rem;
+  overflow: hidden;
 }
 
 .cw-toolbar {
@@ -111,10 +116,12 @@
 }
 
 .cw-inbox {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
+  height: 100%;
   display: grid;
   grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: 0;
   border: 1px solid var(--cw-line);
   border-radius: 1rem;
@@ -127,9 +134,18 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  height: 100%;
+  max-height: 100%;
   border-right: 1px solid var(--cw-line);
   background: #fff;
-  overflow: auto;
+  overflow: hidden;
+}
+
+.cw-list-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .cw-list-head {
@@ -137,8 +153,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.85rem 1rem 0.55rem;
-  position: sticky;
-  top: 0;
+  flex-shrink: 0;
   background: #fff;
   z-index: 1;
   border-bottom: 1px solid var(--cw-line);
@@ -260,6 +275,9 @@
   flex-direction: column;
   min-height: 0;
   min-width: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
   background: var(--cw-chat-bg);
   background-image:
     radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.35) 0, transparent 40%),
@@ -320,8 +338,11 @@
 }
 
 .cw-messages {
-  flex: 1;
-  overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -512,9 +533,13 @@
 }
 
 @media (max-width: 900px) {
+  .cw-root {
+    --cw-chat-frame: calc(100dvh - 7.25rem);
+  }
+
   .cw-inbox {
     grid-template-columns: 1fr;
-    min-height: 70vh;
+    min-height: 0;
   }
 
   .cw-list--hidden-mobile {

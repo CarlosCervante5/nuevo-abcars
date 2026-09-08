@@ -32,30 +32,32 @@
         <span class="cw-count">{{ conversations.length }}</span>
       </div>
 
-      <button
-        type="button"
-        class="cw-conv"
-        *ngFor="let c of conversations"
-        [class.active]="selected?.uuid === c.uuid"
-        [class.cw-conv--handoff]="c.needs_human"
-        (click)="openConversation(c)"
-      >
-        <span class="cw-avatar" aria-hidden="true">{{ initials(c) }}</span>
-        <span class="cw-conv-body">
-          <span class="cw-conv-top">
-            <strong class="cw-conv-name">{{ c.customer_name || formatPhone(c.phone) }}</strong>
-            <time class="cw-conv-time" *ngIf="c.last_message_at">{{ relativeTime(c.last_message_at) }}</time>
+      <div class="cw-list-scroll">
+        <button
+          type="button"
+          class="cw-conv"
+          *ngFor="let c of conversations"
+          [class.active]="selected?.uuid === c.uuid"
+          [class.cw-conv--handoff]="c.needs_human"
+          (click)="openConversation(c)"
+        >
+          <span class="cw-avatar" aria-hidden="true">{{ initials(c) }}</span>
+          <span class="cw-conv-body">
+            <span class="cw-conv-top">
+              <strong class="cw-conv-name">{{ c.customer_name || formatPhone(c.phone) }}</strong>
+              <time class="cw-conv-time" *ngIf="c.last_message_at">{{ relativeTime(c.last_message_at) }}</time>
+            </span>
+            <span class="cw-conv-bottom">
+              <span class="cw-conv-phone">{{ formatPhone(c.phone) }}</span>
+              <span class="cw-badge" *ngIf="c.needs_human">Handoff</span>
+            </span>
           </span>
-          <span class="cw-conv-bottom">
-            <span class="cw-conv-phone">{{ formatPhone(c.phone) }}</span>
-            <span class="cw-badge" *ngIf="c.needs_human">Handoff</span>
-          </span>
-        </span>
-      </button>
+        </button>
 
-      <div class="cw-empty-block" *ngIf="!conversations.length">
-        <p class="cw-empty-title">Sin conversaciones</p>
-        <p class="cw-empty-copy">Cuando lleguen mensajes de WhatsApp aparecerán aquí.</p>
+        <div class="cw-empty-block" *ngIf="!conversations.length">
+          <p class="cw-empty-title">Sin conversaciones</p>
+          <p class="cw-empty-copy">Cuando lleguen mensajes de WhatsApp aparecerán aquí.</p>
+        </div>
       </div>
     </aside>
 
