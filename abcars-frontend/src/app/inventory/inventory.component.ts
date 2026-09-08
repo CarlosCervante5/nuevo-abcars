@@ -37,9 +37,9 @@ interface VehicleWithApiData extends Vehicle {
             </button>
           </div>
 
-          <div class="flex flex-col lg:flex-row gap-8">
+          <div class="flex flex-col lg:flex-row gap-6">
             <!-- Barra lateral de Filtros mejorada (solo visible en desktop) -->
-            <aside class="hidden lg:block lg:w-1/4 xl:w-1/5">
+            <aside class="hidden lg:block lg:w-1/5 xl:w-1/6 shrink-0">
               <div class="sticky top-24 space-y-6">
                 
                 <!-- Filtros principales -->
@@ -259,7 +259,7 @@ interface VehicleWithApiData extends Vehicle {
             </aside>
 
             <!-- Grid de Vehículos y Banners -->
-            <div class="lg:w-3/4 xl:w-4/5">
+            <div class="lg:w-4/5 xl:w-5/6 min-w-0 flex-1">
               <!-- Resultados, buscador y ordenamiento alineados al grid -->
               <div class="mb-8">
                 <div class="flex flex-col md:flex-row gap-6 items-center">
