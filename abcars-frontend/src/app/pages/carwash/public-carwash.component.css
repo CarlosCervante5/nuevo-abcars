@@ -79,7 +79,26 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
+  align-items: center;
   margin-bottom: 1.75rem;
+}
+
+.cw-phone-line {
+  margin: 0.85rem 0 0;
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.cw-phone-link,
+.cw-banner-phone {
+  color: var(--cw-gold-soft);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.cw-phone-link:hover,
+.cw-banner-phone:hover {
+  text-decoration: underline;
 }
 
 .cw-btn {

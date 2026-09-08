@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HomeNavComponent } from '../../shared/components/home-nav/home-nav.component';
 import { ModernFooterComponent } from '../../shared/components/modern-footer/modern-footer.component';
+import { CarWashService } from '@services/carwash.service';
 
 interface WashServiceRow {
   name: string;
@@ -18,10 +19,13 @@ interface WashServiceRow {
   templateUrl: './public-carwash.component.html',
   styleUrls: ['./public-carwash.component.css']
 })
-export class PublicCarwashComponent {
-  readonly whatsappUrl =
-    'https://wa.me/5212221263726?text=' +
-    encodeURIComponent('Hola AB CarWash, quiero agendar un servicio.');
+export class PublicCarwashComponent implements OnInit {
+  /** Fallback si el API aún no responde (Settings → Teléfono público). */
+  private phoneDigits = '525646531805';
+
+  whatsappUrl = this.buildWhatsAppUrl('Hola AB CarWash, quiero agendar un lavado.');
+  phoneDisplay = '+52 564 653 1805';
+  phoneTel = 'tel:+525646531805';
 
   readonly features = [
     { label: 'Rapidez', icon: 'speed' },
@@ -82,14 +86,38 @@ export class PublicCarwashComponent {
     }
   ];
 
+  constructor(private carwash: CarWashService) {}
+
+  ngOnInit(): void {
+    this.carwash.getPublicContact().subscribe({
+      next: (res) => {
+        const d = res.data;
+        if (d?.phone_digits) {
+          this.phoneDigits = d.phone_digits;
+          this.phoneTel = `tel:+${d.phone_digits}`;
+          this.whatsappUrl =
+            d.whatsapp_url ||
+            this.buildWhatsAppUrl(d.prefill || 'Hola AB CarWash, quiero agendar un lavado.');
+        }
+        if (d?.phone_display) {
+          this.phoneDisplay = d.phone_display;
+        }
+      },
+      error: () => {
+        /* se mantiene fallback */
+      }
+    });
+  }
+
   scrollToPackages(): void {
     document.getElementById('paquetes')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   whatsappFor(service: WashServiceRow): string {
-    return (
-      'https://wa.me/5212221263726?text=' +
-      encodeURIComponent(`Hola AB CarWash, me interesa: ${service.name}`)
-    );
+    return this.buildWhatsAppUrl(`Hola AB CarWash, me interesa: ${service.name}`);
+  }
+
+  private buildWhatsAppUrl(text: string): string {
+    return `https://wa.me/${this.phoneDigits}?text=${encodeURIComponent(text)}`;
   }
 }

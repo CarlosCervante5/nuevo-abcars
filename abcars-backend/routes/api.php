@@ -439,6 +439,9 @@ Route::prefix('carwash')->middleware([
 });
 // Fin Segmento CarWash
 
+// Contacto público CarWash (CTA WhatsApp en sitio)
+Route::get('/carwash/public/contact', [CarWashWhatsAppSettingsController::class, 'publicContact']);
+
 // Webhooks WhatsApp CarWash (públicos; auth por secret)
 Route::prefix('webhooks')->group(function () {
     Route::post('/evolution/whatsapp', [CarWashWhatsAppWebhookController::class, 'evolution']);

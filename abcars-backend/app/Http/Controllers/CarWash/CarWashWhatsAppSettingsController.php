@@ -111,4 +111,47 @@ class CarWashWhatsAppSettingsController extends Controller
             return ApiResponseHelper::apiError('No se pudo obtener el QR', $e->getMessage(), 500, 'CARWASH_WA_QR');
         }
     }
+
+    /**
+     * Contacto público para CTAs de agendar (sin auth).
+     */
+    public function publicContact(CarWashSettingsService $settings)
+    {
+        try {
+            $settings->applyRuntime();
+            $cfg = $settings->whatsappConfig();
+            $raw = (string) ($cfg['public_whatsapp_phone'] ?? '');
+            $digits = preg_replace('/\D+/', '', $raw) ?? '';
+
+            if ($digits === '') {
+                $digits = preg_replace('/\D+/', '', (string) env('CARWASH_PUBLIC_WHATSAPP_PHONE', '525646531805')) ?? '';
+            }
+
+            if (strlen($digits) === 10) {
+                $digits = '52'.$digits;
+            }
+
+            $prefill = 'Hola AB CarWash, quiero agendar un lavado.';
+            $display = null;
+            $url = null;
+            if ($digits !== '') {
+                if (str_starts_with($digits, '52') && strlen($digits) >= 12) {
+                    $local = substr($digits, -10);
+                    $display = '+52 '.substr($local, 0, 3).' '.substr($local, 3, 3).' '.substr($local, 6, 4);
+                } else {
+                    $display = '+'.$digits;
+                }
+                $url = 'https://wa.me/'.$digits.'?text='.rawurlencode($prefill);
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Contacto público CarWash', [
+                'phone_digits' => $digits ?: null,
+                'phone_display' => $display,
+                'whatsapp_url' => $url,
+                'prefill' => $prefill,
+            ]);
+        } catch (\Throwable $e) {
+            return ApiResponseHelper::apiError('No se pudo cargar contacto CarWash', $e->getMessage(), 500, 'CARWASH_PUBLIC_CONTACT');
+        }
+    }
 }

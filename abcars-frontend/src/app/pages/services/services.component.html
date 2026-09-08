@@ -108,10 +108,22 @@
               <p class="service-card-description">
                 Autolavado express, completo, encerado y detailing. Agenda por WhatsApp.
               </p>
-              <a [routerLink]="['/carwash']" 
-                 class="service-btn-blue">
-                Ver paquetes
-              </a>
+              <p class="service-card-phone" *ngIf="carwashPhoneDisplay">
+                <a [href]="carwashPhoneTel">{{ carwashPhoneDisplay }}</a>
+              </p>
+              <div class="service-card-actions">
+                <a [routerLink]="['/carwash']" class="service-btn-blue">
+                  Ver paquetes
+                </a>
+                <a
+                  class="service-btn-wa"
+                  [href]="carwashWhatsappUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Agendar por WhatsApp
+                </a>
+              </div>
         </div>
       </div>
 

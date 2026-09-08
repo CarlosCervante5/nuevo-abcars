@@ -446,4 +446,19 @@ export class CarWashService {
       )
       .pipe(catchError((e) => this.handleError(e)));
   }
+
+  getPublicContact() {
+    return this.http
+      .get<{
+        status: number;
+        message: string;
+        data: {
+          phone_digits?: string | null;
+          phone_display?: string | null;
+          whatsapp_url?: string | null;
+          prefill?: string;
+        };
+      }>(`${this.baseUrl}/api/carwash/public/contact`)
+      .pipe(catchError((e) => this.handleError(e)));
+  }
 }

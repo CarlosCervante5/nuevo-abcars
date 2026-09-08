@@ -25,6 +25,12 @@
             Agenda via WhatsApp
           </a>
         </div>
+        <p class="cw-phone-line">
+          WhatsApp /
+          <a class="cw-phone-link" [href]="phoneTel">{{ phoneDisplay }}</a>
+          ·
+          <a class="cw-phone-link" [href]="whatsappUrl" target="_blank" rel="noopener noreferrer">Abrir chat</a>
+        </p>
 
         <div class="cw-feature-row">
           <article class="cw-feature" *ngFor="let f of features">
@@ -99,7 +105,11 @@
     <div class="cw-banner-inner">
       <div>
         <h2>¿Listo para dejar tu auto impecable?</h2>
-        <p>Agenda por WhatsApp y te confirmamos horario en minutos.</p>
+        <p>
+          Agenda por WhatsApp al
+          <a class="cw-banner-phone" [href]="phoneTel">{{ phoneDisplay }}</a>
+          y te confirmamos horario en minutos.
+        </p>
       </div>
       <a class="cw-btn cw-btn--gold" [href]="whatsappUrl" target="_blank" rel="noopener noreferrer">
         Hablar con CarWash
