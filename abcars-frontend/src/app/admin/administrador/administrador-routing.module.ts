@@ -25,6 +25,8 @@ import { MainBannerGuard } from './guards/main-banner.guard';
 import { AdminBrandsModelsComponent } from './pages/admin-brands-models/admin-brands-models.component';
 import { IntelimotorIntegrationComponent } from './pages/intelimotor-integration/intelimotor-integration.component';
 import { InventoryPublishLogComponent } from './pages/inventory-publish-log/inventory-publish-log.component';
+import { CarWashBoardComponent } from './pages/carwash-board/carwash-board.component';
+import { CarWashAppointmentsComponent } from './pages/carwash-appointments/carwash-appointments.component';
 const routes: Routes = [
   {
     path: '',
@@ -80,6 +82,9 @@ const routes: Routes = [
       },
       { path: 'analytics', component: AnalyticsComponent, data: { embedInShell: true } },
       { path: 'publish-log', component: InventoryPublishLogComponent, data: { embedInShell: true } },
+      { path: 'carwash/board', component: CarWashBoardComponent, data: { embedInShell: true } },
+      { path: 'carwash/appointments', component: CarWashAppointmentsComponent, data: { embedInShell: true } },
+      { path: 'carwash', redirectTo: 'carwash/board', pathMatch: 'full' },
       { path: 'assistant', component: AssistantComponent, data: { embedInShell: true } },
       { path: 'api-info', component: ApiInfoComponent, data: { embedInShell: true } },
       { path: 'intelimotor', component: IntelimotorIntegrationComponent, data: { embedInShell: true } },

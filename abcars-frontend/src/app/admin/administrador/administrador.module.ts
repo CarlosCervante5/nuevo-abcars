@@ -29,6 +29,8 @@ import { AdminMainBannerComponent } from "./pages/admin-main-banner/admin-main-b
 import { AdminBrandsModelsComponent } from "./pages/admin-brands-models/admin-brands-models.component";
 import { IntelimotorIntegrationComponent } from "./pages/intelimotor-integration/intelimotor-integration.component";
 import { InventoryPublishLogComponent } from "./pages/inventory-publish-log/inventory-publish-log.component";
+import { CarWashBoardComponent } from "./pages/carwash-board/carwash-board.component";
+import { CarWashAppointmentsComponent } from "./pages/carwash-appointments/carwash-appointments.component";
 @NgModule({
     declarations: [
         AdminShellComponent,
@@ -63,7 +65,9 @@ import { InventoryPublishLogComponent } from "./pages/inventory-publish-log/inve
         PromotionsPageModule,
         AdminMainBannerComponent,
         IntelimotorIntegrationComponent,
-        InventoryPublishLogComponent
+        InventoryPublishLogComponent,
+        CarWashBoardComponent,
+        CarWashAppointmentsComponent
     ]
   })
   export class AdministradorModule { }

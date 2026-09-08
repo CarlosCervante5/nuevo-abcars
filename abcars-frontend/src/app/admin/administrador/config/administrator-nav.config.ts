@@ -130,6 +130,15 @@ export const ADMINISTRATOR_NAV_ITEMS: AdministratorNavItem[] = [
     requiredRoles: ['administrator', 'super_admin']
   },
   {
+    title: 'CarWash',
+    icon: 'fi fi-rr-car-side',
+    routerLink: ['carwash/board'],
+    description: 'Tablero y agenda de lavados',
+    iconColor: 'green',
+    requiredPermissions: ['view carwash', 'manage carwash appointments'],
+    requiredRoles: ['administrator', 'super_admin', 'carwash_admin', 'carwash_supervisor', 'carwash_cashier']
+  },
+  {
     title: 'Fotos de entregas',
     icon: 'fi fi-rr-gift',
     routerLink: ['delivery-photos'],

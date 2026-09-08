@@ -1,0 +1,76 @@
+<div class="cw-page">
+  <header class="cw-header">
+    <div>
+      <h1>CarWash · Nueva cita</h1>
+      <p>Agenda un lavado desde el panel administrador.</p>
+    </div>
+    <a routerLink="/admin/administrator/carwash/board" mat-stroked-button>Ver tablero</a>
+  </header>
+
+  <form class="cw-form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline">
+      <mat-label>Sede</mat-label>
+      <mat-select [(ngModel)]="form.location_uuid" name="location_uuid" required>
+        <mat-option *ngFor="let loc of locations" [value]="loc.uuid">{{ loc.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Servicio</mat-label>
+      <mat-select [(ngModel)]="form.service_type_uuid" name="service_type_uuid" required>
+        <mat-option *ngFor="let s of services" [value]="s.uuid">
+          {{ s.name }} · {{ s.duration_minutes }} min · ${{ s.price }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Cliente</mat-label>
+      <input matInput [(ngModel)]="form.customer_name" name="customer_name" required />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Teléfono WhatsApp</mat-label>
+      <input matInput [(ngModel)]="form.customer_phone" name="customer_phone" required placeholder="+52155..." />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Inicio</mat-label>
+      <input matInput type="datetime-local" [(ngModel)]="form.scheduled_start_at" name="scheduled_start_at" required />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Placas</mat-label>
+      <input matInput [(ngModel)]="form.vehicle_plates" name="vehicle_plates" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Marca</mat-label>
+      <input matInput [(ngModel)]="form.vehicle_brand" name="vehicle_brand" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Modelo</mat-label>
+      <input matInput [(ngModel)]="form.vehicle_model" name="vehicle_model" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Color</mat-label>
+      <input matInput [(ngModel)]="form.vehicle_color" name="vehicle_color" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="cw-notes">
+      <mat-label>Notas</mat-label>
+      <textarea matInput rows="3" [(ngModel)]="form.notes" name="notes"></textarea>
+    </mat-form-field>
+
+    <div class="cw-actions">
+      <button mat-flat-button color="primary" type="submit" [disabled]="saving">
+        {{ saving ? 'Guardando…' : 'Crear cita' }}
+      </button>
+    </div>
+  </form>
+
+  <p class="cw-success" *ngIf="success">{{ success }}</p>
+  <p class="cw-error" *ngIf="error">{{ error }}</p>
+</div>

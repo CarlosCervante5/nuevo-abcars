@@ -1,0 +1,52 @@
+<div class="cw-page">
+  <header class="cw-header">
+    <div>
+      <h1>CarWash · Tablero del día</h1>
+      <p>Control operativo de lavados por estatus.</p>
+    </div>
+    <a routerLink="/admin/administrator/carwash/appointments" mat-stroked-button>Agenda</a>
+  </header>
+
+  <div class="cw-filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha</mat-label>
+      <input matInput type="date" [(ngModel)]="date" (change)="load()" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Sede</mat-label>
+      <mat-select [(ngModel)]="locationUuid" (selectionChange)="load()">
+        <mat-option value="">Todas</mat-option>
+        <mat-option *ngFor="let loc of locations" [value]="loc.uuid">{{ loc.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" type="button" (click)="load()">Actualizar</button>
+  </div>
+
+  <p class="cw-meta" *ngIf="!loading">{{ total }} lavados en el día</p>
+  <div class="cw-loading" *ngIf="loading"><mat-spinner diameter="36"></mat-spinner></div>
+  <p class="cw-error" *ngIf="error">{{ error }}</p>
+
+  <div class="cw-board" *ngIf="!loading && !error">
+    <section class="cw-column" *ngFor="let col of columns">
+      <h2>{{ col.label }} <span>{{ col.items.length }}</span></h2>
+      <article class="cw-card" *ngFor="let item of col.items">
+        <strong>{{ item.customer_name }}</strong>
+        <div>{{ item.vehicle_brand }} {{ item.vehicle_model }} · {{ item.vehicle_plates || 's/placas' }}</div>
+        <div>{{ item.service_type?.name || 'Servicio' }}</div>
+        <div class="cw-time">{{ item.scheduled_start_at | date: 'shortTime' }}</div>
+        <button
+          mat-button
+          color="primary"
+          type="button"
+          *ngIf="nextStatus[item.status]"
+          (click)="advance(item)"
+        >
+          Avanzar a {{ statusLabels[nextStatus[item.status]!] }}
+        </button>
+      </article>
+      <p class="cw-empty" *ngIf="col.items.length === 0">Sin citas</p>
+    </section>
+  </div>
+</div>

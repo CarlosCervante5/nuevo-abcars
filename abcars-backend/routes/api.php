@@ -40,6 +40,8 @@ use App\Http\Controllers\Analytics\AnalyticsController;
 use App\Http\Controllers\Analytics\AdminAnalyticsDashboardController;
 use App\Http\Controllers\Assistant\AssistantController;
 use App\Http\Controllers\StudioCatalog\StudioCatalogController;
+use App\Http\Controllers\CarWash\CarWashAppointmentController;
+use App\Http\Controllers\CarWash\CarWashCatalogController;
 use Illuminate\Support\Facades\Route;
 
 // Información básica de la API (GET /api)
@@ -389,6 +391,30 @@ Route::prefix('integrations/intelimotor')->middleware(['auth:sanctum', 'role:adm
 Route::post('integrations/intelimotor/vehicles/{vehicleUuid}/push-photos', [IntelimotorIntegrationController::class, 'pushVehiclePhotos'])
     ->middleware(['auth:sanctum', 'role_or_permission:super_admin|administrator|marketing|update vehicles']);
 // Fin Segmento Integración Intelimotor
+
+// Segmento CarWash (sandbox / MVP)
+Route::prefix('carwash')->middleware([
+    'auth:sanctum',
+    'role_or_permission:super_admin|administrator|carwash_admin|carwash_supervisor|carwash_cashier|carwash_washer|carwash_agent|view carwash|manage carwash appointments',
+])->group(function () {
+    Route::get('/board', [CarWashAppointmentController::class, 'board']);
+    Route::get('/appointments', [CarWashAppointmentController::class, 'index']);
+    Route::post('/appointments', [CarWashAppointmentController::class, 'store']);
+    Route::get('/appointments/{uuid}', [CarWashAppointmentController::class, 'show']);
+    Route::patch('/appointments/{uuid}/status', [CarWashAppointmentController::class, 'updateStatus']);
+
+    Route::get('/locations', [CarWashCatalogController::class, 'locations']);
+    Route::post('/locations', [CarWashCatalogController::class, 'storeLocation']);
+    Route::get('/service-types', [CarWashCatalogController::class, 'serviceTypes']);
+    Route::post('/service-types', [CarWashCatalogController::class, 'storeServiceType']);
+    Route::get('/washers', [CarWashCatalogController::class, 'washers']);
+    Route::post('/washers', [CarWashCatalogController::class, 'storeWasher']);
+    Route::get('/products', [CarWashCatalogController::class, 'products']);
+    Route::post('/products', [CarWashCatalogController::class, 'storeProduct']);
+    Route::get('/bays', [CarWashCatalogController::class, 'bays']);
+    Route::post('/bays', [CarWashCatalogController::class, 'storeBay']);
+});
+// Fin Segmento CarWash
 
 // Segmento Campaigns
 

@@ -1,0 +1,48 @@
+.cw-page {
+  padding: 1.25rem 1.5rem 2rem;
+  max-width: 920px;
+}
+
+.cw-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.cw-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.cw-header p {
+  margin: 0.35rem 0 0;
+  color: #5c5c5c;
+}
+
+.cw-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.cw-notes,
+.cw-actions {
+  grid-column: 1 / -1;
+}
+
+.cw-success {
+  color: #067647;
+  margin-top: 1rem;
+}
+
+.cw-error {
+  color: #b42318;
+  margin-top: 1rem;
+}
+
+@media (max-width: 720px) {
+  .cw-form {
+    grid-template-columns: 1fr;
+  }
+}
