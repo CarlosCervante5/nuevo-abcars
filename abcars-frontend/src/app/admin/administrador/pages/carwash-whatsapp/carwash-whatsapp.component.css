@@ -1,0 +1,170 @@
+.cw-page {
+  padding: 1.25rem 1.5rem 2rem;
+  color: #1a1a1a;
+}
+
+.cw-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cw-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.cw-header p {
+  margin: 0.35rem 0 0;
+  color: #5c5c5c;
+}
+
+.cw-header small {
+  color: #777;
+}
+
+.cw-header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.cw-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.cw-inbox {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.85fr) minmax(0, 1.4fr);
+  gap: 1rem;
+  min-height: 420px;
+}
+
+.cw-list {
+  background: #f6f7f8;
+  border-radius: 12px;
+  padding: 0.5rem;
+  overflow: auto;
+  max-height: 70vh;
+}
+
+.cw-conv {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  padding: 0.7rem 0.75rem;
+  display: grid;
+  gap: 0.15rem;
+  cursor: pointer;
+}
+
+.cw-conv:hover,
+.cw-conv.active {
+  background: #fff;
+}
+
+.cw-conv span {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.cw-conv em {
+  color: #b54708;
+  font-style: normal;
+  font-size: 0.75rem;
+}
+
+.cw-thread {
+  background: #f6f7f8;
+  border-radius: 12px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 420px;
+  max-height: 70vh;
+}
+
+.cw-thread-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.cw-messages {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding-right: 0.25rem;
+}
+
+.cw-bubble {
+  max-width: 85%;
+  background: #fff;
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+}
+
+.cw-bubble.out {
+  align-self: flex-end;
+  background: #e8f1ff;
+}
+
+.cw-bubble.in {
+  align-self: flex-start;
+}
+
+.cw-bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.cw-bubble small {
+  color: #888;
+  font-size: 0.72rem;
+}
+
+.cw-reply {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.cw-full {
+  width: 100%;
+}
+
+.cw-loading {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.cw-empty,
+.cw-empty-panel {
+  color: #888;
+}
+
+.cw-empty-panel {
+  display: grid;
+  place-items: center;
+}
+
+.cw-error {
+  color: #b42318;
+}
+
+@media (max-width: 900px) {
+  .cw-inbox {
+    grid-template-columns: 1fr;
+  }
+}

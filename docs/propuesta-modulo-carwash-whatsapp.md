@@ -412,12 +412,11 @@ Se pide validar:
   - Outbox + job `SendCarWashWhatsAppNotification` al cambiar estatus
   - Admin: `GET /api/carwash/whatsapp/status`, `POST /api/carwash/whatsapp/send`
 - Seeder `CarWashSeeder` (permisos, roles, sede, servicios, amenidades)
-- Admin Angular: Tablero + Agenda + POS
-- Propuesta en `docs/propuesta-modulo-carwash-whatsapp.md`
+- Admin Angular: Tablero + Agenda + POS + **bandeja WhatsApp**
+- Guía: `docs/carwash-evolution-setup.md`
 
 ### Pendiente siguiente
 
-- Bandeja WhatsApp / handoff UI en admin
-- Plantillas proactivas (si Meta/Twilio lo requiere; Evolution suele ir por sesión)
+- Escaneo QR instancia `abcars-carwash` (estado `connecting`)
+- Vars Evolution en Railway sandbox + migrate/seed
 - App móvil lavadores
-- En Railway sandbox: migrate + seed + vars Evolution + worker de queue

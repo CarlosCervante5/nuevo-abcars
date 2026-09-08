@@ -4,7 +4,6 @@ namespace App\Http\Controllers\CarWash;
 
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
-use App\Jobs\ProcessCarWashWhatsAppInbound;
 use App\Services\CarWash\WhatsApp\CarWashPhoneNormalizer;
 use App\Services\CarWash\WhatsApp\CarWashWhatsAppInboundService;
 use App\Services\CarWash\WhatsApp\WhatsAppGatewayResolver;
@@ -61,14 +60,19 @@ class CarWashWhatsAppWebhookController extends Controller
         $phone = CarWashPhoneNormalizer::e164($remoteJid);
         $messageId = $key['id'] ?? null;
 
-        ProcessCarWashWhatsAppInbound::dispatch([
+        $inbound = [
             'phone' => $phone,
             'body' => trim($body),
             'provider_message_id' => $messageId ? (string) $messageId : null,
             'customer_name' => $data['pushName'] ?? null,
             'payload' => $request->all(),
             'provider' => 'evolution',
-        ]);
+        ];
+
+        // Tras la respuesta HTTP (no depende de worker de queue)
+        dispatch(function () use ($inbound) {
+            app(CarWashWhatsAppInboundService::class)->handle($inbound);
+        })->afterResponse();
 
         return response()->json(['ok' => true]);
     }
@@ -88,14 +92,18 @@ class CarWashWhatsAppWebhookController extends Controller
                 ->header('Content-Type', 'text/xml');
         }
 
-        ProcessCarWashWhatsAppInbound::dispatch([
+        $inbound = [
             'phone' => CarWashPhoneNormalizer::e164($from),
             'body' => $body,
             'provider_message_id' => $sid ? (string) $sid : null,
             'customer_name' => $request->input('ProfileName'),
             'payload' => $request->all(),
             'provider' => 'twilio',
-        ]);
+        ];
+
+        dispatch(function () use ($inbound) {
+            app(CarWashWhatsAppInboundService::class)->handle($inbound);
+        })->afterResponse();
 
         // Respuesta vacía: el bot responde vía API async
         return response('<?xml version="1.0" encoding="UTF-8"?><Response></Response>', 200)

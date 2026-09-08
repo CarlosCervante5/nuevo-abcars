@@ -44,6 +44,7 @@ use App\Http\Controllers\CarWash\CarWashAppointmentController;
 use App\Http\Controllers\CarWash\CarWashCatalogController;
 use App\Http\Controllers\CarWash\CarWashPosController;
 use App\Http\Controllers\CarWash\CarWashWhatsAppWebhookController;
+use App\Http\Controllers\CarWash\CarWashWhatsAppInboxController;
 use Illuminate\Support\Facades\Route;
 
 // Información básica de la API (GET /api)
@@ -422,6 +423,10 @@ Route::prefix('carwash')->middleware([
 
     Route::get('/whatsapp/status', [CarWashWhatsAppWebhookController::class, 'status']);
     Route::post('/whatsapp/send', [CarWashWhatsAppWebhookController::class, 'send']);
+    Route::get('/whatsapp/conversations', [CarWashWhatsAppInboxController::class, 'conversations']);
+    Route::get('/whatsapp/conversations/{uuid}/messages', [CarWashWhatsAppInboxController::class, 'messages']);
+    Route::post('/whatsapp/conversations/{uuid}/reply', [CarWashWhatsAppInboxController::class, 'reply']);
+    Route::patch('/whatsapp/conversations/{uuid}/handoff', [CarWashWhatsAppInboxController::class, 'updateHandoff']);
 });
 // Fin Segmento CarWash
 

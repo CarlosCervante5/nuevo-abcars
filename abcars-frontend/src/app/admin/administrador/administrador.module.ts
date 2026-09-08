@@ -32,6 +32,7 @@ import { InventoryPublishLogComponent } from "./pages/inventory-publish-log/inve
 import { CarWashBoardComponent } from "./pages/carwash-board/carwash-board.component";
 import { CarWashAppointmentsComponent } from "./pages/carwash-appointments/carwash-appointments.component";
 import { CarWashPosComponent } from "./pages/carwash-pos/carwash-pos.component";
+import { CarWashWhatsAppComponent } from "./pages/carwash-whatsapp/carwash-whatsapp.component";
 @NgModule({
     declarations: [
         AdminShellComponent,
@@ -69,7 +70,8 @@ import { CarWashPosComponent } from "./pages/carwash-pos/carwash-pos.component";
         InventoryPublishLogComponent,
         CarWashBoardComponent,
         CarWashAppointmentsComponent,
-        CarWashPosComponent
+        CarWashPosComponent,
+        CarWashWhatsAppComponent
     ]
   })
   export class AdministradorModule { }

@@ -1,0 +1,84 @@
+<div class="cw-page">
+  <header class="cw-header">
+    <div>
+      <h1>CarWash · WhatsApp</h1>
+      <p>Bandeja de conversaciones (Evolution / Twilio).</p>
+      <small *ngIf="channelInfo">{{ channelInfo }}</small>
+    </div>
+    <div class="cw-header-actions">
+      <a routerLink="/admin/administrator/carwash/board" mat-stroked-button>Tablero</a>
+      <a routerLink="/admin/administrator/carwash/pos" mat-stroked-button>POS</a>
+    </div>
+  </header>
+
+  <div class="cw-filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Buscar</mat-label>
+      <input matInput [(ngModel)]="query" name="q" (keyup.enter)="reload()" />
+    </mat-form-field>
+    <mat-checkbox [(ngModel)]="onlyHuman" name="onlyHuman" (change)="reload()">Solo handoff</mat-checkbox>
+    <button mat-stroked-button type="button" (click)="reload()">Actualizar</button>
+  </div>
+
+  <p class="cw-error" *ngIf="error">{{ error }}</p>
+
+  <div class="cw-inbox" *ngIf="!loading; else loadingTpl">
+    <aside class="cw-list">
+      <button
+        type="button"
+        class="cw-conv"
+        *ngFor="let c of conversations"
+        [class.active]="selected?.uuid === c.uuid"
+        (click)="openConversation(c)"
+      >
+        <strong>{{ c.customer_name || c.phone }}</strong>
+        <span>{{ c.phone }}</span>
+        <em *ngIf="c.needs_human">handoff</em>
+      </button>
+      <p class="cw-empty" *ngIf="!conversations.length">Sin conversaciones aún.</p>
+    </aside>
+
+    <section class="cw-thread" *ngIf="selected; else pickTpl">
+      <div class="cw-thread-head">
+        <div>
+          <strong>{{ selected.customer_name || selected.phone }}</strong>
+          <div>{{ selected.phone }}</div>
+        </div>
+        <button mat-stroked-button type="button" (click)="toggleHandoff()">
+          {{ selected.needs_human ? 'Quitar handoff' : 'Marcar handoff' }}
+        </button>
+      </div>
+
+      <div class="cw-messages" *ngIf="!loadingThread">
+        <div
+          class="cw-bubble"
+          *ngFor="let m of messages"
+          [class.out]="m.direction === 'outbound'"
+          [class.in]="m.direction === 'inbound'"
+        >
+          <p>{{ m.body }}</p>
+          <small>{{ m.created_at | date: 'short' }} · {{ m.direction }}</small>
+        </div>
+        <p class="cw-empty" *ngIf="!messages.length">Sin mensajes.</p>
+      </div>
+      <div class="cw-loading" *ngIf="loadingThread"><mat-spinner diameter="28"></mat-spinner></div>
+
+      <div class="cw-reply">
+        <mat-form-field appearance="outline" class="cw-full">
+          <mat-label>Responder</mat-label>
+          <textarea matInput rows="2" [(ngModel)]="replyBody" name="reply"></textarea>
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="button" (click)="sendReply()" [disabled]="sending || !replyBody.trim()">
+          {{ sending ? 'Enviando…' : 'Enviar' }}
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <ng-template #loadingTpl>
+    <div class="cw-loading"><mat-spinner diameter="36"></mat-spinner></div>
+  </ng-template>
+  <ng-template #pickTpl>
+    <section class="cw-thread cw-empty-panel">Selecciona una conversación.</section>
+  </ng-template>
+</div>

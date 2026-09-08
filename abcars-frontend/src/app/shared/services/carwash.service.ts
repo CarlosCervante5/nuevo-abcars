@@ -61,6 +61,23 @@ export interface CarWashOrder {
   location?: CarWashLocation | null;
 }
 
+export interface CarWashWhatsAppConversation {
+  uuid: string;
+  phone: string;
+  customer_name?: string | null;
+  status: string;
+  needs_human: boolean;
+  last_message_at?: string | null;
+}
+
+export interface CarWashWhatsAppMessage {
+  uuid: string;
+  direction: 'inbound' | 'outbound' | string;
+  body?: string | null;
+  status?: string | null;
+  created_at?: string;
+}
+
 export interface CarWashAppointment {
   uuid: string;
   customer_name: string;
@@ -215,6 +232,62 @@ export class CarWashService {
       .post<{ status: number; message: string; data: CarWashOrder }>(
         `${this.baseUrl}/api/carwash/pos/checkout`,
         payload,
+        { headers: this.authHeaders() }
+      )
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  whatsappStatus() {
+    return this.http
+      .get<{ status: number; message: string; data: { provider: string; configured: boolean; agent_enabled: boolean } }>(
+        `${this.baseUrl}/api/carwash/whatsapp/status`,
+        { headers: this.authHeaders() }
+      )
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  listWhatsAppConversations(filters: { q?: string; needs_human?: boolean; per_page?: number } = {}) {
+    let params = new HttpParams();
+    Object.entries(filters).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') {
+        params = params.set(k, String(v));
+      }
+    });
+    return this.http
+      .get<{ status: number; message: string; data: unknown }>(`${this.baseUrl}/api/carwash/whatsapp/conversations`, {
+        headers: this.authHeaders(),
+        params
+      })
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  getWhatsAppMessages(conversationUuid: string) {
+    return this.http
+      .get<{
+        status: number;
+        message: string;
+        data: { conversation: CarWashWhatsAppConversation; messages: CarWashWhatsAppMessage[] };
+      }>(`${this.baseUrl}/api/carwash/whatsapp/conversations/${conversationUuid}/messages`, {
+        headers: this.authHeaders()
+      })
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  replyWhatsApp(conversationUuid: string, body: string) {
+    return this.http
+      .post<{ status: number; message: string; data: CarWashWhatsAppConversation }>(
+        `${this.baseUrl}/api/carwash/whatsapp/conversations/${conversationUuid}/reply`,
+        { body },
+        { headers: this.authHeaders() }
+      )
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  updateWhatsAppHandoff(conversationUuid: string, needsHuman: boolean) {
+    return this.http
+      .patch<{ status: number; message: string; data: CarWashWhatsAppConversation }>(
+        `${this.baseUrl}/api/carwash/whatsapp/conversations/${conversationUuid}/handoff`,
+        { needs_human: needsHuman },
         { headers: this.authHeaders() }
       )
       .pipe(catchError((e) => this.handleError(e)));

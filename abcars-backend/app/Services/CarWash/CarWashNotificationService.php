@@ -60,8 +60,8 @@ class CarWashNotificationService
             ],
         ]);
 
-        SendCarWashWhatsAppNotification::dispatch($outbox->id);
+        SendCarWashWhatsAppNotification::dispatchSync($outbox->id);
 
-        return $outbox;
+        return $outbox->fresh();
     }
 }
