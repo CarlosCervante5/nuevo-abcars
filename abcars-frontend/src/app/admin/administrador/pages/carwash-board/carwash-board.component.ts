@@ -2,11 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
 import {
   CarWashAppointment,
   CarWashLocation,
@@ -18,16 +14,7 @@ import {
   standalone: true,
   templateUrl: './carwash-board.component.html',
   styleUrls: ['./carwash-board.component.css'],
-  imports: [
-    CommonModule,
-    FormsModule,
-    RouterModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatProgressSpinnerModule,
-    MatSelectModule
-  ]
+  imports: [CommonModule, FormsModule, RouterModule, MatProgressSpinnerModule]
 })
 export class CarWashBoardComponent implements OnInit {
   date = new Date().toISOString().slice(0, 10);

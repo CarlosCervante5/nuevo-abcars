@@ -1,29 +1,33 @@
-<div class="cw-page">
-  <header class="cw-header">
-    <div>
-      <h1>CarWash · WhatsApp</h1>
+<div class="cw-root adm-shell-page">
+  <div class="cw-hero">
+    <div class="cw-hero-text">
+      <p class="cw-eyebrow">Canal</p>
+      <h1>WhatsApp CarWash</h1>
       <p>Bandeja de conversaciones (Evolution / Twilio).</p>
       <small *ngIf="channelInfo">{{ channelInfo }}</small>
     </div>
-    <div class="cw-header-actions">
-      <a routerLink="/admin/administrator/carwash/board" mat-stroked-button>Tablero</a>
-      <a routerLink="/admin/administrator/carwash/pos" mat-stroked-button>POS</a>
+    <div class="cw-hero-actions">
+      <a routerLink="/admin/administrator/carwash/board" class="cw-btn cw-btn--ghost">Tablero</a>
+      <a routerLink="/admin/administrator/carwash/pos" class="cw-btn cw-btn--ghost">POS</a>
     </div>
-  </header>
-
-  <div class="cw-filters">
-    <mat-form-field appearance="outline">
-      <mat-label>Buscar</mat-label>
-      <input matInput [(ngModel)]="query" name="q" (keyup.enter)="reload()" />
-    </mat-form-field>
-    <mat-checkbox [(ngModel)]="onlyHuman" name="onlyHuman" (change)="reload()">Solo handoff</mat-checkbox>
-    <button mat-stroked-button type="button" (click)="reload()">Actualizar</button>
   </div>
 
-  <p class="cw-error" *ngIf="error">{{ error }}</p>
+  <div class="cw-toolbar">
+    <label class="cw-field">
+      <span>Buscar</span>
+      <input [(ngModel)]="query" name="q" (keyup.enter)="reload()" placeholder="Teléfono o nombre" />
+    </label>
+    <label class="cw-check">
+      <input type="checkbox" [(ngModel)]="onlyHuman" name="onlyHuman" (change)="reload()" />
+      Solo handoff
+    </label>
+    <button type="button" class="cw-btn cw-btn--primary" (click)="reload()">Actualizar</button>
+  </div>
+
+  <p class="cw-alert cw-alert--error" *ngIf="error">{{ error }}</p>
 
   <div class="cw-inbox" *ngIf="!loading; else loadingTpl">
-    <aside class="cw-list">
+    <aside class="cw-list cw-panel">
       <button
         type="button"
         class="cw-conv"
@@ -38,13 +42,13 @@
       <p class="cw-empty" *ngIf="!conversations.length">Sin conversaciones aún.</p>
     </aside>
 
-    <section class="cw-thread" *ngIf="selected; else pickTpl">
+    <section class="cw-thread cw-panel" *ngIf="selected; else pickTpl">
       <div class="cw-thread-head">
         <div>
           <strong>{{ selected.customer_name || selected.phone }}</strong>
-          <div>{{ selected.phone }}</div>
+          <div class="cw-muted">{{ selected.phone }}</div>
         </div>
-        <button mat-stroked-button type="button" (click)="toggleHandoff()">
+        <button type="button" class="cw-btn cw-btn--ghost" (click)="toggleHandoff()">
           {{ selected.needs_human ? 'Quitar handoff' : 'Marcar handoff' }}
         </button>
       </div>
@@ -64,11 +68,11 @@
       <div class="cw-loading" *ngIf="loadingThread"><mat-spinner diameter="28"></mat-spinner></div>
 
       <div class="cw-reply">
-        <mat-form-field appearance="outline" class="cw-full">
-          <mat-label>Responder</mat-label>
-          <textarea matInput rows="2" [(ngModel)]="replyBody" name="reply"></textarea>
-        </mat-form-field>
-        <button mat-flat-button color="primary" type="button" (click)="sendReply()" [disabled]="sending || !replyBody.trim()">
+        <label class="cw-field">
+          <span>Responder</span>
+          <textarea rows="2" [(ngModel)]="replyBody" name="reply"></textarea>
+        </label>
+        <button type="button" class="cw-btn cw-btn--primary" (click)="sendReply()" [disabled]="sending || !replyBody.trim()">
           {{ sending ? 'Enviando…' : 'Enviar' }}
         </button>
       </div>
@@ -76,9 +80,9 @@
   </div>
 
   <ng-template #loadingTpl>
-    <div class="cw-loading"><mat-spinner diameter="36"></mat-spinner></div>
+    <div class="cw-loading"><mat-spinner diameter="40"></mat-spinner></div>
   </ng-template>
   <ng-template #pickTpl>
-    <section class="cw-thread cw-empty-panel">Selecciona una conversación.</section>
+    <section class="cw-thread cw-panel cw-empty-panel">Selecciona una conversación.</section>
   </ng-template>
 </div>

@@ -2,11 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import {
   CarWashService,
   CarWashWhatsAppConversation,
@@ -18,16 +14,7 @@ import {
   standalone: true,
   templateUrl: './carwash-whatsapp.component.html',
   styleUrls: ['./carwash-whatsapp.component.css'],
-  imports: [
-    CommonModule,
-    FormsModule,
-    RouterModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatProgressSpinnerModule,
-    MatCheckboxModule
-  ]
+  imports: [CommonModule, FormsModule, RouterModule, MatProgressSpinnerModule]
 })
 export class CarWashWhatsAppComponent implements OnInit, OnDestroy {
   conversations: CarWashWhatsAppConversation[] = [];

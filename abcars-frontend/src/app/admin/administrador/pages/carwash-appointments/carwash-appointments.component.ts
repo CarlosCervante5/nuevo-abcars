@@ -2,11 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
 import {
   CarWashLocation,
   CarWashService,
@@ -18,16 +13,7 @@ import {
   standalone: true,
   templateUrl: './carwash-appointments.component.html',
   styleUrls: ['./carwash-appointments.component.css'],
-  imports: [
-    CommonModule,
-    FormsModule,
-    RouterModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatProgressSpinnerModule,
-    MatSelectModule
-  ]
+  imports: [CommonModule, FormsModule, RouterModule]
 })
 export class CarWashAppointmentsComponent implements OnInit {
   locations: CarWashLocation[] = [];
