@@ -39,19 +39,19 @@ export interface Vehicle {
           class="relative z-10 w-full h-64 object-cover block transition-transform duration-300 group-hover:scale-110"
         />
         <!-- Price Badge -->
-        <div class="absolute top-4 right-4 z-20 bg-white bg-opacity-90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
-          <span class="text-lg font-bold text-abcars-primary">
+        <div class="absolute top-3 right-3 z-20 bg-white bg-opacity-90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg">
+          <span class="text-base font-bold text-abcars-primary">
             {{ formatPrice(vehicle.sale_price) }}
           </span>
         </div>
         <!-- Brand / categoría badge -->
-        <div class="absolute top-4 left-4 z-20 flex flex-col items-start gap-1">
-          <span class="bg-black bg-opacity-70 backdrop-blur-sm rounded-full px-3 py-1 text-white text-sm font-medium uppercase">
+        <div class="absolute top-3 left-3 z-20 flex flex-col items-start gap-1 max-w-[55%]">
+          <span class="bg-black bg-opacity-70 backdrop-blur-sm rounded-full px-2.5 py-0.5 text-white text-xs font-medium uppercase">
             {{ topLeftBadgeLabel }}
           </span>
           <span
             *ngIf="showConsignmentBadge"
-            class="bg-black bg-opacity-70 backdrop-blur-sm rounded-full px-3 py-1 text-white text-sm font-medium uppercase"
+            class="bg-black bg-opacity-70 backdrop-blur-sm rounded-full px-2.5 py-0.5 text-white text-xs font-medium uppercase"
           >
             CONSIGNACIÓN
           </span>
