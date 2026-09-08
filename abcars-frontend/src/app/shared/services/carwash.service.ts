@@ -23,6 +23,16 @@ export interface CarWashServiceType {
   sort_order?: number;
 }
 
+export interface CarWashProduct {
+  uuid: string;
+  name: string;
+  sku?: string | null;
+  description?: string | null;
+  price: number | string;
+  stock: number;
+  is_active: boolean;
+}
+
 export interface CarWashLoyaltySettings {
   enabled: boolean;
   slots: number;
