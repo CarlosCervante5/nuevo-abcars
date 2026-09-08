@@ -94,13 +94,33 @@
   gap: 0.75rem;
 }
 
-.valuation-value-item p {
+.valuation-value-item .value-copy {
   margin: 0;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.45;
   color: var(--val-ink);
   max-width: 16rem;
+}
+
+.valuation-value-item .value-lead {
+  font-weight: 700;
+  display: block;
+}
+
+.valuation-value-item .value-copy--inline .value-lead {
+  display: inline;
+}
+
+.valuation-value-item .value-rest {
+  font-weight: 400;
+  display: block;
+  margin-top: 0.15rem;
+}
+
+.valuation-value-item .value-copy--inline .value-rest {
+  display: inline;
+  margin-top: 0;
 }
 
 .valuation-icon-lg,
@@ -242,7 +262,15 @@
   font-size: 0.95rem !important;
   font-weight: 700 !important;
   color: var(--val-ink) !important;
-  margin: 0 0 0.65rem !important;
+  margin: 0 0 0.4rem !important;
+}
+
+.modality-subtitle {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--val-muted);
 }
 
 .modality-list {
