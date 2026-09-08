@@ -57,6 +57,12 @@ class CarWashSettingsService
                 'enabled' => (bool) config('carwash.agent.enabled', true),
                 'history_limit' => (int) config('carwash.agent.history_limit', 12),
                 'model' => (string) config('carwash.agent.model', 'gpt-4o-mini'),
+                'openai_api_key' => (string) (
+                    config('carwash.agent.openai_api_key')
+                    ?: config('services.openai.key')
+                    ?: env('OPENAI_API_KEY')
+                    ?: ''
+                ),
             ],
             'public_whatsapp_phone' => '',
         ];
@@ -125,6 +131,8 @@ class CarWashSettingsService
                 'enabled' => (bool) ($cfg['agent']['enabled'] ?? true),
                 'history_limit' => (int) ($cfg['agent']['history_limit'] ?? 12),
                 'model' => (string) ($cfg['agent']['model'] ?? 'gpt-4o-mini'),
+                'openai_api_key' => $this->maskSecret((string) ($cfg['agent']['openai_api_key'] ?? '')),
+                'openai_api_key_set' => filled($cfg['agent']['openai_api_key'] ?? null),
             ],
             'public_whatsapp_phone' => (string) ($cfg['public_whatsapp_phone'] ?? ''),
             'webhook_urls' => [
@@ -294,6 +302,16 @@ class CarWashSettingsService
                 if (($merged['twilio'][$secret] ?? '') === '' && ! isset($currentStored['twilio'][$secret])) {
                     unset($merged['twilio'][$secret]);
                 }
+            }
+        }
+
+        $incomingOpenAi = $merged['agent']['openai_api_key'] ?? null;
+        if ($this->shouldKeepSecret($incomingOpenAi)) {
+            // No persistir la key del .env: solo conservar override ya guardado en BD.
+            if (isset($currentStored['agent']['openai_api_key']) && $currentStored['agent']['openai_api_key'] !== '') {
+                $merged['agent']['openai_api_key'] = $currentStored['agent']['openai_api_key'];
+            } else {
+                unset($merged['agent']['openai_api_key']);
             }
         }
 

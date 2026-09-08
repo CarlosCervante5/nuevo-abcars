@@ -143,8 +143,20 @@
           <span>Modelo OpenAI</span>
           <input [(ngModel)]="form.agent.model" name="agent_model" placeholder="gpt-4o-mini" />
         </label>
+        <label class="cw-field cw-field--full">
+          <span>OpenAI API Key {{ settings?.agent?.openai_api_key_set ? '(dejá vacío para no cambiar)' : '' }}</span>
+          <input
+            type="password"
+            [(ngModel)]="form.agent.openai_api_key"
+            name="agent_openai_key"
+            autocomplete="new-password"
+            [placeholder]="settings?.agent?.openai_api_key_set ? '•••• configurada' : 'sk-… (o usa OPENAI_API_KEY del servidor)'"
+          />
+        </label>
       </div>
-      <p class="cw-hint">La API key de OpenAI sigue en el servidor (`OPENAI_API_KEY`).</p>
+      <p class="cw-hint">
+        Si Railway no tiene <code>OPENAI_API_KEY</code>, pégala aquí. Sin clave válida el bot usa un modo básico (listar servicios / guiar agendar).
+      </p>
     </section>
 
     <div class="cw-footer-actions">

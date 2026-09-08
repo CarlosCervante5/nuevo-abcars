@@ -8,6 +8,8 @@ use App\Models\CarWash\CarWashServiceType;
 use App\Models\CarWash\CarWashWhatsAppConversation;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CarWashAssistantToolsService
 {
@@ -65,16 +67,16 @@ class CarWashAssistantToolsService
                 'type' => 'function',
                 'function' => [
                     'name' => 'carwash_create_appointment',
-                    'description' => 'Crea una cita de lavado. Confirma datos con el cliente antes de llamar.',
+                    'description' => 'Crea una cita de lavado en la base de datos. Obligatorio llamarla para agendar. No inventes éxito: solo confirma si responde ok:true.',
                     'parameters' => [
                         'type' => 'object',
                         'properties' => [
-                            'location_uuid' => ['type' => 'string'],
-                            'service_code' => ['type' => 'string', 'description' => 'Código: express, completo, detailing, moto'],
-                            'service_type_uuid' => ['type' => 'string'],
+                            'location_uuid' => ['type' => 'string', 'description' => 'UUID de sede (preferido) o nombre/código de sede.'],
+                            'service_code' => ['type' => 'string', 'description' => 'Código del servicio (ej. lavado-aspirado-secado) o nombre exacto del catálogo.'],
+                            'service_type_uuid' => ['type' => 'string', 'description' => 'UUID del servicio si lo tienes de carwash_list_services.'],
                             'customer_name' => ['type' => 'string'],
                             'customer_phone' => ['type' => 'string', 'description' => 'Teléfono E.164 o 10 dígitos MX'],
-                            'scheduled_start_at' => ['type' => 'string', 'description' => 'ISO8601 o YYYY-MM-DD HH:MM'],
+                            'scheduled_start_at' => ['type' => 'string', 'description' => 'Preferible YYYY-MM-DD HH:MM (America/Mexico_City). También acepta mañana 14:00 / mañana 2 PM.'],
                             'vehicle_plates' => ['type' => 'string'],
                             'vehicle_brand' => ['type' => 'string'],
                             'vehicle_model' => ['type' => 'string'],
@@ -191,26 +193,64 @@ class CarWashAssistantToolsService
     private function createAppointment(array $args, ?string $callerPhone): array
     {
         try {
-            $serviceUuid = $args['service_type_uuid'] ?? null;
-            if (! $serviceUuid && ! empty($args['service_code'])) {
-                $service = CarWashServiceType::query()->where('code', $args['service_code'])->first();
-                $serviceUuid = $service?->uuid;
+            $service = $this->resolveServiceType(
+                isset($args['service_type_uuid']) ? (string) $args['service_type_uuid'] : null,
+                isset($args['service_code']) ? (string) $args['service_code'] : null,
+            );
+            if (! $service) {
+                return [
+                    'ok' => false,
+                    'error' => 'Servicio no encontrado. Usa carwash_list_services y pasa service_code o service_type_uuid.',
+                    'hint' => 'No digas al cliente que la cita quedó agendada.',
+                ];
             }
-            if (! $serviceUuid) {
-                return ['error' => 'Indica service_code o service_type_uuid'];
+
+            $location = $this->resolveLocation(
+                isset($args['location_uuid']) ? (string) $args['location_uuid'] : null,
+                isset($args['location_name']) ? (string) $args['location_name'] : null,
+            );
+            if (! $location) {
+                return [
+                    'ok' => false,
+                    'error' => 'Sede no encontrada. Usa carwash_list_locations y pasa el UUID.',
+                    'hint' => 'No digas al cliente que la cita quedó agendada.',
+                ];
             }
 
             $phone = (string) ($args['customer_phone'] ?? $callerPhone ?? '');
             if ($phone === '') {
-                return ['error' => 'Falta teléfono del cliente'];
+                return [
+                    'ok' => false,
+                    'error' => 'Falta teléfono del cliente',
+                    'hint' => 'No digas al cliente que la cita quedó agendada.',
+                ];
+            }
+
+            $customerName = trim((string) ($args['customer_name'] ?? ''));
+            if ($customerName === '') {
+                return [
+                    'ok' => false,
+                    'error' => 'Falta nombre del cliente',
+                    'hint' => 'No digas al cliente que la cita quedó agendada.',
+                ];
+            }
+
+            try {
+                $start = $this->parseScheduledStart((string) ($args['scheduled_start_at'] ?? ''));
+            } catch (Exception $e) {
+                return [
+                    'ok' => false,
+                    'error' => 'Fecha/hora inválida: '.$e->getMessage().'. Usa YYYY-MM-DD HH:MM (zona America/Mexico_City).',
+                    'hint' => 'No digas al cliente que la cita quedó agendada.',
+                ];
             }
 
             $appointment = $this->appointments->create([
-                'location_uuid' => $args['location_uuid'],
-                'service_type_uuid' => $serviceUuid,
-                'customer_name' => $args['customer_name'],
+                'location_uuid' => $location->uuid,
+                'service_type_uuid' => $service->uuid,
+                'customer_name' => $customerName,
                 'customer_phone' => $phone,
-                'scheduled_start_at' => $args['scheduled_start_at'],
+                'scheduled_start_at' => $start->toDateTimeString(),
                 'vehicle_plates' => $args['vehicle_plates'] ?? null,
                 'vehicle_brand' => $args['vehicle_brand'] ?? null,
                 'vehicle_model' => $args['vehicle_model'] ?? null,
@@ -220,19 +260,165 @@ class CarWashAssistantToolsService
                 'status' => 'scheduled',
             ], null);
 
+            Log::info('CarWash WhatsApp cita creada', [
+                'uuid' => $appointment->uuid,
+                'phone' => $phone,
+                'start' => optional($appointment->scheduled_start_at)->toIso8601String(),
+            ]);
+
             return [
                 'ok' => true,
                 'appointment' => [
                     'uuid' => $appointment->uuid,
                     'status' => $appointment->status,
                     'scheduled_start_at' => optional($appointment->scheduled_start_at)->toIso8601String(),
+                    'scheduled_local' => optional($appointment->scheduled_start_at)?->timezone(config('app.timezone'))->format('Y-m-d H:i'),
                     'service' => $appointment->serviceType?->name,
                     'location' => $appointment->location?->name,
                     'quoted_price' => $appointment->quoted_price,
+                    'vehicle_plates' => $appointment->vehicle_plates,
                 ],
             ];
         } catch (Exception $e) {
-            return ['error' => $e->getMessage()];
+            Log::warning('CarWash WhatsApp createAppointment failed', [
+                'message' => $e->getMessage(),
+                'args' => $args,
+            ]);
+
+            return [
+                'ok' => false,
+                'error' => $e->getMessage(),
+                'hint' => 'No digas al cliente que la cita quedó agendada. Pide corregir el dato faltante.',
+            ];
+        }
+    }
+
+    private function resolveServiceType(?string $uuid, ?string $codeOrName): ?CarWashServiceType
+    {
+        if (filled($uuid)) {
+            $byUuid = CarWashServiceType::findByUuid($uuid);
+            if ($byUuid) {
+                return $byUuid;
+            }
+        }
+
+        $raw = trim((string) $codeOrName);
+        if ($raw === '') {
+            return null;
+        }
+
+        $byCode = CarWashServiceType::query()->where('code', $raw)->first();
+        if ($byCode) {
+            return $byCode;
+        }
+
+        $slug = Str::slug($raw);
+        if ($slug !== '') {
+            $bySlug = CarWashServiceType::query()->where('code', $slug)->first();
+            if ($bySlug) {
+                return $bySlug;
+            }
+        }
+
+        $byName = CarWashServiceType::query()
+            ->where('is_active', true)
+            ->where(function ($q) use ($raw) {
+                $q->whereRaw('LOWER(name) = ?', [mb_strtolower($raw)])
+                    ->orWhere('name', 'like', '%'.$raw.'%');
+            })
+            ->orderBy('sort_order')
+            ->first();
+
+        return $byName;
+    }
+
+    private function resolveLocation(?string $uuidOrName, ?string $altName = null): ?CarWashLocation
+    {
+        $candidates = array_values(array_filter([
+            trim((string) $uuidOrName),
+            trim((string) $altName),
+        ], fn ($v) => $v !== ''));
+
+        foreach ($candidates as $raw) {
+            $byUuid = CarWashLocation::findByUuid($raw);
+            if ($byUuid) {
+                return $byUuid;
+            }
+
+            $byCode = CarWashLocation::query()->where('code', $raw)->first();
+            if ($byCode) {
+                return $byCode;
+            }
+
+            $byName = CarWashLocation::query()
+                ->where('is_active', true)
+                ->where(function ($q) use ($raw) {
+                    $q->whereRaw('LOWER(name) = ?', [mb_strtolower($raw)])
+                        ->orWhere('name', 'like', '%'.$raw.'%');
+                })
+                ->orderBy('name')
+                ->first();
+            if ($byName) {
+                return $byName;
+            }
+        }
+
+        // Si solo hay una sede activa, usarla
+        $only = CarWashLocation::query()->where('is_active', true)->limit(2)->get();
+        if ($only->count() === 1) {
+            return $only->first();
+        }
+
+        return null;
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function parseScheduledStart(string $raw): Carbon
+    {
+        $raw = trim($raw);
+        if ($raw === '') {
+            throw new Exception('Fecha vacía');
+        }
+
+        $tz = 'America/Mexico_City';
+        $configuredTz = (string) config('app.timezone', '');
+        if ($configuredTz !== '' && $configuredTz !== 'UTC') {
+            $tz = $configuredTz;
+        }
+        $lower = mb_strtolower($raw);
+
+        // Relativos en español: hoy / mañana + hora opcional
+        if (preg_match('/\b(hoy|mañana|manana)\b/u', $lower, $dayMatch)) {
+            $base = now($tz)->startOfDay();
+            if (in_array($dayMatch[1], ['mañana', 'manana'], true)) {
+                $base->addDay();
+            }
+
+            $hour = 10;
+            $minute = 0;
+            if (preg_match('/(\d{1,2})(?:[:\.](\d{2}))?\s*(a\.?\s*m\.?|p\.?\s*m\.?|am|pm)?/iu', $lower, $tm)) {
+                $hour = (int) $tm[1];
+                $minute = isset($tm[2]) && $tm[2] !== '' ? (int) $tm[2] : 0;
+                $ampm = strtolower(preg_replace('/\s+/', '', (string) ($tm[3] ?? '')));
+                if (str_contains($ampm, 'p') && $hour < 12) {
+                    $hour += 12;
+                } elseif (str_contains($ampm, 'a') && $hour === 12) {
+                    $hour = 0;
+                } elseif ($ampm === '' && $hour >= 1 && $hour <= 7) {
+                    // Sin am/pm: en CarWash "2" suele ser 14:00
+                    $hour += 12;
+                }
+            }
+
+            return $base->setTime($hour, $minute, 0);
+        }
+
+        try {
+            return Carbon::parse($raw, $tz);
+        } catch (\Throwable $e) {
+            throw new Exception('No se pudo interpretar "'.$raw.'"');
         }
     }
 

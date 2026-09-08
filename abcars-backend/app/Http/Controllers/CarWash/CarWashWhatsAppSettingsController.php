@@ -63,6 +63,7 @@ class CarWashWhatsAppSettingsController extends Controller
                 'agent.enabled' => 'nullable|boolean',
                 'agent.history_limit' => 'nullable|integer|min:1|max:50',
                 'agent.model' => 'nullable|string|max:80',
+                'agent.openai_api_key' => 'nullable|string|max:500',
                 'public_whatsapp_phone' => 'nullable|string|max:32',
             ]);
 

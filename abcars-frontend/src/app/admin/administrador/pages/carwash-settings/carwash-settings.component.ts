@@ -47,7 +47,8 @@ export class CarWashSettingsComponent implements OnInit, OnDestroy {
     agent: {
       enabled: true,
       history_limit: 12,
-      model: 'gpt-4o-mini'
+      model: 'gpt-4o-mini',
+      openai_api_key: ''
     },
     public_whatsapp_phone: ''
   };
@@ -204,7 +205,8 @@ export class CarWashSettingsComponent implements OnInit, OnDestroy {
     this.form.agent = {
       enabled: data.agent?.enabled !== false,
       history_limit: data.agent?.history_limit || 12,
-      model: data.agent?.model || 'gpt-4o-mini'
+      model: data.agent?.model || 'gpt-4o-mini',
+      openai_api_key: ''
     };
     this.form.public_whatsapp_phone = data.public_whatsapp_phone || '';
   }

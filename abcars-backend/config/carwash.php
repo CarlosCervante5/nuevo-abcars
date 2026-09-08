@@ -32,6 +32,8 @@ return [
         'enabled' => filter_var(env('CARWASH_WHATSAPP_AGENT_ENABLED', true), FILTER_VALIDATE_BOOLEAN),
         'history_limit' => (int) env('CARWASH_WHATSAPP_HISTORY_LIMIT', 12),
         'model' => env('CARWASH_WHATSAPP_OPENAI_MODEL', 'gpt-4o-mini'),
+        // Opcional: override de OPENAI_API_KEY vía settings (si vacío, se usa services.openai.key / env).
+        'openai_api_key' => env('OPENAI_API_KEY', ''),
     ],
 
 ];

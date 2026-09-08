@@ -105,6 +105,8 @@ export interface CarWashWhatsAppSettings {
     enabled: boolean;
     history_limit: number;
     model: string;
+    openai_api_key?: string;
+    openai_api_key_set?: boolean;
   };
   public_whatsapp_phone?: string;
   webhook_urls?: { evolution: string; twilio: string };
