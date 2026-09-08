@@ -52,12 +52,13 @@ class CarWashAssistantToolsService
                 'type' => 'function',
                 'function' => [
                     'name' => 'carwash_get_availability',
-                    'description' => 'Resumen de ocupación para una sede y fecha (citas ya agendadas).',
+                    'description' => 'Devuelve horarios LIBRES y ocupados de una sede para una fecha. Si available_slots tiene valores, SÍ hay disponibilidad. slots/booked vacíos = día libre, no “sin cupo”.',
                     'parameters' => [
                         'type' => 'object',
                         'properties' => [
-                            'location_uuid' => ['type' => 'string', 'description' => 'UUID de la sede.'],
-                            'date' => ['type' => 'string', 'description' => 'Fecha YYYY-MM-DD.'],
+                            'location_uuid' => ['type' => 'string', 'description' => 'UUID, código o nombre de la sede.'],
+                            'date' => ['type' => 'string', 'description' => 'YYYY-MM-DD, o hoy / mañana.'],
+                            'duration_minutes' => ['type' => 'integer', 'description' => 'Duración del servicio en minutos (default 60).'],
                         ],
                         'required' => ['location_uuid', 'date'],
                     ],
@@ -158,36 +159,135 @@ class CarWashAssistantToolsService
 
     private function getAvailability(array $args): array
     {
-        $location = CarWashLocation::findByUuid((string) ($args['location_uuid'] ?? ''));
+        $location = $this->resolveLocation(
+            isset($args['location_uuid']) ? (string) $args['location_uuid'] : null,
+            isset($args['location_name']) ? (string) $args['location_name'] : null,
+        );
         if (! $location) {
-            return ['error' => 'Sede no encontrada'];
+            return ['ok' => false, 'error' => 'Sede no encontrada'];
         }
 
         try {
-            $day = Carbon::parse((string) ($args['date'] ?? now()->toDateString()));
-        } catch (\Throwable) {
-            return ['error' => 'Fecha inválida'];
+            $day = $this->parseAvailabilityDate((string) ($args['date'] ?? 'hoy'));
+        } catch (\Throwable $e) {
+            return ['ok' => false, 'error' => 'Fecha inválida: '.$e->getMessage()];
         }
+
+        $tz = 'America/Mexico_City';
+        $configuredTz = (string) config('app.timezone', '');
+        if ($configuredTz !== '' && $configuredTz !== 'UTC') {
+            $tz = $configuredTz;
+        }
+
+        $dayStart = $day->copy()->timezone($tz)->startOfDay();
+        $dayEnd = $day->copy()->timezone($tz)->endOfDay();
+        $duration = max(15, (int) ($args['duration_minutes'] ?? 60));
+        $openHour = 9;
+        $closeHour = 18;
+        $stepMinutes = 60;
 
         $appointments = CarWashAppointment::query()
             ->where('location_id', $location->id)
-            ->whereBetween('scheduled_start_at', [$day->copy()->startOfDay(), $day->copy()->endOfDay()])
+            ->whereBetween('scheduled_start_at', [$dayStart, $dayEnd])
             ->whereNotIn('status', ['cancelled', 'no_show'])
             ->orderBy('scheduled_start_at')
             ->get(['uuid', 'customer_name', 'status', 'scheduled_start_at', 'scheduled_end_at']);
 
-        return [
-            'location' => $location->only(['uuid', 'name']),
-            'date' => $day->toDateString(),
-            'booked_count' => $appointments->count(),
-            'slots' => $appointments->map(fn ($a) => [
+        $booked = $appointments->map(function ($a) use ($tz) {
+            $start = optional($a->scheduled_start_at)?->timezone($tz);
+            $end = optional($a->scheduled_end_at)?->timezone($tz);
+
+            return [
                 'uuid' => $a->uuid,
                 'status' => $a->status,
-                'start' => optional($a->scheduled_start_at)->toIso8601String(),
-                'end' => optional($a->scheduled_end_at)->toIso8601String(),
-            ]),
-            'hint' => 'Sugiere horarios libres evitando los slots listados. Horario típico 09:00–18:00.',
+                'start' => $start?->toIso8601String(),
+                'end' => $end?->toIso8601String(),
+                'time' => $start?->format('H:i'),
+            ];
+        })->values()->all();
+
+        $now = now($tz);
+        $available = [];
+        $cursor = $dayStart->copy()->setTime($openHour, 0, 0);
+        $lastStart = $dayStart->copy()->setTime($closeHour, 0, 0)->subMinutes($duration);
+
+        while ($cursor->lte($lastStart)) {
+            $slotStart = $cursor->copy();
+            $slotEnd = $cursor->copy()->addMinutes($duration);
+
+            $isPast = $dayStart->isSameDay($now) && $slotEnd->lte($now);
+            $overlaps = $appointments->contains(function ($a) use ($slotStart, $slotEnd) {
+                $aStart = $a->scheduled_start_at;
+                $aEnd = $a->scheduled_end_at ?? optional($a->scheduled_start_at)?->copy()->addHour();
+                if (! $aStart || ! $aEnd) {
+                    return false;
+                }
+
+                return $slotStart->lt($aEnd) && $slotEnd->gt($aStart);
+            });
+
+            if (! $isPast && ! $overlaps) {
+                $available[] = $slotStart->format('H:i');
+            }
+
+            $cursor->addMinutes($stepMinutes);
+        }
+
+        $message = count($available) > 0
+            ? 'Hay horarios libres. Ofrece al cliente opciones de available_slots.'
+            : (
+                $dayStart->isSameDay($now) && $now->hour >= $closeHour
+                    ? 'El horario de hoy ya cerró ('.$openHour.':00–'.$closeHour.':00). Sugiere mañana u otro día.'
+                    : 'No quedan huecos libres en esa fecha dentro del horario '.$openHour.':00–'.$closeHour.':00.'
+            );
+
+        return [
+            'ok' => true,
+            'location' => $location->only(['uuid', 'name']),
+            'date' => $dayStart->toDateString(),
+            'timezone' => $tz,
+            'business_hours' => sprintf('%02d:00–%02d:00', $openHour, $closeHour),
+            'duration_minutes' => $duration,
+            'booked_count' => count($booked),
+            'booked_slots' => $booked,
+            // Compat: antes "slots" eran ocupados; ahora no confundir con libres
+            'slots' => $booked,
+            'available_slots' => $available,
+            'available_count' => count($available),
+            'message' => $message,
+            'hint' => 'Si available_count > 0 hay disponibilidad. booked_slots/slots vacíos significa día sin citas (libre), NO falta de cupo.',
         ];
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function parseAvailabilityDate(string $raw): Carbon
+    {
+        $raw = trim($raw);
+        if ($raw === '') {
+            $raw = 'hoy';
+        }
+
+        $tz = 'America/Mexico_City';
+        $configuredTz = (string) config('app.timezone', '');
+        if ($configuredTz !== '' && $configuredTz !== 'UTC') {
+            $tz = $configuredTz;
+        }
+
+        $lower = mb_strtolower($raw);
+        if (preg_match('/\bhoy\b/u', $lower)) {
+            return now($tz)->startOfDay();
+        }
+        if (preg_match('/\b(mañana|manana)\b/u', $lower)) {
+            return now($tz)->addDay()->startOfDay();
+        }
+
+        try {
+            return Carbon::parse($raw, $tz)->startOfDay();
+        } catch (\Throwable $e) {
+            throw new Exception('No se pudo interpretar la fecha "'.$raw.'"');
+        }
     }
 
     private function createAppointment(array $args, ?string $callerPhone): array

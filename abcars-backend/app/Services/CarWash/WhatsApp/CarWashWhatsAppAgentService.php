@@ -49,6 +49,7 @@ REGLAS DE AGENDAR (críticas):
 4. Si ok:true, confirma con: uuid, fecha/hora exacta (scheduled_local o scheduled_start_at), servicio, sede, placas y precio de la respuesta de la tool.
 5. Para scheduled_start_at preferí YYYY-MM-DD HH:MM en zona America/Mexico_City. También puedes usar "mañana 14:00".
 6. Usa service_code / service_type_uuid y location_uuid que salgan de las tools (no inventes UUIDs).
+7. En carwash_get_availability: lee available_slots. Si available_count > 0, SÍ hay cupo. booked_slots/slots vacíos = día libre (todo disponible), NO digas que no hay horarios.
 
 Confirma datos (nombre, servicio, sede, fecha/hora, placas) antes de crear una cita.
 El teléfono del cliente en este chat es: {$callerPhone}. Úsalo si no lo proporciona.
@@ -300,6 +301,30 @@ PROMPT;
         }
 
         if ($wantsSchedule) {
+            $locations = $this->tools->execute('carwash_list_locations', [], $callerPhone);
+            $firstLoc = null;
+            $locItems = $locations['locations'] ?? [];
+            if (is_iterable($locItems)) {
+                foreach ($locItems as $loc) {
+                    $firstLoc = is_array($loc) ? ($loc['uuid'] ?? null) : ($loc->uuid ?? null);
+                    break;
+                }
+            }
+            if ($firstLoc) {
+                $avail = $this->tools->execute('carwash_get_availability', [
+                    'location_uuid' => (string) $firstLoc,
+                    'date' => 'hoy',
+                ], $callerPhone);
+                $free = $avail['available_slots'] ?? [];
+                if (is_array($free) && count($free) > 0) {
+                    $lines[] = '';
+                    $lines[] = '*Horarios libres hoy:* '.implode(', ', array_slice($free, 0, 8));
+                } elseif (! empty($avail['message'])) {
+                    $lines[] = '';
+                    $lines[] = (string) $avail['message'];
+                }
+            }
+
             $lines[] = '';
             $lines[] = 'Para agendar necesito: *nombre*, *servicio* (código o nombre), *sede*, *fecha y hora*, y *placas*.';
             $lines[] = 'Ejemplo: Juan Pérez, lavado-aspirado-secado, mañana 10:00, ABC123.';
