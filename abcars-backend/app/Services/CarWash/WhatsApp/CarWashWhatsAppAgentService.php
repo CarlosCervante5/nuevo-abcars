@@ -68,6 +68,8 @@ REGLAS DE AGENDAR (críticas):
 
 El teléfono del cliente en este chat es: {$callerPhone}. Úsalo si no lo proporciona.
 Si piden autos seminuevos / inventario ABCars, indica amablemente que este canal es solo CarWash.
+Si el cliente escribe 0 / iniciar / reiniciar, el sistema ya reinicia el flujo; no hace falta tool.
+En mensajes de ayuda puedes recordar: “Escribe 0 o iniciar para reiniciar”.
 PROMPT;
 
         $messages = [['role' => 'system', 'content' => $system]];
@@ -180,8 +182,19 @@ PROMPT;
     public function historyFromConversation(CarWashWhatsAppConversation $conversation): array
     {
         $limit = max(2, (int) config('carwash.agent.history_limit', 12));
-        $rows = CarWashWhatsAppMessage::query()
-            ->where('conversation_id', $conversation->id)
+        $query = CarWashWhatsAppMessage::query()
+            ->where('conversation_id', $conversation->id);
+
+        $resetAt = $conversation->meta['context_reset_at'] ?? null;
+        if (is_string($resetAt) && trim($resetAt) !== '') {
+            try {
+                $query->where('created_at', '>=', \Carbon\Carbon::parse($resetAt));
+            } catch (\Throwable) {
+                // si el meta está mal, no filtrar
+            }
+        }
+
+        $rows = $query
             ->orderByDesc('id')
             ->limit($limit)
             ->get()
@@ -194,6 +207,10 @@ PROMPT;
             if ($body === '') {
                 continue;
             }
+            // No contaminar el historial del agente con comandos de reinicio
+            if ($row->direction === 'inbound' && $this->isHistoryNoise($body)) {
+                continue;
+            }
             $history[] = [
                 'role' => $row->direction === 'inbound' ? 'user' : 'assistant',
                 'content' => $body,
@@ -201,6 +218,15 @@ PROMPT;
         }
 
         return $history;
+    }
+
+    private function isHistoryNoise(string $body): bool
+    {
+        $normalized = mb_strtolower(trim($body));
+        $normalized = trim($normalized, " \t\n\r\0\x0B.!¡?¿*\"'");
+
+        return $normalized === '0'
+            || (bool) preg_match('/^(iniciar|inciar|reiniciar|reset|menu|menú|inicio|empezar|comenzar)$/u', $normalized);
     }
 
     private function resolveOpenAiKey(): string

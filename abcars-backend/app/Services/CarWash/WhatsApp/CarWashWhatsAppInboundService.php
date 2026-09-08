@@ -65,10 +65,21 @@ class CarWashWhatsAppInboundService
             $conversation->save();
         });
 
+        $conversation = $conversation->fresh();
+
+        // Reinicio de flujo: "0" / iniciar / reiniciar (si el usuario se trabó)
+        if ($this->isResetCommand($body)) {
+            $this->resetConversationContext($conversation);
+            $this->sendAndStore($conversation->fresh(), $this->welcomeAfterResetMessage());
+
+            return;
+        }
+
         if ($conversation->needs_human) {
             $this->sendAndStore(
                 $conversation,
-                'Tu mensaje quedó con un asesor. Te contactaremos pronto. Si es urgente, indícalo aquí.'
+                'Tu mensaje quedó con un asesor. Te contactaremos pronto. Si es urgente, indícalo aquí.'."\n\n".
+                'Si quieres empezar de nuevo escribe *0* o *iniciar*.'
             );
 
             return;
@@ -82,6 +93,54 @@ class CarWashWhatsAppInboundService
 
         $reply = $this->agent->reply($body, $history, $phone);
         $this->sendAndStore($conversation, $reply);
+    }
+
+    private function isResetCommand(string $body): bool
+    {
+        $normalized = mb_strtolower(trim($body));
+        $normalized = preg_replace('/\s+/u', ' ', $normalized) ?? $normalized;
+        // Quitar signos comunes de WhatsApp
+        $normalized = trim($normalized, " \t\n\r\0\x0B.!¡?¿*\"'");
+
+        if ($normalized === '0') {
+            return true;
+        }
+
+        return (bool) preg_match(
+            '/^(iniciar|inciar|reiniciar|reset|menu|menú|inicio|empezar|comenzar|hola\s*bot)$/u',
+            $normalized
+        );
+    }
+
+    private function resetConversationContext(CarWashWhatsAppConversation $conversation): void
+    {
+        $meta = is_array($conversation->meta) ? $conversation->meta : [];
+        $meta['context_reset_at'] = now()->toIso8601String();
+        $meta['context_reset_reason'] = 'user_command';
+        unset($meta['handoff_reason'], $meta['handoff_at']);
+
+        $conversation->needs_human = false;
+        $conversation->status = 'open';
+        $conversation->meta = $meta;
+        $conversation->last_message_at = now();
+        $conversation->save();
+
+        Log::info('CarWash WhatsApp conversation reset', [
+            'conversation_uuid' => $conversation->uuid,
+            'phone' => $conversation->phone,
+        ]);
+    }
+
+    private function welcomeAfterResetMessage(): string
+    {
+        return implode("\n", [
+            '¡Listo! Reiniciamos la conversación 👋',
+            '',
+            'Soy el asistente de *ABCars CarWash*.',
+            '¿Quieres *agendar un lavado* o consultar tus *sellos*?',
+            '',
+            'Si en cualquier momento te trabas, escribe *0* o *iniciar* para volver al inicio.',
+        ]);
     }
 
     public function sendAndStore(CarWashWhatsAppConversation $conversation, string $body): void
