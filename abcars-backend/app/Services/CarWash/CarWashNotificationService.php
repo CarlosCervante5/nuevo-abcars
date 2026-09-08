@@ -65,4 +65,48 @@ class CarWashNotificationService
 
         return $outbox->fresh();
     }
+
+    /**
+     * Tras entregar el servicio: envía la cuponera con el sello recién llenado.
+     *
+     * @param  array<string, mixed>  $awardResult
+     */
+    public function queueLoyaltyStampCard(CarWashAppointment $appointment, array $awardResult): ?CarWashNotificationOutbox
+    {
+        if (! ($awardResult['awarded'] ?? false)) {
+            return null;
+        }
+
+        $phone = CarWashPhoneNormalizer::e164((string) $appointment->customer_phone);
+        if ($phone === '') {
+            return null;
+        }
+
+        $card = is_array($awardResult['card'] ?? null) ? $awardResult['card'] : [];
+        $body = trim((string) ($card['whatsapp_message'] ?? ''));
+        if ($body === '') {
+            return null;
+        }
+
+        $outbox = CarWashNotificationOutbox::create([
+            'appointment_id' => $appointment->id,
+            'channel' => 'whatsapp',
+            'to_phone' => $phone,
+            'template_key' => 'loyalty_stamp',
+            'body' => $body,
+            'status' => 'pending',
+            'attempts' => 0,
+            'meta' => [
+                'appointment_uuid' => $appointment->uuid,
+                'to_status' => 'delivered',
+                'completed_cycle' => (bool) ($awardResult['completed_cycle'] ?? false),
+                'stamps_count' => $card['stamps_count'] ?? null,
+                'slots' => $card['slots'] ?? null,
+            ],
+        ]);
+
+        SendCarWashWhatsAppNotification::dispatchSync($outbox->id);
+
+        return $outbox->fresh();
+    }
 }

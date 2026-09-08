@@ -165,7 +165,8 @@ class CarWashAppointmentService
         if ($toStatus === 'delivered') {
             $fresh = $appointment->fresh() ?? $appointment;
             if (! $fresh->isInternalSalesDelivery()) {
-                $this->loyalty->awardOnDelivered($fresh);
+                $award = $this->loyalty->awardOnDelivered($fresh);
+                $this->notifications->queueLoyaltyStampCard($fresh, $award);
             }
         }
 

@@ -141,21 +141,49 @@ class CarWashLoyaltyService
                 $card->stamps_count = min($slots, (int) $card->stamps_count + 1);
                 $card->last_stamp_at = now();
                 $completed = false;
+                $stampsForDisplay = (int) $card->stamps_count;
 
                 if ($card->stamps_count >= $slots) {
                     $card->completed_cycles = (int) $card->completed_cycles + 1;
                     $card->stamps_count = 0;
                     $card->reward_ready_at = now();
                     $completed = true;
+                    $stampsForDisplay = $slots; // mostrar tarjeta llena en el aviso
                 }
 
                 $card->save();
+
+                $payload = $this->cardPayload($card->fresh(), $settings);
+                // Si completó ciclo, el payload tiene 0 sellos; para WhatsApp mostramos la tarjeta llena.
+                if ($completed) {
+                    $payload['stamps_count'] = $slots;
+                    $payload['remaining'] = 0;
+                    $payload['punch_card'] = $this->renderPunchCard(
+                        $slots,
+                        $slots,
+                        $settings['stamp_emoji'],
+                        $settings['empty_emoji']
+                    );
+                    $payload['punch_card_lines'] = $this->renderPunchCardLines(
+                        $slots,
+                        $slots,
+                        $settings['stamp_emoji'],
+                        $settings['empty_emoji']
+                    );
+                }
+
+                $payload['whatsapp_message'] = $this->buildStampWhatsAppMessage(
+                    $payload,
+                    $completed,
+                    (string) ($appointment->customer_name ?: 'cliente')
+                );
 
                 return [
                     'ok' => true,
                     'awarded' => true,
                     'completed_cycle' => $completed,
-                    'card' => $this->cardPayload($card->fresh(), $settings),
+                    'stamps_for_display' => $stampsForDisplay,
+                    'card' => $payload,
                 ];
             });
 
@@ -286,6 +314,45 @@ class CarWashLoyaltyService
         }
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * Mensaje WhatsApp tras sumar sello al terminar el servicio.
+     *
+     * @param  array<string, mixed>  $cardPayload
+     */
+    public function buildStampWhatsAppMessage(array $cardPayload, bool $completedCycle, string $customerName): string
+    {
+        $name = trim($customerName) !== '' ? trim($customerName) : 'cliente';
+        $lines = $cardPayload['punch_card_lines'] ?? null;
+        $punch = is_array($lines) && count($lines) > 0
+            ? implode("\n", $lines)
+            : (string) ($cardPayload['punch_card'] ?? '');
+        $stamps = (int) ($cardPayload['stamps_count'] ?? 0);
+        $slots = (int) ($cardPayload['slots'] ?? 10);
+        $remaining = (int) ($cardPayload['remaining'] ?? max(0, $slots - $stamps));
+        $reward = (string) ($cardPayload['reward_text'] ?? 'tu recompensa');
+
+        if ($completedCycle) {
+            return implode("\n", [
+                "Hola {$name}, ¡terminamos tu lavado y sumaste el último sello! 🎉",
+                '',
+                $punch,
+                '',
+                "Cuponera completa ({$slots}/{$slots})",
+                "Recompensa: {$reward}",
+                'Preséntate en la sede para canjearla. ¡Gracias por visitarnos!',
+            ]);
+        }
+
+        return implode("\n", [
+            "Hola {$name}, ¡gracias por tu visita! Ya sumamos un sello a tu cuponera:",
+            '',
+            $punch,
+            '',
+            "Sellos: {$stamps}/{$slots}",
+            "Te faltan {$remaining} para: {$reward}",
+        ]);
     }
 
     /**
