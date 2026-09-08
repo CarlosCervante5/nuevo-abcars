@@ -400,17 +400,24 @@ Se pide validar:
 
 - Migración `2026_09_08_120000_create_carwash_tables.php`
 - Modelos `App\Models\CarWash\*`
-- API autenticada `/api/carwash/*` (board, appointments, catalog, **POS**)
-- `CarWashAppointmentService` (crear + cambiar estatus + logs)
-- `CarWashPosService` + `POST /api/carwash/pos/checkout` + listado de órdenes
-- `CarWashNotificationService`: encola WhatsApp en outbox al cambiar estatus (sin envío Twilio aún)
-- Seeder `CarWashSeeder` (permisos, roles, sede demo, servicios + amenidades)
-- Admin Angular: Tablero + Agenda + **POS** + nav CarWash
+- API autenticada `/api/carwash/*` (board, appointments, catalog, POS)
+- `CarWashAppointmentService` + `CarWashPosService`
+- **WhatsApp (Evolution API Cloud + Twilio):**
+  - Proveedor vía `CARWASH_WHATSAPP_PROVIDER=evolution|twilio`
+  - Gateway Evolution (`EVOLUTION_API_URL`, `EVOLUTION_API_KEY`, `EVOLUTION_INSTANCE`)
+  - Webhooks públicos:
+    - `POST /api/webhooks/evolution/whatsapp`
+    - `POST /api/webhooks/twilio/whatsapp`
+  - Agente OpenAI + tools CarWash (agenda, estatus, cancelar, handoff)
+  - Outbox + job `SendCarWashWhatsAppNotification` al cambiar estatus
+  - Admin: `GET /api/carwash/whatsapp/status`, `POST /api/carwash/whatsapp/send`
+- Seeder `CarWashSeeder` (permisos, roles, sede, servicios, amenidades)
+- Admin Angular: Tablero + Agenda + POS
 - Propuesta en `docs/propuesta-modulo-carwash-whatsapp.md`
 
 ### Pendiente siguiente
 
-- Webhook Twilio + tools del agente CarWash
-- Job de envío desde `carwash_notification_outbox`
-- Bandeja WhatsApp / handoff
-- Ejecutar en Railway sandbox: `php artisan migrate` + `php artisan db:seed --class=CarWashSeeder`
+- Bandeja WhatsApp / handoff UI en admin
+- Plantillas proactivas (si Meta/Twilio lo requiere; Evolution suele ir por sesión)
+- App móvil lavadores
+- En Railway sandbox: migrate + seed + vars Evolution + worker de queue

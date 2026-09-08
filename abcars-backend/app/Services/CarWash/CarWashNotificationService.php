@@ -4,6 +4,7 @@ namespace App\Services\CarWash;
 
 use App\Models\CarWash\CarWashAppointment;
 use App\Models\CarWash\CarWashNotificationOutbox;
+use App\Jobs\SendCarWashWhatsAppNotification;
 
 class CarWashNotificationService
 {
@@ -45,7 +46,7 @@ class CarWashNotificationService
             return null;
         }
 
-        return CarWashNotificationOutbox::create([
+        $outbox = CarWashNotificationOutbox::create([
             'appointment_id' => $appointment->id,
             'channel' => 'whatsapp',
             'to_phone' => $phone,
@@ -58,5 +59,9 @@ class CarWashNotificationService
                 'to_status' => $toStatus,
             ],
         ]);
+
+        SendCarWashWhatsAppNotification::dispatch($outbox->id);
+
+        return $outbox;
     }
 }

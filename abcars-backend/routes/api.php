@@ -43,6 +43,7 @@ use App\Http\Controllers\StudioCatalog\StudioCatalogController;
 use App\Http\Controllers\CarWash\CarWashAppointmentController;
 use App\Http\Controllers\CarWash\CarWashCatalogController;
 use App\Http\Controllers\CarWash\CarWashPosController;
+use App\Http\Controllers\CarWash\CarWashWhatsAppWebhookController;
 use Illuminate\Support\Facades\Route;
 
 // Información básica de la API (GET /api)
@@ -418,8 +419,17 @@ Route::prefix('carwash')->middleware([
     Route::get('/orders', [CarWashPosController::class, 'index']);
     Route::get('/orders/{uuid}', [CarWashPosController::class, 'show']);
     Route::post('/pos/checkout', [CarWashPosController::class, 'checkout']);
+
+    Route::get('/whatsapp/status', [CarWashWhatsAppWebhookController::class, 'status']);
+    Route::post('/whatsapp/send', [CarWashWhatsAppWebhookController::class, 'send']);
 });
 // Fin Segmento CarWash
+
+// Webhooks WhatsApp CarWash (públicos; auth por secret)
+Route::prefix('webhooks')->group(function () {
+    Route::post('/evolution/whatsapp', [CarWashWhatsAppWebhookController::class, 'evolution']);
+    Route::post('/twilio/whatsapp', [CarWashWhatsAppWebhookController::class, 'twilio']);
+});
 
 // Segmento Campaigns
 
