@@ -82,28 +82,33 @@ class CarWashBootstrapController extends Controller
             $rows = CarWashAppointment::query()
                 ->with('serviceType')
                 ->whereNotNull('scheduled_start_at')
+                ->whereNotIn('status', ['cancelled', 'delivered', 'no_show'])
                 ->where(function ($q) use ($now) {
                     $q->whereYear('scheduled_start_at', '<', (int) $now->year)
-                        ->orWhere('scheduled_start_at', '<', $now->copy()->subDay());
+                        ->orWhere('scheduled_start_at', '<', $now->copy()->subDay())
+                        // WhatsApp reciente con fecha lejana (IA inventó p. ej. octubre cuando dijeron "hoy")
+                        ->orWhere(function ($q2) use ($now) {
+                            $q2->where('channel', 'whatsapp')
+                                ->where('created_at', '>=', $now->copy()->subDays(14)->utc())
+                                ->where('scheduled_start_at', '>', $now->copy()->addDays(2)->utc());
+                        });
                 })
-                ->whereNotIn('status', ['cancelled', 'delivered', 'no_show'])
                 ->limit(200)
                 ->get();
 
             foreach ($rows as $row) {
                 $start = Carbon::parse($row->scheduled_start_at)->timezone($tz);
                 $from = $start->toIso8601String();
+                $created = $row->created_at ? Carbon::parse($row->created_at)->timezone($tz) : $now->copy();
+                $isRecentWhatsApp = ($row->channel ?? '') === 'whatsapp'
+                    && $created->gt($now->copy()->subDays(14));
 
-                // Citas WhatsApp recientes con año viejo: casi siempre querían "hoy/mañana"
-                if (
-                    ($row->channel ?? '') === 'whatsapp'
-                    && $row->created_at
-                    && Carbon::parse($row->created_at)->gt(now()->subDays(14))
-                    && (int) $start->year < (int) $now->year
-                ) {
-                    $candidate = Carbon::parse($row->created_at)->timezone($tz)
-                        ->startOfDay()
-                        ->setTime($start->hour, $start->minute, 0);
+                // WhatsApp reciente + fecha lejana o año viejo → anclar al día de creación (misma hora)
+                if ($isRecentWhatsApp && (
+                    (int) $start->year < (int) $now->year
+                    || $start->gt($created->copy()->addDays(2))
+                )) {
+                    $candidate = $created->copy()->startOfDay()->setTime($start->hour, $start->minute, 0);
                     if ($candidate->lt($now->copy()->subHours(1))) {
                         $candidate->addDay();
                     }

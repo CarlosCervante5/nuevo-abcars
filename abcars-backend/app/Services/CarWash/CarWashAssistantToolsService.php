@@ -336,12 +336,13 @@ class CarWashAssistantToolsService
             }
 
             try {
-                $start = $this->parseScheduledStart((string) ($args['scheduled_start_at'] ?? ''));
-                $start = $this->ensureSchedulableDate($start);
+                $rawStart = (string) ($args['scheduled_start_at'] ?? '');
+                $start = $this->parseScheduledStart($rawStart);
+                $start = $this->ensureSchedulableDate($start, $rawStart);
             } catch (Exception $e) {
                 return [
                     'ok' => false,
-                    'error' => 'Fecha/hora inválida: '.$e->getMessage().'. Usa YYYY-MM-DD HH:MM con el año actual (America/Mexico_City), p. ej. '.now('America/Mexico_City')->addDay()->format('Y-m-d').' 14:00.',
+                    'error' => 'Fecha/hora inválida: '.$e->getMessage().'. Usa YYYY-MM-DD HH:MM con el año actual (America/Mexico_City), p. ej. '.now('America/Mexico_City')->format('Y-m-d').' 16:00.',
                     'hint' => 'No digas al cliente que la cita quedó agendada.',
                 ];
             }
@@ -491,26 +492,36 @@ class CarWashAssistantToolsService
         $lower = mb_strtolower($raw);
 
         // Relativos en español: hoy / mañana + hora opcional
-        if (preg_match('/\b(hoy|mañana|manana)\b/u', $lower, $dayMatch)) {
+        if (preg_match('/\b(hoy|mañana|manana|today|tomorrow)\b/u', $lower, $dayMatch)) {
             $base = now($tz)->startOfDay();
-            if (in_array($dayMatch[1], ['mañana', 'manana'], true)) {
+            $token = $dayMatch[1];
+            if (in_array($token, ['mañana', 'manana', 'tomorrow'], true)) {
                 $base->addDay();
             }
 
             $hour = 10;
             $minute = 0;
-            if (preg_match('/(\d{1,2})(?:[:\.](\d{2}))?\s*(a\.?\s*m\.?|p\.?\s*m\.?|am|pm)?/iu', $lower, $tm)) {
+            // Preferir HH:MM explícito (evita capturar otros dígitos)
+            if (preg_match('/\b(\d{1,2})[:\.](\d{2})\b/', $lower, $tm)) {
                 $hour = (int) $tm[1];
-                $minute = isset($tm[2]) && $tm[2] !== '' ? (int) $tm[2] : 0;
-                $ampm = strtolower(preg_replace('/\s+/', '', (string) ($tm[3] ?? '')));
+                $minute = (int) $tm[2];
+            } elseif (preg_match('/\b(\d{1,2})\s*(a\.?\s*m\.?|p\.?\s*m\.?|am|pm)\b/iu', $lower, $tm)) {
+                $hour = (int) $tm[1];
+                $ampm = strtolower(preg_replace('/\s+/', '', (string) ($tm[2] ?? '')));
                 if (str_contains($ampm, 'p') && $hour < 12) {
                     $hour += 12;
                 } elseif (str_contains($ampm, 'a') && $hour === 12) {
                     $hour = 0;
-                } elseif ($ampm === '' && $hour >= 1 && $hour <= 7) {
-                    // Sin am/pm: en CarWash "2" suele ser 14:00
+                }
+            } elseif (preg_match('/\b(\d{1,2})\b/', $lower, $tm)) {
+                $hour = (int) $tm[1];
+                if ($hour >= 1 && $hour <= 7) {
                     $hour += 12;
                 }
+            }
+
+            if ($hour > 23) {
+                $hour = 23;
             }
 
             return $base->setTime($hour, $minute, 0);
@@ -522,15 +533,15 @@ class CarWashAssistantToolsService
             throw new Exception('No se pudo interpretar "'.$raw.'"');
         }
 
-        return $this->ensureSchedulableDate($parsed);
+        return $this->ensureSchedulableDate($parsed, $raw);
     }
 
     /**
-     * Corrige años viejos (p. ej. 2023) y rechaza horarios ya pasados sin alternativa clara.
+     * Corrige años viejos / fechas absurdas y rechaza horarios ya pasados.
      *
      * @throws Exception
      */
-    private function ensureSchedulableDate(Carbon $start): Carbon
+    private function ensureSchedulableDate(Carbon $start, ?string $raw = null): Carbon
     {
         $tz = 'America/Mexico_City';
         $configuredTz = (string) config('app.timezone', '');
@@ -541,18 +552,36 @@ class CarWashAssistantToolsService
         $start = $start->copy()->timezone($tz);
         $now = now($tz);
         $threshold = $now->copy()->subHours(1);
+        $raw = (string) $raw;
+        $hasIsoDate = (bool) preg_match('/\d{4}-\d{2}-\d{2}/', $raw);
 
-        // La IA a veces manda años viejos (2023…). Traer al año actual / siguiente.
+        // Canal WhatsApp: casi siempre es hoy/mañana. Si la IA inventa una fecha lejana
+        // (con o sin ISO), anclar a hoy/mañana con la misma hora.
+        if ($start->gt($now->copy()->addDays(2))) {
+            $candidate = $now->copy()->setTime($start->hour, $start->minute, 0);
+            if ($candidate->lt($threshold)) {
+                $candidate->addDay();
+            }
+            Log::warning('CarWash schedule far date snapped near-term', [
+                'raw' => $raw,
+                'had_iso' => $hasIsoDate,
+                'from' => $start->toIso8601String(),
+                'to' => $candidate->toIso8601String(),
+            ]);
+            $start = $candidate;
+        }
+
+        // Años viejos (2023…). Traer al año actual / siguiente.
         if ((int) $start->year < (int) $now->year || $start->lt($threshold)) {
             $candidate = $start->copy()->year($now->year);
             if ($candidate->lt($threshold)) {
                 $candidate->addYear();
             }
-            // Si el mes/día ya pasó este año y addYear quedó > 1 año adelante, preferir mañana misma hora
             if ($candidate->gt($now->copy()->addMonths(6))) {
                 $candidate = $now->copy()->addDay()->setTime($start->hour, $start->minute, 0);
             }
             Log::warning('CarWash schedule date normalized', [
+                'raw' => $raw,
                 'from' => $start->toIso8601String(),
                 'to' => $candidate->toIso8601String(),
             ]);
@@ -566,7 +595,7 @@ class CarWashAssistantToolsService
         }
 
         if ($start->gt($now->copy()->addMonths(6))) {
-            throw new Exception('La fecha está demasiado lejos. Agenda dentro de los próximos 6 meses.');
+            throw new Exception('La fecha está demasiado lejos. Agenda dentro de los próximos 6 meses. Hoy es '.$now->format('Y-m-d').'.');
         }
 
         return $start;
