@@ -41,8 +41,13 @@ php artisan db:seed --class=CarWashSeeder
 php artisan queue:work   # si QUEUE_CONNECTION=database
 ```
 
-## Prueba
+## Usuarios demo (CarWashSeeder)
 
-1. Escribe al WhatsApp vinculado: “Hola, quiero agendar un lavado”.
-2. Admin → CarWash WhatsApp (bandeja).
-3. Al marcar una cita como `ready` en el tablero, debe salir notificación por WhatsApp.
+| Rol | Email | Password | Nickname |
+|-----|-------|----------|----------|
+| Supervisor lavadores | `carwash_supervisor@abcars.mx` | `CarWashSupervisor%2026%%` | `carwash_supervisor` |
+| Lavador | `carwash_lavador@abcars.mx` | `CarWashLavador%2026%%` | `carwash_lavador` |
+
+```bash
+php artisan db:seed --class=CarWashSeeder
+```

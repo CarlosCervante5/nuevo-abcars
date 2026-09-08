@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\CarWash\CarWashLocation;
 use App\Models\CarWash\CarWashProduct;
 use App\Models\CarWash\CarWashServiceType;
+use App\Models\CarWash\CarWashWasher;
+use Database\Seeders\Support\SeededUser;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -60,8 +62,9 @@ class CarWashSeeder extends Seeder
             $role->givePermissionTo($permissions);
         }
 
-        if (! CarWashLocation::query()->exists()) {
-            CarWashLocation::create([
+        $location = CarWashLocation::query()->first();
+        if (! $location) {
+            $location = CarWashLocation::create([
                 'name' => 'CarWash ABCars Centro',
                 'code' => 'cw-centro',
                 'phone' => null,
@@ -102,6 +105,62 @@ class CarWashSeeder extends Seeder
                     'is_active' => true,
                 ])
             );
+        }
+
+        $this->seedStaffUsers($location);
+    }
+
+    private function seedStaffUsers(CarWashLocation $location): void
+    {
+        $supervisorRole = Role::findByName('carwash_supervisor');
+        $washerRole = Role::findByName('carwash_washer');
+
+        $supervisor = SeededUser::findExistingOrCreate([
+            'email' => 'carwash_supervisor@abcars.mx',
+            'nickname' => 'carwash_supervisor',
+            'password' => 'CarWashSupervisor%2026%%',
+        ]);
+        if (! $supervisor->hasRole('carwash_supervisor')) {
+            $supervisor->assignRole($supervisorRole);
+        }
+        if (! $supervisor->userProfile) {
+            $supervisor->userProfile()->create([
+                'name' => 'Supervisor',
+                'last_name' => 'CarWash',
+                'location' => $location->name,
+            ]);
+        }
+
+        $washer = SeededUser::findExistingOrCreate([
+            'email' => 'carwash_lavador@abcars.mx',
+            'nickname' => 'carwash_lavador',
+            'password' => 'CarWashLavador%2026%%',
+        ]);
+        if (! $washer->hasRole('carwash_washer')) {
+            $washer->assignRole($washerRole);
+        }
+        if (! $washer->userProfile) {
+            $washer->userProfile()->create([
+                'name' => 'Lavador',
+                'last_name' => 'CarWash',
+                'location' => $location->name,
+            ]);
+        }
+
+        CarWashWasher::query()->firstOrCreate(
+            ['user_id' => $washer->id],
+            [
+                'location_id' => $location->id,
+                'display_name' => 'Lavador CarWash',
+                'phone' => null,
+                'is_active' => true,
+            ]
+        );
+
+        if ($this->command) {
+            $this->command->info('Usuarios CarWash:');
+            $this->command->info('  Supervisor: carwash_supervisor@abcars.mx / CarWashSupervisor%2026%%');
+            $this->command->info('  Lavador:    carwash_lavador@abcars.mx / CarWashLavador%2026%%');
         }
     }
 }
