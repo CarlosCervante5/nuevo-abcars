@@ -42,6 +42,7 @@ use App\Http\Controllers\Assistant\AssistantController;
 use App\Http\Controllers\StudioCatalog\StudioCatalogController;
 use App\Http\Controllers\CarWash\CarWashAppointmentController;
 use App\Http\Controllers\CarWash\CarWashCatalogController;
+use App\Http\Controllers\CarWash\CarWashPosController;
 use Illuminate\Support\Facades\Route;
 
 // Información básica de la API (GET /api)
@@ -395,7 +396,7 @@ Route::post('integrations/intelimotor/vehicles/{vehicleUuid}/push-photos', [Inte
 // Segmento CarWash (sandbox / MVP)
 Route::prefix('carwash')->middleware([
     'auth:sanctum',
-    'role_or_permission:super_admin|administrator|carwash_admin|carwash_supervisor|carwash_cashier|carwash_washer|carwash_agent|view carwash|manage carwash appointments',
+    'role_or_permission:super_admin|administrator|carwash_admin|carwash_supervisor|carwash_cashier|carwash_washer|carwash_agent|view carwash|manage carwash appointments|manage carwash pos',
 ])->group(function () {
     Route::get('/board', [CarWashAppointmentController::class, 'board']);
     Route::get('/appointments', [CarWashAppointmentController::class, 'index']);
@@ -413,6 +414,10 @@ Route::prefix('carwash')->middleware([
     Route::post('/products', [CarWashCatalogController::class, 'storeProduct']);
     Route::get('/bays', [CarWashCatalogController::class, 'bays']);
     Route::post('/bays', [CarWashCatalogController::class, 'storeBay']);
+
+    Route::get('/orders', [CarWashPosController::class, 'index']);
+    Route::get('/orders/{uuid}', [CarWashPosController::class, 'show']);
+    Route::post('/pos/checkout', [CarWashPosController::class, 'checkout']);
 });
 // Fin Segmento CarWash
 

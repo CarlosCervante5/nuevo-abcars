@@ -31,6 +31,7 @@ import { IntelimotorIntegrationComponent } from "./pages/intelimotor-integration
 import { InventoryPublishLogComponent } from "./pages/inventory-publish-log/inventory-publish-log.component";
 import { CarWashBoardComponent } from "./pages/carwash-board/carwash-board.component";
 import { CarWashAppointmentsComponent } from "./pages/carwash-appointments/carwash-appointments.component";
+import { CarWashPosComponent } from "./pages/carwash-pos/carwash-pos.component";
 @NgModule({
     declarations: [
         AdminShellComponent,
@@ -67,7 +68,8 @@ import { CarWashAppointmentsComponent } from "./pages/carwash-appointments/carwa
         IntelimotorIntegrationComponent,
         InventoryPublishLogComponent,
         CarWashBoardComponent,
-        CarWashAppointmentsComponent
+        CarWashAppointmentsComponent,
+        CarWashPosComponent
     ]
   })
   export class AdministradorModule { }

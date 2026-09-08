@@ -1,0 +1,173 @@
+.cw-page {
+  padding: 1.25rem 1.5rem 2rem;
+  color: #1a1a1a;
+}
+
+.cw-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cw-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.cw-header p {
+  margin: 0.35rem 0 0;
+  color: #5c5c5c;
+}
+
+.cw-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cw-loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.cw-pos {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.9fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.cw-catalog h2,
+.cw-ticket h2 {
+  margin: 0.5rem 0 0.75rem;
+  font-size: 1rem;
+}
+
+.cw-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.cw-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.cw-chip {
+  border: 1px solid #d8dce3;
+  background: #f7f8fa;
+  border-radius: 10px;
+  padding: 0.65rem 0.8rem;
+  text-align: left;
+  cursor: pointer;
+  display: grid;
+  gap: 0.15rem;
+  min-width: 140px;
+}
+
+.cw-chip:hover:not(:disabled) {
+  border-color: #1f6feb;
+  background: #eef5ff;
+}
+
+.cw-chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.cw-chip span {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.cw-ticket {
+  background: #f6f7f8;
+  border-radius: 12px;
+  padding: 1rem;
+  position: sticky;
+  top: 0.75rem;
+}
+
+.cw-full {
+  width: 100%;
+}
+
+.cw-lines {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.cw-lines li {
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.cw-lines small {
+  display: block;
+  color: #777;
+}
+
+.cw-qty {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.cw-line-total {
+  font-weight: 600;
+  text-align: right;
+}
+
+.cw-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.15rem;
+  margin: 0.5rem 0 0.85rem;
+}
+
+.cw-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.cw-empty {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.cw-error {
+  color: #b42318;
+  margin-top: 0.75rem;
+}
+
+.cw-success {
+  color: #067647;
+  margin-top: 0.75rem;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 960px) {
+  .cw-pos,
+  .cw-row {
+    grid-template-columns: 1fr;
+  }
+
+  .cw-ticket {
+    position: static;
+  }
+}

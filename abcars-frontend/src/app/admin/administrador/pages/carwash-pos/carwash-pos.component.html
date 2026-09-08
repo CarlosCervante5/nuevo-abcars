@@ -1,0 +1,132 @@
+<div class="cw-page">
+  <header class="cw-header">
+    <div>
+      <h1>CarWash · POS</h1>
+      <p>Cobro de lavados y amenidades (sandbox).</p>
+    </div>
+    <div class="cw-header-actions">
+      <a routerLink="/admin/administrator/carwash/board" mat-stroked-button>Tablero</a>
+      <a routerLink="/admin/administrator/carwash/appointments" mat-stroked-button>Agenda</a>
+    </div>
+  </header>
+
+  <div class="cw-loading" *ngIf="loading">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div class="cw-pos" *ngIf="!loading">
+    <section class="cw-catalog">
+      <div class="cw-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Sede</mat-label>
+          <mat-select [(ngModel)]="locationUuid" name="location" (selectionChange)="onLocationChange()">
+            <mat-option *ngFor="let loc of locations" [value]="loc.uuid">{{ loc.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Cita del día (opcional)</mat-label>
+          <mat-select [(ngModel)]="appointmentUuid" name="appointment" (selectionChange)="onAppointmentPick()">
+            <mat-option value="">Walk-in / sin cita</mat-option>
+            <mat-option *ngFor="let a of todaysAppointments" [value]="a.uuid">
+              {{ a.customer_name }} · {{ a.vehicle_plates || 's/p' }} · {{ a.status }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <h2>Servicios</h2>
+      <div class="cw-chips">
+        <button
+          type="button"
+          class="cw-chip"
+          *ngFor="let s of services"
+          (click)="addService(s)"
+        >
+          <strong>{{ s.name }}</strong>
+          <span>${{ s.price }} · {{ s.duration_minutes }} min</span>
+        </button>
+      </div>
+
+      <h2>Amenidades</h2>
+      <div class="cw-chips">
+        <button
+          type="button"
+          class="cw-chip"
+          *ngFor="let p of products"
+          (click)="addProduct(p)"
+          [disabled]="(p.stock || 0) < 1"
+        >
+          <strong>{{ p.name }}</strong>
+          <span>${{ p.price }} · stock {{ p.stock }}</span>
+        </button>
+        <p class="cw-empty" *ngIf="!products.length">Sin productos. Ejecuta el seeder CarWash.</p>
+      </div>
+    </section>
+
+    <aside class="cw-ticket">
+      <h2>Ticket</h2>
+
+      <mat-form-field appearance="outline" class="cw-full">
+        <mat-label>Cliente</mat-label>
+        <input matInput [(ngModel)]="customerName" name="customer_name" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="cw-full">
+        <mat-label>Teléfono</mat-label>
+        <input matInput [(ngModel)]="customerPhone" name="customer_phone" />
+      </mat-form-field>
+
+      <ul class="cw-lines" *ngIf="cart.length; else emptyCart">
+        <li *ngFor="let line of cart">
+          <div>
+            <strong>{{ line.name }}</strong>
+            <small>{{ line.item_type }} · ${{ line.unit_price }}</small>
+          </div>
+          <div class="cw-qty">
+            <button type="button" mat-stroked-button (click)="bumpQty(line, -1)">−</button>
+            <span>{{ line.quantity }}</span>
+            <button type="button" mat-stroked-button (click)="bumpQty(line, 1)">+</button>
+            <button type="button" mat-button color="warn" (click)="removeLine(line)">Quitar</button>
+          </div>
+          <div class="cw-line-total">${{ line.unit_price * line.quantity | number: '1.2-2' }}</div>
+        </li>
+      </ul>
+      <ng-template #emptyCart>
+        <p class="cw-empty">Agrega servicios o amenidades.</p>
+      </ng-template>
+
+      <mat-form-field appearance="outline" class="cw-full">
+        <mat-label>Pago</mat-label>
+        <mat-select [(ngModel)]="paymentMethod" name="payment_method">
+          <mat-option value="cash">Efectivo</mat-option>
+          <mat-option value="card">Tarjeta</mat-option>
+          <mat-option value="transfer">Transferencia</mat-option>
+          <mat-option value="mixed">Mixto</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="cw-full">
+        <mat-label>Notas</mat-label>
+        <textarea matInput rows="2" [(ngModel)]="notes" name="notes"></textarea>
+      </mat-form-field>
+
+      <div class="cw-total">
+        <span>Total</span>
+        <strong>${{ subtotal | number: '1.2-2' }}</strong>
+      </div>
+
+      <div class="cw-actions">
+        <button mat-stroked-button type="button" (click)="clearTicket()" [disabled]="checkingOut">Limpiar</button>
+        <button mat-flat-button color="primary" type="button" (click)="checkout()" [disabled]="checkingOut || !cart.length">
+          {{ checkingOut ? 'Cobrando…' : 'Cobrar' }}
+        </button>
+      </div>
+
+      <p class="cw-error" *ngIf="error">{{ error }}</p>
+      <div class="cw-success" *ngIf="lastOrder">
+        Cobro OK · ticket {{ lastOrder.uuid | slice: 0:8 }} · ${{ lastOrder.total }} ({{ lastOrder.payment_method }})
+      </div>
+    </aside>
+  </div>
+</div>

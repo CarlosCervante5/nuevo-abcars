@@ -27,6 +27,7 @@ import { IntelimotorIntegrationComponent } from './pages/intelimotor-integration
 import { InventoryPublishLogComponent } from './pages/inventory-publish-log/inventory-publish-log.component';
 import { CarWashBoardComponent } from './pages/carwash-board/carwash-board.component';
 import { CarWashAppointmentsComponent } from './pages/carwash-appointments/carwash-appointments.component';
+import { CarWashPosComponent } from './pages/carwash-pos/carwash-pos.component';
 const routes: Routes = [
   {
     path: '',
@@ -84,6 +85,7 @@ const routes: Routes = [
       { path: 'publish-log', component: InventoryPublishLogComponent, data: { embedInShell: true } },
       { path: 'carwash/board', component: CarWashBoardComponent, data: { embedInShell: true } },
       { path: 'carwash/appointments', component: CarWashAppointmentsComponent, data: { embedInShell: true } },
+      { path: 'carwash/pos', component: CarWashPosComponent, data: { embedInShell: true } },
       { path: 'carwash', redirectTo: 'carwash/board', pathMatch: 'full' },
       { path: 'assistant', component: AssistantComponent, data: { embedInShell: true } },
       { path: 'api-info', component: ApiInfoComponent, data: { embedInShell: true } },

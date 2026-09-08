@@ -133,10 +133,19 @@ export const ADMINISTRATOR_NAV_ITEMS: AdministratorNavItem[] = [
     title: 'CarWash',
     icon: 'fi fi-rr-car-side',
     routerLink: ['carwash/board'],
-    description: 'Tablero y agenda de lavados',
+    description: 'Tablero, agenda y POS',
     iconColor: 'green',
-    requiredPermissions: ['view carwash', 'manage carwash appointments'],
+    requiredPermissions: ['view carwash', 'manage carwash appointments', 'manage carwash pos'],
     requiredRoles: ['administrator', 'super_admin', 'carwash_admin', 'carwash_supervisor', 'carwash_cashier']
+  },
+  {
+    title: 'CarWash POS',
+    icon: 'fi fi-rr-shopping-cart',
+    routerLink: ['carwash/pos'],
+    description: 'Cobro de lavados y amenidades',
+    iconColor: 'amber',
+    requiredPermissions: ['manage carwash pos', 'view carwash'],
+    requiredRoles: ['administrator', 'super_admin', 'carwash_admin', 'carwash_cashier']
   },
   {
     title: 'Fotos de entregas',

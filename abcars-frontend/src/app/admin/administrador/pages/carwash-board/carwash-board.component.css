@@ -11,6 +11,12 @@
   margin-bottom: 1rem;
 }
 
+.cw-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .cw-header h1 {
   margin: 0;
   font-size: 1.5rem;

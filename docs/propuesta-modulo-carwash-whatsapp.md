@@ -396,19 +396,21 @@ Se pide validar:
 
 **Inicio:** 2026-09-08 en rama `sanboxNuevoABcars`.
 
-### Entregado en esta base
+### Entregado
 
 - Migración `2026_09_08_120000_create_carwash_tables.php`
 - Modelos `App\Models\CarWash\*`
-- API autenticada `/api/carwash/*` (board, appointments, catalog)
+- API autenticada `/api/carwash/*` (board, appointments, catalog, **POS**)
 - `CarWashAppointmentService` (crear + cambiar estatus + logs)
-- Seeder `CarWashSeeder` (permisos, roles, sede demo, servicios default)
-- Admin Angular: Tablero + Nueva cita + nav **CarWash**
+- `CarWashPosService` + `POST /api/carwash/pos/checkout` + listado de órdenes
+- `CarWashNotificationService`: encola WhatsApp en outbox al cambiar estatus (sin envío Twilio aún)
+- Seeder `CarWashSeeder` (permisos, roles, sede demo, servicios + amenidades)
+- Admin Angular: Tablero + Agenda + **POS** + nav CarWash
 - Propuesta en `docs/propuesta-modulo-carwash-whatsapp.md`
 
 ### Pendiente siguiente
 
-- POS y amenidades UI
-- WhatsApp Twilio webhook + tools del agente
-- Notificaciones de estatus
+- Webhook Twilio + tools del agente CarWash
+- Job de envío desde `carwash_notification_outbox`
+- Bandeja WhatsApp / handoff
 - Ejecutar en Railway sandbox: `php artisan migrate` + `php artisan db:seed --class=CarWashSeeder`

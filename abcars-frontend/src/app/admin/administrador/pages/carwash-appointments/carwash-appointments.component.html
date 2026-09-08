@@ -4,7 +4,10 @@
       <h1>CarWash · Nueva cita</h1>
       <p>Agenda un lavado desde el panel administrador.</p>
     </div>
-    <a routerLink="/admin/administrator/carwash/board" mat-stroked-button>Ver tablero</a>
+    <div class="cw-header-actions">
+      <a routerLink="/admin/administrator/carwash/board" mat-stroked-button>Ver tablero</a>
+      <a routerLink="/admin/administrator/carwash/pos" mat-stroked-button>POS</a>
+    </div>
   </header>
 
   <form class="cw-form" (ngSubmit)="submit()">

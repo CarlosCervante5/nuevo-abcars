@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\CarWash\CarWashLocation;
+use App\Models\CarWash\CarWashProduct;
 use App\Models\CarWash\CarWashServiceType;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
@@ -80,6 +81,23 @@ class CarWashSeeder extends Seeder
             CarWashServiceType::firstOrCreate(
                 ['code' => $service['code']],
                 array_merge($service, [
+                    'description' => null,
+                    'is_active' => true,
+                ])
+            );
+        }
+
+        $products = [
+            ['name' => 'Aromatizante spray', 'sku' => 'AM-AROMA', 'price' => 49, 'stock' => 50],
+            ['name' => 'Funda volante', 'sku' => 'AM-FUNDA', 'price' => 129, 'stock' => 20],
+            ['name' => 'Toalla microfibra', 'sku' => 'AM-TOALLA', 'price' => 89, 'stock' => 40],
+            ['name' => 'Kit limpia vidrios', 'sku' => 'AM-VIDRIO', 'price' => 99, 'stock' => 25],
+        ];
+
+        foreach ($products as $product) {
+            CarWashProduct::firstOrCreate(
+                ['sku' => $product['sku']],
+                array_merge($product, [
                     'description' => null,
                     'is_active' => true,
                 ])

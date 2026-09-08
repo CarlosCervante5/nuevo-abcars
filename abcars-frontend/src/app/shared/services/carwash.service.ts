@@ -29,6 +29,38 @@ export interface CarWashWasher {
   location?: CarWashLocation | null;
 }
 
+export interface CarWashProduct {
+  uuid: string;
+  name: string;
+  sku?: string | null;
+  price: number | string;
+  stock: number;
+  is_active: boolean;
+}
+
+export interface CarWashOrderItem {
+  uuid: string;
+  item_type: string;
+  name: string;
+  quantity: number;
+  unit_price: number | string;
+  line_total: number | string;
+}
+
+export interface CarWashOrder {
+  uuid: string;
+  status: string;
+  customer_name?: string | null;
+  customer_phone?: string | null;
+  subtotal: number | string;
+  total: number | string;
+  payment_method?: string | null;
+  paid_at?: string | null;
+  notes?: string | null;
+  items?: CarWashOrderItem[];
+  location?: CarWashLocation | null;
+}
+
 export interface CarWashAppointment {
   uuid: string;
   customer_name: string;
@@ -144,6 +176,47 @@ export class CarWashService {
         headers: this.authHeaders(),
         params
       })
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  listProducts() {
+    return this.http
+      .get<{ status: number; message: string; data: CarWashProduct[] }>(`${this.baseUrl}/api/carwash/products`, {
+        headers: this.authHeaders()
+      })
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  listOrders(filters: { location_uuid?: string; status?: string; per_page?: number } = {}) {
+    let params = new HttpParams();
+    Object.entries(filters).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') {
+        params = params.set(k, String(v));
+      }
+    });
+    return this.http
+      .get<{ status: number; message: string; data: unknown }>(`${this.baseUrl}/api/carwash/orders`, {
+        headers: this.authHeaders(),
+        params
+      })
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  checkout(payload: {
+    location_uuid: string;
+    appointment_uuid?: string;
+    customer_name?: string;
+    customer_phone?: string;
+    payment_method: string;
+    notes?: string;
+    items: Array<{ item_type: 'service' | 'product'; uuid: string; quantity: number }>;
+  }) {
+    return this.http
+      .post<{ status: number; message: string; data: CarWashOrder }>(
+        `${this.baseUrl}/api/carwash/pos/checkout`,
+        payload,
+        { headers: this.authHeaders() }
+      )
       .pipe(catchError((e) => this.handleError(e)));
   }
 }
