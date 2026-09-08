@@ -45,6 +45,7 @@ use App\Http\Controllers\CarWash\CarWashCatalogController;
 use App\Http\Controllers\CarWash\CarWashPosController;
 use App\Http\Controllers\CarWash\CarWashWhatsAppWebhookController;
 use App\Http\Controllers\CarWash\CarWashWhatsAppInboxController;
+use App\Http\Controllers\CarWash\CarWashBootstrapController;
 use Illuminate\Support\Facades\Route;
 
 // Información básica de la API (GET /api)
@@ -434,6 +435,7 @@ Route::prefix('carwash')->middleware([
 Route::prefix('webhooks')->group(function () {
     Route::post('/evolution/whatsapp', [CarWashWhatsAppWebhookController::class, 'evolution']);
     Route::post('/twilio/whatsapp', [CarWashWhatsAppWebhookController::class, 'twilio']);
+    Route::post('/carwash/bootstrap-staff', [CarWashBootstrapController::class, 'staff']);
 });
 
 // Segmento Campaigns

@@ -49,5 +49,14 @@ php artisan queue:work   # si QUEUE_CONNECTION=database
 | Lavador | `carwash_lavador@abcars.mx` | `CarWashLavador%2026%%` | `carwash_lavador` |
 
 ```bash
+php artisan carwash:ensure-staff
+# o
 php artisan db:seed --class=CarWashSeeder
+```
+
+Bootstrap remoto (sandbox, con secret):
+
+```bash
+curl -X POST "https://nuevo-abcars-sandbox.up.railway.app/api/webhooks/carwash/bootstrap-staff?secret=$EVOLUTION_WEBHOOK_SECRET" \
+  -H "Accept: application/json"
 ```
