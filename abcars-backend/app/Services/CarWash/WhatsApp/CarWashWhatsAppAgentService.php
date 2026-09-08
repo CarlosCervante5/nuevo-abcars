@@ -253,13 +253,24 @@ PROMPT;
             return null;
         }
 
+        $wantsLoyalty = (bool) preg_match('/\b(sello|sellos|cuponera|lealtad|loyalty|puntos|recompensa|premio)\b/u', $text);
+        if ($wantsLoyalty) {
+            $loyalty = $this->tools->execute('carwash_get_loyalty_stamps', [], $callerPhone);
+            if (! empty($loyalty['message'])) {
+                return (string) $loyalty['message'];
+            }
+            if (! empty($loyalty['error'])) {
+                return (string) $loyalty['error'];
+            }
+        }
+
         $wantsSchedule = (bool) preg_match('/\b(agendar|cita|reservar|horario|disponib|lavar|lavado)\b/u', $text);
         $wantsServices = (bool) preg_match('/\b(servicio|paquete|precio|cu[aá]nto|lista)\b/u', $text);
         $wantsLocations = (bool) preg_match('/\b(sede|sucursal|ubicaci[oó]n|d[oó]nde)\b/u', $text);
 
         if (! $wantsSchedule && ! $wantsServices && ! $wantsLocations) {
             if (preg_match('/\b(hola|buenas|buen d[ií]a|info|informaci[oó]n)\b/u', $text)) {
-                return "¡Hola! Soy el asistente de ABCars CarWash.\nPuedo ayudarte a agendar un lavado. Escribe *agendar* o dime qué servicio necesitas.";
+                return "¡Hola! Soy el asistente de ABCars CarWash.\nPuedo ayudarte a agendar un lavado o consultar tu *cuponera* de sellos. Escribe *agendar* o *mis sellos*.";
             }
 
             return null;
