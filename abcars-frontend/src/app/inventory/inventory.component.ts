@@ -317,7 +317,7 @@ interface VehicleWithApiData extends Vehicle {
                 <p class="text-gray-600 text-lg">No se encontraron vehículos con los filtros seleccionados.</p>
                 <button (click)="clearFilters()" class="mt-4 text-yellow-500 hover:text-yellow-600 font-medium">Limpiar filtros</button>
               </div>
-              <div *ngIf="!isLoading && !loadError && filteredItems.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div *ngIf="!isLoading && !loadError && filteredItems.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 <ng-container *ngFor="let item of filteredItems">
                   <!-- Vehículo -->
                   <app-vehicle-card-tailwind *ngIf="isVehicle(item)" [vehicle]="item"></app-vehicle-card-tailwind>

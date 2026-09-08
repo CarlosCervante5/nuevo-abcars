@@ -125,9 +125,17 @@
   object-position: center bottom !important;
 }
 
-/* Estilo para tarjetas de vehículos - altura fija */
+/* Estilo para tarjetas de vehículos - altura fija y ancho completo del grid */
+:host ::ng-deep app-vehicle-card-tailwind {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
 :host ::ng-deep app-vehicle-card-tailwind .vehicle-card {
   height: 480px !important;
+  width: 100% !important;
+  max-width: none !important;
   display: flex !important;
   flex-direction: column !important;
 }
