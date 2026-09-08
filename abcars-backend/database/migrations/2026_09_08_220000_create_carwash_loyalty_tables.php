@@ -38,7 +38,8 @@ return new class extends Migration
                 $table->string('source', 32)->default('delivered');
                 $table->timestamps();
 
-                $table->index(['loyalty_card_id', 'cycle_number']);
+                // Nombre corto: el auto-generado supera el límite MySQL de 64 chars con DB_TABLE_PREFIX.
+                $table->index(['loyalty_card_id', 'cycle_number'], 'cw_loyalty_stamps_card_cycle_idx');
             });
         }
     }
