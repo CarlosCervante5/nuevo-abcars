@@ -4,6 +4,8 @@ namespace App\Http\Controllers\CarWash;
 
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Models\CarWash\CarWashAppointment;
+use Carbon\Carbon;
 use Database\Seeders\CarWashSeeder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -60,6 +62,86 @@ class CarWashBootstrapController extends Controller
             Log::error('CarWash bootstrap failed', ['message' => $e->getMessage()]);
 
             return ApiResponseHelper::apiError('Bootstrap CarWash falló', $e->getMessage(), 500, 'CARWASH_BOOTSTRAP');
+        }
+    }
+
+    /**
+     * Repara citas WhatsApp/admin con año viejo (p. ej. 2023) para que aparezcan en la agenda actual.
+     */
+    public function repairSchedules(Request $request)
+    {
+        if (! $this->authorizeBootstrap($request)) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        try {
+            $tz = 'America/Mexico_City';
+            $now = now($tz);
+            $fixed = [];
+
+            $rows = CarWashAppointment::query()
+                ->with('serviceType')
+                ->whereNotNull('scheduled_start_at')
+                ->where(function ($q) use ($now) {
+                    $q->whereYear('scheduled_start_at', '<', (int) $now->year)
+                        ->orWhere('scheduled_start_at', '<', $now->copy()->subDay());
+                })
+                ->whereNotIn('status', ['cancelled', 'delivered', 'no_show'])
+                ->limit(200)
+                ->get();
+
+            foreach ($rows as $row) {
+                $start = Carbon::parse($row->scheduled_start_at)->timezone($tz);
+                $from = $start->toIso8601String();
+
+                // Citas WhatsApp recientes con año viejo: casi siempre querían "hoy/mañana"
+                if (
+                    ($row->channel ?? '') === 'whatsapp'
+                    && $row->created_at
+                    && Carbon::parse($row->created_at)->gt(now()->subDays(14))
+                    && (int) $start->year < (int) $now->year
+                ) {
+                    $candidate = Carbon::parse($row->created_at)->timezone($tz)
+                        ->startOfDay()
+                        ->setTime($start->hour, $start->minute, 0);
+                    if ($candidate->lt($now->copy()->subHours(1))) {
+                        $candidate->addDay();
+                    }
+                } else {
+                    $candidate = $start->copy()->year($now->year);
+                    if ($candidate->lt($now->copy()->subHours(1))) {
+                        $candidate->addYear();
+                    }
+                    if ($candidate->gt($now->copy()->addMonths(6))) {
+                        $candidate = $now->copy()->addDay()->setTime($start->hour, $start->minute, 0);
+                    }
+                }
+
+                $duration = max(15, (int) ($row->serviceType?->duration_minutes ?? 60));
+                if ($row->scheduled_end_at && $row->scheduled_start_at) {
+                    $duration = max(15, Carbon::parse($row->scheduled_start_at)->diffInMinutes(Carbon::parse($row->scheduled_end_at)));
+                }
+
+                $row->scheduled_start_at = $candidate;
+                $row->scheduled_end_at = $candidate->copy()->addMinutes($duration);
+                $row->save();
+
+                $fixed[] = [
+                    'uuid' => $row->uuid,
+                    'customer_name' => $row->customer_name,
+                    'from' => $from,
+                    'to' => $candidate->toIso8601String(),
+                ];
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Citas CarWash reparadas', [
+                'fixed_count' => count($fixed),
+                'fixed' => $fixed,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('CarWash repairSchedules failed', ['message' => $e->getMessage()]);
+
+            return ApiResponseHelper::apiError('Repair CarWash falló', $e->getMessage(), 500, 'CARWASH_REPAIR_SCHEDULES');
         }
     }
 

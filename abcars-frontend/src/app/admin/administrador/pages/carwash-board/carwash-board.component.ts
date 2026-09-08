@@ -17,7 +17,7 @@ import {
   imports: [CommonModule, FormsModule, RouterModule, MatProgressSpinnerModule]
 })
 export class CarWashBoardComponent implements OnInit {
-  date = new Date().toISOString().slice(0, 10);
+  date = '';
   locationUuid = '';
   locations: CarWashLocation[] = [];
   columns: { key: string; label: string; items: CarWashAppointment[] }[] = [];
@@ -50,12 +50,21 @@ export class CarWashBoardComponent implements OnInit {
   constructor(private carwash: CarWashService) {}
 
   ngOnInit(): void {
+    this.date = this.localDateKey(new Date());
     this.carwash.listLocations().subscribe({
       next: (res) => {
         this.locations = res.data || [];
       }
     });
     this.load();
+  }
+
+  private localDateKey(d: Date): string {
+    const y = d.getFullYear();
+    const m = `${d.getMonth() + 1}`.padStart(2, '0');
+    const day = `${d.getDate()}`.padStart(2, '0');
+
+    return `${y}-${m}-${day}`;
   }
 
   load(): void {

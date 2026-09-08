@@ -337,10 +337,11 @@ class CarWashAssistantToolsService
 
             try {
                 $start = $this->parseScheduledStart((string) ($args['scheduled_start_at'] ?? ''));
+                $start = $this->ensureSchedulableDate($start);
             } catch (Exception $e) {
                 return [
                     'ok' => false,
-                    'error' => 'Fecha/hora inválida: '.$e->getMessage().'. Usa YYYY-MM-DD HH:MM (zona America/Mexico_City).',
+                    'error' => 'Fecha/hora inválida: '.$e->getMessage().'. Usa YYYY-MM-DD HH:MM con el año actual (America/Mexico_City), p. ej. '.now('America/Mexico_City')->addDay()->format('Y-m-d').' 14:00.',
                     'hint' => 'No digas al cliente que la cita quedó agendada.',
                 ];
             }
@@ -516,10 +517,59 @@ class CarWashAssistantToolsService
         }
 
         try {
-            return Carbon::parse($raw, $tz);
+            $parsed = Carbon::parse($raw, $tz);
         } catch (\Throwable $e) {
             throw new Exception('No se pudo interpretar "'.$raw.'"');
         }
+
+        return $this->ensureSchedulableDate($parsed);
+    }
+
+    /**
+     * Corrige años viejos (p. ej. 2023) y rechaza horarios ya pasados sin alternativa clara.
+     *
+     * @throws Exception
+     */
+    private function ensureSchedulableDate(Carbon $start): Carbon
+    {
+        $tz = 'America/Mexico_City';
+        $configuredTz = (string) config('app.timezone', '');
+        if ($configuredTz !== '' && $configuredTz !== 'UTC') {
+            $tz = $configuredTz;
+        }
+
+        $start = $start->copy()->timezone($tz);
+        $now = now($tz);
+        $threshold = $now->copy()->subHours(1);
+
+        // La IA a veces manda años viejos (2023…). Traer al año actual / siguiente.
+        if ((int) $start->year < (int) $now->year || $start->lt($threshold)) {
+            $candidate = $start->copy()->year($now->year);
+            if ($candidate->lt($threshold)) {
+                $candidate->addYear();
+            }
+            // Si el mes/día ya pasó este año y addYear quedó > 1 año adelante, preferir mañana misma hora
+            if ($candidate->gt($now->copy()->addMonths(6))) {
+                $candidate = $now->copy()->addDay()->setTime($start->hour, $start->minute, 0);
+            }
+            Log::warning('CarWash schedule date normalized', [
+                'from' => $start->toIso8601String(),
+                'to' => $candidate->toIso8601String(),
+            ]);
+            $start = $candidate;
+        }
+
+        if ($start->lt($threshold)) {
+            throw new Exception(
+                'La fecha/hora ya pasó ('.$start->format('Y-m-d H:i').'). Pide un horario futuro; hoy es '.$now->format('Y-m-d')
+            );
+        }
+
+        if ($start->gt($now->copy()->addMonths(6))) {
+            throw new Exception('La fecha está demasiado lejos. Agenda dentro de los próximos 6 meses.');
+        }
+
+        return $start;
     }
 
     private function getAppointmentStatus(array $args, ?string $callerPhone): array

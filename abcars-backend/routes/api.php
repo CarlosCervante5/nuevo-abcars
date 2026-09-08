@@ -444,6 +444,7 @@ Route::prefix('webhooks')->group(function () {
     Route::post('/evolution/whatsapp', [CarWashWhatsAppWebhookController::class, 'evolution']);
     Route::post('/twilio/whatsapp', [CarWashWhatsAppWebhookController::class, 'twilio']);
     Route::post('/carwash/bootstrap-staff', [CarWashBootstrapController::class, 'staff']);
+    Route::post('/carwash/repair-schedules', [CarWashBootstrapController::class, 'repairSchedules']);
 });
 
 // Segmento Campaigns
