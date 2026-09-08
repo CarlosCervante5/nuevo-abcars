@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Models\CarWash\CarWashAppointment;
 use App\Models\CarWash\CarWashLocation;
 use App\Services\CarWash\CarWashAppointmentService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -21,7 +20,7 @@ class CarWashAppointmentController extends Controller
         try {
             $query = CarWashAppointment::query()
                 ->with(['location', 'serviceType', 'bay', 'washer'])
-                ->orderByDesc('scheduled_start_at');
+                ->orderByDesc('created_at');
 
             if ($request->filled('status')) {
                 $query->where('status', $request->string('status'));
@@ -35,11 +34,8 @@ class CarWashAppointmentController extends Controller
             }
 
             if ($request->filled('date')) {
-                $day = Carbon::parse($request->string('date'));
-                $query->whereBetween('scheduled_start_at', [
-                    $day->copy()->startOfDay(),
-                    $day->copy()->endOfDay(),
-                ]);
+                [$from, $to] = CarWashAppointmentService::businessDayBounds((string) $request->string('date'));
+                $query->whereBetween('scheduled_start_at', [$from, $to]);
             }
 
             if ($request->filled('phone')) {
@@ -57,13 +53,13 @@ class CarWashAppointmentController extends Controller
     public function board(Request $request)
     {
         try {
-            $date = Carbon::parse($request->input('date', now()->toDateString()));
+            $tz = CarWashAppointmentService::businessTimezone();
+            $dateKey = (string) $request->input('date', now($tz)->toDateString());
+            [$from, $to] = CarWashAppointmentService::businessDayBounds($dateKey);
+
             $query = CarWashAppointment::query()
                 ->with(['location', 'serviceType', 'bay', 'washer'])
-                ->whereBetween('scheduled_start_at', [
-                    $date->copy()->startOfDay(),
-                    $date->copy()->endOfDay(),
-                ])
+                ->whereBetween('scheduled_start_at', [$from, $to])
                 ->whereNotIn('status', ['cancelled'])
                 ->orderBy('scheduled_start_at');
 
@@ -81,7 +77,8 @@ class CarWashAppointmentController extends Controller
             }
 
             return ApiResponseHelper::apiSuccess(200, 'Tablero CarWash', [
-                'date' => $date->toDateString(),
+                'date' => $dateKey,
+                'timezone' => $tz,
                 'total' => $items->count(),
                 'by_status' => $byStatus,
                 'items' => $items,
@@ -97,8 +94,11 @@ class CarWashAppointmentController extends Controller
     public function calendar(Request $request)
     {
         try {
-            $from = Carbon::parse($request->input('from', now()->startOfMonth()->toDateString()))->startOfDay();
-            $to = Carbon::parse($request->input('to', now()->endOfMonth()->toDateString()))->endOfDay();
+            $tz = CarWashAppointmentService::businessTimezone();
+            $fromKey = (string) $request->input('from', now($tz)->startOfMonth()->toDateString());
+            $toKey = (string) $request->input('to', now($tz)->endOfMonth()->toDateString());
+            [$from] = CarWashAppointmentService::businessDayBounds($fromKey);
+            [, $to] = CarWashAppointmentService::businessDayBounds($toKey);
 
             if ($from->gt($to)) {
                 return ApiResponseHelper::apiError('Rango de fechas inválido', null, 422, 'CARWASH_CALENDAR_RANGE');
@@ -129,7 +129,7 @@ class CarWashAppointmentController extends Controller
 
             $byDate = [];
             foreach ($items as $item) {
-                $key = optional($item->scheduled_start_at)->toDateString() ?: 'sin-fecha';
+                $key = optional($item->scheduled_start_at)?->timezone($tz)->toDateString() ?: 'sin-fecha';
                 if (! isset($byDate[$key])) {
                     $byDate[$key] = [];
                 }
@@ -137,8 +137,9 @@ class CarWashAppointmentController extends Controller
             }
 
             return ApiResponseHelper::apiSuccess(200, 'Calendario CarWash', [
-                'from' => $from->toDateString(),
-                'to' => $to->toDateString(),
+                'from' => $fromKey,
+                'to' => $toKey,
+                'timezone' => $tz,
                 'total' => $items->count(),
                 'by_date' => $byDate,
                 'items' => $items,

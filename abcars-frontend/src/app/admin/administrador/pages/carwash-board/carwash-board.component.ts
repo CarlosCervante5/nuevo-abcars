@@ -59,6 +59,18 @@ export class CarWashBoardComponent implements OnInit {
     this.load();
   }
 
+  goToday(): void {
+    this.date = this.localDateKey(new Date());
+    this.load();
+  }
+
+  goTomorrow(): void {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    this.date = this.localDateKey(d);
+    this.load();
+  }
+
   private localDateKey(d: Date): string {
     const y = d.getFullYear();
     const m = `${d.getMonth() + 1}`.padStart(2, '0');

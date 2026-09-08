@@ -107,9 +107,28 @@
       <button class="cw-btn cw-btn--primary" type="submit" [disabled]="saving">
         {{ saving ? 'Guardando…' : (isInternal ? 'Programar entrega Ventas' : 'Crear cita pública') }}
       </button>
+      <a class="cw-btn cw-btn--ghost" routerLink="/admin/administrator/carwash/board">Ir al tablero</a>
     </div>
   </form>
 
   <p class="cw-alert cw-alert--ok" *ngIf="success">{{ success }}</p>
   <p class="cw-alert cw-alert--error" *ngIf="error">{{ error }}</p>
+
+  <section class="cw-panel cw-recent">
+    <div class="cw-panel-head">
+      <h2>Últimas agendas guardadas</h2>
+      <button type="button" class="cw-btn cw-btn--ghost" (click)="loadRecent()" [disabled]="loadingRecent">
+        {{ loadingRecent ? 'Cargando…' : 'Actualizar' }}
+      </button>
+    </div>
+    <p class="cw-muted" *ngIf="!loadingRecent && recent.length === 0">Aún no hay citas.</p>
+    <ul class="cw-recent-list" *ngIf="recent.length">
+      <li *ngFor="let item of recent">
+        <strong>{{ item.customer_name }}</strong>
+        <span>{{ item.scheduled_start_at | date: 'short' }}</span>
+        <span>{{ item.status }} · {{ item.channel || '—' }}</span>
+        <span>{{ item.service_type?.name || 'Servicio' }}</span>
+      </li>
+    </ul>
+  </section>
 </div>

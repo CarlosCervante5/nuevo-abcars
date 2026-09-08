@@ -1,10 +1,12 @@
 <div class="cw-root adm-shell-page">
   <div class="cw-toolbar">
-    <p class="cw-toolbar-meta">Tablero · {{ total }} en agenda</p>
+    <p class="cw-toolbar-meta">Tablero · {{ total }} en agenda · zona México</p>
     <label class="cw-field">
       <span>Fecha</span>
       <input type="date" [(ngModel)]="date" (change)="load()" />
     </label>
+    <button type="button" class="cw-btn cw-btn--ghost" (click)="goToday()">Hoy</button>
+    <button type="button" class="cw-btn cw-btn--ghost" (click)="goTomorrow()">Mañana</button>
     <label class="cw-field">
       <span>Sede</span>
       <select [(ngModel)]="locationUuid" (change)="load()">
@@ -14,6 +16,9 @@
     </label>
     <button type="button" class="cw-btn cw-btn--primary" (click)="load()">Actualizar</button>
   </div>
+  <p class="cw-hint" *ngIf="!loading && !error && total === 0">
+    Sin citas este día. Las agendas de WhatsApp por “mañana” aparecen al cambiar la fecha (botón Mañana).
+  </p>
 
   <div class="cw-loading" *ngIf="loading">
     <mat-spinner diameter="40"></mat-spinner>
@@ -38,7 +43,7 @@
           </strong>
         </p>
         <p class="cw-card-service">{{ item.service_type?.name || 'Servicio' }}</p>
-        <p class="cw-card-time">{{ item.scheduled_start_at | date: 'shortTime' }}</p>
+        <p class="cw-card-time">{{ item.scheduled_start_at | date: 'short' }}</p>
         <button
           type="button"
           class="cw-btn cw-btn--small cw-btn--ghost"

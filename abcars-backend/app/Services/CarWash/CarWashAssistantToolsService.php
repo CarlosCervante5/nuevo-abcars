@@ -396,7 +396,8 @@ class CarWashAssistantToolsService
                 'service_type_uuid' => $service->uuid,
                 'customer_name' => $customerName,
                 'customer_phone' => $phone,
-                'scheduled_start_at' => $start->toDateTimeString(),
+                // ISO con offset MX: evita doble conversión en AppointmentService.
+                'scheduled_start_at' => $start->toIso8601String(),
                 'vehicle_plates' => $args['vehicle_plates'] ?? null,
                 'vehicle_brand' => $args['vehicle_brand'] ?? null,
                 'vehicle_model' => $args['vehicle_model'] ?? null,
@@ -406,10 +407,12 @@ class CarWashAssistantToolsService
                 'status' => 'scheduled',
             ], null);
 
+            $bizTz = CarWashAppointmentService::businessTimezone();
             Log::info('CarWash WhatsApp cita creada', [
                 'uuid' => $appointment->uuid,
                 'phone' => $phone,
                 'start' => optional($appointment->scheduled_start_at)->toIso8601String(),
+                'start_local' => optional($appointment->scheduled_start_at)?->timezone($bizTz)->format('Y-m-d H:i'),
             ]);
 
             return [
@@ -418,7 +421,7 @@ class CarWashAssistantToolsService
                     'uuid' => $appointment->uuid,
                     'status' => $appointment->status,
                     'scheduled_start_at' => optional($appointment->scheduled_start_at)->toIso8601String(),
-                    'scheduled_local' => optional($appointment->scheduled_start_at)?->timezone(config('app.timezone'))->format('Y-m-d H:i'),
+                    'scheduled_local' => optional($appointment->scheduled_start_at)?->timezone($bizTz)->format('Y-m-d H:i'),
                     'service' => $appointment->serviceType?->name,
                     'location' => $appointment->location?->name,
                     'quoted_price' => $appointment->quoted_price,

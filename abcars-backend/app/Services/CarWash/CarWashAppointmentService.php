@@ -32,16 +32,10 @@ class CarWashAppointmentService
             throw new Exception('Sede CarWash no válida');
         }
 
-        $tz = 'America/Mexico_City';
-        $configuredTz = (string) config('app.timezone', '');
-        if ($configuredTz !== '' && $configuredTz !== 'UTC') {
-            $tz = $configuredTz;
-        }
-
-        // Interpretar hora de negocio en México y persistir en timezone de la app.
-        $start = Carbon::parse($data['scheduled_start_at'], $tz)->timezone(config('app.timezone', 'UTC'));
+        // ISO con Z/offset = instante absoluto; YYYY-MM-DD HH:MM naive = hora de negocio MX.
+        $start = $this->parseIncomingSchedule($data['scheduled_start_at']);
         $end = isset($data['scheduled_end_at'])
-            ? Carbon::parse($data['scheduled_end_at'], $tz)->timezone(config('app.timezone', 'UTC'))
+            ? $this->parseIncomingSchedule($data['scheduled_end_at'])
             : $start->copy()->addMinutes((int) $service->duration_minutes);
 
         $bayId = null;
@@ -110,6 +104,60 @@ class CarWashAppointmentService
 
             return $appointment->fresh(['location', 'serviceType', 'bay', 'washer']);
         });
+    }
+
+    /**
+     * Zona horaria de negocio CarWash (agenda / WhatsApp / tablero).
+     */
+    public static function businessTimezone(): string
+    {
+        $configuredTz = (string) config('app.timezone', '');
+        if ($configuredTz !== '' && $configuredTz !== 'UTC') {
+            return $configuredTz;
+        }
+
+        return 'America/Mexico_City';
+    }
+
+    /**
+     * Límites UTC de un día calendario en zona de negocio (para filtros board/list/calendar).
+     *
+     * @return array{0: Carbon, 1: Carbon}
+     */
+    public static function businessDayBounds(string $date): array
+    {
+        $tz = self::businessTimezone();
+        $day = Carbon::parse($date, $tz)->startOfDay();
+
+        return [
+            $day->copy()->utc(),
+            $day->copy()->endOfDay()->utc(),
+        ];
+    }
+
+    /**
+     * @param  mixed  $value  Carbon, ISO-8601 o datetime naive (México)
+     */
+    public function parseIncomingSchedule(mixed $value): Carbon
+    {
+        $appTz = (string) config('app.timezone', 'UTC');
+        $bizTz = self::businessTimezone();
+
+        if ($value instanceof Carbon) {
+            return $value->copy()->timezone($appTz);
+        }
+
+        $raw = trim((string) $value);
+        if ($raw === '') {
+            throw new Exception('Fecha/hora vacía');
+        }
+
+        // Instantes absolutos: no reinterpretar como México.
+        if (preg_match('/(?:Z|[+-]\d{2}:?\d{2})$/i', $raw) || preg_match('/^\d{4}-\d{2}-\d{2}T/', $raw)) {
+            return Carbon::parse($raw)->timezone($appTz);
+        }
+
+        return Carbon::parse($raw, $bizTz)->timezone($appTz);
     }
 
     /**

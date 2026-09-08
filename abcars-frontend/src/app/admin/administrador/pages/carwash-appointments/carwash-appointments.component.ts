@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import {
+  CarWashAppointment,
   CarWashLocation,
   CarWashService,
   CarWashServiceType
@@ -18,7 +19,9 @@ import {
 export class CarWashAppointmentsComponent implements OnInit {
   locations: CarWashLocation[] = [];
   services: CarWashServiceType[] = [];
+  recent: CarWashAppointment[] = [];
   loading = false;
+  loadingRecent = false;
   saving = false;
   error: string | null = null;
   success: string | null = null;
@@ -43,10 +46,7 @@ export class CarWashAppointmentsComponent implements OnInit {
   constructor(private carwash: CarWashService) {}
 
   ngOnInit(): void {
-    const now = new Date();
-    now.setMinutes(0, 0, 0);
-    now.setHours(now.getHours() + 1);
-    this.form.scheduled_start_at = now.toISOString().slice(0, 16);
+    this.form.scheduled_start_at = this.localDateTimeValue(new Date(Date.now() + 60 * 60 * 1000));
 
     this.carwash.listLocations().subscribe({
       next: (res) => {
@@ -64,6 +64,7 @@ export class CarWashAppointmentsComponent implements OnInit {
         }
       }
     });
+    this.loadRecent();
   }
 
   get isInternal(): boolean {
@@ -74,6 +75,20 @@ export class CarWashAppointmentsComponent implements OnInit {
     if (this.isInternal && !this.form.customer_name) {
       this.form.customer_name = 'Entrega Ventas';
     }
+  }
+
+  loadRecent(): void {
+    this.loadingRecent = true;
+    this.carwash.listAppointments({ per_page: 12 }).subscribe({
+      next: (res) => {
+        const page = res.data as { data?: CarWashAppointment[] } | CarWashAppointment[];
+        this.recent = Array.isArray(page) ? page : page?.data || [];
+        this.loadingRecent = false;
+      },
+      error: () => {
+        this.loadingRecent = false;
+      }
+    });
   }
 
   submit(): void {
@@ -108,11 +123,15 @@ export class CarWashAppointmentsComponent implements OnInit {
     };
 
     this.carwash.createAppointment(payload).subscribe({
-      next: () => {
+      next: (res) => {
         this.saving = false;
+        const created = (res as { data?: CarWashAppointment })?.data;
+        const when = created?.scheduled_start_at
+          ? new Date(created.scheduled_start_at).toLocaleString('es-MX')
+          : this.form.scheduled_start_at;
         this.success = this.isInternal
-          ? 'Entrega Ventas agendada. VIN pendiente de validar en el tablero.'
-          : 'Cita pública creada correctamente';
+          ? `Entrega Ventas agendada para ${when}. Revisa el tablero en esa fecha.`
+          : `Cita creada para ${when}. Si es “mañana”, ábrela en el tablero con esa fecha.`;
         this.form.customer_name = this.isInternal ? 'Entrega Ventas' : '';
         this.form.customer_phone = '';
         this.form.vehicle_plates = '';
@@ -123,11 +142,18 @@ export class CarWashAppointmentsComponent implements OnInit {
         this.form.vehicle_condition = '';
         this.form.requested_by_name = '';
         this.form.notes = '';
+        this.loadRecent();
       },
       error: (err) => {
         this.saving = false;
         this.error = err?.error?.message || 'No se pudo crear la cita';
       }
     });
+  }
+
+  /** Valor local para input datetime-local (evita desfase de toISOString). */
+  private localDateTimeValue(d: Date): string {
+    const pad = (n: number) => `${n}`.padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 }
