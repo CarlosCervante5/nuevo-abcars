@@ -96,20 +96,22 @@
 
 .valuation-value-item .value-copy {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 400;
-  line-height: 1.45;
+  line-height: 1.4;
   color: var(--val-ink);
-  max-width: 16rem;
+  max-width: 18.5rem;
 }
 
 .valuation-value-item .value-lead {
   font-weight: 700;
   display: block;
+  white-space: nowrap;
 }
 
 .valuation-value-item .value-copy--inline .value-lead {
   display: inline;
+  white-space: normal;
 }
 
 .valuation-value-item .value-rest {
@@ -267,15 +269,18 @@
 
 .modality-subtitle {
   margin: 0 0 0.75rem;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   font-weight: 400;
-  line-height: 1.45;
+  line-height: 1.35;
   color: var(--val-muted);
+  white-space: nowrap;
 }
 
 .modality-list {
-  margin: 0;
-  padding-left: 1.15rem;
+  margin: 0 !important;
+  padding-left: 1.35rem !important;
+  list-style-type: disc !important;
+  list-style-position: outside !important;
   color: var(--val-muted);
   font-size: 0.9rem;
   line-height: 1.55;
@@ -283,6 +288,8 @@
 
 .modality-list li {
   margin-bottom: 0.35rem;
+  display: list-item !important;
+  list-style-type: disc !important;
 }
 
 .valuation-contact-fields {
