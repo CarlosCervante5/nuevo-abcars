@@ -1,111 +1,192 @@
 <div class="cw-root adm-shell-page">
+  <div class="cw-toolbar">
+    <div class="cw-toolbar-title">
+      <p class="cw-toolbar-meta">POS CarWash</p>
+      <span class="cw-chip-meta">{{ cartCount }} ítems · ${{ subtotal | number: '1.2-2' }}</span>
+    </div>
+    <label class="cw-field cw-field--inline">
+      <span>Sede</span>
+      <select [(ngModel)]="locationUuid" name="location" (change)="onLocationChange()" [disabled]="loading">
+        <option *ngFor="let loc of locations" [value]="loc.uuid">{{ loc.name }}</option>
+      </select>
+    </label>
+    <label class="cw-field cw-field--inline cw-field--grow">
+      <span>Cita del día</span>
+      <select [(ngModel)]="appointmentUuid" name="appointment" (change)="onAppointmentPick()" [disabled]="loading">
+        <option value="">Walk-in / sin cita</option>
+        <option *ngFor="let a of todaysAppointments" [value]="a.uuid">
+          {{ a.customer_name }} · {{ a.vehicle_plates || 's/p' }} · {{ a.status }}
+        </option>
+      </select>
+    </label>
+  </div>
+
   <div class="cw-loading" *ngIf="loading"><mat-spinner diameter="40"></mat-spinner></div>
 
   <div class="cw-pos" *ngIf="!loading">
-    <section class="cw-panel cw-pos-catalog">
-      <div class="cw-row">
-        <label class="cw-field">
-          <span>Sede</span>
-          <select [(ngModel)]="locationUuid" name="location" (change)="onLocationChange()">
-            <option *ngFor="let loc of locations" [value]="loc.uuid">{{ loc.name }}</option>
-          </select>
+    <section class="cw-catalog">
+      <div class="cw-catalog-toolbar">
+        <label class="cw-field cw-field--search">
+          <span>Buscar en catálogo</span>
+          <input
+            [(ngModel)]="catalogQuery"
+            name="catalogQuery"
+            placeholder="Servicio o amenidad…"
+            autocomplete="off"
+          />
         </label>
-        <label class="cw-field">
-          <span>Cita del día (opcional)</span>
-          <select [(ngModel)]="appointmentUuid" name="appointment" (change)="onAppointmentPick()">
-            <option value="">Walk-in / sin cita</option>
-            <option *ngFor="let a of todaysAppointments" [value]="a.uuid">
-              {{ a.customer_name }} · {{ a.vehicle_plates || 's/p' }} · {{ a.status }}
-            </option>
-          </select>
-        </label>
+        <div class="cw-tabs" role="tablist">
+          <button
+            type="button"
+            class="cw-tab"
+            [class.active]="catalogTab === 'services'"
+            (click)="catalogTab = 'services'"
+          >
+            Servicios
+            <em>{{ filteredServices.length }}</em>
+          </button>
+          <button
+            type="button"
+            class="cw-tab"
+            [class.active]="catalogTab === 'products'"
+            (click)="catalogTab = 'products'"
+          >
+            Amenidades
+            <em>{{ filteredProducts.length }}</em>
+          </button>
+        </div>
       </div>
 
-      <h2 class="cw-section-title">Servicios</h2>
-      <div class="cw-chips">
-        <button type="button" class="cw-chip" *ngFor="let s of services" (click)="addService(s)">
-          <strong>{{ s.name }}</strong>
-          <span>${{ s.price }} · {{ s.duration_minutes }} min</span>
-        </button>
-      </div>
-
-      <h2 class="cw-section-title">Amenidades</h2>
-      <div class="cw-chips">
+      <div class="cw-grid" *ngIf="catalogTab === 'services'">
         <button
           type="button"
-          class="cw-chip"
-          *ngFor="let p of products"
+          class="cw-card"
+          *ngFor="let s of filteredServices"
+          (click)="addService(s)"
+        >
+          <span class="cw-card-tag">Servicio</span>
+          <strong class="cw-card-name">{{ s.name }}</strong>
+          <span class="cw-card-meta">{{ s.duration_minutes || 0 }} min</span>
+          <span class="cw-card-price">${{ s.price | number: '1.2-2' }}</span>
+          <span class="cw-card-cta">+ Agregar</span>
+        </button>
+        <div class="cw-empty-block" *ngIf="!filteredServices.length">
+          <p class="cw-empty-title">Sin servicios</p>
+          <p class="cw-empty-copy">Prueba otra búsqueda o revisa el catálogo.</p>
+        </div>
+      </div>
+
+      <div class="cw-grid" *ngIf="catalogTab === 'products'">
+        <button
+          type="button"
+          class="cw-card"
+          *ngFor="let p of filteredProducts"
           (click)="addProduct(p)"
           [disabled]="(p.stock || 0) < 1"
+          [class.cw-card--disabled]="(p.stock || 0) < 1"
         >
-          <strong>{{ p.name }}</strong>
-          <span>${{ p.price }} · stock {{ p.stock }}</span>
+          <span class="cw-card-tag cw-card-tag--product">Amenidad</span>
+          <strong class="cw-card-name">{{ p.name }}</strong>
+          <span class="cw-card-meta" [class.cw-stock-low]="(p.stock || 0) > 0 && (p.stock || 0) <= 3">
+            Stock {{ p.stock || 0 }}
+          </span>
+          <span class="cw-card-price">${{ p.price | number: '1.2-2' }}</span>
+          <span class="cw-card-cta">{{ (p.stock || 0) < 1 ? 'Agotado' : '+ Agregar' }}</span>
         </button>
-        <p class="cw-empty" *ngIf="!products.length">Sin productos. Ejecuta el seeder CarWash.</p>
+        <div class="cw-empty-block" *ngIf="!filteredProducts.length">
+          <p class="cw-empty-title">Sin amenidades</p>
+          <p class="cw-empty-copy">Ejecuta el seeder CarWash o ajusta la búsqueda.</p>
+        </div>
       </div>
     </section>
 
-    <aside class="cw-ticket cw-panel">
-      <h2 class="cw-section-title">Ticket</h2>
+    <aside class="cw-ticket">
+      <header class="cw-ticket-head">
+        <div>
+          <h2>Ticket</h2>
+          <p class="cw-ticket-sub">{{ appointmentUuid ? 'Con cita' : 'Walk-in' }}</p>
+        </div>
+        <button type="button" class="cw-btn cw-btn--ghost cw-btn--small" (click)="clearTicket()" [disabled]="checkingOut">
+          Limpiar
+        </button>
+      </header>
 
-      <label class="cw-field">
-        <span>Cliente</span>
-        <input [(ngModel)]="customerName" name="customer_name" />
-      </label>
-      <label class="cw-field">
-        <span>Teléfono</span>
-        <input [(ngModel)]="customerPhone" name="customer_phone" />
-      </label>
+      <div class="cw-ticket-customer">
+        <label class="cw-field">
+          <span>Cliente</span>
+          <input [(ngModel)]="customerName" name="customer_name" placeholder="Nombre" />
+        </label>
+        <label class="cw-field">
+          <span>Teléfono</span>
+          <input [(ngModel)]="customerPhone" name="customer_phone" placeholder="10 dígitos" />
+        </label>
+      </div>
 
-      <ul class="cw-lines" *ngIf="cart.length; else emptyCart">
-        <li *ngFor="let line of cart">
-          <div>
+      <div class="cw-ticket-lines" *ngIf="cart.length; else emptyCart">
+        <article class="cw-line" *ngFor="let line of cart">
+          <div class="cw-line-main">
             <strong>{{ line.name }}</strong>
-            <small>{{ line.item_type }} · ${{ line.unit_price }}</small>
+            <small>{{ line.item_type === 'service' ? 'Servicio' : 'Amenidad' }} · ${{ line.unit_price | number: '1.2-2' }}</small>
           </div>
-          <div class="cw-qty">
-            <button type="button" class="cw-qty-btn" (click)="bumpQty(line, -1)">−</button>
-            <span>{{ line.quantity }}</span>
-            <button type="button" class="cw-qty-btn" (click)="bumpQty(line, 1)">+</button>
-            <button type="button" class="cw-link-danger" (click)="removeLine(line)">Quitar</button>
+          <div class="cw-line-controls">
+            <div class="cw-qty">
+              <button type="button" class="cw-qty-btn" (click)="bumpQty(line, -1)" aria-label="Menos">−</button>
+              <span>{{ line.quantity }}</span>
+              <button type="button" class="cw-qty-btn" (click)="bumpQty(line, 1)" aria-label="Más">+</button>
+            </div>
+            <strong class="cw-line-total">${{ line.unit_price * line.quantity | number: '1.2-2' }}</strong>
+            <button type="button" class="cw-remove" (click)="removeLine(line)" aria-label="Quitar">×</button>
           </div>
-          <div class="cw-line-total">${{ line.unit_price * line.quantity | number: '1.2-2' }}</div>
-        </li>
-      </ul>
+        </article>
+      </div>
       <ng-template #emptyCart>
-        <p class="cw-empty">Agrega servicios o amenidades.</p>
+        <div class="cw-empty-block cw-empty-block--ticket">
+          <p class="cw-empty-title">Ticket vacío</p>
+          <p class="cw-empty-copy">Toca un servicio o amenidad para agregarlo.</p>
+        </div>
       </ng-template>
 
-      <label class="cw-field">
-        <span>Pago</span>
-        <select [(ngModel)]="paymentMethod" name="payment_method">
-          <option value="cash">Efectivo</option>
-          <option value="card">Tarjeta</option>
-          <option value="transfer">Transferencia</option>
-          <option value="mixed">Mixto</option>
-        </select>
-      </label>
+      <div class="cw-pay">
+        <span class="cw-pay-label">Método de pago</span>
+        <div class="cw-pay-options">
+          <button
+            type="button"
+            class="cw-pay-opt"
+            *ngFor="let opt of paymentOptions"
+            [class.active]="paymentMethod === opt.value"
+            (click)="paymentMethod = opt.value"
+          >
+            {{ opt.label }}
+          </button>
+        </div>
+      </div>
 
       <label class="cw-field">
         <span>Notas</span>
-        <textarea rows="2" [(ngModel)]="notes" name="notes"></textarea>
+        <textarea rows="2" [(ngModel)]="notes" name="notes" placeholder="Opcional"></textarea>
       </label>
 
       <div class="cw-total">
-        <span>Total</span>
+        <div>
+          <span>Total a cobrar</span>
+          <small>{{ cartCount }} línea(s)</small>
+        </div>
         <strong>${{ subtotal | number: '1.2-2' }}</strong>
       </div>
 
-      <div class="cw-actions">
-        <button type="button" class="cw-btn cw-btn--ghost" (click)="clearTicket()" [disabled]="checkingOut">Limpiar</button>
-        <button type="button" class="cw-btn cw-btn--primary" (click)="checkout()" [disabled]="checkingOut || !cart.length">
-          {{ checkingOut ? 'Cobrando…' : 'Cobrar' }}
-        </button>
-      </div>
+      <button
+        type="button"
+        class="cw-btn cw-btn--primary cw-btn--block"
+        (click)="checkout()"
+        [disabled]="checkingOut || !cart.length"
+      >
+        {{ checkingOut ? 'Cobrando…' : 'Cobrar ahora' }}
+      </button>
 
       <p class="cw-alert cw-alert--error" *ngIf="error">{{ error }}</p>
       <p class="cw-alert cw-alert--ok" *ngIf="lastOrder">
-        Cobro OK · ticket {{ lastOrder.uuid | slice: 0:8 }} · ${{ lastOrder.total }} ({{ lastOrder.payment_method }})
+        Cobro OK · #{{ lastOrder.uuid | slice: 0:8 }} · ${{ lastOrder.total | number: '1.2-2' }}
+        ({{ paymentLabel(lastOrder.payment_method) }})
       </p>
     </aside>
   </div>

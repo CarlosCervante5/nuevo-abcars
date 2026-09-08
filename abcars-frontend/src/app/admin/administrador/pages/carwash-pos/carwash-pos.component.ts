@@ -39,12 +39,21 @@ export class CarWashPosComponent implements OnInit {
   customerPhone = '';
   paymentMethod: 'cash' | 'card' | 'transfer' | 'mixed' = 'cash';
   notes = '';
+  catalogQuery = '';
+  catalogTab: 'services' | 'products' = 'services';
 
   cart: CartLine[] = [];
   loading = false;
   checkingOut = false;
   error: string | null = null;
   lastOrder: CarWashOrder | null = null;
+
+  readonly paymentOptions: { value: 'cash' | 'card' | 'transfer' | 'mixed'; label: string }[] = [
+    { value: 'cash', label: 'Efectivo' },
+    { value: 'card', label: 'Tarjeta' },
+    { value: 'transfer', label: 'Transfer' },
+    { value: 'mixed', label: 'Mixto' }
+  ];
 
   constructor(private carwash: CarWashService) {}
 
@@ -74,6 +83,34 @@ export class CarWashPosComponent implements OnInit {
     });
   }
 
+  get filteredServices(): CarWashServiceType[] {
+    const q = this.catalogQuery.trim().toLowerCase();
+    if (!q) return this.services;
+    return this.services.filter(
+      (s) =>
+        (s.name || '').toLowerCase().includes(q) ||
+        (s.code || '').toLowerCase().includes(q)
+    );
+  }
+
+  get filteredProducts(): CarWashProduct[] {
+    const q = this.catalogQuery.trim().toLowerCase();
+    if (!q) return this.products;
+    return this.products.filter(
+      (p) =>
+        (p.name || '').toLowerCase().includes(q) ||
+        (p.sku || '').toLowerCase().includes(q)
+    );
+  }
+
+  get cartCount(): number {
+    return this.cart.reduce((sum, l) => sum + l.quantity, 0);
+  }
+
+  get subtotal(): number {
+    return this.cart.reduce((sum, l) => sum + l.unit_price * l.quantity, 0);
+  }
+
   onLocationChange(): void {
     this.appointmentUuid = '';
     this.reloadDayAppointments();
@@ -81,7 +118,7 @@ export class CarWashPosComponent implements OnInit {
 
   reloadDayAppointments(): void {
     if (!this.locationUuid) return;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = this.localDateKey(new Date());
     this.carwash.listAppointments({ date: today, location_uuid: this.locationUuid, per_page: 50 }).subscribe({
       next: (res) => {
         const data = res.data as { data?: CarWashAppointment[] } | CarWashAppointment[];
@@ -111,6 +148,7 @@ export class CarWashPosComponent implements OnInit {
   }
 
   addProduct(product: CarWashProduct): void {
+    if ((product.stock || 0) < 1) return;
     this.addLine({
       item_type: 'product',
       uuid: product.uuid,
@@ -130,15 +168,16 @@ export class CarWashPosComponent implements OnInit {
   }
 
   bumpQty(line: CartLine, delta: number): void {
-    line.quantity = Math.max(1, line.quantity + delta);
+    const next = line.quantity + delta;
+    if (next < 1) {
+      this.removeLine(line);
+      return;
+    }
+    line.quantity = next;
   }
 
   removeLine(line: CartLine): void {
     this.cart = this.cart.filter((c) => !(c.item_type === line.item_type && c.uuid === line.uuid));
-  }
-
-  get subtotal(): number {
-    return this.cart.reduce((sum, l) => sum + l.unit_price * l.quantity, 0);
   }
 
   clearTicket(): void {
@@ -149,6 +188,11 @@ export class CarWashPosComponent implements OnInit {
     this.notes = '';
     this.paymentMethod = 'cash';
     this.error = null;
+  }
+
+  paymentLabel(method: string | null | undefined): string {
+    const found = this.paymentOptions.find((o) => o.value === method);
+    return found?.label || method || '—';
   }
 
   checkout(): void {
@@ -185,5 +229,12 @@ export class CarWashPosComponent implements OnInit {
           this.error = err?.error?.message || 'No se pudo cobrar';
         }
       });
+  }
+
+  private localDateKey(d: Date): string {
+    const y = d.getFullYear();
+    const m = `${d.getMonth() + 1}`.padStart(2, '0');
+    const day = `${d.getDate()}`.padStart(2, '0');
+    return `${y}-${m}-${day}`;
   }
 }
