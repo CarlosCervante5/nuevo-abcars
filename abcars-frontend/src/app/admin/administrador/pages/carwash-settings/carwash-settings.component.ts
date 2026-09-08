@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -11,15 +11,22 @@ import { CarWashService, CarWashWhatsAppSettings } from '@services/carwash.servi
   styleUrls: ['./carwash-settings.component.css'],
   imports: [CommonModule, FormsModule, MatProgressSpinnerModule]
 })
-export class CarWashSettingsComponent implements OnInit {
+export class CarWashSettingsComponent implements OnInit, OnDestroy {
   loading = false;
   saving = false;
   checking = false;
+  loadingQr = false;
   error: string | null = null;
   success: string | null = null;
   settings: CarWashWhatsAppSettings | null = null;
   connectionState: string | null = null;
   connectionError: string | null = null;
+  qrBase64: string | null = null;
+  pairingCode: string | null = null;
+  qrError: string | null = null;
+  qrHint: string | null = null;
+
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
 
   form = {
     whatsapp_provider: 'evolution' as 'evolution' | 'twilio',
@@ -51,6 +58,14 @@ export class CarWashSettingsComponent implements OnInit {
     this.load();
   }
 
+  ngOnDestroy(): void {
+    this.stopPolling();
+  }
+
+  get isConnected(): boolean {
+    return (this.connectionState || '').toLowerCase() === 'open';
+  }
+
   load(): void {
     this.loading = true;
     this.error = null;
@@ -61,6 +76,9 @@ export class CarWashSettingsComponent implements OnInit {
         this.connectionState = res.data.connection?.state || null;
         this.connectionError = res.data.connection?.error || null;
         this.loading = false;
+        if (this.form.whatsapp_provider === 'evolution' && !this.isConnected) {
+          this.loadQr(false);
+        }
       },
       error: (err) => {
         this.loading = false;
@@ -104,12 +122,67 @@ export class CarWashSettingsComponent implements OnInit {
         this.checking = false;
         this.connectionState = res.data.state || null;
         this.connectionError = res.data.ok ? null : res.data.error || 'Sin respuesta';
+        if (this.isConnected) {
+          this.qrBase64 = null;
+          this.pairingCode = null;
+          this.qrHint = 'Instancia conectada (open).';
+          this.stopPolling();
+        }
       },
       error: (err) => {
         this.checking = false;
         this.connectionError = err?.error?.message || 'No se pudo consultar Evolution';
       }
     });
+  }
+
+  loadQr(showErrors = true): void {
+    if (this.form.whatsapp_provider !== 'evolution') return;
+    this.loadingQr = true;
+    this.qrError = null;
+    if (showErrors) this.qrHint = null;
+
+    this.carwash.getWhatsAppQr().subscribe({
+      next: (res) => {
+        this.loadingQr = false;
+        const d = res.data;
+        if (d.already_connected || (d.state || '').toLowerCase() === 'open') {
+          this.connectionState = 'open';
+          this.qrBase64 = null;
+          this.pairingCode = null;
+          this.qrHint = 'WhatsApp ya está vinculado (estado open).';
+          this.stopPolling();
+          return;
+        }
+        if (!d.ok) {
+          this.qrBase64 = null;
+          this.pairingCode = null;
+          this.qrError = d.error || 'No se obtuvo QR';
+          return;
+        }
+        this.qrBase64 = d.base64 || null;
+        this.pairingCode = d.pairing_code || null;
+        this.connectionState = d.state || 'connecting';
+        this.qrHint = 'Escanea con WhatsApp → Dispositivos vinculados. El QR caduca ~60s.';
+        this.startPolling();
+      },
+      error: (err) => {
+        this.loadingQr = false;
+        this.qrError = err?.error?.message || err?.error?.data?.error || 'No se pudo obtener el QR de Evolution';
+      }
+    });
+  }
+
+  private startPolling(): void {
+    this.stopPolling();
+    this.pollTimer = setInterval(() => this.refreshConnection(), 8000);
+  }
+
+  private stopPolling(): void {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
+    }
   }
 
   private applyToForm(data: CarWashWhatsAppSettings): void {

@@ -45,15 +45,40 @@
     <section class="cw-panel" *ngIf="form.whatsapp_provider === 'evolution'">
       <div class="cw-panel-head">
         <h2>Evolution API</h2>
-        <button type="button" class="cw-btn cw-btn--ghost cw-btn--small" (click)="refreshConnection()" [disabled]="checking">
-          {{ checking ? 'Consultando…' : 'Probar conexión' }}
-        </button>
+        <div class="cw-panel-actions">
+          <button type="button" class="cw-btn cw-btn--ghost cw-btn--small" (click)="refreshConnection()" [disabled]="checking">
+            {{ checking ? 'Consultando…' : 'Probar conexión' }}
+          </button>
+          <button type="button" class="cw-btn cw-btn--primary cw-btn--small" (click)="loadQr()" [disabled]="loadingQr || isConnected">
+            {{ loadingQr ? 'Cargando QR…' : (isConnected ? 'Conectado' : 'Mostrar QR') }}
+          </button>
+        </div>
       </div>
       <p class="cw-conn" *ngIf="connectionState || connectionError">
         Estado:
-        <strong [class.ok]="connectionState === 'open'">{{ connectionState || '—' }}</strong>
+        <strong [class.ok]="isConnected">{{ connectionState || '—' }}</strong>
         <span *ngIf="connectionError"> · {{ connectionError }}</span>
       </p>
+
+      <div class="cw-qr-box" *ngIf="!isConnected">
+        <p class="cw-hint" *ngIf="qrHint">{{ qrHint }}</p>
+        <p class="cw-alert cw-alert--error" *ngIf="qrError">{{ qrError }}</p>
+        <div class="cw-qr-loading" *ngIf="loadingQr"><mat-spinner diameter="36"></mat-spinner></div>
+        <img *ngIf="qrBase64 && !loadingQr" class="cw-qr-img" [src]="qrBase64" alt="QR WhatsApp Evolution" />
+        <p class="cw-pairing" *ngIf="pairingCode && !loadingQr">
+          Código de emparejamiento: <strong>{{ pairingCode }}</strong>
+        </p>
+        <button
+          type="button"
+          class="cw-btn cw-btn--ghost cw-btn--small"
+          *ngIf="!loadingQr"
+          (click)="loadQr()"
+        >
+          Renovar QR
+        </button>
+      </div>
+      <p class="cw-alert cw-alert--ok" *ngIf="isConnected">WhatsApp vinculado. Ya puedes usar la bandeja.</p>
+
       <div class="cw-edit-grid">
         <label class="cw-field cw-field--full">
           <span>Base URL</span>

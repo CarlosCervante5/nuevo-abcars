@@ -431,6 +431,7 @@ Route::prefix('carwash')->middleware([
     Route::get('/whatsapp/settings', [CarWashWhatsAppSettingsController::class, 'show']);
     Route::put('/whatsapp/settings', [CarWashWhatsAppSettingsController::class, 'update']);
     Route::get('/whatsapp/connection', [CarWashWhatsAppSettingsController::class, 'connection']);
+    Route::get('/whatsapp/qr', [CarWashWhatsAppSettingsController::class, 'qr']);
     Route::get('/whatsapp/conversations', [CarWashWhatsAppInboxController::class, 'conversations']);
     Route::get('/whatsapp/conversations/{uuid}/messages', [CarWashWhatsAppInboxController::class, 'messages']);
     Route::post('/whatsapp/conversations/{uuid}/reply', [CarWashWhatsAppInboxController::class, 'reply']);

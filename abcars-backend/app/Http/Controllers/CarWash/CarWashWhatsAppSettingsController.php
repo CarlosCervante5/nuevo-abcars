@@ -98,4 +98,16 @@ class CarWashWhatsAppSettingsController extends Controller
             ]);
         }
     }
+
+    public function qr(CarWashSettingsService $settings)
+    {
+        try {
+            $settings->applyRuntime();
+            $result = $settings->evolutionConnectQr();
+
+            return ApiResponseHelper::apiSuccess(200, 'QR Evolution', $result);
+        } catch (\Throwable $e) {
+            return ApiResponseHelper::apiError('No se pudo obtener el QR', $e->getMessage(), 500, 'CARWASH_WA_QR');
+        }
+    }
 }

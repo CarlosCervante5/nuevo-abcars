@@ -381,6 +381,23 @@ export class CarWashService {
       .pipe(catchError((e) => this.handleError(e)));
   }
 
+  getWhatsAppQr() {
+    return this.http
+      .get<{
+        status: number;
+        message: string;
+        data: {
+          ok?: boolean;
+          already_connected?: boolean;
+          state?: string | null;
+          base64?: string | null;
+          pairing_code?: string | null;
+          error?: string | null;
+        };
+      }>(`${this.baseUrl}/api/carwash/whatsapp/qr`, { headers: this.authHeaders() })
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
   listWhatsAppConversations(filters: { q?: string; needs_human?: boolean; per_page?: number } = {}) {
     let params = new HttpParams();
     Object.entries(filters).forEach(([k, v]) => {

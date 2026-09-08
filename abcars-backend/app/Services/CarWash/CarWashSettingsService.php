@@ -170,6 +170,106 @@ class CarWashSettingsService
         }
     }
 
+    /**
+     * Solicita QR / pairing code a Evolution (GET /instance/connect/{instance}).
+     */
+    public function evolutionConnectQr(): array
+    {
+        $this->applyRuntime();
+        $cfg = config('carwash.evolution');
+        if (! filled($cfg['base_url'] ?? null) || ! filled($cfg['api_key'] ?? null) || ! filled($cfg['instance'] ?? null)) {
+            return ['ok' => false, 'error' => 'Evolution no configurada', 'base64' => null, 'pairing_code' => null];
+        }
+
+        try {
+            $url = rtrim($cfg['base_url'], '/').'/instance/connect/'.$cfg['instance'];
+            $response = Http::withHeaders(['apikey' => $cfg['api_key']])
+                ->timeout((int) ($cfg['timeout'] ?? 30))
+                ->get($url);
+            $json = $response->json();
+
+            if (! $response->successful()) {
+                $error = is_array($json)
+                    ? ($json['message'] ?? $json['error'] ?? $response->body())
+                    : $response->body();
+
+                return [
+                    'ok' => false,
+                    'error' => is_string($error) ? $error : json_encode($error),
+                    'base64' => null,
+                    'pairing_code' => null,
+                    'raw' => $json,
+                ];
+            }
+
+            $base64 = data_get($json, 'base64')
+                ?? data_get($json, 'qrcode.base64')
+                ?? data_get($json, 'qr.base64')
+                ?? null;
+
+            if (is_string($base64) && $base64 !== '' && ! str_starts_with($base64, 'data:')) {
+                $base64 = 'data:image/png;base64,'.$base64;
+            }
+
+            $pairing = data_get($json, 'pairingCode')
+                ?? data_get($json, 'pairing_code')
+                ?? null;
+
+            $code = data_get($json, 'code');
+            // Algunas versiones solo devuelven `code` (string QR crudo) sin base64
+            if ((! is_string($base64) || $base64 === '') && is_string($code) && str_starts_with($code, 'data:image')) {
+                $base64 = $code;
+            }
+
+            $state = data_get($json, 'instance.state')
+                ?? data_get($json, 'instance.status')
+                ?? data_get($json, 'state')
+                ?? null;
+
+            if ((! is_string($base64) || $base64 === '') && ! filled($pairing) && $state === 'open') {
+                return [
+                    'ok' => true,
+                    'already_connected' => true,
+                    'state' => 'open',
+                    'base64' => null,
+                    'pairing_code' => null,
+                    'error' => null,
+                    'raw' => $json,
+                ];
+            }
+
+            if ((! is_string($base64) || $base64 === '') && ! filled($pairing)) {
+                return [
+                    'ok' => false,
+                    'error' => 'Evolution no devolvió QR. Revisa instancia o abre el Manager.',
+                    'base64' => null,
+                    'pairing_code' => null,
+                    'state' => $state,
+                    'raw' => $json,
+                ];
+            }
+
+            return [
+                'ok' => true,
+                'already_connected' => false,
+                'state' => $state ?: 'connecting',
+                'base64' => is_string($base64) ? $base64 : null,
+                'pairing_code' => $pairing ? (string) $pairing : null,
+                'error' => null,
+                'raw' => $json,
+            ];
+        } catch (\Throwable $e) {
+            Log::warning('Evolution connect QR failed', ['message' => $e->getMessage()]);
+
+            return [
+                'ok' => false,
+                'error' => $e->getMessage(),
+                'base64' => null,
+                'pairing_code' => null,
+            ];
+        }
+    }
+
     private function preserveSecrets(array $merged, array $currentStored): array
     {
         $effective = $this->whatsappConfig();
