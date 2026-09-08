@@ -26,11 +26,27 @@
         <h2>{{ col.label }}</h2>
         <span class="cw-count">{{ col.items.length }}</span>
       </header>
-      <article class="cw-card" *ngFor="let item of col.items">
+      <article class="cw-card" *ngFor="let item of col.items" [class.cw-card--sales]="item.order_type === 'internal_sales_delivery'">
+        <span class="cw-badge" *ngIf="item.order_type === 'internal_sales_delivery'">Ventas</span>
         <strong class="cw-card-name">{{ item.customer_name }}</strong>
         <p class="cw-card-line">{{ item.vehicle_brand }} {{ item.vehicle_model }} · {{ item.vehicle_plates || 's/placas' }}</p>
+        <p class="cw-card-line" *ngIf="item.vehicle_vin">VIN {{ item.vehicle_vin }} · {{ item.vehicle_condition === 'new' ? 'Nuevo' : (item.vehicle_condition === 'used' ? 'Seminuevo' : '') }}</p>
+        <p class="cw-card-line" *ngIf="item.order_type === 'internal_sales_delivery'">
+          VIN:
+          <strong [class.ok]="item.vin_validation_status === 'matched'" [class.warn]="item.vin_validation_status === 'pending' || item.vin_validation_status === 'unmatched'">
+            {{ item.vin_validation_status || 'pending' }}
+          </strong>
+        </p>
         <p class="cw-card-service">{{ item.service_type?.name || 'Servicio' }}</p>
         <p class="cw-card-time">{{ item.scheduled_start_at | date: 'shortTime' }}</p>
+        <button
+          type="button"
+          class="cw-btn cw-btn--small cw-btn--ghost"
+          *ngIf="item.order_type === 'internal_sales_delivery' && item.vehicle_vin && item.vin_validation_status !== 'matched'"
+          (click)="validateVin(item)"
+        >
+          Validar VIN
+        </button>
         <button
           type="button"
           class="cw-btn cw-btn--small cw-btn--primary"

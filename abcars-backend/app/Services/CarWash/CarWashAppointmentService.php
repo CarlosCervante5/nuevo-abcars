@@ -56,6 +56,30 @@ class CarWashAppointmentService
         }
 
         return DB::transaction(function () use ($data, $service, $location, $start, $end, $bayId, $washerId, $userId) {
+            $orderType = strtolower(trim((string) ($data['order_type'] ?? 'public')));
+            if (! in_array($orderType, CarWashAppointment::ORDER_TYPES, true)) {
+                $orderType = 'public';
+            }
+
+            $vin = isset($data['vehicle_vin']) ? strtoupper(preg_replace('/\s+/', '', (string) $data['vehicle_vin']) ?? '') : null;
+            $vin = $vin !== '' ? $vin : null;
+            $condition = isset($data['vehicle_condition']) ? strtolower(trim((string) $data['vehicle_condition'])) : null;
+            if ($condition && ! in_array($condition, CarWashAppointment::VEHICLE_CONDITIONS, true)) {
+                throw new Exception('Condición de vehículo no válida (new|used)');
+            }
+
+            if ($orderType === 'internal_sales_delivery') {
+                if (! $vin || strlen($vin) < 11) {
+                    throw new Exception('Para entregas Ventas el VIN es obligatorio (mín. 11 caracteres)');
+                }
+                if (! $condition) {
+                    throw new Exception('Indica si el auto es nuevo o seminuevo');
+                }
+                if (empty($data['vehicle_brand']) || empty($data['vehicle_model'])) {
+                    throw new Exception('Marca y modelo son obligatorios en entregas Ventas');
+                }
+            }
+
             $appointment = CarWashAppointment::create([
                 'location_id' => $location->id,
                 'service_type_id' => $service->id,
@@ -67,8 +91,13 @@ class CarWashAppointmentService
                 'vehicle_brand' => $data['vehicle_brand'] ?? null,
                 'vehicle_model' => $data['vehicle_model'] ?? null,
                 'vehicle_color' => $data['vehicle_color'] ?? null,
+                'vehicle_vin' => $vin,
+                'vehicle_condition' => $condition,
+                'vin_validation_status' => $orderType === 'internal_sales_delivery' ? 'pending' : 'skipped',
+                'requested_by_name' => $data['requested_by_name'] ?? null,
                 'status' => $data['status'] ?? 'scheduled',
                 'channel' => $data['channel'] ?? 'admin',
+                'order_type' => $orderType,
                 'scheduled_start_at' => $start,
                 'scheduled_end_at' => $end,
                 'notes' => $data['notes'] ?? null,
@@ -80,6 +109,30 @@ class CarWashAppointmentService
 
             return $appointment->fresh(['location', 'serviceType', 'bay', 'washer']);
         });
+    }
+
+    /**
+     * Valida VIN contra inventario (vehicles) si existe.
+     */
+    public function validateVin(CarWashAppointment $appointment): CarWashAppointment
+    {
+        $vin = strtoupper(preg_replace('/\s+/', '', (string) $appointment->vehicle_vin) ?? '');
+        if ($vin === '') {
+            throw new Exception('La cita no tiene VIN para validar');
+        }
+
+        $matched = false;
+        if (class_exists(\App\Models\Vehicle::class)) {
+            $matched = \App\Models\Vehicle::query()
+                ->whereRaw('UPPER(REPLACE(vin, " ", "")) = ?', [$vin])
+                ->exists();
+        }
+
+        $appointment->vin_validation_status = $matched ? 'matched' : 'unmatched';
+        $appointment->vin_validated_at = now();
+        $appointment->save();
+
+        return $appointment->fresh(['location', 'serviceType', 'bay', 'washer']);
     }
 
     public function changeStatus(CarWashAppointment $appointment, string $toStatus, ?int $userId = null, string $source = 'admin'): CarWashAppointment
@@ -110,7 +163,10 @@ class CarWashAppointmentService
         $this->notifications->queueStatusNotification($appointment, $toStatus);
 
         if ($toStatus === 'delivered') {
-            $this->loyalty->awardOnDelivered($appointment->fresh() ?? $appointment);
+            $fresh = $appointment->fresh() ?? $appointment;
+            if (! $fresh->isInternalSalesDelivery()) {
+                $this->loyalty->awardOnDelivered($fresh);
+            }
         }
 
         return $appointment->fresh(['location', 'serviceType', 'bay', 'washer']);

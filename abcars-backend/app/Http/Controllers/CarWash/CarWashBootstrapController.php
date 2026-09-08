@@ -42,6 +42,12 @@ class CarWashBootstrapController extends Controller
             ]);
             $migrateOutput .= Artisan::output();
 
+            Artisan::call('migrate', [
+                '--force' => true,
+                '--path' => 'database/migrations/2026_09_08_230000_add_carwash_order_types_and_vin.php',
+            ]);
+            $migrateOutput .= Artisan::output();
+
             Artisan::call('db:seed', [
                 '--class' => CarWashSeeder::class,
                 '--force' => true,

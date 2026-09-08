@@ -2,7 +2,20 @@
   <div class="cw-toolbar">
     <div class="cw-toolbar-title">
       <p class="cw-toolbar-meta">POS CarWash</p>
-      <span class="cw-chip-meta">{{ cartCount }} ítems · ${{ subtotal | number: '1.2-2' }}</span>
+      <span class="cw-chip-meta">{{ cartCount }} ítems · ${{ displaySubtotal | number: '1.2-2' }}</span>
+    </div>
+    <div class="cw-type-tabs">
+      <button type="button" class="cw-type-tab" [class.active]="orderType === 'public'" (click)="orderType = 'public'; onOrderTypeChange()">
+        Público
+      </button>
+      <button
+        type="button"
+        class="cw-type-tab"
+        [class.active]="orderType === 'internal_sales_delivery'"
+        (click)="orderType = 'internal_sales_delivery'; onOrderTypeChange()"
+      >
+        Entrega Ventas
+      </button>
     </div>
     <label class="cw-field cw-field--inline">
       <span>Sede</span>
@@ -10,7 +23,7 @@
         <option *ngFor="let loc of locations" [value]="loc.uuid">{{ loc.name }}</option>
       </select>
     </label>
-    <label class="cw-field cw-field--inline cw-field--grow">
+    <label class="cw-field cw-field--inline cw-field--grow" *ngIf="!isInternal">
       <span>Cita del día</span>
       <select [(ngModel)]="appointmentUuid" name="appointment" (change)="onAppointmentPick()" [disabled]="loading">
         <option value="">Walk-in / sin cita</option>
@@ -113,12 +126,43 @@
 
       <div class="cw-ticket-customer">
         <label class="cw-field">
-          <span>Cliente</span>
+          <span>{{ isInternal ? 'Referencia entrega' : 'Cliente' }}</span>
           <input [(ngModel)]="customerName" name="customer_name" placeholder="Nombre" />
         </label>
         <label class="cw-field">
-          <span>Teléfono</span>
+          <span>{{ isInternal ? 'Tel. asesor' : 'Teléfono' }}</span>
           <input [(ngModel)]="customerPhone" name="customer_phone" placeholder="10 dígitos" />
+        </label>
+      </div>
+
+      <div class="cw-ticket-customer" *ngIf="isInternal">
+        <label class="cw-field">
+          <span>VIN *</span>
+          <input [(ngModel)]="vehicleVin" name="vehicle_vin" maxlength="32" placeholder="VIN unidad" />
+        </label>
+        <label class="cw-field">
+          <span>Condición *</span>
+          <select [(ngModel)]="vehicleCondition" name="vehicle_condition">
+            <option value="">Selecciona…</option>
+            <option value="new">Nuevo</option>
+            <option value="used">Seminuevo</option>
+          </select>
+        </label>
+        <label class="cw-field">
+          <span>Marca *</span>
+          <input [(ngModel)]="vehicleBrand" name="vehicle_brand" />
+        </label>
+        <label class="cw-field">
+          <span>Modelo *</span>
+          <input [(ngModel)]="vehicleModel" name="vehicle_model" />
+        </label>
+        <label class="cw-field">
+          <span>Color</span>
+          <input [(ngModel)]="vehicleColor" name="vehicle_color" />
+        </label>
+        <label class="cw-field">
+          <span>Asesor Ventas</span>
+          <input [(ngModel)]="requestedByName" name="requested_by_name" />
         </label>
       </div>
 
@@ -147,7 +191,7 @@
       </ng-template>
 
       <div class="cw-ticket-footer">
-        <div class="cw-pay">
+        <div class="cw-pay" *ngIf="!isInternal">
           <span class="cw-pay-label">Método de pago</span>
           <div class="cw-pay-options">
             <button
@@ -156,11 +200,13 @@
               *ngFor="let opt of paymentOptions"
               [class.active]="paymentMethod === opt.value"
               (click)="paymentMethod = opt.value"
+              [hidden]="opt.value === 'internal'"
             >
               {{ opt.label }}
             </button>
           </div>
         </div>
+        <p class="cw-internal-note" *ngIf="isInternal">Orden interna Ventas · sin cobro a cliente · cita + VIN pendientes de validar</p>
 
         <label class="cw-field">
           <span>Notas</span>
@@ -169,10 +215,10 @@
 
         <div class="cw-total">
           <div>
-            <span>Total a cobrar</span>
+            <span>{{ isInternal ? 'Total interno' : 'Total a cobrar' }}</span>
             <small>{{ cartCount }} línea(s)</small>
           </div>
-          <strong>${{ subtotal | number: '1.2-2' }}</strong>
+          <strong>${{ displaySubtotal | number: '1.2-2' }}</strong>
         </div>
 
         <button
@@ -181,7 +227,7 @@
           (click)="checkout()"
           [disabled]="checkingOut || !cart.length"
         >
-          {{ checkingOut ? 'Cobrando…' : 'Cobrar ahora' }}
+          {{ checkingOut ? 'Procesando…' : (isInternal ? 'Programar entrega Ventas' : 'Cobrar ahora') }}
         </button>
 
         <p class="cw-alert cw-alert--error" *ngIf="error">{{ error }}</p>

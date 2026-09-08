@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class CarWashOrder extends CarWashModel
 {
     protected $fillable = [
-        'location_id', 'appointment_id', 'cashier_user_id', 'status',
-        'customer_name', 'customer_phone', 'subtotal', 'total',
+        'location_id', 'appointment_id', 'cashier_user_id', 'status', 'order_type',
+        'customer_name', 'customer_phone', 'vehicle_vin', 'vehicle_condition',
+        'subtotal', 'total',
         'payment_method', 'paid_at', 'notes',
     ];
 

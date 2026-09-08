@@ -24,6 +24,7 @@ export class CarWashAppointmentsComponent implements OnInit {
   success: string | null = null;
 
   form = {
+    order_type: 'public' as 'public' | 'internal_sales_delivery',
     location_uuid: '',
     service_type_uuid: '',
     customer_name: '',
@@ -32,6 +33,9 @@ export class CarWashAppointmentsComponent implements OnInit {
     vehicle_brand: '',
     vehicle_model: '',
     vehicle_color: '',
+    vehicle_vin: '',
+    vehicle_condition: '' as '' | 'new' | 'used',
+    requested_by_name: '',
     scheduled_start_at: '',
     notes: ''
   };
@@ -62,22 +66,62 @@ export class CarWashAppointmentsComponent implements OnInit {
     });
   }
 
+  get isInternal(): boolean {
+    return this.form.order_type === 'internal_sales_delivery';
+  }
+
+  onOrderTypeChange(): void {
+    if (this.isInternal && !this.form.customer_name) {
+      this.form.customer_name = 'Entrega Ventas';
+    }
+  }
+
   submit(): void {
     this.saving = true;
     this.error = null;
     this.success = null;
-    const payload = {
+
+    if (this.isInternal) {
+      if (!this.form.vehicle_vin || this.form.vehicle_vin.replace(/\s+/g, '').length < 11) {
+        this.saving = false;
+        this.error = 'VIN obligatorio para entrega Ventas (mín. 11 caracteres)';
+        return;
+      }
+      if (!this.form.vehicle_condition) {
+        this.saving = false;
+        this.error = 'Indica si el auto es nuevo o seminuevo';
+        return;
+      }
+      if (!this.form.vehicle_brand || !this.form.vehicle_model) {
+        this.saving = false;
+        this.error = 'Marca y modelo son obligatorios en entregas Ventas';
+        return;
+      }
+    }
+
+    const payload: Record<string, unknown> = {
       ...this.form,
+      vehicle_condition: this.form.vehicle_condition || null,
+      vehicle_vin: this.form.vehicle_vin || null,
       scheduled_start_at: new Date(this.form.scheduled_start_at).toISOString(),
       channel: 'admin'
     };
+
     this.carwash.createAppointment(payload).subscribe({
       next: () => {
         this.saving = false;
-        this.success = 'Cita creada correctamente';
-        this.form.customer_name = '';
+        this.success = this.isInternal
+          ? 'Entrega Ventas agendada. VIN pendiente de validar en el tablero.'
+          : 'Cita pública creada correctamente';
+        this.form.customer_name = this.isInternal ? 'Entrega Ventas' : '';
         this.form.customer_phone = '';
         this.form.vehicle_plates = '';
+        this.form.vehicle_vin = '';
+        this.form.vehicle_brand = '';
+        this.form.vehicle_model = '';
+        this.form.vehicle_color = '';
+        this.form.vehicle_condition = '';
+        this.form.requested_by_name = '';
         this.form.notes = '';
       },
       error: (err) => {

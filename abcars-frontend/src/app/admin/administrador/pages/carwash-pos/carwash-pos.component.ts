@@ -35,9 +35,17 @@ export class CarWashPosComponent implements OnInit {
 
   locationUuid = '';
   appointmentUuid = '';
+  orderType: 'public' | 'internal_sales_delivery' = 'public';
   customerName = '';
   customerPhone = '';
-  paymentMethod: 'cash' | 'card' | 'transfer' | 'mixed' = 'cash';
+  vehicleVin = '';
+  vehicleCondition: '' | 'new' | 'used' = '';
+  vehiclePlates = '';
+  vehicleBrand = '';
+  vehicleModel = '';
+  vehicleColor = '';
+  requestedByName = '';
+  paymentMethod: 'cash' | 'card' | 'transfer' | 'mixed' | 'internal' = 'cash';
   notes = '';
   catalogQuery = '';
   catalogTab: 'services' | 'products' = 'services';
@@ -48,12 +56,30 @@ export class CarWashPosComponent implements OnInit {
   error: string | null = null;
   lastOrder: CarWashOrder | null = null;
 
-  readonly paymentOptions: { value: 'cash' | 'card' | 'transfer' | 'mixed'; label: string }[] = [
+  readonly paymentOptions: { value: 'cash' | 'card' | 'transfer' | 'mixed' | 'internal'; label: string }[] = [
     { value: 'cash', label: 'Efectivo' },
     { value: 'card', label: 'Tarjeta' },
     { value: 'transfer', label: 'Transfer' },
-    { value: 'mixed', label: 'Mixto' }
+    { value: 'mixed', label: 'Mixto' },
+    { value: 'internal', label: 'Interno (Ventas)' }
   ];
+
+  get isInternal(): boolean {
+    return this.orderType === 'internal_sales_delivery';
+  }
+
+  get displaySubtotal(): number {
+    return this.isInternal ? 0 : this.subtotal;
+  }
+
+  onOrderTypeChange(): void {
+    if (this.isInternal) {
+      this.paymentMethod = 'internal';
+      if (!this.customerName) this.customerName = 'Entrega Ventas';
+    } else if (this.paymentMethod === 'internal') {
+      this.paymentMethod = 'cash';
+    }
+  }
 
   constructor(private carwash: CarWashService) {}
 
@@ -183,10 +209,17 @@ export class CarWashPosComponent implements OnInit {
   clearTicket(): void {
     this.cart = [];
     this.appointmentUuid = '';
-    this.customerName = '';
+    this.customerName = this.isInternal ? 'Entrega Ventas' : '';
     this.customerPhone = '';
+    this.vehicleVin = '';
+    this.vehicleCondition = '';
+    this.vehiclePlates = '';
+    this.vehicleBrand = '';
+    this.vehicleModel = '';
+    this.vehicleColor = '';
+    this.requestedByName = '';
     this.notes = '';
-    this.paymentMethod = 'cash';
+    this.paymentMethod = this.isInternal ? 'internal' : 'cash';
     this.error = null;
   }
 
@@ -200,6 +233,25 @@ export class CarWashPosComponent implements OnInit {
       this.error = 'Selecciona sede e ítems';
       return;
     }
+    if (this.isInternal) {
+      const vin = (this.vehicleVin || '').replace(/\s+/g, '');
+      if (vin.length < 11) {
+        this.error = 'VIN obligatorio para entrega Ventas';
+        return;
+      }
+      if (!this.vehicleCondition) {
+        this.error = 'Indica nuevo o seminuevo';
+        return;
+      }
+      if (!this.vehicleBrand || !this.vehicleModel) {
+        this.error = 'Marca y modelo obligatorios';
+        return;
+      }
+      if (!this.cart.some((c) => c.item_type === 'service')) {
+        this.error = 'Agrega un servicio de lavado';
+        return;
+      }
+    }
     this.checkingOut = true;
     this.error = null;
     this.lastOrder = null;
@@ -209,7 +261,15 @@ export class CarWashPosComponent implements OnInit {
         appointment_uuid: this.appointmentUuid || undefined,
         customer_name: this.customerName || undefined,
         customer_phone: this.customerPhone || undefined,
-        payment_method: this.paymentMethod,
+        order_type: this.orderType,
+        vehicle_vin: this.isInternal ? this.vehicleVin : undefined,
+        vehicle_condition: this.isInternal && this.vehicleCondition ? this.vehicleCondition : undefined,
+        vehicle_plates: this.vehiclePlates || undefined,
+        vehicle_brand: this.vehicleBrand || undefined,
+        vehicle_model: this.vehicleModel || undefined,
+        vehicle_color: this.vehicleColor || undefined,
+        requested_by_name: this.requestedByName || undefined,
+        payment_method: this.isInternal ? 'internal' : this.paymentMethod,
         notes: this.notes || undefined,
         items: this.cart.map((c) => ({
           item_type: c.item_type,

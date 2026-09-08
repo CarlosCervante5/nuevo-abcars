@@ -409,6 +409,7 @@ Route::prefix('carwash')->middleware([
     Route::post('/appointments', [CarWashAppointmentController::class, 'store']);
     Route::get('/appointments/{uuid}', [CarWashAppointmentController::class, 'show']);
     Route::patch('/appointments/{uuid}/status', [CarWashAppointmentController::class, 'updateStatus']);
+    Route::post('/appointments/{uuid}/validate-vin', [CarWashAppointmentController::class, 'validateVin']);
 
     Route::get('/locations', [CarWashCatalogController::class, 'locations']);
     Route::post('/locations', [CarWashCatalogController::class, 'storeLocation']);

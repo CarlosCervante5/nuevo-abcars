@@ -1,8 +1,31 @@
 <div class="cw-root adm-shell-page">
   <form class="cw-panel" (ngSubmit)="submit()">
     <div class="cw-panel-head">
-      <h1>Nueva cita de lavado</h1>
+      <h1>Nueva cita / orden de lavado</h1>
     </div>
+
+    <div class="cw-type-tabs" role="tablist">
+      <button
+        type="button"
+        class="cw-type-tab"
+        [class.active]="form.order_type === 'public'"
+        (click)="form.order_type = 'public'; onOrderTypeChange()"
+      >
+        Público (cliente general)
+      </button>
+      <button
+        type="button"
+        class="cw-type-tab"
+        [class.active]="form.order_type === 'internal_sales_delivery'"
+        (click)="form.order_type = 'internal_sales_delivery'; onOrderTypeChange()"
+      >
+        Entrega Ventas (interno)
+      </button>
+    </div>
+    <p class="cw-type-hint" *ngIf="isInternal">
+      Lavado para entrega de autos nuevos/seminuevos. Requiere VIN para validar después contra inventario.
+    </p>
+
     <div class="cw-form-grid">
       <label class="cw-field">
         <span>Sede</span>
@@ -21,12 +44,12 @@
       </label>
 
       <label class="cw-field">
-        <span>Cliente</span>
+        <span>{{ isInternal ? 'Referencia / cliente entrega' : 'Cliente' }}</span>
         <input [(ngModel)]="form.customer_name" name="customer_name" required />
       </label>
 
       <label class="cw-field">
-        <span>Teléfono WhatsApp</span>
+        <span>{{ isInternal ? 'Teléfono asesor / contacto' : 'Teléfono WhatsApp' }}</span>
         <input [(ngModel)]="form.customer_phone" name="customer_phone" required placeholder="+52155..." />
       </label>
 
@@ -35,19 +58,38 @@
         <input type="datetime-local" [(ngModel)]="form.scheduled_start_at" name="scheduled_start_at" required />
       </label>
 
+      <label class="cw-field" *ngIf="isInternal">
+        <span>Asesor Ventas</span>
+        <input [(ngModel)]="form.requested_by_name" name="requested_by_name" placeholder="Nombre del asesor" />
+      </label>
+
+      <label class="cw-field" *ngIf="isInternal">
+        <span>VIN *</span>
+        <input [(ngModel)]="form.vehicle_vin" name="vehicle_vin" required maxlength="32" placeholder="17 caracteres" />
+      </label>
+
+      <label class="cw-field" *ngIf="isInternal">
+        <span>Condición *</span>
+        <select [(ngModel)]="form.vehicle_condition" name="vehicle_condition" required>
+          <option value="">Selecciona…</option>
+          <option value="new">Nuevo</option>
+          <option value="used">Seminuevo</option>
+        </select>
+      </label>
+
       <label class="cw-field">
         <span>Placas</span>
         <input [(ngModel)]="form.vehicle_plates" name="vehicle_plates" />
       </label>
 
       <label class="cw-field">
-        <span>Marca</span>
-        <input [(ngModel)]="form.vehicle_brand" name="vehicle_brand" />
+        <span>Marca {{ isInternal ? '*' : '' }}</span>
+        <input [(ngModel)]="form.vehicle_brand" name="vehicle_brand" [required]="isInternal" />
       </label>
 
       <label class="cw-field">
-        <span>Modelo</span>
-        <input [(ngModel)]="form.vehicle_model" name="vehicle_model" />
+        <span>Modelo {{ isInternal ? '*' : '' }}</span>
+        <input [(ngModel)]="form.vehicle_model" name="vehicle_model" [required]="isInternal" />
       </label>
 
       <label class="cw-field">
@@ -63,7 +105,7 @@
 
     <div class="cw-form-footer">
       <button class="cw-btn cw-btn--primary" type="submit" [disabled]="saving">
-        {{ saving ? 'Guardando…' : 'Crear cita' }}
+        {{ saving ? 'Guardando…' : (isInternal ? 'Programar entrega Ventas' : 'Crear cita pública') }}
       </button>
     </div>
   </form>

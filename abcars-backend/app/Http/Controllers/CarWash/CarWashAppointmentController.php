@@ -163,6 +163,10 @@ class CarWashAppointmentController extends Controller
                 'vehicle_brand' => 'nullable|string|max:100',
                 'vehicle_model' => 'nullable|string|max:100',
                 'vehicle_color' => 'nullable|string|max:50',
+                'vehicle_vin' => 'nullable|string|max:32',
+                'vehicle_condition' => ['nullable', 'string', Rule::in(CarWashAppointment::VEHICLE_CONDITIONS)],
+                'order_type' => ['nullable', 'string', Rule::in(CarWashAppointment::ORDER_TYPES)],
+                'requested_by_name' => 'nullable|string|max:255',
                 'scheduled_start_at' => 'required|date',
                 'scheduled_end_at' => 'nullable|date|after:scheduled_start_at',
                 'notes' => 'nullable|string',
@@ -177,6 +181,22 @@ class CarWashAppointmentController extends Controller
             return ApiResponseHelper::validationError($e);
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al crear cita CarWash', $e->getMessage(), 500, 'CARWASH_APPOINTMENT_CREATE');
+        }
+    }
+
+    public function validateVin(string $uuid)
+    {
+        try {
+            $appointment = CarWashAppointment::findByUuid($uuid);
+            if (! $appointment) {
+                return ApiResponseHelper::apiError('Cita no encontrada', null, 404, 'CARWASH_APPOINTMENT_NOT_FOUND');
+            }
+
+            $updated = $this->appointments->validateVin($appointment);
+
+            return ApiResponseHelper::apiSuccess(200, 'VIN validado', $updated);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al validar VIN', $e->getMessage(), 500, 'CARWASH_VIN_VALIDATE');
         }
     }
 

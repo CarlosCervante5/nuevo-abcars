@@ -98,4 +98,13 @@ export class CarWashBoardComponent implements OnInit {
       }
     });
   }
+
+  validateVin(item: CarWashAppointment): void {
+    this.carwash.validateAppointmentVin(item.uuid).subscribe({
+      next: () => this.load(),
+      error: (err) => {
+        this.error = err?.error?.message || 'No se pudo validar el VIN';
+      }
+    });
+  }
 }

@@ -135,6 +135,11 @@ export interface CarWashAppointment {
   vehicle_brand?: string | null;
   vehicle_model?: string | null;
   vehicle_color?: string | null;
+  vehicle_vin?: string | null;
+  vehicle_condition?: 'new' | 'used' | string | null;
+  order_type?: 'public' | 'internal_sales_delivery' | string;
+  vin_validation_status?: string | null;
+  requested_by_name?: string | null;
   status: string;
   channel: string;
   scheduled_start_at?: string | null;
@@ -225,6 +230,16 @@ export class CarWashService {
       .post<{ status: number; message: string; data: CarWashAppointment }>(
         `${this.baseUrl}/api/carwash/appointments`,
         payload,
+        { headers: this.authHeaders() }
+      )
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  validateAppointmentVin(uuid: string) {
+    return this.http
+      .post<{ status: number; message: string; data: CarWashAppointment }>(
+        `${this.baseUrl}/api/carwash/appointments/${uuid}/validate-vin`,
+        {},
         { headers: this.authHeaders() }
       )
       .pipe(catchError((e) => this.handleError(e)));
@@ -346,6 +361,15 @@ export class CarWashService {
     appointment_uuid?: string;
     customer_name?: string;
     customer_phone?: string;
+    order_type?: 'public' | 'internal_sales_delivery';
+    vehicle_vin?: string;
+    vehicle_condition?: 'new' | 'used';
+    vehicle_plates?: string;
+    vehicle_brand?: string;
+    vehicle_model?: string;
+    vehicle_color?: string;
+    requested_by_name?: string;
+    scheduled_start_at?: string;
     payment_method: string;
     notes?: string;
     items: Array<{ item_type: 'service' | 'product'; uuid: string; quantity: number }>;
