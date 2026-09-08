@@ -48,6 +48,7 @@ use App\Http\Controllers\CarWash\CarWashWhatsAppSettingsController;
 use App\Http\Controllers\CarWash\CarWashWhatsAppInboxController;
 use App\Http\Controllers\CarWash\CarWashBootstrapController;
 use App\Http\Controllers\CarWash\CarWashLoyaltyController;
+use App\Http\Controllers\CarWash\CarWashPublicController;
 use Illuminate\Support\Facades\Route;
 
 // Información básica de la API (GET /api)
@@ -447,6 +448,7 @@ Route::prefix('carwash')->middleware([
 
 // Contacto público CarWash (CTA WhatsApp en sitio)
 Route::get('/carwash/public/contact', [CarWashWhatsAppSettingsController::class, 'publicContact']);
+Route::get('/carwash/public/customer-status', [CarWashPublicController::class, 'customerStatus']);
 
 // Webhooks WhatsApp CarWash (públicos; auth por secret)
 Route::prefix('webhooks')->group(function () {

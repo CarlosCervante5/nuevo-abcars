@@ -14,7 +14,7 @@ import {
   IonIcon,
   RefresherEventDetail,
 } from '@ionic/react';
-import { car, notificationsOutline, logInOutline } from 'ionicons/icons';
+import { car, notificationsOutline, logInOutline, waterOutline } from 'ionicons/icons';
 
 const LOGO_ABCARS = '/logo.svg';
 import { useHistory } from 'react-router-dom';
@@ -171,14 +171,25 @@ const PublicInventoryList: React.FC = () => {
             <div className="logo-section">
               <img src={LOGO_ABCARS} alt="ABCars" className="logo-img" />
             </div>
-            {isAuthenticated ? (
-              <IonIcon icon={notificationsOutline} className="header-icon" />
-            ) : (
-              <button className="header-login-btn" onClick={() => history.push('/login')}>
-                <IonIcon icon={logInOutline} />
-                <span>Iniciar sesión</span>
+            <div className="header-actions">
+              <button
+                type="button"
+                className="header-carwash-btn"
+                onClick={() => history.push('/carwash')}
+                aria-label="CarWash"
+              >
+                <IonIcon icon={waterOutline} />
+                <span>CarWash</span>
               </button>
-            )}
+              {isAuthenticated ? (
+                <IonIcon icon={notificationsOutline} className="header-icon" />
+              ) : (
+                <button className="header-login-btn" onClick={() => history.push('/login')}>
+                  <IonIcon icon={logInOutline} />
+                  <span>Iniciar sesión</span>
+                </button>
+              )}
+            </div>
           </div>
         </IonToolbar>
       </IonHeader>

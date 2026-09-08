@@ -43,6 +43,7 @@ import VehicleDetail from './pages/manager/VehicleDetail';
 import VehiclePhotos from './pages/manager/VehiclePhotos';
 import PublicInventoryList from './pages/inventory/PublicInventoryList';
 import PublicVehicleDetail from './pages/inventory/PublicVehicleDetail';
+import CarWashHome from './pages/carwash/CarWashHome';
 import { connectivityService } from './services/connectivityService';
 import { processOfflineQueue } from './services/offlineSync';
 import { vehicleImageAiBatchService } from './services/vehicleImageAiBatchService';
@@ -199,6 +200,9 @@ const App: React.FC = () => {
           </Route>
           <Route exact path="/inventory/:vehicleUuid">
             <PublicVehicleDetail />
+          </Route>
+          <Route exact path="/carwash">
+            <CarWashHome />
           </Route>
           <Route exact path="/">
             {isAuthenticated ? (

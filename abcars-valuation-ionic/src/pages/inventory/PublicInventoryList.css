@@ -35,6 +35,30 @@
   color: var(--ion-color-secondary);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-carwash-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #ffc73a;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.header-carwash-btn ion-icon {
+  font-size: 18px;
+}
+
 .header-login-btn {
   display: flex;
   align-items: center;
