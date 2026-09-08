@@ -1,70 +1,129 @@
 <div class="cw-root adm-shell-page">
   <div class="cw-toolbar">
-    <p class="cw-toolbar-meta" *ngIf="channelInfo; else waTitle">{{ channelInfo }}</p>
-    <ng-template #waTitle><p class="cw-toolbar-meta">WhatsApp CarWash</p></ng-template>
-    <label class="cw-field">
+    <div class="cw-toolbar-title">
+      <p class="cw-toolbar-meta">Bandeja WhatsApp</p>
+      <span class="cw-chip" *ngIf="channelInfo" [title]="channelInfo">{{ channelInfo }}</span>
+    </div>
+    <label class="cw-field cw-field--search">
       <span>Buscar</span>
-      <input [(ngModel)]="query" name="q" (keyup.enter)="reload()" placeholder="Teléfono o nombre" />
+      <input
+        [(ngModel)]="query"
+        name="q"
+        (keyup.enter)="reload()"
+        placeholder="Teléfono o nombre"
+        autocomplete="off"
+      />
     </label>
     <label class="cw-check">
       <input type="checkbox" [(ngModel)]="onlyHuman" name="onlyHuman" (change)="reload()" />
       Solo handoff
     </label>
-    <button type="button" class="cw-btn cw-btn--primary" (click)="reload()">Actualizar</button>
+    <button type="button" class="cw-btn cw-btn--ghost" (click)="reload()" [disabled]="loading">
+      Actualizar
+    </button>
   </div>
 
   <p class="cw-alert cw-alert--error" *ngIf="error">{{ error }}</p>
 
-  <div class="cw-inbox" *ngIf="!loading; else loadingTpl">
-    <aside class="cw-list cw-panel">
+  <div class="cw-inbox" *ngIf="!loading; else loadingTpl" [class.cw-inbox--thread]="!!selected && mobileShowThread">
+    <aside class="cw-list" [class.cw-list--hidden-mobile]="!!selected && mobileShowThread">
+      <div class="cw-list-head">
+        <strong>Conversaciones</strong>
+        <span class="cw-count">{{ conversations.length }}</span>
+      </div>
+
       <button
         type="button"
         class="cw-conv"
         *ngFor="let c of conversations"
         [class.active]="selected?.uuid === c.uuid"
+        [class.cw-conv--handoff]="c.needs_human"
         (click)="openConversation(c)"
       >
-        <strong>{{ c.customer_name || c.phone }}</strong>
-        <span>{{ c.phone }}</span>
-        <em *ngIf="c.needs_human">handoff</em>
+        <span class="cw-avatar" aria-hidden="true">{{ initials(c) }}</span>
+        <span class="cw-conv-body">
+          <span class="cw-conv-top">
+            <strong class="cw-conv-name">{{ c.customer_name || formatPhone(c.phone) }}</strong>
+            <time class="cw-conv-time" *ngIf="c.last_message_at">{{ relativeTime(c.last_message_at) }}</time>
+          </span>
+          <span class="cw-conv-bottom">
+            <span class="cw-conv-phone">{{ formatPhone(c.phone) }}</span>
+            <span class="cw-badge" *ngIf="c.needs_human">Handoff</span>
+          </span>
+        </span>
       </button>
-      <p class="cw-empty" *ngIf="!conversations.length">Sin conversaciones aún.</p>
+
+      <div class="cw-empty-block" *ngIf="!conversations.length">
+        <p class="cw-empty-title">Sin conversaciones</p>
+        <p class="cw-empty-copy">Cuando lleguen mensajes de WhatsApp aparecerán aquí.</p>
+      </div>
     </aside>
 
-    <section class="cw-thread cw-panel" *ngIf="selected; else pickTpl">
-      <div class="cw-thread-head">
-        <div>
-          <strong>{{ selected.customer_name || selected.phone }}</strong>
-          <div class="cw-muted">{{ selected.phone }}</div>
+    <section
+      class="cw-thread"
+      *ngIf="selected; else pickTpl"
+      [class.cw-thread--visible-mobile]="mobileShowThread"
+    >
+      <header class="cw-thread-head">
+        <button type="button" class="cw-back" (click)="closeThread()" aria-label="Volver a la lista">←</button>
+        <span class="cw-avatar cw-avatar--lg" aria-hidden="true">{{ initials(selected) }}</span>
+        <div class="cw-thread-meta">
+          <strong>{{ selected.customer_name || formatPhone(selected.phone) }}</strong>
+          <div class="cw-muted">
+            {{ formatPhone(selected.phone) }}
+            <span class="cw-dot" *ngIf="selected.needs_human">· Atención humana</span>
+          </div>
         </div>
-        <button type="button" class="cw-btn cw-btn--ghost" (click)="toggleHandoff()">
-          {{ selected.needs_human ? 'Quitar handoff' : 'Marcar handoff' }}
-        </button>
-      </div>
-
-      <div class="cw-messages" *ngIf="!loadingThread">
-        <div
-          class="cw-bubble"
-          *ngFor="let m of messages"
-          [class.out]="m.direction === 'outbound'"
-          [class.in]="m.direction === 'inbound'"
+        <button
+          type="button"
+          class="cw-btn"
+          [class.cw-btn--warn]="!selected.needs_human"
+          [class.cw-btn--ghost]="selected.needs_human"
+          (click)="toggleHandoff()"
         >
-          <p>{{ m.body }}</p>
-          <small>{{ m.created_at | date: 'short' }} · {{ m.direction }}</small>
-        </div>
-        <p class="cw-empty" *ngIf="!messages.length">Sin mensajes.</p>
-      </div>
-      <div class="cw-loading" *ngIf="loadingThread"><mat-spinner diameter="28"></mat-spinner></div>
-
-      <div class="cw-reply">
-        <label class="cw-field">
-          <span>Responder</span>
-          <textarea rows="2" [(ngModel)]="replyBody" name="reply"></textarea>
-        </label>
-        <button type="button" class="cw-btn cw-btn--primary" (click)="sendReply()" [disabled]="sending || !replyBody.trim()">
-          {{ sending ? 'Enviando…' : 'Enviar' }}
+          {{ selected.needs_human ? 'Devolver al bot' : 'Tomar handoff' }}
         </button>
+      </header>
+
+      <div class="cw-messages" #messagesPane *ngIf="!loadingThread">
+        <ng-container *ngFor="let m of messages; let i = index">
+          <div class="cw-day" *ngIf="showDayDivider(i)">
+            {{ dayLabel(m.created_at) }}
+          </div>
+          <div
+            class="cw-bubble"
+            [class.out]="m.direction === 'outbound'"
+            [class.in]="m.direction === 'inbound'"
+          >
+            <p class="cw-bubble-text">{{ m.body }}</p>
+            <div class="cw-bubble-meta">
+              <time>{{ m.created_at | date: 'HH:mm' }}</time>
+              <span *ngIf="m.direction === 'outbound'">{{ m.status || 'enviado' }}</span>
+            </div>
+          </div>
+        </ng-container>
+        <div class="cw-empty-block cw-empty-block--thread" *ngIf="!messages.length">
+          <p class="cw-empty-title">Sin mensajes</p>
+          <p class="cw-empty-copy">Escribe abajo para responder al cliente.</p>
+        </div>
       </div>
+      <div class="cw-loading cw-loading--thread" *ngIf="loadingThread">
+        <mat-spinner diameter="28"></mat-spinner>
+      </div>
+
+      <form class="cw-composer" (ngSubmit)="sendReply()">
+        <textarea
+          rows="1"
+          [(ngModel)]="replyBody"
+          name="reply"
+          placeholder="Escribe un mensaje…"
+          (keydown)="onComposerKeydown($event)"
+          [disabled]="sending"
+        ></textarea>
+        <button type="submit" class="cw-send" [disabled]="sending || !replyBody.trim()" aria-label="Enviar">
+          {{ sending ? '…' : 'Enviar' }}
+        </button>
+      </form>
     </section>
   </div>
 
@@ -72,6 +131,11 @@
     <div class="cw-loading"><mat-spinner diameter="40"></mat-spinner></div>
   </ng-template>
   <ng-template #pickTpl>
-    <section class="cw-thread cw-panel cw-empty-panel">Selecciona una conversación.</section>
+    <section class="cw-thread cw-thread--empty">
+      <div class="cw-empty-block">
+        <p class="cw-empty-title">Selecciona una conversación</p>
+        <p class="cw-empty-copy">Elige un chat de la izquierda para ver el hilo y responder.</p>
+      </div>
+    </section>
   </ng-template>
 </div>
