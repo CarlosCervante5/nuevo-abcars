@@ -212,8 +212,9 @@
 
 .valuation-magenta-box {
   background: #fff;
-  border: 2px solid var(--val-magenta);
+  border: none;
   border-radius: 0.85rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
   padding: 1.35rem 1.25rem;
 }
 
