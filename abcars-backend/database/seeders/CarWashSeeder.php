@@ -41,6 +41,7 @@ class CarWashSeeder extends Seeder
             'view carwash',
             'manage carwash appointments',
             'manage carwash washers',
+            'manage carwash whatsapp',
         ]);
         Role::findByName('carwash_cashier')->syncPermissions([
             'view carwash',
