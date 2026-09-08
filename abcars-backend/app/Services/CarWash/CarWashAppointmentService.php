@@ -28,9 +28,16 @@ class CarWashAppointmentService
             throw new Exception('Sede CarWash no válida');
         }
 
-        $start = Carbon::parse($data['scheduled_start_at']);
+        $tz = 'America/Mexico_City';
+        $configuredTz = (string) config('app.timezone', '');
+        if ($configuredTz !== '' && $configuredTz !== 'UTC') {
+            $tz = $configuredTz;
+        }
+
+        // Interpretar hora de negocio en México y persistir en timezone de la app.
+        $start = Carbon::parse($data['scheduled_start_at'], $tz)->timezone(config('app.timezone', 'UTC'));
         $end = isset($data['scheduled_end_at'])
-            ? Carbon::parse($data['scheduled_end_at'])
+            ? Carbon::parse($data['scheduled_end_at'], $tz)->timezone(config('app.timezone', 'UTC'))
             : $start->copy()->addMinutes((int) $service->duration_minutes);
 
         $bayId = null;
