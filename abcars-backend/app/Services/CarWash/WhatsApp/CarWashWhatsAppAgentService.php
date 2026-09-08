@@ -5,6 +5,7 @@ namespace App\Services\CarWash\WhatsApp;
 use App\Models\CarWash\CarWashWhatsAppConversation;
 use App\Models\CarWash\CarWashWhatsAppMessage;
 use App\Services\CarWash\CarWashAssistantToolsService;
+use App\Services\CarWash\CarWashCustomerService;
 use App\Services\CarWash\CarWashSettingsService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -14,6 +15,7 @@ class CarWashWhatsAppAgentService
     public function __construct(
         private CarWashAssistantToolsService $tools,
         private CarWashSettingsService $settings,
+        private CarWashCustomerService $customers,
     ) {}
 
     /**
@@ -39,10 +41,24 @@ class CarWashWhatsAppAgentService
         $tomorrowMx = now('America/Mexico_City')->addDay()->format('Y-m-d');
         $nowMx = now('America/Mexico_City')->format('H:i');
 
+        $returningHint = '';
+        $returning = $this->customers->findByPhone($callerPhone);
+        if ($returning && $returning->last_service_name) {
+            $svc = $returning->last_service_name;
+            $code = $returning->last_service_code ?: '';
+            $loc = $returning->last_location_name ?: '';
+            $plates = $returning->last_vehicle_plates ?: '';
+            $returningHint = "CLIENTE RECURRENTE: su último servicio fue \"{$svc}\"".($code !== '' ? " (code={$code})" : '').
+                ($loc !== '' ? " en {$loc}" : '').
+                ($plates !== '' ? ", placas {$plates}" : '').
+                '. Si quiere agendar, ofrece primero ese mismo servicio (pregunta: “¿Repetimos el mismo?”) antes de listar otros.';
+        }
+
         $system = <<<PROMPT
 Eres el asistente de WhatsApp de ABCars CarWash. Atiendes citas de lavado de autos como un asesor amable y conversacional (no como un formulario).
 
 FECHA/HORA ACTUAL (America/Mexico_City): hoy={$todayMx} hora={$nowMx}; mañana={$tomorrowMx}.
+{$returningHint}
 
 Puedes: consultar servicios/sedes, revisar ocupación, agendar, consultar estatus y cancelar citas, consultar cuponera/sellos, o escalar a humano.
 Responde SIEMPRE en español, mensajes cortos de WhatsApp (1–4 líneas). Sin markdown pesado ni listas enormes.

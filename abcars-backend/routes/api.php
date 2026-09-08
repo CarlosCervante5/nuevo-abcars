@@ -49,6 +49,7 @@ use App\Http\Controllers\CarWash\CarWashWhatsAppInboxController;
 use App\Http\Controllers\CarWash\CarWashBootstrapController;
 use App\Http\Controllers\CarWash\CarWashLoyaltyController;
 use App\Http\Controllers\CarWash\CarWashPublicController;
+use App\Http\Controllers\CarWash\CarWashCustomerController;
 use Illuminate\Support\Facades\Route;
 
 // Información básica de la API (GET /api)
@@ -432,6 +433,10 @@ Route::prefix('carwash')->middleware([
     Route::get('/loyalty/settings', [CarWashLoyaltyController::class, 'settings']);
     Route::put('/loyalty/settings', [CarWashLoyaltyController::class, 'updateSettings']);
     Route::get('/loyalty/cards', [CarWashLoyaltyController::class, 'cards']);
+
+    Route::get('/customers', [CarWashCustomerController::class, 'index']);
+    Route::post('/customers/sync-delivered', [CarWashCustomerController::class, 'syncDelivered']);
+    Route::post('/customers/rebook-offers', [CarWashCustomerController::class, 'sendRebookOffers']);
 
     Route::get('/whatsapp/status', [CarWashWhatsAppWebhookController::class, 'status']);
     Route::post('/whatsapp/send', [CarWashWhatsAppWebhookController::class, 'send']);

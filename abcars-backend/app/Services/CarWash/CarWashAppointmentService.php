@@ -14,6 +14,7 @@ class CarWashAppointmentService
     public function __construct(
         private CarWashNotificationService $notifications,
         private CarWashLoyaltyService $loyalty,
+        private CarWashCustomerService $customers,
     ) {}
 
     /**
@@ -165,6 +166,7 @@ class CarWashAppointmentService
         if ($toStatus === 'delivered') {
             $fresh = $appointment->fresh() ?? $appointment;
             if (! $fresh->isInternalSalesDelivery()) {
+                $this->customers->rememberFromDelivered($fresh);
                 $award = $this->loyalty->awardOnDelivered($fresh);
                 $this->notifications->queueLoyaltyStampCard($fresh, $award);
             }
