@@ -160,6 +160,7 @@ class CarWashWhatsAppWebhookController extends Controller
 
     private function authorizeEvolution(Request $request): bool
     {
+        app(\App\Services\CarWash\CarWashSettingsService::class)->applyRuntime();
         $secret = (string) config('carwash.evolution.webhook_secret', '');
         if ($secret === '') {
             // Sin secret: acepta (sandbox). Recomendado configurar EVOLUTION_WEBHOOK_SECRET.
@@ -185,6 +186,7 @@ class CarWashWhatsAppWebhookController extends Controller
 
     private function authorizeTwilio(Request $request): bool
     {
+        app(\App\Services\CarWash\CarWashSettingsService::class)->applyRuntime();
         $secret = (string) config('carwash.twilio.webhook_secret', '');
         if ($secret === '') {
             return true;

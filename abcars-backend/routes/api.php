@@ -44,6 +44,7 @@ use App\Http\Controllers\CarWash\CarWashAppointmentController;
 use App\Http\Controllers\CarWash\CarWashCatalogController;
 use App\Http\Controllers\CarWash\CarWashPosController;
 use App\Http\Controllers\CarWash\CarWashWhatsAppWebhookController;
+use App\Http\Controllers\CarWash\CarWashWhatsAppSettingsController;
 use App\Http\Controllers\CarWash\CarWashWhatsAppInboxController;
 use App\Http\Controllers\CarWash\CarWashBootstrapController;
 use Illuminate\Support\Facades\Route;
@@ -412,6 +413,8 @@ Route::prefix('carwash')->middleware([
     Route::post('/locations', [CarWashCatalogController::class, 'storeLocation']);
     Route::get('/service-types', [CarWashCatalogController::class, 'serviceTypes']);
     Route::post('/service-types', [CarWashCatalogController::class, 'storeServiceType']);
+    Route::patch('/service-types/{uuid}', [CarWashCatalogController::class, 'updateServiceType']);
+    Route::delete('/service-types/{uuid}', [CarWashCatalogController::class, 'destroyServiceType']);
     Route::get('/washers', [CarWashCatalogController::class, 'washers']);
     Route::post('/washers', [CarWashCatalogController::class, 'storeWasher']);
     Route::get('/products', [CarWashCatalogController::class, 'products']);
@@ -425,6 +428,9 @@ Route::prefix('carwash')->middleware([
 
     Route::get('/whatsapp/status', [CarWashWhatsAppWebhookController::class, 'status']);
     Route::post('/whatsapp/send', [CarWashWhatsAppWebhookController::class, 'send']);
+    Route::get('/whatsapp/settings', [CarWashWhatsAppSettingsController::class, 'show']);
+    Route::put('/whatsapp/settings', [CarWashWhatsAppSettingsController::class, 'update']);
+    Route::get('/whatsapp/connection', [CarWashWhatsAppSettingsController::class, 'connection']);
     Route::get('/whatsapp/conversations', [CarWashWhatsAppInboxController::class, 'conversations']);
     Route::get('/whatsapp/conversations/{uuid}/messages', [CarWashWhatsAppInboxController::class, 'messages']);
     Route::post('/whatsapp/conversations/{uuid}/reply', [CarWashWhatsAppInboxController::class, 'reply']);

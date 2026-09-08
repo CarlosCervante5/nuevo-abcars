@@ -35,6 +35,7 @@ import { CarWashPosComponent } from "./pages/carwash-pos/carwash-pos.component";
 import { CarWashWhatsAppComponent } from "./pages/carwash-whatsapp/carwash-whatsapp.component";
 import { CarWashCalendarComponent } from "./pages/carwash-calendar/carwash-calendar.component";
 import { CarWashCatalogComponent } from "./pages/carwash-catalog/carwash-catalog.component";
+import { CarWashSettingsComponent } from "./pages/carwash-settings/carwash-settings.component";
 @NgModule({
     declarations: [
         AdminShellComponent,
@@ -75,7 +76,8 @@ import { CarWashCatalogComponent } from "./pages/carwash-catalog/carwash-catalog
         CarWashCatalogComponent,
         CarWashAppointmentsComponent,
         CarWashPosComponent,
-        CarWashWhatsAppComponent
+        CarWashWhatsAppComponent,
+        CarWashSettingsComponent
     ]
   })
   export class AdministradorModule { }

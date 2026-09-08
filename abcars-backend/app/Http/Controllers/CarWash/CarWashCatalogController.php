@@ -84,6 +84,57 @@ class CarWashCatalogController extends Controller
         }
     }
 
+    public function updateServiceType(Request $request, string $uuid)
+    {
+        try {
+            $service = CarWashServiceType::findByUuid($uuid);
+            if (! $service) {
+                return ApiResponseHelper::apiError('Servicio no encontrado', null, 404, 'CARWASH_SERVICE_NOT_FOUND');
+            }
+
+            $data = $request->validate([
+                'name' => 'sometimes|required|string|max:255',
+                'code' => 'sometimes|required|string|max:50',
+                'description' => 'nullable|string',
+                'duration_minutes' => 'sometimes|required|integer|min:5|max:1440',
+                'price' => 'sometimes|required|numeric|min:0',
+                'is_active' => 'nullable|boolean',
+                'sort_order' => 'nullable|integer|min:0',
+            ]);
+
+            if (isset($data['code']) && $data['code'] !== $service->code) {
+                if (CarWashServiceType::query()->where('code', $data['code'])->where('id', '!=', $service->id)->exists()) {
+                    return ApiResponseHelper::apiError('Ya existe un servicio con ese código', null, 422, 'CARWASH_SERVICE_CODE_EXISTS');
+                }
+            }
+
+            $service->fill($data);
+            $service->save();
+
+            return ApiResponseHelper::apiSuccess(200, 'Servicio actualizado', $service->fresh());
+        } catch (ValidationException $e) {
+            return ApiResponseHelper::validationError($e);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al actualizar servicio', $e->getMessage(), 500, 'CARWASH_SERVICE_UPDATE');
+        }
+    }
+
+    public function destroyServiceType(string $uuid)
+    {
+        try {
+            $service = CarWashServiceType::findByUuid($uuid);
+            if (! $service) {
+                return ApiResponseHelper::apiError('Servicio no encontrado', null, 404, 'CARWASH_SERVICE_NOT_FOUND');
+            }
+
+            $service->delete();
+
+            return ApiResponseHelper::apiSuccess(200, 'Servicio eliminado', ['uuid' => $uuid]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al eliminar servicio', $e->getMessage(), 500, 'CARWASH_SERVICE_DELETE');
+        }
+    }
+
     public function washers(Request $request)
     {
         $query = CarWashWasher::query()->with('location')->orderBy('display_name');

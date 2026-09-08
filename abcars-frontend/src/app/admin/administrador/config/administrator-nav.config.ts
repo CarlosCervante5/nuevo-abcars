@@ -177,6 +177,15 @@ export const ADMINISTRATOR_NAV_ITEMS: AdministratorNavItem[] = [
     requiredRoles: ['administrator', 'super_admin', 'carwash_admin', 'carwash_agent']
   },
   {
+    title: 'CarWash Settings',
+    icon: 'fi fi-rr-settings',
+    routerLink: ['carwash/settings'],
+    description: 'Configurar WhatsApp / Evolution / Twilio',
+    iconColor: 'blue',
+    requiredPermissions: ['manage carwash whatsapp'],
+    requiredRoles: ['administrator', 'super_admin', 'carwash_admin']
+  },
+  {
     title: 'Fotos de entregas',
     icon: 'fi fi-rr-gift',
     routerLink: ['delivery-photos'],

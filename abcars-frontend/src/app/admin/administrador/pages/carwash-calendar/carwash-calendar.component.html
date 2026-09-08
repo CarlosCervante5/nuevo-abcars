@@ -1,21 +1,4 @@
 <div class="cw-root adm-shell-page">
-  <div class="cw-hero">
-    <div class="cw-hero-text">
-      <p class="cw-eyebrow">Agenda</p>
-      <h1>Calendario en tiempo real</h1>
-      <p>
-        {{ total }} citas en el mes
-        <span *ngIf="lastSync"> · sync {{ lastSync | date: 'shortTime' }}</span>
-        <span class="cw-live" [class.off]="!live">{{ live ? '● EN VIVO' : '○ pausado' }}</span>
-      </p>
-    </div>
-    <div class="cw-hero-actions">
-      <button type="button" class="cw-btn cw-btn--ghost" (click)="toggleLive()">
-        {{ live ? 'Pausar' : 'Reanudar' }} live
-      </button>
-    </div>
-  </div>
-
   <div class="cw-toolbar">
     <div class="cw-month-nav">
       <button type="button" class="cw-btn cw-btn--ghost" (click)="prevMonth()">‹</button>
@@ -23,6 +6,11 @@
       <button type="button" class="cw-btn cw-btn--ghost" (click)="nextMonth()">›</button>
       <button type="button" class="cw-btn cw-btn--ghost" (click)="goToday()">Hoy</button>
     </div>
+    <p class="cw-toolbar-meta">
+      {{ total }} citas
+      <span *ngIf="lastSync"> · sync {{ lastSync | date: 'shortTime' }}</span>
+      <span class="cw-live" [class.off]="!live">{{ live ? '● EN VIVO' : '○ pausado' }}</span>
+    </p>
     <label class="cw-field">
       <span>Sede</span>
       <select [(ngModel)]="locationUuid" (change)="load(true)">
@@ -30,6 +18,9 @@
         <option *ngFor="let loc of locations" [value]="loc.uuid">{{ loc.name }}</option>
       </select>
     </label>
+    <button type="button" class="cw-btn cw-btn--ghost" (click)="toggleLive()">
+      {{ live ? 'Pausar' : 'Reanudar' }} live
+    </button>
     <button type="button" class="cw-btn cw-btn--primary" (click)="load(true)">Actualizar</button>
   </div>
 

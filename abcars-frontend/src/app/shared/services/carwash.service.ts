@@ -20,6 +20,7 @@ export interface CarWashServiceType {
   duration_minutes: number;
   price: number | string;
   is_active: boolean;
+  sort_order?: number;
 }
 
 export interface CarWashProduct {
@@ -72,12 +73,35 @@ export interface CarWashWhatsAppConversation {
   last_message_at?: string | null;
 }
 
-export interface CarWashWhatsAppMessage {
-  uuid: string;
-  direction: 'inbound' | 'outbound' | string;
-  body?: string | null;
-  status?: string | null;
-  created_at?: string;
+export interface CarWashWhatsAppSettings {
+  whatsapp_provider: string;
+  evolution: {
+    base_url: string;
+    api_key: string;
+    api_key_set?: boolean;
+    instance: string;
+    webhook_secret: string;
+    webhook_secret_set?: boolean;
+    timeout: number;
+  };
+  twilio: {
+    account_sid: string;
+    auth_token: string;
+    auth_token_set?: boolean;
+    from: string;
+    webhook_secret: string;
+    webhook_secret_set?: boolean;
+    timeout: number;
+  };
+  agent: {
+    enabled: boolean;
+    history_limit: number;
+    model: string;
+  };
+  public_whatsapp_phone?: string;
+  webhook_urls?: { evolution: string; twilio: string };
+  status?: { provider: string; configured: boolean; agent_enabled: boolean };
+  connection?: { ok?: boolean; state?: string | null; error?: string | null };
 }
 
 export interface CarWashAppointment {
@@ -201,11 +225,62 @@ export class CarWashService {
       .pipe(catchError((e) => this.handleError(e)));
   }
 
-  listServiceTypes() {
+  listServiceTypes(includeInactive = false) {
+    let params = new HttpParams();
+    if (includeInactive) params = params.set('include_inactive', '1');
     return this.http
       .get<{ status: number; message: string; data: CarWashServiceType[] }>(`${this.baseUrl}/api/carwash/service-types`, {
-        headers: this.authHeaders()
+        headers: this.authHeaders(),
+        params
       })
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  createServiceType(payload: {
+    name: string;
+    code: string;
+    description?: string | null;
+    duration_minutes: number;
+    price: number;
+    is_active?: boolean;
+    sort_order?: number;
+  }) {
+    return this.http
+      .post<{ status: number; message: string; data: CarWashServiceType }>(
+        `${this.baseUrl}/api/carwash/service-types`,
+        payload,
+        { headers: this.authHeaders() }
+      )
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  updateServiceType(
+    uuid: string,
+    payload: Partial<{
+      name: string;
+      code: string;
+      description: string | null;
+      duration_minutes: number;
+      price: number;
+      is_active: boolean;
+      sort_order: number;
+    }>
+  ) {
+    return this.http
+      .patch<{ status: number; message: string; data: CarWashServiceType }>(
+        `${this.baseUrl}/api/carwash/service-types/${uuid}`,
+        payload,
+        { headers: this.authHeaders() }
+      )
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  deleteServiceType(uuid: string) {
+    return this.http
+      .delete<{ status: number; message: string; data: unknown }>(
+        `${this.baseUrl}/api/carwash/service-types/${uuid}`,
+        { headers: this.authHeaders() }
+      )
       .pipe(catchError((e) => this.handleError(e)));
   }
 
@@ -265,6 +340,34 @@ export class CarWashService {
     return this.http
       .get<{ status: number; message: string; data: { provider: string; configured: boolean; agent_enabled: boolean } }>(
         `${this.baseUrl}/api/carwash/whatsapp/status`,
+        { headers: this.authHeaders() }
+      )
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  getWhatsAppSettings() {
+    return this.http
+      .get<{ status: number; message: string; data: CarWashWhatsAppSettings }>(
+        `${this.baseUrl}/api/carwash/whatsapp/settings`,
+        { headers: this.authHeaders() }
+      )
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  updateWhatsAppSettings(payload: Partial<CarWashWhatsAppSettings>) {
+    return this.http
+      .put<{ status: number; message: string; data: CarWashWhatsAppSettings }>(
+        `${this.baseUrl}/api/carwash/whatsapp/settings`,
+        payload,
+        { headers: this.authHeaders() }
+      )
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  getWhatsAppConnection() {
+    return this.http
+      .get<{ status: number; message: string; data: { ok?: boolean; state?: string | null; error?: string | null } }>(
+        `${this.baseUrl}/api/carwash/whatsapp/connection`,
         { headers: this.authHeaders() }
       )
       .pipe(catchError((e) => this.handleError(e)));

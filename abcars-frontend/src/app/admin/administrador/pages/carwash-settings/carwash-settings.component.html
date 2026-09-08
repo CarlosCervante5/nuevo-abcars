@@ -1,0 +1,131 @@
+<div class="cw-root adm-shell-page">
+  <div class="cw-toolbar">
+    <p class="cw-toolbar-meta">Settings WhatsApp</p>
+    <button type="button" class="cw-btn cw-btn--ghost" (click)="load()" [disabled]="loading || saving">Recargar</button>
+    <button type="button" class="cw-btn cw-btn--primary" (click)="save()" [disabled]="loading || saving">
+      {{ saving ? 'Guardando…' : 'Guardar' }}
+    </button>
+  </div>
+
+  <p class="cw-alert cw-alert--error" *ngIf="error">{{ error }}</p>
+  <p class="cw-alert cw-alert--ok" *ngIf="success">{{ success }}</p>
+
+  <div class="cw-loading" *ngIf="loading"><mat-spinner diameter="40"></mat-spinner></div>
+
+  <form class="cw-layout" *ngIf="!loading" (ngSubmit)="save()">
+    <section class="cw-panel">
+      <h2>Canal</h2>
+      <div class="cw-status-row" *ngIf="settings?.status as st">
+        <span class="cw-pill" [class.on]="st.configured">{{ st.configured ? 'Configurado' : 'Incompleto' }}</span>
+        <span class="cw-pill">Proveedor: {{ st.provider }}</span>
+        <span class="cw-pill" [class.on]="st.agent_enabled">Agente {{ st.agent_enabled ? 'ON' : 'OFF' }}</span>
+      </div>
+
+      <label class="cw-field">
+        <span>Proveedor</span>
+        <select [(ngModel)]="form.whatsapp_provider" name="whatsapp_provider">
+          <option value="evolution">Evolution API</option>
+          <option value="twilio">Twilio WhatsApp</option>
+        </select>
+      </label>
+
+      <label class="cw-field">
+        <span>Teléfono público (wa.me, solo dígitos)</span>
+        <input [(ngModel)]="form.public_whatsapp_phone" name="public_whatsapp_phone" placeholder="522221263726" />
+      </label>
+
+      <div class="cw-hooks" *ngIf="settings?.webhook_urls as urls">
+        <p><strong>Webhook Evolution</strong></p>
+        <code>{{ urls.evolution }}?secret=TU_SECRET</code>
+        <p><strong>Webhook Twilio</strong></p>
+        <code>{{ urls.twilio }}</code>
+      </div>
+    </section>
+
+    <section class="cw-panel" *ngIf="form.whatsapp_provider === 'evolution'">
+      <div class="cw-panel-head">
+        <h2>Evolution API</h2>
+        <button type="button" class="cw-btn cw-btn--ghost cw-btn--small" (click)="refreshConnection()" [disabled]="checking">
+          {{ checking ? 'Consultando…' : 'Probar conexión' }}
+        </button>
+      </div>
+      <p class="cw-conn" *ngIf="connectionState || connectionError">
+        Estado:
+        <strong [class.ok]="connectionState === 'open'">{{ connectionState || '—' }}</strong>
+        <span *ngIf="connectionError"> · {{ connectionError }}</span>
+      </p>
+      <div class="cw-edit-grid">
+        <label class="cw-field cw-field--full">
+          <span>Base URL</span>
+          <input [(ngModel)]="form.evolution.base_url" name="evo_base_url" placeholder="https://tu-evolution.up.railway.app" />
+        </label>
+        <label class="cw-field">
+          <span>Instancia</span>
+          <input [(ngModel)]="form.evolution.instance" name="evo_instance" placeholder="abcars-carwash" />
+        </label>
+        <label class="cw-field">
+          <span>Timeout (s)</span>
+          <input type="number" min="5" max="120" [(ngModel)]="form.evolution.timeout" name="evo_timeout" />
+        </label>
+        <label class="cw-field cw-field--full">
+          <span>API Key {{ settings?.evolution?.api_key_set ? '(dejá vacío para no cambiar)' : '' }}</span>
+          <input type="password" [(ngModel)]="form.evolution.api_key" name="evo_api_key" autocomplete="new-password"
+            [placeholder]="settings?.evolution?.api_key_set ? '•••• configurada' : 'AUTHENTICATION_API_KEY'" />
+        </label>
+        <label class="cw-field cw-field--full">
+          <span>Webhook secret {{ settings?.evolution?.webhook_secret_set ? '(dejá vacío para no cambiar)' : '' }}</span>
+          <input type="password" [(ngModel)]="form.evolution.webhook_secret" name="evo_webhook_secret" autocomplete="new-password"
+            [placeholder]="settings?.evolution?.webhook_secret_set ? '•••• configurado' : 'secret del webhook'" />
+        </label>
+      </div>
+    </section>
+
+    <section class="cw-panel" *ngIf="form.whatsapp_provider === 'twilio'">
+      <h2>Twilio</h2>
+      <div class="cw-edit-grid">
+        <label class="cw-field">
+          <span>Account SID</span>
+          <input [(ngModel)]="form.twilio.account_sid" name="tw_sid" />
+        </label>
+        <label class="cw-field">
+          <span>From (whatsapp:+…)</span>
+          <input [(ngModel)]="form.twilio.from" name="tw_from" placeholder="whatsapp:+14155238886" />
+        </label>
+        <label class="cw-field cw-field--full">
+          <span>Auth Token {{ settings?.twilio?.auth_token_set ? '(dejá vacío para no cambiar)' : '' }}</span>
+          <input type="password" [(ngModel)]="form.twilio.auth_token" name="tw_token" autocomplete="new-password"
+            [placeholder]="settings?.twilio?.auth_token_set ? '•••• configurado' : 'auth token'" />
+        </label>
+        <label class="cw-field cw-field--full">
+          <span>Webhook secret {{ settings?.twilio?.webhook_secret_set ? '(opcional)' : '' }}</span>
+          <input type="password" [(ngModel)]="form.twilio.webhook_secret" name="tw_wh" autocomplete="new-password" />
+        </label>
+      </div>
+    </section>
+
+    <section class="cw-panel">
+      <h2>Agente IA</h2>
+      <div class="cw-edit-grid">
+        <label class="cw-check">
+          <input type="checkbox" [(ngModel)]="form.agent.enabled" name="agent_enabled" />
+          Agente automático habilitado
+        </label>
+        <label class="cw-field">
+          <span>Historial (mensajes)</span>
+          <input type="number" min="1" max="50" [(ngModel)]="form.agent.history_limit" name="agent_history" />
+        </label>
+        <label class="cw-field">
+          <span>Modelo OpenAI</span>
+          <input [(ngModel)]="form.agent.model" name="agent_model" placeholder="gpt-4o-mini" />
+        </label>
+      </div>
+      <p class="cw-hint">La API key de OpenAI sigue en el servidor (`OPENAI_API_KEY`).</p>
+    </section>
+
+    <div class="cw-footer-actions">
+      <button type="submit" class="cw-btn cw-btn--primary" [disabled]="saving">
+        {{ saving ? 'Guardando…' : 'Guardar configuración' }}
+      </button>
+    </div>
+  </form>
+</div>

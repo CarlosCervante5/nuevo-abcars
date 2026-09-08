@@ -1,14 +1,7 @@
 <div class="cw-root adm-shell-page">
-  <div class="cw-hero">
-    <div class="cw-hero-text">
-      <p class="cw-eyebrow">Canal</p>
-      <h1>WhatsApp CarWash</h1>
-      <p>Bandeja de conversaciones (Evolution / Twilio).</p>
-      <small *ngIf="channelInfo">{{ channelInfo }}</small>
-    </div>
-  </div>
-
   <div class="cw-toolbar">
+    <p class="cw-toolbar-meta" *ngIf="channelInfo; else waTitle">{{ channelInfo }}</p>
+    <ng-template #waTitle><p class="cw-toolbar-meta">WhatsApp CarWash</p></ng-template>
     <label class="cw-field">
       <span>Buscar</span>
       <input [(ngModel)]="query" name="q" (keyup.enter)="reload()" placeholder="Teléfono o nombre" />

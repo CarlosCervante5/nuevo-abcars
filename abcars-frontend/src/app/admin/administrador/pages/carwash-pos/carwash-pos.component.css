@@ -15,47 +15,19 @@
   font-family: Inter, system-ui, sans-serif;
 }
 
-.cw-hero {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 1rem;
-  background: var(--cw-card);
-  border: 1px solid var(--cw-line);
-  border-radius: 1rem;
-  padding: 1.35rem 1.5rem;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-  margin-bottom: 1rem;
-}
-
-.cw-eyebrow {
-  margin: 0 0 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--cw-accent);
-}
-
-.cw-hero h1 {
+.cw-toolbar-meta {
   margin: 0;
-  font-size: 1.55rem;
-  font-weight: 800;
+  margin-right: auto;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--cw-ink);
+  align-self: center;
 }
 
-.cw-hero-text p:last-child {
-  margin: 0.35rem 0 0;
-  color: var(--cw-muted);
-}
-
-.cw-hero-actions,
 .cw-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem;
-}
-
-.cw-actions {
   justify-content: flex-end;
   margin-top: 0.35rem;
 }
@@ -83,7 +55,12 @@
 
 .cw-ticket {
   position: sticky;
-  top: 0.75rem;
+  top: 4rem;
+  max-height: calc(100vh - 4.5rem);
+  overflow-y: auto;
+  align-self: start;
+  z-index: 4;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
 .cw-section-title {
@@ -277,6 +254,9 @@
   }
 
   .cw-ticket {
-    position: static;
+    position: sticky;
+    top: 3.75rem;
+    max-height: calc(100vh - 4rem);
+    order: -1;
   }
 }

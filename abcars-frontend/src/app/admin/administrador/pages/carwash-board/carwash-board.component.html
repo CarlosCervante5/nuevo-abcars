@@ -1,13 +1,6 @@
 <div class="cw-root adm-shell-page">
-  <div class="cw-hero">
-    <div class="cw-hero-text">
-      <p class="cw-eyebrow">Operación</p>
-      <h1>Tablero del día</h1>
-      <p>Control de lavados por estatus · {{ total }} en agenda</p>
-    </div>
-  </div>
-
   <div class="cw-toolbar">
+    <p class="cw-toolbar-meta">Tablero · {{ total }} en agenda</p>
     <label class="cw-field">
       <span>Fecha</span>
       <input type="date" [(ngModel)]="date" (change)="load()" />

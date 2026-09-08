@@ -15,51 +15,24 @@
   font-family: Inter, system-ui, sans-serif;
 }
 
-.cw-hero {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 1rem;
-  background: var(--cw-card);
-  border: 1px solid var(--cw-line);
-  border-radius: 1rem;
-  padding: 1.35rem 1.5rem;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-  margin-bottom: 1rem;
-}
-
-.cw-eyebrow {
-  margin: 0 0 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--cw-accent);
-}
-
-.cw-hero h1 {
-  margin: 0;
-  font-size: 1.55rem;
-  font-weight: 800;
-}
-
-.cw-hero-text p:last-child {
-  margin: 0.35rem 0 0;
-  color: var(--cw-muted);
-}
-
-.cw-hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-}
-
 .cw-panel {
   background: var(--cw-card);
   border: 1px solid var(--cw-line);
   border-radius: 1rem;
   padding: 1.25rem 1.35rem;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.cw-panel-head {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--cw-line);
+}
+
+.cw-panel-head h1 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
 }
 
 .cw-form-grid {

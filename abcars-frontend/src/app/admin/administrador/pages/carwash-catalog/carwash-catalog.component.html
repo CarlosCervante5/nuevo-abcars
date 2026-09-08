@@ -1,22 +1,62 @@
 <div class="cw-root adm-shell-page">
-  <div class="cw-hero">
-    <div class="cw-hero-text">
-      <p class="cw-eyebrow">Catálogo</p>
-      <h1>Servicios y productos</h1>
-      <p>
-        {{ services.length }} servicios · {{ products.length }} productos
-      </p>
-    </div>
+  <div class="cw-toolbar">
+    <p class="cw-toolbar-meta">{{ services.length }} servicios · {{ products.length }} productos</p>
     <button type="button" class="cw-btn cw-btn--ghost" (click)="load()">Actualizar</button>
+    <button type="button" class="cw-btn cw-btn--primary" (click)="startCreate()" [disabled]="creating">
+      Nuevo servicio
+    </button>
   </div>
 
   <p class="cw-alert cw-alert--error" *ngIf="error">{{ error }}</p>
+  <p class="cw-alert cw-alert--ok" *ngIf="success">{{ success }}</p>
 
   <div class="cw-loading" *ngIf="loading"><mat-spinner diameter="40"></mat-spinner></div>
 
   <div class="cw-layout" *ngIf="!loading">
     <section class="cw-panel">
       <h2>Lista de servicios</h2>
+
+      <form class="cw-edit-form" *ngIf="creating || editingUuid" (ngSubmit)="save()">
+        <h3>{{ creating ? 'Nuevo servicio' : 'Editar servicio' }}</h3>
+        <div class="cw-edit-grid">
+          <label class="cw-field">
+            <span>Nombre</span>
+            <input [(ngModel)]="form.name" name="name" required (ngModelChange)="onNameChange()" />
+          </label>
+          <label class="cw-field">
+            <span>Código</span>
+            <input [(ngModel)]="form.code" name="code" required />
+          </label>
+          <label class="cw-field">
+            <span>Duración (min)</span>
+            <input type="number" min="5" [(ngModel)]="form.duration_minutes" name="duration_minutes" required />
+          </label>
+          <label class="cw-field">
+            <span>Precio público c/IVA</span>
+            <input type="number" min="0" step="1" [(ngModel)]="form.price" name="price" required />
+          </label>
+          <label class="cw-field">
+            <span>Orden</span>
+            <input type="number" min="0" [(ngModel)]="form.sort_order" name="sort_order" />
+          </label>
+          <label class="cw-check">
+            <input type="checkbox" [(ngModel)]="form.is_active" name="is_active" />
+            Activo
+          </label>
+          <label class="cw-field cw-field--full">
+            <span>Descripción / tarifas</span>
+            <textarea rows="2" [(ngModel)]="form.description" name="description"
+              placeholder="Ej. Internos: $172 · Público sin IVA: $216"></textarea>
+          </label>
+        </div>
+        <div class="cw-edit-actions">
+          <button type="button" class="cw-btn cw-btn--ghost" (click)="cancelEdit()" [disabled]="saving">Cancelar</button>
+          <button type="submit" class="cw-btn cw-btn--primary" [disabled]="saving">
+            {{ saving ? 'Guardando…' : 'Guardar' }}
+          </button>
+        </div>
+      </form>
+
       <div class="cw-table-wrap" *ngIf="services.length; else noServices">
         <table class="cw-table">
           <thead>
@@ -25,10 +65,12 @@
               <th>Duración</th>
               <th>Público c/IVA</th>
               <th>Código</th>
+              <th>Estado</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let s of services">
+            <tr *ngFor="let s of services" [class.inactive]="!s.is_active" [class.editing]="editingUuid === s.uuid">
               <td>
                 <strong>{{ s.name }}</strong>
                 <small *ngIf="s.description">{{ s.description }}</small>
@@ -36,12 +78,21 @@
               <td>{{ s.duration_minutes }} min</td>
               <td>${{ s.price | number: '1.0-0' }}</td>
               <td><code>{{ s.code }}</code></td>
+              <td>
+                <button type="button" class="cw-status" [class.on]="s.is_active" (click)="toggleActive(s)">
+                  {{ s.is_active ? 'Activo' : 'Inactivo' }}
+                </button>
+              </td>
+              <td class="cw-row-actions">
+                <button type="button" class="cw-btn cw-btn--ghost cw-btn--small" (click)="startEdit(s)">Editar</button>
+                <button type="button" class="cw-btn cw-btn--danger cw-btn--small" (click)="remove(s)">Eliminar</button>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
       <ng-template #noServices>
-        <p class="cw-empty">Sin servicios. Ejecuta el seeder CarWash.</p>
+        <p class="cw-empty">Sin servicios. Crea uno o ejecuta el seeder CarWash.</p>
       </ng-template>
     </section>
 
