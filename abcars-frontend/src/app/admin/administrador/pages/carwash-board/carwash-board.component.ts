@@ -9,6 +9,12 @@ import {
   CarWashService
 } from '@services/carwash.service';
 
+interface BoardDayTab {
+  date: string;
+  label: string;
+  count: number;
+}
+
 @Component({
   selector: 'app-carwash-board',
   standalone: true,
@@ -21,6 +27,7 @@ export class CarWashBoardComponent implements OnInit {
   locationUuid = '';
   locations: CarWashLocation[] = [];
   columns: { key: string; label: string; items: CarWashAppointment[] }[] = [];
+  dayTabs: BoardDayTab[] = [];
   loading = false;
   error: string | null = null;
   total = 0;
@@ -47,6 +54,8 @@ export class CarWashBoardComponent implements OnInit {
     no_show: null
   };
 
+  private readonly pipelineStatuses = new Set(['scheduled', 'checked_in', 'in_progress', 'ready', 'draft']);
+
   constructor(private carwash: CarWashService) {}
 
   ngOnInit(): void {
@@ -56,7 +65,7 @@ export class CarWashBoardComponent implements OnInit {
         this.locations = res.data || [];
       }
     });
-    this.load();
+    this.refreshDayTabs(true);
   }
 
   goToday(): void {
@@ -71,12 +80,93 @@ export class CarWashBoardComponent implements OnInit {
     this.load();
   }
 
+  selectDay(date: string): void {
+    this.date = date;
+    this.load();
+  }
+
+  onFiltersChange(): void {
+    this.refreshDayTabs(false);
+    this.load();
+  }
+
   private localDateKey(d: Date): string {
     const y = d.getFullYear();
     const m = `${d.getMonth() + 1}`.padStart(2, '0');
     const day = `${d.getDate()}`.padStart(2, '0');
 
     return `${y}-${m}-${day}`;
+  }
+
+  private mexicoDateKey(iso: string): string | null {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+  }
+
+  private isPipeline(item: CarWashAppointment): boolean {
+    return this.pipelineStatuses.has(item.status);
+  }
+
+  /** Días con citas pendientes (14 días) + auto-salta al más cercano si hoy no tiene pendientes. */
+  refreshDayTabs(autoJump: boolean): void {
+    const from = this.localDateKey(new Date());
+    const end = new Date();
+    end.setDate(end.getDate() + 14);
+    const to = this.localDateKey(end);
+
+    this.carwash.getCalendar(from, to, this.locationUuid || undefined).subscribe({
+      next: (res) => {
+        const byDate = res.data?.by_date || {};
+        const items = res.data?.items || [];
+        const counts = new Map<string, number>();
+
+        for (const item of items) {
+          if (!this.isPipeline(item)) continue;
+          const key = this.mexicoDateKey(item.scheduled_start_at || '') || '';
+          if (!key) continue;
+          counts.set(key, (counts.get(key) || 0) + 1);
+        }
+
+        // También usar by_date por si items viene vacío en algún deploy viejo
+        Object.entries(byDate).forEach(([key, dayItems]) => {
+          const n = (dayItems || []).filter((a) => this.isPipeline(a)).length;
+          if (n > 0) counts.set(key, Math.max(counts.get(key) || 0, n));
+        });
+
+        const tabs: BoardDayTab[] = [];
+        for (let i = 0; i <= 14; i++) {
+          const d = new Date();
+          d.setDate(d.getDate() + i);
+          const key = this.localDateKey(d);
+          const count = counts.get(key) || 0;
+          if (count === 0 && i > 0) continue;
+          tabs.push({
+            date: key,
+            label: this.dayTabLabel(d, i),
+            count
+          });
+        }
+        this.dayTabs = tabs.filter((t) => t.count > 0 || t.date === from);
+
+        if (autoJump) {
+          const todayCount = counts.get(from) || 0;
+          if (todayCount === 0) {
+            const next = [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]))[0];
+            if (next) this.date = next[0];
+          }
+        }
+
+        this.load();
+      },
+      error: () => this.load()
+    });
+  }
+
+  private dayTabLabel(d: Date, offset: number): string {
+    if (offset === 0) return 'Hoy';
+    if (offset === 1) return 'Mañana';
+    return d.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' });
   }
 
   load(): void {
@@ -104,7 +194,9 @@ export class CarWashBoardComponent implements OnInit {
     const next = this.nextStatus[item.status];
     if (!next) return;
     this.carwash.updateStatus(item.uuid, next).subscribe({
-      next: () => this.load(),
+      next: () => {
+        this.refreshDayTabs(false);
+      },
       error: (err) => {
         this.error = err?.error?.message || 'No se pudo actualizar el estatus';
       }

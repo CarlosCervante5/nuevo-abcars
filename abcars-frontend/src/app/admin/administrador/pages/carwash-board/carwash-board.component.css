@@ -47,6 +47,56 @@
   padding: 0.55rem 0.75rem;
 }
 
+.cw-day-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  margin: 0 0 0.9rem;
+  padding: 0.65rem 0.75rem;
+  background: var(--cw-card);
+  border: 1px solid var(--cw-line);
+  border-radius: 0.85rem;
+}
+
+.cw-day-tabs-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--cw-muted);
+  margin-right: 0.25rem;
+}
+
+.cw-day-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--cw-line);
+  background: var(--cw-surface);
+  color: var(--cw-ink);
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.cw-day-tab em {
+  font-style: normal;
+  background: #fef08a;
+  color: #854d0e;
+  border-radius: 999px;
+  min-width: 1.25rem;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.cw-day-tab.active {
+  border-color: #ca8a04;
+  background: #fef9c3;
+}
+
 .cw-field {
   display: grid;
   gap: 0.3rem;

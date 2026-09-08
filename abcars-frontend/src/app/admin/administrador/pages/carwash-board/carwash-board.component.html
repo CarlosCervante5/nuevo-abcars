@@ -1,6 +1,6 @@
 <div class="cw-root adm-shell-page">
   <div class="cw-toolbar">
-    <p class="cw-toolbar-meta">Tablero · {{ total }} en agenda · zona México</p>
+    <p class="cw-toolbar-meta">Tablero · {{ total }} en agenda · {{ date }}</p>
     <label class="cw-field">
       <span>Fecha</span>
       <input type="date" [(ngModel)]="date" (change)="load()" />
@@ -9,15 +9,30 @@
     <button type="button" class="cw-btn cw-btn--ghost" (click)="goTomorrow()">Mañana</button>
     <label class="cw-field">
       <span>Sede</span>
-      <select [(ngModel)]="locationUuid" (change)="load()">
+      <select [(ngModel)]="locationUuid" (change)="onFiltersChange()">
         <option value="">Todas</option>
         <option *ngFor="let loc of locations" [value]="loc.uuid">{{ loc.name }}</option>
       </select>
     </label>
-    <button type="button" class="cw-btn cw-btn--primary" (click)="load()">Actualizar</button>
+    <button type="button" class="cw-btn cw-btn--primary" (click)="onFiltersChange()">Actualizar</button>
   </div>
+
+  <div class="cw-day-tabs" *ngIf="dayTabs.length">
+    <span class="cw-day-tabs-label">Citas pendientes:</span>
+    <button
+      type="button"
+      class="cw-day-tab"
+      *ngFor="let tab of dayTabs"
+      [class.active]="tab.date === date"
+      (click)="selectDay(tab.date)"
+    >
+      {{ tab.label }}
+      <em *ngIf="tab.count">{{ tab.count }}</em>
+    </button>
+  </div>
+
   <p class="cw-hint" *ngIf="!loading && !error && total === 0">
-    Sin citas este día. Las agendas de WhatsApp por “mañana” aparecen al cambiar la fecha (botón Mañana).
+    Sin citas este día. Usa las pestañas de arriba o cambia la fecha: las agendas futuras no aparecen en “hoy”.
   </p>
 
   <div class="cw-loading" *ngIf="loading">
