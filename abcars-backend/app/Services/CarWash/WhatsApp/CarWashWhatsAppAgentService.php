@@ -40,25 +40,32 @@ class CarWashWhatsAppAgentService
         $nowMx = now('America/Mexico_City')->format('H:i');
 
         $system = <<<PROMPT
-Eres el asistente de WhatsApp de ABCars CarWash. Atiendes citas de lavado de autos.
+Eres el asistente de WhatsApp de ABCars CarWash. Atiendes citas de lavado de autos como un asesor amable y conversacional (no como un formulario).
 
 FECHA/HORA ACTUAL (America/Mexico_City): hoy={$todayMx} hora={$nowMx}; mañana={$tomorrowMx}.
 
-Puedes: listar servicios/sedes, revisar ocupación, agendar, consultar estatus y cancelar citas, consultar la cuponera/sellos de lealtad, o escalar a humano.
-Responde SIEMPRE en español, breve y claro (mensajes de WhatsApp, sin markdown pesado).
-No inventes precios ni horarios: usa las tools.
+Puedes: consultar servicios/sedes, revisar ocupación, agendar, consultar estatus y cancelar citas, consultar cuponera/sellos, o escalar a humano.
+Responde SIEMPRE en español, mensajes cortos de WhatsApp (1–4 líneas). Sin markdown pesado ni listas enormes.
+
+ESTILO CONVERSACIONAL (muy importante):
+1. Pide INFORMACIÓN POR PARTES: una pregunta a la vez. No pidas nombre+servicio+sede+hora+placas en el mismo mensaje.
+2. Orden sugerido al agendar: (a) qué necesita el auto / tipo de lavado → (b) sede → (c) día/hora → (d) nombre → (e) placas → (f) resumen y confirmación → (g) crear cita.
+3. Si el cliente ya dio varios datos juntos, úsalos y pregunta solo lo que falte.
+4. SERVICIOS: no sueltes un catálogo numerado completo. Usa carwash_list_services y ofrece 2–3 opciones en tono de asesor, p. ej. “¿Buscas algo rápido de exterior, o también aspirado/interior? El más pedido es X (\$.\.\.). También tenemos Y…”. Si pide “ver todos”, entonces sí muestra el resto breve.
+5. HORARIOS: ofrece 2–4 slots concretos (no una lista interminable). Pregunta “¿te late alguno de estos?”.
+6. SEDES: si hay pocas, puedes nombrarlas en una frase; si hay varias, pregunta por zona o ofrece la principal primero.
+7. Tras reunir datos, haz UN resumen corto y pregunta “¿Confirmamos?”. Solo entonces llama carwash_create_appointment.
 
 REGLAS DE AGENDAR (críticas):
 1. Para crear una cita DEBES llamar carwash_create_appointment.
-2. NUNCA digas que la cita "quedó agendada" / "con éxito" si la tool no devolvió ok:true y un uuid.
+2. NUNCA digas que la cita “quedó agendada” / “con éxito” si la tool no devolvió ok:true y un uuid.
 3. Si la tool responde ok:false o error, explica el problema y pide el dato faltante. No inventes confirmación.
 4. Si ok:true, confirma con: uuid, fecha/hora exacta (scheduled_local o scheduled_start_at), servicio, sede, placas y precio de la respuesta de la tool.
-5. Para scheduled_start_at usa SIEMPRE YYYY-MM-DD HH:MM con las fechas de arriba. Si el cliente dice "hoy" usa {$todayMx}. Si dice "mañana" usa {$tomorrowMx}. Nunca inventes otra fecha (p. ej. octubre) cuando pidieron hoy/mañana.
-6. Usa service_code / service_type_uuid y location_uuid que salgan de las tools (no inventes UUIDs).
-7. En carwash_get_availability: lee available_slots. Si available_count > 0, SÍ hay cupo. booked_slots/slots vacíos = día libre (todo disponible), NO digas que no hay horarios.
-8. Si preguntan por sellos, cuponera, puntos o recompensa: llama carwash_get_loyalty_stamps y muestra punch_card / message tal cual (emojis 🛒). No inventes sellos.
+5. Para scheduled_start_at usa SIEMPRE YYYY-MM-DD HH:MM con las fechas de arriba. Si el cliente dice “hoy” usa {$todayMx}. Si dice “mañana” usa {$tomorrowMx}. Nunca inventes otra fecha cuando pidieron hoy/mañana.
+6. Usa service_code / service_type_uuid y location_uuid de las tools (no inventes UUIDs).
+7. En carwash_get_availability: lee available_slots. Si available_count > 0, SÍ hay cupo. booked_slots/slots vacíos = día libre.
+8. Si preguntan por sellos/cuponera: carwash_get_loyalty_stamps y muestra punch_card/message tal cual.
 
-Confirma datos (nombre, servicio, sede, fecha/hora, placas) antes de crear una cita.
 El teléfono del cliente en este chat es: {$callerPhone}. Úsalo si no lo proporciona.
 Si piden autos seminuevos / inventario ABCars, indica amablemente que este canal es solo CarWash.
 PROMPT;
@@ -94,8 +101,8 @@ PROMPT;
                         'messages' => $messages,
                         'tools' => $this->tools->getToolsDefinitions(),
                         'tool_choice' => 'auto',
-                        'temperature' => 0.3,
-                        'max_tokens' => 700,
+                        'temperature' => 0.45,
+                        'max_tokens' => 550,
                     ]);
 
                 if (! $response->successful()) {
@@ -270,84 +277,53 @@ PROMPT;
 
         if (! $wantsSchedule && ! $wantsServices && ! $wantsLocations) {
             if (preg_match('/\b(hola|buenas|buen d[ií]a|info|informaci[oó]n)\b/u', $text)) {
-                return "¡Hola! Soy el asistente de ABCars CarWash.\nPuedo ayudarte a agendar un lavado o consultar tu *cuponera* de sellos. Escribe *agendar* o *mis sellos*.";
+                return "¡Hola! Soy el asistente de ABCars CarWash 👋\n¿Quieres *agendar un lavado* o consultar tus *sellos* de la cuponera?";
             }
 
             return null;
         }
 
-        $lines = ['¡Claro! Te ayudo con ABCars CarWash.'];
+        // Flujo conversacional por partes (sin volcar catálogo completo)
+        if ($wantsSchedule && ! $wantsServices && ! $wantsLocations) {
+            return "¡Claro! Te ayudo a agendar.\n¿Qué necesitas hoy: algo *rápido de exterior*, o también *aspirado/interior*?";
+        }
 
-        if ($wantsServices || $wantsSchedule) {
+        if ($wantsServices || ($wantsSchedule && $wantsServices)) {
             $services = $this->tools->execute('carwash_list_services', [], $callerPhone);
-            $items = $services['services'] ?? [];
-            if (is_iterable($items) && count($items) > 0) {
-                $lines[] = '';
-                $lines[] = '*Servicios:*';
-                $i = 1;
-                foreach ($items as $s) {
-                    $name = is_array($s) ? ($s['name'] ?? '') : ($s->name ?? '');
-                    $code = is_array($s) ? ($s['code'] ?? '') : ($s->code ?? '');
-                    $price = is_array($s) ? ($s['price'] ?? '') : ($s->price ?? '');
-                    $mins = is_array($s) ? ($s['duration_minutes'] ?? '') : ($s->duration_minutes ?? '');
-                    $priceFmt = is_numeric($price) ? '$'.number_format((float) $price, 0) : (string) $price;
-                    $lines[] = "{$i}. {$name} ({$code}) — {$priceFmt} · {$mins} min";
-                    $i++;
-                    if ($i > 12) {
-                        break;
+            $suggestions = $services['top_suggestions'] ?? [];
+            if (is_array($suggestions) && count($suggestions) > 0) {
+                $lines = ['Te sugiero estas opciones:'];
+                foreach (array_slice($suggestions, 0, 3) as $s) {
+                    $pitch = is_array($s) ? ($s['pitch'] ?? ($s['name'] ?? '')) : (string) $s;
+                    if ($pitch !== '') {
+                        $lines[] = '• '.$pitch;
                     }
                 }
+                $lines[] = '';
+                $lines[] = '¿Cuál te late, o prefieres que te explique la diferencia?';
+
+                return implode("\n", $lines);
             }
         }
 
-        if ($wantsLocations || $wantsSchedule) {
+        if ($wantsLocations) {
             $locations = $this->tools->execute('carwash_list_locations', [], $callerPhone);
             $items = $locations['locations'] ?? [];
-            if (is_iterable($items) && count($items) > 0) {
-                $lines[] = '';
-                $lines[] = '*Sedes:*';
-                $i = 1;
+            $names = [];
+            if (is_iterable($items)) {
                 foreach ($items as $loc) {
-                    $name = is_array($loc) ? ($loc['name'] ?? '') : ($loc->name ?? '');
-                    $addr = is_array($loc) ? ($loc['address'] ?? '') : ($loc->address ?? '');
-                    $lines[] = $addr !== '' && $addr !== null
-                        ? "{$i}. {$name} — {$addr}"
-                        : "{$i}. {$name}";
-                    $i++;
+                    $names[] = is_array($loc) ? ($loc['name'] ?? '') : ($loc->name ?? '');
                 }
+            }
+            $names = array_values(array_filter($names));
+            if (count($names) === 1) {
+                return "Atendemos en *{$names[0]}*. ¿Te queda bien esa sede?";
+            }
+            if (count($names) > 1) {
+                return 'Tenemos: '.implode(' y ', array_slice($names, 0, 3)).".\n¿Cuál te queda más cerca?";
             }
         }
 
-        if ($wantsSchedule) {
-            $locations = $this->tools->execute('carwash_list_locations', [], $callerPhone);
-            $firstLoc = null;
-            $locItems = $locations['locations'] ?? [];
-            if (is_iterable($locItems)) {
-                foreach ($locItems as $loc) {
-                    $firstLoc = is_array($loc) ? ($loc['uuid'] ?? null) : ($loc->uuid ?? null);
-                    break;
-                }
-            }
-            if ($firstLoc) {
-                $avail = $this->tools->execute('carwash_get_availability', [
-                    'location_uuid' => (string) $firstLoc,
-                    'date' => 'hoy',
-                ], $callerPhone);
-                $free = $avail['available_slots'] ?? [];
-                if (is_array($free) && count($free) > 0) {
-                    $lines[] = '';
-                    $lines[] = '*Horarios libres hoy:* '.implode(', ', array_slice($free, 0, 8));
-                } elseif (! empty($avail['message'])) {
-                    $lines[] = '';
-                    $lines[] = (string) $avail['message'];
-                }
-            }
-
-            $lines[] = '';
-            $lines[] = 'Para agendar necesito: *nombre*, *servicio* (código o nombre), *sede*, *fecha y hora*, y *placas*.';
-            $lines[] = 'Ejemplo: Juan Pérez, lavado-aspirado-secado, mañana 10:00, ABC123.';
-        }
-
-        return implode("\n", $lines);
+        return "Perfecto. Empecemos: ¿buscas un lavado *rápido* o uno más *completo* (aspirado/interior)?";
     }
 }

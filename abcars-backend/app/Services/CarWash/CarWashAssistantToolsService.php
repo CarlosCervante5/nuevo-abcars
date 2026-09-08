@@ -40,7 +40,7 @@ class CarWashAssistantToolsService
                 'type' => 'function',
                 'function' => [
                     'name' => 'carwash_list_services',
-                    'description' => 'Lista los paquetes de lavado activos con duración y precio.',
+                    'description' => 'Obtiene paquetes de lavado (precio/duración) para sugerir conversacionalmente 2–3 opciones. No vuelques toda la lista al cliente salvo que pida ver todos.',
                     'parameters' => ['type' => 'object', 'properties' => (object) [], 'required' => []],
                 ],
             ],
@@ -162,7 +162,23 @@ class CarWashAssistantToolsService
             ->orderBy('sort_order')
             ->get(['uuid', 'name', 'code', 'duration_minutes', 'price', 'description']);
 
-        return ['services' => $items];
+        $suggestions = [];
+        foreach ($items->take(3) as $s) {
+            $price = is_numeric($s->price) ? '$'.number_format((float) $s->price, 0) : (string) $s->price;
+            $mins = (int) ($s->duration_minutes ?? 0);
+            $suggestions[] = [
+                'code' => $s->code,
+                'name' => $s->name,
+                'pitch' => "{$s->name} ({$price}, ~{$mins} min)",
+            ];
+        }
+
+        return [
+            'ok' => true,
+            'services' => $items,
+            'top_suggestions' => $suggestions,
+            'assistant_instruction' => 'Ofrece top_suggestions en tono conversacional (2–3). Pregunta qué busca (rápido / completo / brillo). No pegues la lista completa salvo que el cliente pida ver todos.',
+        ];
     }
 
     private function listLocations(): array
@@ -172,7 +188,15 @@ class CarWashAssistantToolsService
             ->orderBy('name')
             ->get(['uuid', 'name', 'code', 'phone', 'address']);
 
-        return ['locations' => $items];
+        $names = $items->pluck('name')->filter()->values()->all();
+
+        return [
+            'ok' => true,
+            'locations' => $items,
+            'assistant_instruction' => count($names) <= 2
+                ? 'Menciona las sedes en una frase y pregunta cuál le queda mejor.'
+                : 'Pregunta por zona o ofrece primero la sede principal; no sueltes un menú largo.',
+        ];
     }
 
     private function getAvailability(array $args): array
@@ -252,7 +276,7 @@ class CarWashAssistantToolsService
         }
 
         $message = count($available) > 0
-            ? 'Hay horarios libres. Ofrece al cliente opciones de available_slots.'
+            ? 'Hay horarios libres. Ofrece solo 2–4 opciones de available_slots y pregunta cuál prefiere.'
             : (
                 $dayStart->isSameDay($now) && $now->hour >= $closeHour
                     ? 'El horario de hoy ya cerró ('.$openHour.':00–'.$closeHour.':00). Sugiere mañana u otro día.'
@@ -271,9 +295,11 @@ class CarWashAssistantToolsService
             // Compat: antes "slots" eran ocupados; ahora no confundir con libres
             'slots' => $booked,
             'available_slots' => $available,
+            'suggested_slots' => array_slice($available, 0, 4),
             'available_count' => count($available),
             'message' => $message,
             'hint' => 'Si available_count > 0 hay disponibilidad. booked_slots/slots vacíos significa día sin citas (libre), NO falta de cupo.',
+            'assistant_instruction' => 'Ofrece suggested_slots (máx. 4) en tono conversacional. No pegues toda available_slots.',
         ];
     }
 
