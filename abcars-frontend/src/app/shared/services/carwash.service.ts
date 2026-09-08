@@ -73,6 +73,14 @@ export interface CarWashWhatsAppConversation {
   last_message_at?: string | null;
 }
 
+export interface CarWashWhatsAppMessage {
+  uuid: string;
+  direction: 'inbound' | 'outbound' | string;
+  body?: string | null;
+  status?: string | null;
+  created_at?: string;
+}
+
 export interface CarWashWhatsAppSettings {
   whatsapp_provider: string;
   evolution: {
