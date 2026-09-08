@@ -73,35 +73,302 @@ class CarWashSeeder extends Seeder
             ]);
         }
 
+        $legacyCodes = ['express', 'completo', 'interior', 'encerado', 'detailing', 'premium', 'moto', 'flota'];
+        CarWashServiceType::query()->whereIn('code', $legacyCodes)->update(['is_active' => false]);
+
         $defaults = [
-            ['name' => 'Express', 'code' => 'express', 'duration_minutes' => 30, 'price' => 149, 'sort_order' => 1],
-            ['name' => 'Completo', 'code' => 'completo', 'duration_minutes' => 60, 'price' => 249, 'sort_order' => 2],
-            ['name' => 'Detailing', 'code' => 'detailing', 'duration_minutes' => 120, 'price' => 799, 'sort_order' => 3],
-            ['name' => 'Moto', 'code' => 'moto', 'duration_minutes' => 40, 'price' => 129, 'sort_order' => 4],
+            [
+                'name' => 'Lavado, Aspirado y Secado',
+                'code' => 'lavado-aspirado-secado',
+                'duration_minutes' => 45,
+                'price' => 250,
+                'sort_order' => 1,
+                'description' => 'Internos: $172 · Público sin IVA: $216 · Público con IVA: $250',
+            ],
+            [
+                'name' => 'Lavado, Aspirado, Secado y Pulido',
+                'code' => 'lavado-aspirado-secado-pulido',
+                'duration_minutes' => 75,
+                'price' => 400,
+                'sort_order' => 2,
+                'description' => 'Internos: $276 · Público sin IVA: $345 · Público con IVA: $400',
+            ],
+            [
+                'name' => 'Lavado, aspirado, secado, pulido y encerado',
+                'code' => 'lavado-pulido-encerado',
+                'duration_minutes' => 120,
+                'price' => 2000,
+                'sort_order' => 3,
+                'description' => 'Internos: $1,379 · Público sin IVA: $1,724 · Público con IVA: $2,000',
+            ],
+            [
+                'name' => 'Lavado de vestiduras',
+                'code' => 'lavado-vestiduras',
+                'duration_minutes' => 90,
+                'price' => 850,
+                'sort_order' => 4,
+                'description' => 'Internos: $586 · Público sin IVA: $733 · Público con IVA: $850',
+            ],
+            [
+                'name' => 'Lavado de vestiduras y alfombra intenso',
+                'code' => 'lavado-vestiduras-intenso',
+                'duration_minutes' => 150,
+                'price' => 1800,
+                'sort_order' => 5,
+                'description' => 'Internos: $1,241 · Público sin IVA: $1,552 · Público con IVA: $1,800',
+            ],
+            [
+                'name' => 'Descontaminación de lluvia ácida parabrisas',
+                'code' => 'descontaminacion-parabrisas',
+                'duration_minutes' => 45,
+                'price' => 600,
+                'sort_order' => 6,
+                'description' => 'Internos: $414 · Público sin IVA: $517 · Público con IVA: $600',
+            ],
+            [
+                'name' => 'Descontaminación de lluvia ácida carrocería',
+                'code' => 'descontaminacion-carroceria',
+                'duration_minutes' => 180,
+                'price' => 3000,
+                'sort_order' => 7,
+                'description' => 'Internos: $2,069 · Público sin IVA: $2,586 · Público con IVA: $3,000',
+            ],
+            [
+                'name' => 'Nanocerámico',
+                'code' => 'nanoceramico',
+                'duration_minutes' => 240,
+                'price' => 4000,
+                'sort_order' => 8,
+                'description' => 'Internos: $2,759 · Público sin IVA: $3,448 · Público con IVA: $4,000',
+            ],
+            [
+                'name' => 'Películas de protección solar',
+                'code' => 'peliculas-proteccion-solar',
+                'duration_minutes' => 180,
+                'price' => 3700,
+                'sort_order' => 9,
+                'description' => 'Internos: $2,552 · Público sin IVA: $3,190 · Público con IVA: $3,700',
+            ],
+            [
+                'name' => 'Filos de PPF',
+                'code' => 'filos-ppf',
+                'duration_minutes' => 60,
+                'price' => 350,
+                'sort_order' => 10,
+                'description' => 'Internos: $241 · Público sin IVA: $302 · Público con IVA: $350',
+            ],
+            [
+                'name' => 'Películas y filos de PPF',
+                'code' => 'peliculas-filos-ppf',
+                'duration_minutes' => 210,
+                'price' => 3900,
+                'sort_order' => 11,
+                'description' => 'Internos: $2,690 · Público sin IVA: $3,362 · Público con IVA: $3,900',
+            ],
+            [
+                'name' => 'PPF Pieza',
+                'code' => 'ppf-pieza',
+                'duration_minutes' => 120,
+                'price' => 3500,
+                'sort_order' => 12,
+                'description' => 'Internos: $2,414 · Público sin IVA: $3,017 · Público con IVA: $3,500',
+            ],
+            [
+                'name' => 'PPF Completo',
+                'code' => 'ppf-completo',
+                'duration_minutes' => 480,
+                'price' => 65000,
+                'sort_order' => 13,
+                'description' => 'Internos: $44,828 · Público sin IVA: $56,034 · Público con IVA: $65,000',
+            ],
+            [
+                'name' => 'Detallado de Rines (retoques)',
+                'code' => 'detallado-rines',
+                'duration_minutes' => 45,
+                'price' => 600,
+                'sort_order' => 14,
+                'description' => 'Internos: $414 · Público sin IVA: $517 · Público con IVA: $600',
+            ],
+            [
+                'name' => 'Detallado completo de ruedas (incluye rotores)',
+                'code' => 'detallado-ruedas',
+                'duration_minutes' => 90,
+                'price' => 750,
+                'sort_order' => 15,
+                'description' => 'Internos: $517 · Público sin IVA: $647 · Público con IVA: $750',
+            ],
+            [
+                'name' => 'Venta de nitrógeno (inflado llantas)',
+                'code' => 'nitrogeno-llantas',
+                'duration_minutes' => 20,
+                'price' => 600,
+                'sort_order' => 16,
+                'description' => 'Internos: $414 · Público sin IVA: $517 · Público con IVA: $600',
+            ],
+            [
+                'name' => 'Rehidratación de plásticos',
+                'code' => 'rehidratacion-plasticos',
+                'duration_minutes' => 60,
+                'price' => 700,
+                'sort_order' => 17,
+                'description' => 'Internos: $483 · Público sin IVA: $603 · Público con IVA: $700',
+            ],
+            [
+                'name' => 'Pintura de fascia sin reparación (express)',
+                'code' => 'pintura-fascia-express',
+                'duration_minutes' => 120,
+                'price' => 1800,
+                'sort_order' => 18,
+                'description' => 'Internos: $1,241 · Público sin IVA: $1,552 · Público con IVA: $1,800',
+            ],
         ];
 
         foreach ($defaults as $service) {
-            CarWashServiceType::firstOrCreate(
+            CarWashServiceType::updateOrCreate(
                 ['code' => $service['code']],
                 array_merge($service, [
-                    'description' => null,
                     'is_active' => true,
                 ])
             );
         }
 
         $products = [
-            ['name' => 'Aromatizante spray', 'sku' => 'AM-AROMA', 'price' => 49, 'stock' => 50],
-            ['name' => 'Funda volante', 'sku' => 'AM-FUNDA', 'price' => 129, 'stock' => 20],
-            ['name' => 'Toalla microfibra', 'sku' => 'AM-TOALLA', 'price' => 89, 'stock' => 40],
-            ['name' => 'Kit limpia vidrios', 'sku' => 'AM-VIDRIO', 'price' => 99, 'stock' => 25],
+            // Líquidos de lavado
+            [
+                'name' => 'Shampoo de lavado 5 L',
+                'sku' => 'LQ-SHAMPOO-5L',
+                'price' => 189,
+                'stock' => 30,
+                'description' => 'Líquido concentrado para espuma activa en carrocería.',
+            ],
+            [
+                'name' => 'Espuma activa 1 L',
+                'sku' => 'LQ-ESPUMA-1L',
+                'price' => 129,
+                'stock' => 40,
+                'description' => 'Pre-lavado con espuma de alto agarre.',
+            ],
+            [
+                'name' => 'Desengrasante motor 1 L',
+                'sku' => 'LQ-DESENGRASE-1L',
+                'price' => 99,
+                'stock' => 35,
+                'description' => 'Líquido desengrasante para compartimento de motor.',
+            ],
+            [
+                'name' => 'Limpiador de llantas 1 L',
+                'sku' => 'LQ-LLANTAS-1L',
+                'price' => 89,
+                'stock' => 45,
+                'description' => 'Removedor de polvo de freno y suciedad en rines.',
+            ],
+            [
+                'name' => 'Limpiavidrios 750 ml',
+                'sku' => 'LQ-VIDRIOS-750',
+                'price' => 59,
+                'stock' => 60,
+                'description' => 'Líquido antirrayas para cristales y espejos.',
+            ],
+            [
+                'name' => 'Limpiador de interiores 1 L',
+                'sku' => 'LQ-INTERIOR-1L',
+                'price' => 79,
+                'stock' => 40,
+                'description' => 'Multiusos para tablero, puertas y plásticos.',
+            ],
+            // Ceras
+            [
+                'name' => 'Cera líquida 500 ml',
+                'sku' => 'CX-LIQUIDA-500',
+                'price' => 149,
+                'stock' => 28,
+                'description' => 'Cera lista para aplicar con brillo rápido.',
+            ],
+            [
+                'name' => 'Cera en pasta 300 g',
+                'sku' => 'CX-PASTA-300',
+                'price' => 179,
+                'stock' => 22,
+                'description' => 'Cera en pasta de protección prolongada.',
+            ],
+            [
+                'name' => 'Spray wax 400 ml',
+                'sku' => 'CX-SPRAY-400',
+                'price' => 119,
+                'stock' => 35,
+                'description' => 'Cera en aerosol para mantenimiento entre lavados.',
+            ],
+            [
+                'name' => 'Sellador cerámico 50 ml',
+                'sku' => 'CX-CERAMICO-50',
+                'price' => 349,
+                'stock' => 12,
+                'description' => 'Protección tipo cerámica de alto brillo (prueba).',
+            ],
+            // Trapos / textiles
+            [
+                'name' => 'Trapo de microfibra (unidad)',
+                'sku' => 'TR-MICRO-1',
+                'price' => 35,
+                'stock' => 120,
+                'description' => 'Paño de microfibra para secado y detalle.',
+            ],
+            [
+                'name' => 'Pack 5 trapos microfibra',
+                'sku' => 'TR-MICRO-5',
+                'price' => 149,
+                'stock' => 40,
+                'description' => 'Paquete de 5 trapos de colores surtidos.',
+            ],
+            [
+                'name' => 'Toalla de secado grande',
+                'sku' => 'TR-SECADO-LG',
+                'price' => 129,
+                'stock' => 30,
+                'description' => 'Toalla absorbente 60×90 cm para carrocería.',
+            ],
+            [
+                'name' => 'Aplicador de cera (esponja)',
+                'sku' => 'TR-APLICADOR',
+                'price' => 29,
+                'stock' => 80,
+                'description' => 'Esponja aplicadora para ceras y selladores.',
+            ],
+            // Amenidades / extras
+            [
+                'name' => 'Aromatizante spray',
+                'sku' => 'AM-AROMA',
+                'price' => 49,
+                'stock' => 50,
+                'description' => 'Aromatizante para habitáculo.',
+            ],
+            [
+                'name' => 'Funda volante',
+                'sku' => 'AM-FUNDA',
+                'price' => 129,
+                'stock' => 20,
+                'description' => 'Funda universal de volante.',
+            ],
+            [
+                'name' => 'Toalla microfibra (venta)',
+                'sku' => 'AM-TOALLA',
+                'price' => 89,
+                'stock' => 40,
+                'description' => 'Toalla de microfibra para venta al cliente.',
+            ],
+            [
+                'name' => 'Kit limpia vidrios',
+                'sku' => 'AM-VIDRIO',
+                'price' => 99,
+                'stock' => 25,
+                'description' => 'Kit líquido + paño para cristales.',
+            ],
         ];
 
         foreach ($products as $product) {
-            CarWashProduct::firstOrCreate(
+            CarWashProduct::updateOrCreate(
                 ['sku' => $product['sku']],
                 array_merge($product, [
-                    'description' => null,
                     'is_active' => true,
                 ])
             );

@@ -11,6 +11,8 @@ import { TechnicalServiceComponent } from './pages/services/technical-service/te
 import { PartsComponent } from './pages/services/parts/parts.component';
 import { ValuationComponent } from './pages/services/valuation/valuation.component';
 import { ServicesComponent } from './pages/services/services.component';
+import { PublicCarwashComponent } from './pages/carwash/public-carwash.component';
+import { AccesoriosComponent } from './pages/accesorios/accesorios.component';
 import { PrivacidadDeUsoComponent } from './pages/externals/privacidad-de-uso/privacidad-de-uso.component';
 import { TerminosYCondicionesComponent } from './pages/externals/terminos-y-condiciones/terminos-y-condiciones.component';
 import { ScrollTopGuard } from './shared/guards/scroll-top.guard';
@@ -75,6 +77,16 @@ const routes: Routes = [
   {
     path: 'servicio-tecnico',
     component: TechnicalServiceComponent,
+    canActivate: [ScrollTopGuard]
+  },
+  {
+    path: 'carwash',
+    component: PublicCarwashComponent,
+    canActivate: [ScrollTopGuard]
+  },
+  {
+    path: 'accesorios',
+    component: AccesoriosComponent,
     canActivate: [ScrollTopGuard]
   },
   {

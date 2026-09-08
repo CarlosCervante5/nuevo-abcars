@@ -1,0 +1,108 @@
+<div class="cw-root adm-shell-page">
+  <div class="cw-hero">
+    <div class="cw-hero-text">
+      <p class="cw-eyebrow">Agenda</p>
+      <h1>Calendario en tiempo real</h1>
+      <p>
+        {{ total }} citas en el mes
+        <span *ngIf="lastSync"> · sync {{ lastSync | date: 'shortTime' }}</span>
+        <span class="cw-live" [class.off]="!live">{{ live ? '● EN VIVO' : '○ pausado' }}</span>
+      </p>
+    </div>
+    <div class="cw-hero-actions">
+      <button type="button" class="cw-btn cw-btn--ghost" (click)="toggleLive()">
+        {{ live ? 'Pausar' : 'Reanudar' }} live
+      </button>
+    </div>
+  </div>
+
+  <div class="cw-toolbar">
+    <div class="cw-month-nav">
+      <button type="button" class="cw-btn cw-btn--ghost" (click)="prevMonth()">‹</button>
+      <strong class="cw-month-label">{{ monthLabel }}</strong>
+      <button type="button" class="cw-btn cw-btn--ghost" (click)="nextMonth()">›</button>
+      <button type="button" class="cw-btn cw-btn--ghost" (click)="goToday()">Hoy</button>
+    </div>
+    <label class="cw-field">
+      <span>Sede</span>
+      <select [(ngModel)]="locationUuid" (change)="load(true)">
+        <option value="">Todas</option>
+        <option *ngFor="let loc of locations" [value]="loc.uuid">{{ loc.name }}</option>
+      </select>
+    </label>
+    <button type="button" class="cw-btn cw-btn--primary" (click)="load(true)">Actualizar</button>
+  </div>
+
+  <p class="cw-alert cw-alert--error" *ngIf="error">{{ error }}</p>
+
+  <div class="cw-layout" *ngIf="!loading || days.length; else loadingTpl">
+    <section class="cw-panel cw-cal">
+      <div class="cw-weekdays">
+        <span *ngFor="let w of weekDays">{{ w }}</span>
+      </div>
+      <div class="cw-grid">
+        <button
+          type="button"
+          class="cw-day"
+          *ngFor="let day of days"
+          [class.out]="!day.inMonth"
+          [class.today]="day.isToday"
+          [class.selected]="day.isSelected"
+          [class.has-items]="day.count > 0"
+          (click)="selectDay(day)"
+        >
+          <span class="cw-day-num">{{ day.dayNumber }}</span>
+          <span class="cw-day-badge" *ngIf="day.count">{{ day.count }}</span>
+          <div class="cw-day-dots" *ngIf="day.count">
+            <i *ngFor="let item of day.items | slice: 0:3" [attr.data-status]="item.status"></i>
+          </div>
+        </button>
+      </div>
+      <div class="cw-legend">
+        <span><i data-status="scheduled"></i> Agendada</span>
+        <span><i data-status="checked_in"></i> Recepción</span>
+        <span><i data-status="in_progress"></i> Lavado</span>
+        <span><i data-status="ready"></i> Lista</span>
+        <span><i data-status="delivered"></i> Entregada</span>
+      </div>
+    </section>
+
+    <aside class="cw-panel cw-day-panel">
+      <header class="cw-day-panel-head">
+        <div>
+          <h2>{{ selectedDateLabel }}</h2>
+          <p>{{ selectedItems.length }} citas</p>
+        </div>
+      </header>
+
+      <div class="cw-day-list" *ngIf="selectedItems.length; else emptyDay">
+        <article class="cw-appt" *ngFor="let item of selectedItems" [attr.data-status]="item.status">
+          <div class="cw-appt-time">{{ item.scheduled_start_at | date: 'shortTime' }}</div>
+          <div class="cw-appt-body">
+            <strong>{{ item.customer_name }}</strong>
+            <p>{{ item.service_type?.name || 'Servicio' }} · {{ item.vehicle_plates || 's/placas' }}</p>
+            <p class="cw-appt-meta">
+              {{ item.vehicle_brand }} {{ item.vehicle_model }}
+              · {{ statusLabels[item.status] || item.status }}
+            </p>
+            <button
+              type="button"
+              class="cw-btn cw-btn--small cw-btn--primary"
+              *ngIf="nextStatus[item.status]"
+              (click)="advance(item)"
+            >
+              Avanzar → {{ statusLabels[nextStatus[item.status]!] }}
+            </button>
+          </div>
+        </article>
+      </div>
+      <ng-template #emptyDay>
+        <p class="cw-empty">Sin citas este día.</p>
+      </ng-template>
+    </aside>
+  </div>
+
+  <ng-template #loadingTpl>
+    <div class="cw-loading"><mat-spinner diameter="40"></mat-spinner></div>
+  </ng-template>
+</div>

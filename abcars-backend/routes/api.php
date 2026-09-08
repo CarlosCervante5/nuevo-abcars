@@ -402,6 +402,7 @@ Route::prefix('carwash')->middleware([
     'role_or_permission:super_admin|administrator|carwash_admin|carwash_supervisor|carwash_cashier|carwash_washer|carwash_agent|view carwash|manage carwash appointments|manage carwash pos',
 ])->group(function () {
     Route::get('/board', [CarWashAppointmentController::class, 'board']);
+    Route::get('/calendar', [CarWashAppointmentController::class, 'calendar']);
     Route::get('/appointments', [CarWashAppointmentController::class, 'index']);
     Route::post('/appointments', [CarWashAppointmentController::class, 'store']);
     Route::get('/appointments/{uuid}', [CarWashAppointmentController::class, 'show']);

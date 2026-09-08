@@ -29,6 +29,8 @@ import { CarWashBoardComponent } from './pages/carwash-board/carwash-board.compo
 import { CarWashAppointmentsComponent } from './pages/carwash-appointments/carwash-appointments.component';
 import { CarWashPosComponent } from './pages/carwash-pos/carwash-pos.component';
 import { CarWashWhatsAppComponent } from './pages/carwash-whatsapp/carwash-whatsapp.component';
+import { CarWashCalendarComponent } from './pages/carwash-calendar/carwash-calendar.component';
+import { CarWashCatalogComponent } from './pages/carwash-catalog/carwash-catalog.component';
 const routes: Routes = [
   {
     path: '',
@@ -85,6 +87,8 @@ const routes: Routes = [
       { path: 'analytics', component: AnalyticsComponent, data: { embedInShell: true } },
       { path: 'publish-log', component: InventoryPublishLogComponent, data: { embedInShell: true } },
       { path: 'carwash/board', component: CarWashBoardComponent, data: { embedInShell: true } },
+      { path: 'carwash/calendar', component: CarWashCalendarComponent, data: { embedInShell: true } },
+      { path: 'carwash/catalog', component: CarWashCatalogComponent, data: { embedInShell: true } },
       { path: 'carwash/appointments', component: CarWashAppointmentsComponent, data: { embedInShell: true } },
       { path: 'carwash/pos', component: CarWashPosComponent, data: { embedInShell: true } },
       { path: 'carwash/whatsapp', component: CarWashWhatsAppComponent, data: { embedInShell: true } },

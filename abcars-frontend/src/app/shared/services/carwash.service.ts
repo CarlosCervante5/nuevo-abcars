@@ -16,8 +16,19 @@ export interface CarWashServiceType {
   uuid: string;
   name: string;
   code: string;
+  description?: string | null;
   duration_minutes: number;
   price: number | string;
+  is_active: boolean;
+}
+
+export interface CarWashProduct {
+  uuid: string;
+  name: string;
+  sku?: string | null;
+  description?: string | null;
+  price: number | string;
+  stock: number;
   is_active: boolean;
 }
 
@@ -27,15 +38,6 @@ export interface CarWashWasher {
   phone?: string | null;
   is_active: boolean;
   location?: CarWashLocation | null;
-}
-
-export interface CarWashProduct {
-  uuid: string;
-  name: string;
-  sku?: string | null;
-  price: number | string;
-  stock: number;
-  is_active: boolean;
 }
 
 export interface CarWashOrderItem {
@@ -128,6 +130,28 @@ export class CarWashService {
     if (locationUuid) params = params.set('location_uuid', locationUuid);
     return this.http
       .get<{ status: number; message: string; data: CarWashBoardResponse }>(`${this.baseUrl}/api/carwash/board`, {
+        headers: this.authHeaders(),
+        params
+      })
+      .pipe(catchError((e) => this.handleError(e)));
+  }
+
+  getCalendar(from: string, to: string, locationUuid?: string) {
+    let params = new HttpParams().set('from', from).set('to', to);
+    if (locationUuid) params = params.set('location_uuid', locationUuid);
+    return this.http
+      .get<{
+        status: number;
+        message: string;
+        data: {
+          from: string;
+          to: string;
+          total: number;
+          by_date: Record<string, CarWashAppointment[]>;
+          items: CarWashAppointment[];
+          generated_at: string;
+        };
+      }>(`${this.baseUrl}/api/carwash/calendar`, {
         headers: this.authHeaders(),
         params
       })

@@ -1,0 +1,94 @@
+<app-home-nav></app-home-nav>
+
+<main class="acc-public">
+  <section class="acc-toolbar">
+    <div class="acc-toolbar-inner">
+      <button type="button" class="acc-cat-btn" (click)="clearFilters()">Categorías</button>
+
+      <div class="acc-vehicle-search">
+        <span class="acc-vehicle-label">Buscar por vehículo</span>
+        <select [(ngModel)]="brand" name="brand">
+          <option value="">Marca</option>
+          <option *ngFor="let b of brands" [value]="b">{{ b }}</option>
+        </select>
+        <select [(ngModel)]="model" name="model">
+          <option value="">Modelo</option>
+          <option value="pickup">Pickup</option>
+          <option value="suv">SUV</option>
+          <option value="sedan">Sedán</option>
+          <option value="hatch">Hatchback</option>
+        </select>
+        <select [(ngModel)]="year" name="year">
+          <option value="">Año</option>
+          <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+        </select>
+      </div>
+
+      <label class="acc-search">
+        <span class="sr-only">Buscar</span>
+        <input type="search" [(ngModel)]="query" name="query" placeholder="Buscar" />
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+          />
+        </svg>
+      </label>
+    </div>
+  </section>
+
+  <section class="acc-hero">
+    <div class="acc-hero-inner">
+      <p class="acc-eyebrow">ABCars Parts</p>
+      <h1>Accesorios</h1>
+      <p>Equipamiento, portaequipaje y protección para tu vehículo.</p>
+    </div>
+  </section>
+
+  <section class="acc-categories">
+    <h2>Categorías principales</h2>
+    <div class="acc-grid">
+      <button
+        type="button"
+        class="acc-card"
+        *ngFor="let cat of categories"
+        [class.active]="selectedCategory === cat.slug"
+        (click)="selectCategory(cat.slug)"
+      >
+        <img [src]="cat.image" [alt]="cat.name" loading="lazy" />
+        <span class="acc-card-overlay">
+          <strong>{{ cat.name }}</strong>
+          <small>{{ cat.blurb }}</small>
+        </span>
+      </button>
+    </div>
+  </section>
+
+  <section class="acc-products" id="productos">
+    <div class="acc-products-head">
+      <h2>
+        {{ selectedCategory ? categoryLabel(selectedCategory) : 'Destacados' }}
+      </h2>
+      <button type="button" class="acc-link" *ngIf="selectedCategory || query" (click)="clearFilters()">
+        Ver todas
+      </button>
+    </div>
+
+    <div class="acc-product-grid" *ngIf="filteredProducts.length; else empty">
+      <article class="acc-product" *ngFor="let p of filteredProducts">
+        <div class="acc-product-body">
+          <p class="acc-product-cat">{{ categoryLabel(p.category) }}</p>
+          <h3>{{ p.name }}</h3>
+          <p class="acc-sku">{{ p.sku }}</p>
+          <p class="acc-price">${{ p.price | number: '1.0-0' }}</p>
+        </div>
+        <a class="acc-btn" [href]="whatsappUrl" target="_blank" rel="noopener noreferrer">Cotizar</a>
+      </article>
+    </div>
+    <ng-template #empty>
+      <p class="acc-empty">No hay productos con esos filtros. Prueba otra categoría o búsqueda.</p>
+    </ng-template>
+  </section>
+</main>
+
+<app-modern-footer></app-modern-footer>

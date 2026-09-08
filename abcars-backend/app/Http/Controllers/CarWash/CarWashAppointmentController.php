@@ -91,6 +91,64 @@ class CarWashAppointmentController extends Controller
         }
     }
 
+    /**
+     * Agenda por rango (calendario mensual / semanal).
+     */
+    public function calendar(Request $request)
+    {
+        try {
+            $from = Carbon::parse($request->input('from', now()->startOfMonth()->toDateString()))->startOfDay();
+            $to = Carbon::parse($request->input('to', now()->endOfMonth()->toDateString()))->endOfDay();
+
+            if ($from->gt($to)) {
+                return ApiResponseHelper::apiError('Rango de fechas inválido', null, 422, 'CARWASH_CALENDAR_RANGE');
+            }
+
+            if ($from->diffInDays($to) > 62) {
+                return ApiResponseHelper::apiError('El rango máximo es de 62 días', null, 422, 'CARWASH_CALENDAR_RANGE_MAX');
+            }
+
+            $query = CarWashAppointment::query()
+                ->with(['location', 'serviceType', 'bay', 'washer'])
+                ->whereBetween('scheduled_start_at', [$from, $to])
+                ->whereNotIn('status', ['cancelled'])
+                ->orderBy('scheduled_start_at');
+
+            if ($request->filled('location_uuid')) {
+                $location = CarWashLocation::findByUuid($request->string('location_uuid'));
+                if ($location) {
+                    $query->where('location_id', $location->id);
+                }
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->string('status'));
+            }
+
+            $items = $query->limit(500)->get();
+
+            $byDate = [];
+            foreach ($items as $item) {
+                $key = optional($item->scheduled_start_at)->toDateString() ?: 'sin-fecha';
+                if (! isset($byDate[$key])) {
+                    $byDate[$key] = [];
+                }
+                $byDate[$key][] = $item;
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Calendario CarWash', [
+                'from' => $from->toDateString(),
+                'to' => $to->toDateString(),
+                'total' => $items->count(),
+                'by_date' => $byDate,
+                'items' => $items,
+                'generated_at' => now()->toIso8601String(),
+            ]);
+        } catch (\Exception $e) {
+            return ApiResponseHelper::apiError('Error al obtener calendario CarWash', $e->getMessage(), 500, 'CARWASH_CALENDAR');
+        }
+    }
+
     public function store(Request $request)
     {
         try {

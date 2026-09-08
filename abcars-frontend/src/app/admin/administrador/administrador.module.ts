@@ -33,6 +33,8 @@ import { CarWashBoardComponent } from "./pages/carwash-board/carwash-board.compo
 import { CarWashAppointmentsComponent } from "./pages/carwash-appointments/carwash-appointments.component";
 import { CarWashPosComponent } from "./pages/carwash-pos/carwash-pos.component";
 import { CarWashWhatsAppComponent } from "./pages/carwash-whatsapp/carwash-whatsapp.component";
+import { CarWashCalendarComponent } from "./pages/carwash-calendar/carwash-calendar.component";
+import { CarWashCatalogComponent } from "./pages/carwash-catalog/carwash-catalog.component";
 @NgModule({
     declarations: [
         AdminShellComponent,
@@ -69,6 +71,8 @@ import { CarWashWhatsAppComponent } from "./pages/carwash-whatsapp/carwash-whats
         IntelimotorIntegrationComponent,
         InventoryPublishLogComponent,
         CarWashBoardComponent,
+        CarWashCalendarComponent,
+        CarWashCatalogComponent,
         CarWashAppointmentsComponent,
         CarWashPosComponent,
         CarWashWhatsAppComponent

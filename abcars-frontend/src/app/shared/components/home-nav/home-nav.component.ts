@@ -28,6 +28,8 @@ import Swal from 'sweetalert2';
           <div class="hidden lg:flex items-center space-x-8">
             <a [routerLink]="['/inventario']" class="nav-link" (click)="scrollToTop()" [ngClass]="isScrolled ? 'text-gray-700 hover:text-yellow-600' : 'text-white font-bold hover:text-yellow-300'">Vehículos</a>
             <a [routerLink]="['/servicios']" class="nav-link" (click)="scrollToTop()" [ngClass]="isScrolled ? 'text-gray-700 hover:text-yellow-600' : 'text-white font-bold hover:text-yellow-300'">Servicios</a>
+            <a [routerLink]="['/carwash']" class="nav-link" (click)="scrollToTop()" [ngClass]="isScrolled ? 'text-gray-700 hover:text-yellow-600' : 'text-white font-bold hover:text-yellow-300'">CarWash</a>
+            <a [routerLink]="['/accesorios']" class="nav-link" (click)="scrollToTop()" [ngClass]="isScrolled ? 'text-gray-700 hover:text-yellow-600' : 'text-white font-bold hover:text-yellow-300'">Accesorios</a>
             <a [routerLink]="['/financiamiento']" class="nav-link" (click)="scrollToTop()" [ngClass]="isScrolled ? 'text-gray-700 hover:text-yellow-600' : 'text-white font-bold hover:text-yellow-300'">Simulador de Crédito</a>
           </div>
 
@@ -146,6 +148,27 @@ import Swal from 'sweetalert2';
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
               </svg>
               <span>Servicios</span>
+            </a>
+
+            <a 
+              [routerLink]="['/carwash']" 
+              class="mobile-sidebar-item" 
+              (click)="closeMobileMenu(); scrollToTop()">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M5 6h14v12H5z"></path>
+              </svg>
+              <span>CarWash</span>
+            </a>
+
+            <a 
+              [routerLink]="['/accesorios']" 
+              class="mobile-sidebar-item" 
+              (click)="closeMobileMenu(); scrollToTop()">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+              </svg>
+              <span>Accesorios</span>
             </a>
             
             <a 

@@ -141,6 +141,24 @@ export const ADMINISTRATOR_NAV_ITEMS: AdministratorNavItem[] = [
     requiredRoles: ['administrator', 'super_admin', 'carwash_admin', 'carwash_supervisor', 'carwash_cashier', 'carwash_washer', 'carwash_agent']
   },
   {
+    title: 'CarWash Calendario',
+    icon: 'fi fi-rr-calendar',
+    routerLink: ['carwash/calendar'],
+    description: 'Agenda mensual en tiempo real',
+    iconColor: 'amber',
+    requiredPermissions: ['view carwash', 'manage carwash appointments'],
+    requiredRoles: ['administrator', 'super_admin', 'carwash_admin', 'carwash_supervisor', 'carwash_cashier', 'carwash_washer', 'carwash_agent']
+  },
+  {
+    title: 'CarWash Catálogo',
+    icon: 'fi fi-rr-box',
+    routerLink: ['carwash/catalog'],
+    description: 'Servicios y productos de prueba',
+    iconColor: 'blue',
+    requiredPermissions: ['view carwash', 'manage carwash catalog', 'manage carwash pos'],
+    requiredRoles: ['administrator', 'super_admin', 'carwash_admin', 'carwash_supervisor', 'carwash_cashier']
+  },
+  {
     title: 'CarWash POS',
     icon: 'fi fi-rr-shopping-cart',
     routerLink: ['carwash/pos'],

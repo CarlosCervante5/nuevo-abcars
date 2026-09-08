@@ -65,10 +65,11 @@ import { sortDealershipsForPublic, branchPublicTitle } from '../../utils/public-
             <h4 class="text-lg font-bold text-white mb-4">Servicios</h4>
             <ul class="space-y-2">
               <li><a [routerLink]="['/inventario']" class="text-gray-300 hover:text-white transition-colors text-sm">Venta de seminuevos</a></li>
+              <li><a [routerLink]="['/carwash']" class="text-gray-300 hover:text-white transition-colors text-sm">CarWash</a></li>
+              <li><a [routerLink]="['/accesorios']" class="text-gray-300 hover:text-white transition-colors text-sm">Accesorios</a></li>
               <li><a [routerLink]="['/financiamiento']" class="text-gray-300 hover:text-white transition-colors text-sm">Financiamiento</a></li>
               <li><a [routerLink]="['/seguros']" class="text-gray-300 hover:text-white transition-colors text-sm">Seguros automotrices</a></li>
               <li><a [routerLink]="['/servicio-tecnico']" class="text-gray-300 hover:text-white transition-colors text-sm">Servicio técnico</a></li>
-              <!-- <li><a [routerLink]="['/refacciones']" class="text-gray-300 hover:text-white transition-colors text-sm">Refacciones originales</a></li> -->
               <li><a [routerLink]="['/valuacion']" [queryParams]="valuationReferralParams" class="text-gray-300 hover:text-white transition-colors text-sm">Valuación gratuita</a></li>
             </ul>
           </div>

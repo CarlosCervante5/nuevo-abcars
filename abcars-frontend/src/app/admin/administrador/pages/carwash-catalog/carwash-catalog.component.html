@@ -1,0 +1,83 @@
+<div class="cw-root adm-shell-page">
+  <div class="cw-hero">
+    <div class="cw-hero-text">
+      <p class="cw-eyebrow">Catálogo</p>
+      <h1>Servicios y productos</h1>
+      <p>
+        {{ services.length }} servicios · {{ products.length }} productos
+      </p>
+    </div>
+    <button type="button" class="cw-btn cw-btn--ghost" (click)="load()">Actualizar</button>
+  </div>
+
+  <p class="cw-alert cw-alert--error" *ngIf="error">{{ error }}</p>
+
+  <div class="cw-loading" *ngIf="loading"><mat-spinner diameter="40"></mat-spinner></div>
+
+  <div class="cw-layout" *ngIf="!loading">
+    <section class="cw-panel">
+      <h2>Lista de servicios</h2>
+      <div class="cw-table-wrap" *ngIf="services.length; else noServices">
+        <table class="cw-table">
+          <thead>
+            <tr>
+              <th>Servicio</th>
+              <th>Duración</th>
+              <th>Público c/IVA</th>
+              <th>Código</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let s of services">
+              <td>
+                <strong>{{ s.name }}</strong>
+                <small *ngIf="s.description">{{ s.description }}</small>
+              </td>
+              <td>{{ s.duration_minutes }} min</td>
+              <td>${{ s.price | number: '1.0-0' }}</td>
+              <td><code>{{ s.code }}</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noServices>
+        <p class="cw-empty">Sin servicios. Ejecuta el seeder CarWash.</p>
+      </ng-template>
+    </section>
+
+    <section class="cw-panel">
+      <h2>Productos de prueba</h2>
+      <div *ngIf="productGroups.length; else noProducts">
+        <div class="cw-group" *ngFor="let group of productGroups">
+          <h3>{{ group.label }}</h3>
+          <div class="cw-table-wrap">
+            <table class="cw-table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>SKU</th>
+                  <th>Stock</th>
+                  <th>Precio</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of group.items">
+                  <td>
+                    <strong>{{ p.name }}</strong>
+                    <small *ngIf="p.description">{{ p.description }}</small>
+                  </td>
+                  <td><code>{{ p.sku || '—' }}</code></td>
+                  <td>{{ p.stock }}</td>
+                  <td>${{ p.price | number: '1.2-2' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <ng-template #noProducts>
+        <p class="cw-empty">Sin productos. Ejecuta el seeder CarWash.</p>
+      </ng-template>
+    </section>
+  </div>
+</div>
