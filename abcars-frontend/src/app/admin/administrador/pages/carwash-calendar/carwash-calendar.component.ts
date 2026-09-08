@@ -36,6 +36,7 @@ export class CarWashCalendarComponent implements OnInit, OnDestroy {
   days: CalendarDay[] = [];
   byDate: Record<string, CarWashAppointment[]> = {};
   selectedItems: CarWashAppointment[] = [];
+  upcoming: CarWashAppointment[] = [];
   total = 0;
   loading = false;
   error: string | null = null;
@@ -161,6 +162,7 @@ export class CarWashCalendarComponent implements OnInit, OnDestroy {
         this.lastSync = res.data?.generated_at || new Date().toISOString();
         this.buildGrid();
         this.refreshSelected();
+        this.refreshUpcoming(res.data?.items || []);
         this.loading = false;
       },
       error: (err) => {
@@ -199,6 +201,37 @@ export class CarWashCalendarComponent implements OnInit, OnDestroy {
     this.selectedItems = [...(this.byDate[this.selectedDate] || [])].sort((a, b) =>
       String(a.scheduled_start_at || '').localeCompare(String(b.scheduled_start_at || ''))
     );
+  }
+
+  private refreshUpcoming(items: CarWashAppointment[]): void {
+    const now = Date.now();
+    this.upcoming = [...(items || [])]
+      .filter((a) => {
+        const t = new Date(a.scheduled_start_at || '').getTime();
+        return Number.isFinite(t) && t >= now - 60 * 60 * 1000 && a.status !== 'cancelled';
+      })
+      .sort((a, b) =>
+        String(a.scheduled_start_at || '').localeCompare(String(b.scheduled_start_at || ''))
+      )
+      .slice(0, 8);
+  }
+
+  jumpToAppointment(item: CarWashAppointment): void {
+    const iso = item.scheduled_start_at || '';
+    const key = this.mexicoDateKey(iso);
+    if (!key) return;
+    const [y, m, d] = key.split('-').map(Number);
+    this.viewYear = y;
+    this.viewMonth = m - 1;
+    this.selectedDate = key;
+    this.load(true);
+  }
+
+  /** Día calendario en Mexico City (YYYY-MM-DD). */
+  private mexicoDateKey(iso: string): string | null {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
   }
 
   private buildGrid(): void {

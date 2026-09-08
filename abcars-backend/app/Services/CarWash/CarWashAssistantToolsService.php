@@ -77,11 +77,12 @@ class CarWashAssistantToolsService
                         'type' => 'object',
                         'properties' => [
                             'location_uuid' => ['type' => 'string', 'description' => 'UUID de sede (preferido) o nombre/código de sede.'],
-                            'service_code' => ['type' => 'string', 'description' => 'Código del servicio (ej. lavado-aspirado-secado) o nombre exacto del catálogo.'],
-                            'service_type_uuid' => ['type' => 'string', 'description' => 'UUID del servicio si lo tienes de carwash_list_services.'],
+                            'service_code' => ['type' => 'string', 'description' => 'Código EXACTO del catálogo (ej. lavado-pulido-encerado). Obligatorio si no mandas service_type_uuid.'],
+                            'service_type_uuid' => ['type' => 'string', 'description' => 'UUID del servicio de carwash_list_services.'],
+                            'service_name' => ['type' => 'string', 'description' => 'Nombre del servicio del catálogo (fallback si no tienes code/uuid).'],
                             'customer_name' => ['type' => 'string'],
                             'customer_phone' => ['type' => 'string', 'description' => 'Teléfono E.164 o 10 dígitos MX'],
-                            'scheduled_start_at' => ['type' => 'string', 'description' => 'Preferible YYYY-MM-DD HH:MM (America/Mexico_City). También acepta mañana 14:00 / mañana 2 PM.'],
+                            'scheduled_start_at' => ['type' => 'string', 'description' => 'Preferible YYYY-MM-DD HH:MM (America/Mexico_City). También acepta mañana 14:00 / mañana 2 PM. Respeta fechas concretas del cliente (p. ej. 2026-09-14 15:00).'],
                             'vehicle_plates' => ['type' => 'string'],
                             'vehicle_brand' => ['type' => 'string'],
                             'vehicle_model' => ['type' => 'string'],
@@ -177,7 +178,7 @@ class CarWashAssistantToolsService
             'ok' => true,
             'services' => $items,
             'top_suggestions' => $suggestions,
-            'assistant_instruction' => 'Ofrece top_suggestions en tono conversacional (2–3). Pregunta qué busca (rápido / completo / brillo). No pegues la lista completa salvo que el cliente pida ver todos.',
+            'assistant_instruction' => 'Ofrece top_suggestions en tono conversacional (2–3). Pregunta qué busca (rápido / completo / brillo). Al crear cita usa SIEMPRE el code exacto de services[].code (nunca inventes códigos). No pegues la lista completa salvo que el cliente pida ver todos.',
         ];
     }
 
@@ -340,12 +341,23 @@ class CarWashAssistantToolsService
             $service = $this->resolveServiceType(
                 isset($args['service_type_uuid']) ? (string) $args['service_type_uuid'] : null,
                 isset($args['service_code']) ? (string) $args['service_code'] : null,
+                isset($args['service_name']) ? (string) $args['service_name'] : null,
             );
             if (! $service) {
+                $catalog = CarWashServiceType::query()
+                    ->where('is_active', true)
+                    ->orderBy('sort_order')
+                    ->get(['code', 'name', 'price'])
+                    ->take(8)
+                    ->map(fn ($s) => $s->code.' = '.$s->name)
+                    ->values()
+                    ->all();
+
                 return [
                     'ok' => false,
-                    'error' => 'Servicio no encontrado. Usa carwash_list_services y pasa service_code o service_type_uuid.',
+                    'error' => 'Servicio no encontrado. Llama carwash_list_services y pasa service_code exacto (o service_type_uuid).',
                     'hint' => 'No digas al cliente que la cita quedó agendada.',
+                    'example_codes' => $catalog,
                 ];
             }
 
@@ -442,7 +454,7 @@ class CarWashAssistantToolsService
         }
     }
 
-    private function resolveServiceType(?string $uuid, ?string $codeOrName): ?CarWashServiceType
+    private function resolveServiceType(?string $uuid, ?string $codeOrName, ?string $altName = null): ?CarWashServiceType
     {
         if (filled($uuid)) {
             $byUuid = CarWashServiceType::findByUuid($uuid);
@@ -451,34 +463,113 @@ class CarWashAssistantToolsService
             }
         }
 
-        $raw = trim((string) $codeOrName);
-        if ($raw === '') {
-            return null;
-        }
+        $candidates = array_values(array_filter([
+            trim((string) $codeOrName),
+            trim((string) $altName),
+        ], fn ($v) => $v !== ''));
 
-        $byCode = CarWashServiceType::query()->where('code', $raw)->first();
-        if ($byCode) {
-            return $byCode;
-        }
+        foreach ($candidates as $raw) {
+            $byCode = CarWashServiceType::query()->where('code', $raw)->first();
+            if ($byCode) {
+                return $byCode;
+            }
 
-        $slug = Str::slug($raw);
-        if ($slug !== '') {
-            $bySlug = CarWashServiceType::query()->where('code', $slug)->first();
-            if ($bySlug) {
-                return $bySlug;
+            $slug = Str::slug($raw);
+            if ($slug !== '') {
+                $bySlug = CarWashServiceType::query()->where('code', $slug)->first();
+                if ($bySlug) {
+                    return $bySlug;
+                }
+            }
+
+            $byName = CarWashServiceType::query()
+                ->where('is_active', true)
+                ->where(function ($q) use ($raw) {
+                    $q->whereRaw('LOWER(name) = ?', [mb_strtolower($raw)])
+                        ->orWhere('name', 'like', '%'.$raw.'%');
+                })
+                ->orderBy('sort_order')
+                ->first();
+            if ($byName) {
+                return $byName;
+            }
+
+            $fuzzy = $this->fuzzyMatchServiceType($raw);
+            if ($fuzzy) {
+                return $fuzzy;
             }
         }
 
-        $byName = CarWashServiceType::query()
-            ->where('is_active', true)
-            ->where(function ($q) use ($raw) {
-                $q->whereRaw('LOWER(name) = ?', [mb_strtolower($raw)])
-                    ->orWhere('name', 'like', '%'.$raw.'%');
-            })
-            ->orderBy('sort_order')
-            ->first();
+        return null;
+    }
 
-        return $byName;
+    /**
+     * Empareja nombres/códigos inventados por la IA (p. ej. lavado-completo)
+     * con el catálogo real (lavado-pulido-encerado).
+     */
+    private function fuzzyMatchServiceType(string $raw): ?CarWashServiceType
+    {
+        $needle = $this->normalizeServiceKey($raw);
+        if ($needle === '' || mb_strlen($needle) < 4) {
+            return null;
+        }
+
+        $services = CarWashServiceType::query()->where('is_active', true)->orderBy('sort_order')->get();
+        $best = null;
+        $bestScore = 0.0;
+
+        foreach ($services as $service) {
+            $hayCode = $this->normalizeServiceKey((string) $service->code);
+            $hayName = $this->normalizeServiceKey((string) $service->name);
+            $score = 0.0;
+
+            if ($hayCode !== '' && (str_contains($hayCode, $needle) || str_contains($needle, $hayCode))) {
+                $score = max($score, 0.92);
+            }
+            if ($hayName !== '' && (str_contains($hayName, $needle) || str_contains($needle, $hayName))) {
+                $score = max($score, 0.9);
+            }
+
+            similar_text($needle, $hayCode, $pctCode);
+            similar_text($needle, $hayName, $pctName);
+            $score = max($score, $pctCode / 100, $pctName / 100);
+
+            // Tokens compartidos (encerado, pulido, vestiduras…)
+            $needleTokens = array_filter(explode('-', $needle), fn ($t) => mb_strlen($t) > 3);
+            $nameTokens = array_filter(explode('-', $hayName), fn ($t) => mb_strlen($t) > 3);
+            if ($needleTokens && $nameTokens) {
+                $shared = count(array_intersect($needleTokens, $nameTokens));
+                if ($shared > 0) {
+                    $score = max($score, $shared / max(count($needleTokens), 1) * 0.85 + 0.1);
+                }
+            }
+
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $best = $service;
+            }
+        }
+
+        if ($best && $bestScore >= 0.72) {
+            Log::info('CarWash service fuzzy matched', [
+                'raw' => $raw,
+                'matched_code' => $best->code,
+                'score' => round($bestScore, 3),
+            ]);
+
+            return $best;
+        }
+
+        return null;
+    }
+
+    private function normalizeServiceKey(string $value): string
+    {
+        $value = mb_strtolower(trim($value));
+        $value = Str::ascii($value);
+        $value = preg_replace('/[^a-z0-9]+/', '-', $value) ?? '';
+
+        return trim($value, '-');
     }
 
     private function resolveLocation(?string $uuidOrName, ?string $altName = null): ?CarWashLocation
@@ -601,10 +692,12 @@ class CarWashAssistantToolsService
         $threshold = $now->copy()->subHours(1);
         $raw = (string) $raw;
         $hasIsoDate = (bool) preg_match('/\d{4}-\d{2}-\d{2}/', $raw);
+        $hasExplicitDayMonth = (bool) preg_match('/\b\d{1,2}\s+de\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\b/ui', $raw)
+            || (bool) preg_match('/\b(lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo)\b/ui', $raw);
 
-        // Canal WhatsApp: casi siempre es hoy/mañana. Si la IA inventa una fecha lejana
-        // (con o sin ISO), anclar a hoy/mañana con la misma hora.
-        if ($start->gt($now->copy()->addDays(2))) {
+        // Solo anclar fechas absurdas (>21 días) inventadas por la IA.
+        // No pisar pedidos explícitos del cliente (p. ej. “lunes 14 de septiembre”).
+        if ($start->gt($now->copy()->addDays(21)) && ! $hasIsoDate && ! $hasExplicitDayMonth) {
             $candidate = $now->copy()->setTime($start->hour, $start->minute, 0);
             if ($candidate->lt($threshold)) {
                 $candidate->addDay();

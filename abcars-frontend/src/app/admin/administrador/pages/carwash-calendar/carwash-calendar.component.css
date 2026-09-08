@@ -26,6 +26,44 @@
   color: #94a3b8;
 }
 
+.cw-upcoming {
+  background: var(--cw-card);
+  border: 1px solid var(--cw-line);
+  border-radius: 0.9rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.cw-upcoming h2 {
+  margin: 0 0 0.55rem;
+  font-size: 0.92rem;
+  font-weight: 750;
+}
+
+.cw-upcoming-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.cw-upcoming-item {
+  display: grid;
+  gap: 0.1rem;
+  text-align: left;
+  border: 1px solid var(--cw-line);
+  background: var(--cw-surface);
+  border-radius: 0.65rem;
+  padding: 0.5rem 0.7rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--cw-ink);
+}
+
+.cw-upcoming-item:hover {
+  border-color: #facc15;
+  background: #fefce8;
+}
+
 .cw-toolbar,
 .cw-month-nav {
   display: flex;

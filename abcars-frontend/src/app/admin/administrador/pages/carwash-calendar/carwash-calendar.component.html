@@ -26,6 +26,17 @@
 
   <p class="cw-alert cw-alert--error" *ngIf="error">{{ error }}</p>
 
+  <section class="cw-upcoming" *ngIf="!loading && upcoming.length">
+    <h2>Próximas citas del mes</h2>
+    <div class="cw-upcoming-list">
+      <button type="button" class="cw-upcoming-item" *ngFor="let item of upcoming" (click)="jumpToAppointment(item)">
+        <strong>{{ item.customer_name }}</strong>
+        <span>{{ item.scheduled_start_at | date: 'EEE d MMM, shortTime' }}</span>
+        <span>{{ item.service_type?.name || 'Servicio' }}</span>
+      </button>
+    </div>
+  </section>
+
   <div class="cw-layout" *ngIf="!loading || days.length; else loadingTpl">
     <section class="cw-panel cw-cal">
       <div class="cw-weekdays">
