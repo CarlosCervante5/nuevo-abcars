@@ -7,8 +7,6 @@ import { CarWashService } from '@services/carwash.service';
 
 interface WashServiceRow {
   name: string;
-  priceInternal: number;
-  priceExVat: number;
   priceWithVat: number;
 }
 
@@ -34,56 +32,26 @@ export class PublicCarwashComponent implements OnInit {
     { label: 'Calidad', icon: 'trophy' }
   ];
 
-  /** Lista oficial de servicios (precios MXN). */
+  /** Lista oficial de servicios (precios MXN con IVA). */
   readonly services: WashServiceRow[] = [
-    { name: 'Lavado, Aspirado y Secado', priceInternal: 172, priceExVat: 216, priceWithVat: 250 },
-    { name: 'Lavado, Aspirado, Secado y Pulido', priceInternal: 276, priceExVat: 345, priceWithVat: 400 },
-    {
-      name: 'Lavado, aspirado, secado, pulido y encerado',
-      priceInternal: 1379,
-      priceExVat: 1724,
-      priceWithVat: 2000
-    },
-    { name: 'Lavado de vestiduras', priceInternal: 586, priceExVat: 733, priceWithVat: 850 },
-    {
-      name: 'Lavado de vestiduras y alfombra intenso',
-      priceInternal: 1241,
-      priceExVat: 1552,
-      priceWithVat: 1800
-    },
-    {
-      name: 'Descontaminación de lluvia ácida parabrisas',
-      priceInternal: 414,
-      priceExVat: 517,
-      priceWithVat: 600
-    },
-    {
-      name: 'Descontaminación de lluvia ácida carrocería',
-      priceInternal: 2069,
-      priceExVat: 2586,
-      priceWithVat: 3000
-    },
-    { name: 'Nanocerámico', priceInternal: 2759, priceExVat: 3448, priceWithVat: 4000 },
-    { name: 'Películas de protección solar', priceInternal: 2552, priceExVat: 3190, priceWithVat: 3700 },
-    { name: 'Filos de PPF', priceInternal: 241, priceExVat: 302, priceWithVat: 350 },
-    { name: 'Películas y filos de PPF', priceInternal: 2690, priceExVat: 3362, priceWithVat: 3900 },
-    { name: 'PPF Pieza', priceInternal: 2414, priceExVat: 3017, priceWithVat: 3500 },
-    { name: 'PPF Completo', priceInternal: 44828, priceExVat: 56034, priceWithVat: 65000 },
-    { name: 'Detallado de Rines (retoques)', priceInternal: 414, priceExVat: 517, priceWithVat: 600 },
-    {
-      name: 'Detallado completo de ruedas (incluye rotores)',
-      priceInternal: 517,
-      priceExVat: 647,
-      priceWithVat: 750
-    },
-    { name: 'Venta de nitrógeno (inflado llantas)', priceInternal: 414, priceExVat: 517, priceWithVat: 600 },
-    { name: 'Rehidratación de plásticos', priceInternal: 483, priceExVat: 603, priceWithVat: 700 },
-    {
-      name: 'Pintura de fascia sin reparación (express)',
-      priceInternal: 1241,
-      priceExVat: 1552,
-      priceWithVat: 1800
-    }
+    { name: 'Lavado, Aspirado y Secado', priceWithVat: 250 },
+    { name: 'Lavado, Aspirado, Secado y Pulido', priceWithVat: 400 },
+    { name: 'Lavado, aspirado, secado, pulido y encerado', priceWithVat: 2000 },
+    { name: 'Lavado de vestiduras', priceWithVat: 850 },
+    { name: 'Lavado de vestiduras y alfombra intenso', priceWithVat: 1800 },
+    { name: 'Descontaminación de lluvia ácida parabrisas', priceWithVat: 600 },
+    { name: 'Descontaminación de lluvia ácida carrocería', priceWithVat: 3000 },
+    { name: 'Nanocerámico', priceWithVat: 4000 },
+    { name: 'Películas de protección solar', priceWithVat: 3700 },
+    { name: 'Filos de PPF', priceWithVat: 350 },
+    { name: 'Películas y filos de PPF', priceWithVat: 3900 },
+    { name: 'PPF Pieza', priceWithVat: 3500 },
+    { name: 'PPF Completo', priceWithVat: 65000 },
+    { name: 'Detallado de Rines (retoques)', priceWithVat: 600 },
+    { name: 'Detallado completo de ruedas (incluye rotores)', priceWithVat: 750 },
+    { name: 'Venta de nitrógeno (inflado llantas)', priceWithVat: 600 },
+    { name: 'Rehidratación de plásticos', priceWithVat: 700 },
+    { name: 'Pintura de fascia sin reparación (express)', priceWithVat: 1800 }
   ];
 
   constructor(private carwash: CarWashService) {}

@@ -70,7 +70,7 @@
     <div class="cw-section-head">
       <p class="cw-kicker cw-kicker--dark">Lista de servicios</p>
       <h2>Precios oficiales</h2>
-      <p>Tarifas en MXN · el precio público con IVA es el cobrado al cliente final.</p>
+      <p>Tarifas en MXN · precio público con IVA.</p>
     </div>
 
     <div class="cw-price-table-wrap">
@@ -78,17 +78,13 @@
         <thead>
           <tr>
             <th>Servicio</th>
-            <th>Precio para internos</th>
-            <th>Público sin IVA</th>
-            <th>Público con IVA</th>
+            <th>Precio con IVA</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let s of services">
             <td class="cw-svc-name">{{ s.name }}</td>
-            <td>${{ s.priceInternal | number: '1.0-0' }}</td>
-            <td>${{ s.priceExVat | number: '1.0-0' }}</td>
             <td class="cw-svc-public">${{ s.priceWithVat | number: '1.0-0' }}</td>
             <td>
               <a class="cw-btn cw-btn--gold cw-btn--tiny" [href]="whatsappFor(s)" target="_blank" rel="noopener noreferrer">
