@@ -150,17 +150,6 @@ import Swal from 'sweetalert2';
             </a>
 
             <a 
-              [routerLink]="['/carwash']" 
-              class="mobile-sidebar-item" 
-              (click)="closeMobileMenu(); scrollToTop()">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M5 6h14v12H5z"></path>
-              </svg>
-              <span>CarWash</span>
-            </a>
-
-            <a 
               [routerLink]="['/accesorios']" 
               class="mobile-sidebar-item" 
               (click)="closeMobileMenu(); scrollToTop()">
