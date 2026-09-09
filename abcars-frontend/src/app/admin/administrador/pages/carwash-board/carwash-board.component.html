@@ -1,4 +1,18 @@
 <div class="cw-root adm-shell-page">
+  <header class="cw-brand-bar" aria-label="AB CarWash">
+    <img
+      class="cw-brand-logo"
+      src="assets/images/carwash/logo-abcarwash.png"
+      alt="AB CarWash"
+      width="220"
+      height="48"
+    />
+    <div class="cw-brand-copy">
+      <p class="cw-brand-kicker">Operación</p>
+      <p class="cw-brand-title">{{ view === 'orders' ? 'Órdenes' : 'Tablero' }}</p>
+    </div>
+  </header>
+
   <div class="cw-view-tabs" role="tablist">
     <button
       type="button"
@@ -24,7 +38,7 @@
 
   <div class="cw-toolbar">
     <p class="cw-toolbar-meta">
-      {{ view === 'orders' ? 'Órdenes' : 'Tablero' }} · {{ total }}
+      {{ total }} registros
       <span *ngIf="date"> · {{ date }}</span>
     </p>
     <label class="cw-field">

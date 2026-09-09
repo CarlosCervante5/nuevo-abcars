@@ -8,12 +8,63 @@
   --cw-line: #e2e8f0;
   --cw-card: #ffffff;
   --cw-surface: #f8fafc;
-  --cw-accent: #ca8a04;
-  --cw-accent-soft: #fef9c3;
+  --cw-accent: #dda62f;
+  --cw-accent-soft: #fef6e0;
+  --cw-brand-black: #0a0a0a;
+  --cw-brand-gray: #8d9497;
   max-width: 88rem;
   margin: 0 auto;
   color: var(--cw-ink);
   font-family: Inter, system-ui, sans-serif;
+}
+
+.cw-brand-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: var(--cw-brand-black);
+  border: 1px solid #1f1f1f;
+  border-radius: 0.9rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.cw-brand-logo {
+  display: block;
+  height: 2.6rem;
+  width: auto;
+  max-width: min(100%, 15rem);
+  object-fit: contain;
+}
+
+.cw-brand-copy {
+  margin-left: auto;
+  text-align: right;
+}
+
+.cw-brand-kicker {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cw-brand-gray);
+}
+
+.cw-brand-title {
+  margin: 0.1rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--cw-accent);
+}
+
+@media (max-width: 640px) {
+  .cw-brand-copy {
+    margin-left: 0;
+    text-align: left;
+    width: 100%;
+  }
 }
 
 .cw-toolbar {
@@ -93,8 +144,8 @@
 }
 
 .cw-day-tab.active {
-  border-color: #ca8a04;
-  background: #fef9c3;
+  border-color: var(--cw-accent);
+  background: var(--cw-accent-soft);
 }
 
 .cw-view-tabs {
@@ -122,6 +173,7 @@
   background: #fff;
   color: var(--cw-ink);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  outline: 1px solid rgba(221, 166, 47, 0.45);
 }
 
 .cw-orders-panel {
