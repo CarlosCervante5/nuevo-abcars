@@ -15,6 +15,8 @@ interface BoardDayTab {
   count: number;
 }
 
+type BoardView = 'kanban' | 'orders';
+
 @Component({
   selector: 'app-carwash-board',
   standalone: true,
@@ -23,23 +25,27 @@ interface BoardDayTab {
   imports: [CommonModule, FormsModule, RouterModule, MatProgressSpinnerModule]
 })
 export class CarWashBoardComponent implements OnInit {
+  view: BoardView = 'kanban';
   date = '';
   locationUuid = '';
+  statusFilter = '';
   locations: CarWashLocation[] = [];
   columns: { key: string; label: string; items: CarWashAppointment[] }[] = [];
+  orders: CarWashAppointment[] = [];
   dayTabs: BoardDayTab[] = [];
   loading = false;
   error: string | null = null;
   total = 0;
+  updatingUuid: string | null = null;
 
   readonly statusLabels: Record<string, string> = {
-    scheduled: 'Agendadas',
-    checked_in: 'Recepcionadas',
+    scheduled: 'Agendada',
+    checked_in: 'Recepcionada',
     in_progress: 'En lavado',
-    ready: 'Listas',
-    delivered: 'Entregadas',
+    ready: 'Lista',
+    delivered: 'Entregada',
     draft: 'Borrador',
-    cancelled: 'Canceladas',
+    cancelled: 'Cancelada',
     no_show: 'No show'
   };
 
@@ -53,6 +59,17 @@ export class CarWashBoardComponent implements OnInit {
     cancelled: null,
     no_show: null
   };
+
+  readonly statusOptions = [
+    'scheduled',
+    'checked_in',
+    'in_progress',
+    'ready',
+    'delivered',
+    'cancelled',
+    'no_show',
+    'draft'
+  ];
 
   private readonly pipelineStatuses = new Set(['scheduled', 'checked_in', 'in_progress', 'ready', 'draft']);
 
@@ -68,6 +85,12 @@ export class CarWashBoardComponent implements OnInit {
     this.refreshDayTabs(true);
   }
 
+  setView(view: BoardView): void {
+    if (this.view === view) return;
+    this.view = view;
+    this.load();
+  }
+
   goToday(): void {
     this.date = this.localDateKey(new Date());
     this.load();
@@ -77,6 +100,11 @@ export class CarWashBoardComponent implements OnInit {
     const d = new Date();
     d.setDate(d.getDate() + 1);
     this.date = this.localDateKey(d);
+    this.load();
+  }
+
+  clearDate(): void {
+    this.date = '';
     this.load();
   }
 
@@ -128,7 +156,6 @@ export class CarWashBoardComponent implements OnInit {
           counts.set(key, (counts.get(key) || 0) + 1);
         }
 
-        // También usar by_date por si items viene vacío en algún deploy viejo
         Object.entries(byDate).forEach(([key, dayItems]) => {
           const n = (dayItems || []).filter((a) => this.isPipeline(a)).length;
           if (n > 0) counts.set(key, Math.max(counts.get(key) || 0, n));
@@ -170,6 +197,14 @@ export class CarWashBoardComponent implements OnInit {
   }
 
   load(): void {
+    if (this.view === 'orders') {
+      this.loadOrders();
+    } else {
+      this.loadKanban();
+    }
+  }
+
+  private loadKanban(): void {
     this.loading = true;
     this.error = null;
     this.carwash.getBoard(this.date, this.locationUuid || undefined).subscribe({
@@ -178,7 +213,7 @@ export class CarWashBoardComponent implements OnInit {
         this.total = res.data?.total || 0;
         this.columns = ['scheduled', 'checked_in', 'in_progress', 'ready', 'delivered'].map((key) => ({
           key,
-          label: this.statusLabels[key] || key,
+          label: this.columnLabel(key),
           items: byStatus[key] || []
         }));
         this.loading = false;
@@ -190,25 +225,92 @@ export class CarWashBoardComponent implements OnInit {
     });
   }
 
+  private loadOrders(): void {
+    this.loading = true;
+    this.error = null;
+    this.carwash
+      .listAppointments({
+        date: this.date || undefined,
+        location_uuid: this.locationUuid || undefined,
+        status: this.statusFilter || undefined,
+        per_page: 100
+      })
+      .subscribe({
+        next: (res) => {
+          const page = res.data as { data?: CarWashAppointment[]; total?: number } | CarWashAppointment[];
+          const rows = Array.isArray(page) ? page : page?.data || [];
+          this.orders = rows;
+          this.total = Array.isArray(page) ? rows.length : page?.total ?? rows.length;
+          this.loading = false;
+        },
+        error: (err) => {
+          this.loading = false;
+          this.error = err?.error?.message || 'No se pudo cargar el listado de órdenes';
+        }
+      });
+  }
+
+  private columnLabel(key: string): string {
+    const map: Record<string, string> = {
+      scheduled: 'Agendadas',
+      checked_in: 'Recepcionadas',
+      in_progress: 'En lavado',
+      ready: 'Listas',
+      delivered: 'Entregadas'
+    };
+    return map[key] || this.statusLabels[key] || key;
+  }
+
   advance(item: CarWashAppointment): void {
     const next = this.nextStatus[item.status];
     if (!next) return;
-    this.carwash.updateStatus(item.uuid, next).subscribe({
+    this.setStatus(item, next);
+  }
+
+  setStatus(item: CarWashAppointment, status: string): void {
+    if (!status || status === item.status) return;
+    this.updatingUuid = item.uuid;
+    this.error = null;
+    this.carwash.updateStatus(item.uuid, status).subscribe({
       next: () => {
-        this.refreshDayTabs(false);
+        this.updatingUuid = null;
+        if (this.view === 'orders') {
+          this.loadOrders();
+          this.refreshDayTabs(false);
+        } else {
+          this.refreshDayTabs(false);
+        }
       },
       error: (err) => {
+        this.updatingUuid = null;
         this.error = err?.error?.message || 'No se pudo actualizar el estatus';
       }
     });
   }
 
   validateVin(item: CarWashAppointment): void {
+    this.updatingUuid = item.uuid;
     this.carwash.validateAppointmentVin(item.uuid).subscribe({
-      next: () => this.load(),
+      next: () => {
+        this.updatingUuid = null;
+        this.load();
+      },
       error: (err) => {
+        this.updatingUuid = null;
         this.error = err?.error?.message || 'No se pudo validar el VIN';
       }
     });
+  }
+
+  orderTypeLabel(item: CarWashAppointment): string {
+    return item.order_type === 'internal_sales_delivery' ? 'Ventas' : 'Público';
+  }
+
+  channelLabel(channel: string | undefined): string {
+    if (!channel) return '—';
+    if (channel === 'whatsapp') return 'WhatsApp';
+    if (channel === 'admin') return 'Admin';
+    if (channel === 'pos') return 'POS';
+    return channel;
   }
 }

@@ -1,12 +1,48 @@
 <div class="cw-root adm-shell-page">
+  <div class="cw-view-tabs" role="tablist">
+    <button
+      type="button"
+      class="cw-view-tab"
+      role="tab"
+      [class.active]="view === 'kanban'"
+      [attr.aria-selected]="view === 'kanban'"
+      (click)="setView('kanban')"
+    >
+      Tablero
+    </button>
+    <button
+      type="button"
+      class="cw-view-tab"
+      role="tab"
+      [class.active]="view === 'orders'"
+      [attr.aria-selected]="view === 'orders'"
+      (click)="setView('orders')"
+    >
+      Órdenes
+    </button>
+  </div>
+
   <div class="cw-toolbar">
-    <p class="cw-toolbar-meta">Tablero · {{ total }} en agenda · {{ date }}</p>
+    <p class="cw-toolbar-meta">
+      {{ view === 'orders' ? 'Órdenes' : 'Tablero' }} · {{ total }}
+      <span *ngIf="date"> · {{ date }}</span>
+    </p>
     <label class="cw-field">
       <span>Fecha</span>
       <input type="date" [(ngModel)]="date" (change)="load()" />
     </label>
     <button type="button" class="cw-btn cw-btn--ghost" (click)="goToday()">Hoy</button>
     <button type="button" class="cw-btn cw-btn--ghost" (click)="goTomorrow()">Mañana</button>
+    <button type="button" class="cw-btn cw-btn--ghost" *ngIf="view === 'orders'" (click)="clearDate()">Todas las fechas</button>
+    <label class="cw-field" *ngIf="view === 'orders'">
+      <span>Estatus</span>
+      <select [(ngModel)]="statusFilter" (change)="load()">
+        <option value="">Todos</option>
+        <option *ngFor="let s of statusOptions" [value]="s">
+          {{ statusLabels[s] || s }}
+        </option>
+      </select>
+    </label>
     <label class="cw-field">
       <span>Sede</span>
       <select [(ngModel)]="locationUuid" (change)="onFiltersChange()">
@@ -17,7 +53,7 @@
     <button type="button" class="cw-btn cw-btn--primary" (click)="onFiltersChange()">Actualizar</button>
   </div>
 
-  <div class="cw-day-tabs" *ngIf="dayTabs.length">
+  <div class="cw-day-tabs" *ngIf="dayTabs.length && view === 'kanban'">
     <span class="cw-day-tabs-label">Citas pendientes:</span>
     <button
       type="button"
@@ -31,8 +67,11 @@
     </button>
   </div>
 
-  <p class="cw-hint" *ngIf="!loading && !error && total === 0">
+  <p class="cw-hint" *ngIf="!loading && !error && view === 'kanban' && total === 0">
     Sin citas este día. Usa las pestañas de arriba o cambia la fecha: las agendas futuras no aparecen en “hoy”.
+  </p>
+  <p class="cw-hint" *ngIf="!loading && !error && view === 'orders' && orders.length === 0">
+    No hay órdenes con estos filtros. Prueba otra fecha o quita el filtro de estatus.
   </p>
 
   <div class="cw-loading" *ngIf="loading">
@@ -40,7 +79,8 @@
   </div>
   <p class="cw-alert cw-alert--error" *ngIf="error">{{ error }}</p>
 
-  <div class="cw-board" *ngIf="!loading && !error">
+  <!-- Kanban -->
+  <div class="cw-board" *ngIf="!loading && !error && view === 'kanban'">
     <section class="cw-column" *ngFor="let col of columns" [attr.data-status]="col.key">
       <header class="cw-column-head">
         <h2>{{ col.label }}</h2>
@@ -63,6 +103,7 @@
           type="button"
           class="cw-btn cw-btn--small cw-btn--ghost"
           *ngIf="item.order_type === 'internal_sales_delivery' && item.vehicle_vin && item.vin_validation_status !== 'matched'"
+          [disabled]="updatingUuid === item.uuid"
           (click)="validateVin(item)"
         >
           Validar VIN
@@ -71,6 +112,7 @@
           type="button"
           class="cw-btn cw-btn--small cw-btn--primary"
           *ngIf="nextStatus[item.status]"
+          [disabled]="updatingUuid === item.uuid"
           (click)="advance(item)"
         >
           Avanzar → {{ statusLabels[nextStatus[item.status]!] }}
@@ -78,5 +120,85 @@
       </article>
       <p class="cw-empty" *ngIf="col.items.length === 0">Sin citas</p>
     </section>
+  </div>
+
+  <!-- Tabla de órdenes -->
+  <div class="cw-orders-panel" *ngIf="!loading && !error && view === 'orders'">
+    <div class="cw-table-wrap">
+      <table class="cw-orders-table">
+        <thead>
+          <tr>
+            <th>Hora</th>
+            <th>Cliente</th>
+            <th>Vehículo</th>
+            <th>Servicio</th>
+            <th>Canal</th>
+            <th>Tipo</th>
+            <th>Estatus</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of orders" [class.cw-row--sales]="item.order_type === 'internal_sales_delivery'">
+            <td class="cw-td-time">
+              <strong>{{ item.scheduled_start_at | date: 'shortTime' }}</strong>
+              <span>{{ item.scheduled_start_at | date: 'dd/MM' }}</span>
+            </td>
+            <td>
+              <strong>{{ item.customer_name }}</strong>
+              <span class="cw-muted">{{ item.customer_phone }}</span>
+            </td>
+            <td>
+              <span>{{ item.vehicle_brand }} {{ item.vehicle_model }}</span>
+              <span class="cw-muted">{{ item.vehicle_plates || 's/placas' }}</span>
+              <span class="cw-muted" *ngIf="item.vehicle_vin">VIN {{ item.vehicle_vin }}</span>
+            </td>
+            <td>{{ item.service_type?.name || '—' }}</td>
+            <td>{{ channelLabel(item.channel) }}</td>
+            <td>
+              <span class="cw-pill" [class.cw-pill--sales]="item.order_type === 'internal_sales_delivery'">
+                {{ orderTypeLabel(item) }}
+              </span>
+            </td>
+            <td>
+              <select
+                class="cw-status-select"
+                [attr.data-status]="item.status"
+                [ngModel]="item.status"
+                [disabled]="updatingUuid === item.uuid"
+                (ngModelChange)="setStatus(item, $event)"
+              >
+                <option *ngFor="let s of statusOptions" [value]="s">
+                  {{ statusLabels[s] || s }}
+                </option>
+              </select>
+            </td>
+            <td class="cw-td-actions">
+              <button
+                type="button"
+                class="cw-btn cw-btn--small cw-btn--ghost"
+                *ngIf="item.order_type === 'internal_sales_delivery' && item.vehicle_vin && item.vin_validation_status !== 'matched'"
+                [disabled]="updatingUuid === item.uuid"
+                (click)="validateVin(item)"
+              >
+                Validar VIN
+              </button>
+              <button
+                type="button"
+                class="cw-btn cw-btn--small cw-btn--primary"
+                *ngIf="nextStatus[item.status]"
+                [disabled]="updatingUuid === item.uuid"
+                (click)="advance(item)"
+              >
+                Avanzar → {{ statusLabels[nextStatus[item.status]!] }}
+              </button>
+              <span class="cw-muted" *ngIf="!nextStatus[item.status] && !(item.order_type === 'internal_sales_delivery' && item.vehicle_vin && item.vin_validation_status !== 'matched')">
+                —
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

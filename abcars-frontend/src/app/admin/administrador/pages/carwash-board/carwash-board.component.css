@@ -97,6 +97,159 @@
   background: #fef9c3;
 }
 
+.cw-view-tabs {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  margin-bottom: 0.85rem;
+  background: var(--cw-surface);
+  border: 1px solid var(--cw-line);
+  border-radius: 0.75rem;
+}
+
+.cw-view-tab {
+  border: 0;
+  background: transparent;
+  color: var(--cw-muted);
+  border-radius: 0.55rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cw-view-tab.active {
+  background: #fff;
+  color: var(--cw-ink);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.cw-orders-panel {
+  background: var(--cw-card);
+  border: 1px solid var(--cw-line);
+  border-radius: 0.9rem;
+  overflow: hidden;
+}
+
+.cw-table-wrap {
+  overflow-x: auto;
+}
+
+.cw-orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 68rem;
+  font-size: 0.86rem;
+}
+
+.cw-orders-table th {
+  text-align: left;
+  padding: 0.75rem 0.85rem;
+  background: var(--cw-surface);
+  border-bottom: 1px solid var(--cw-line);
+  color: var(--cw-muted);
+  font-size: 0.75rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.cw-orders-table td {
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid var(--cw-line);
+  vertical-align: top;
+}
+
+.cw-orders-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.cw-row--sales {
+  background: #fffbeb;
+}
+
+.cw-td-time,
+.cw-orders-table td {
+  display: table-cell;
+}
+
+.cw-td-time strong,
+.cw-orders-table td strong {
+  display: block;
+}
+
+.cw-muted {
+  display: block;
+  color: var(--cw-muted);
+  font-size: 0.78rem;
+  margin-top: 0.15rem;
+}
+
+.cw-pill {
+  display: inline-flex;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.cw-pill--sales {
+  background: #fef08a;
+  color: #854d0e;
+}
+
+.cw-status-select {
+  border: 1px solid var(--cw-line);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 650;
+  background: #fff;
+  min-width: 9.5rem;
+}
+
+.cw-status-select[data-status='scheduled'] {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.cw-status-select[data-status='checked_in'] {
+  border-color: #fdba74;
+  background: #fff7ed;
+}
+
+.cw-status-select[data-status='in_progress'] {
+  border-color: #fde047;
+  background: #fefce8;
+}
+
+.cw-status-select[data-status='ready'] {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.cw-status-select[data-status='delivered'] {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.cw-status-select[data-status='cancelled'],
+.cw-status-select[data-status='no_show'] {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.cw-td-actions {
+  white-space: nowrap;
+}
+
+.cw-td-actions .cw-btn {
+  margin: 0.15rem 0.15rem 0.15rem 0;
+}
+
 .cw-field {
   display: grid;
   gap: 0.3rem;
