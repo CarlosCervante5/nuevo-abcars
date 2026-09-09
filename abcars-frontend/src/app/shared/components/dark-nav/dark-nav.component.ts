@@ -28,7 +28,6 @@ import Swal from 'sweetalert2';
           <div class="hidden lg:flex items-center space-x-8">
             <a [routerLink]="['/inventario']" [queryParams]="referralLinkParams" class="nav-link text-gray-700 hover:text-yellow-600" (click)="scrollToTop()">Vehículos</a>
             <a [routerLink]="['/servicios']" [queryParams]="referralLinkParams" class="nav-link text-gray-700 hover:text-yellow-600" (click)="scrollToTop()">Servicios</a>
-            <a [routerLink]="['/carwash']" [queryParams]="referralLinkParams" class="nav-link text-gray-700 hover:text-yellow-600" (click)="scrollToTop()">CarWash</a>
             <a [routerLink]="['/accesorios']" [queryParams]="referralLinkParams" class="nav-link text-gray-700 hover:text-yellow-600" (click)="scrollToTop()">Accesorios</a>
             <a [routerLink]="['/financiamiento']" [queryParams]="referralLinkParams" class="nav-link text-gray-700 hover:text-yellow-600" (click)="scrollToTop()">Simulador de Crédito</a>
           </div>

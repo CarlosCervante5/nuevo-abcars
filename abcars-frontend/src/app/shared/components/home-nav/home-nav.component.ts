@@ -28,7 +28,6 @@ import Swal from 'sweetalert2';
           <div class="hidden lg:flex items-center space-x-8">
             <a [routerLink]="['/inventario']" class="nav-link" (click)="scrollToTop()" [ngClass]="isScrolled ? 'text-gray-700 hover:text-yellow-600' : 'text-white font-bold hover:text-yellow-300'">Vehículos</a>
             <a [routerLink]="['/servicios']" class="nav-link" (click)="scrollToTop()" [ngClass]="isScrolled ? 'text-gray-700 hover:text-yellow-600' : 'text-white font-bold hover:text-yellow-300'">Servicios</a>
-            <a [routerLink]="['/carwash']" class="nav-link" (click)="scrollToTop()" [ngClass]="isScrolled ? 'text-gray-700 hover:text-yellow-600' : 'text-white font-bold hover:text-yellow-300'">CarWash</a>
             <a [routerLink]="['/accesorios']" class="nav-link" (click)="scrollToTop()" [ngClass]="isScrolled ? 'text-gray-700 hover:text-yellow-600' : 'text-white font-bold hover:text-yellow-300'">Accesorios</a>
             <a [routerLink]="['/financiamiento']" class="nav-link" (click)="scrollToTop()" [ngClass]="isScrolled ? 'text-gray-700 hover:text-yellow-600' : 'text-white font-bold hover:text-yellow-300'">Simulador de Crédito</a>
           </div>
