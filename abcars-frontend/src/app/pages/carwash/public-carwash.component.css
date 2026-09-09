@@ -1,5 +1,35 @@
 /* Shell alineado a páginas de servicio (financiamiento / seguros) */
 
+.cw-hero {
+  background: linear-gradient(90deg, #0b1f3a 0%, #071526 55%, #0a1628 100%) !important;
+}
+
+.cw-brand-hero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 0.85rem 1.25rem;
+  margin: 0 auto 1.35rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.cw-brand-logo {
+  display: block;
+  height: 3.75rem;
+  width: auto;
+  max-width: min(100%, 22rem);
+  object-fit: contain;
+}
+
+@media (min-width: 768px) {
+  .cw-brand-logo {
+    height: 4.75rem;
+    max-width: 26rem;
+  }
+}
+
 .svc-hero-title {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
   font-size: 2rem !important;
@@ -49,23 +79,6 @@
   line-height: 1.55 !important;
   color: #6b7280 !important;
   margin: 0 0 1.5rem !important;
-}
-
-.cw-brand-inline {
-  display: inline-flex;
-  align-items: center;
-  background: #0a0a0a;
-  border-radius: 0.75rem;
-  padding: 0.55rem 0.85rem;
-  margin-bottom: 1.25rem;
-}
-
-.cw-brand-logo {
-  display: block;
-  height: 2.1rem;
-  width: auto;
-  max-width: 12rem;
-  object-fit: contain;
 }
 
 .svc-table {
