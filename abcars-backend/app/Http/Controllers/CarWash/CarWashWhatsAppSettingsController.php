@@ -124,18 +124,17 @@ class CarWashWhatsAppSettingsController extends Controller
             $digits = preg_replace('/\D+/', '', $raw) ?? '';
 
             if ($digits === '') {
-                $digits = preg_replace('/\D+/', '', (string) env('CARWASH_PUBLIC_WHATSAPP_PHONE', '525646531805')) ?? '';
+                $digits = preg_replace('/\D+/', '', (string) env('CARWASH_PUBLIC_WHATSAPP_PHONE', '5215646531805')) ?? '';
             }
 
-            if (strlen($digits) === 10) {
-                $digits = '52'.$digits;
-            }
+            // México: wa.me necesita 521 + 10 dígitos (si no, el chat queda con 1 palomita)
+            $digits = \App\Services\CarWash\WhatsApp\CarWashPhoneNormalizer::forEvolution($digits);
 
             $prefill = 'Hola AB CarWash, quiero agendar un lavado.';
             $display = null;
             $url = null;
             if ($digits !== '') {
-                if (str_starts_with($digits, '52') && strlen($digits) >= 12) {
+                if (preg_match('/^521\d{10}$/', $digits) || preg_match('/^52\d{10}$/', $digits)) {
                     $local = substr($digits, -10);
                     $display = '+52 '.substr($local, 0, 3).' '.substr($local, 3, 3).' '.substr($local, 6, 4);
                 } else {
@@ -146,6 +145,10 @@ class CarWashWhatsAppSettingsController extends Controller
 
             return ApiResponseHelper::apiSuccess(200, 'Contacto público CarWash', [
                 'phone_digits' => $digits ?: null,
+                // Marcar sin el "1" de WhatsApp (llamadas usan +52 + 10 locales)
+                'phone_tel' => $digits
+                    ? ('tel:+'.(preg_match('/^521(\d{10})$/', $digits, $m) ? '52'.$m[1] : $digits))
+                    : null,
                 'phone_display' => $display,
                 'whatsapp_url' => $url,
                 'prefill' => $prefill,

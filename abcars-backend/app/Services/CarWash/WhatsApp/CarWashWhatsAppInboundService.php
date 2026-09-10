@@ -36,14 +36,10 @@ class CarWashWhatsAppInboundService
             }
         }
 
-        $conversation = CarWashWhatsAppConversation::query()->firstOrCreate(
-            ['phone' => $phone],
-            [
-                'customer_name' => $inbound['customer_name'] ?? null,
-                'status' => 'open',
-                'needs_human' => false,
-                'meta' => ['provider' => $inbound['provider'] ?? config('carwash.whatsapp_provider')],
-            ]
+        $conversation = $this->findOrCreateConversation(
+            $phone,
+            $inbound['customer_name'] ?? null,
+            $inbound['provider'] ?? null
         );
 
         if (! empty($inbound['customer_name']) && empty($conversation->customer_name)) {
@@ -198,14 +194,10 @@ class CarWashWhatsAppInboundService
             }
         }
 
-        $conversation = CarWashWhatsAppConversation::query()->firstOrCreate(
-            ['phone' => $phone],
-            [
-                'customer_name' => $customerName,
-                'status' => 'open',
-                'needs_human' => false,
-                'meta' => ['provider' => $payload['provider'] ?? config('carwash.whatsapp_provider')],
-            ]
+        $conversation = $this->findOrCreateConversation(
+            $phone,
+            $customerName,
+            $payload['provider'] ?? null
         );
 
         if ($customerName && empty($conversation->customer_name)) {
@@ -245,5 +237,40 @@ class CarWashWhatsAppInboundService
         $conversation->save();
 
         return $message;
+    }
+
+    /**
+     * Busca conversación por +521… o variante +52… (evita duplicados MX).
+     */
+    private function findOrCreateConversation(
+        string $phone,
+        ?string $customerName = null,
+        ?string $provider = null,
+    ): CarWashWhatsAppConversation {
+        $alt = CarWashPhoneNormalizer::mexicoAlternate($phone);
+        $phones = array_values(array_filter([$phone, $alt]));
+
+        $conversation = CarWashWhatsAppConversation::query()
+            ->whereIn('phone', $phones)
+            ->orderByRaw('CASE WHEN phone = ? THEN 0 ELSE 1 END', [$phone])
+            ->first();
+
+        if ($conversation) {
+            // Preferir formato WhatsApp MX (+521…) al reenviar
+            if ($conversation->phone !== $phone && str_starts_with($phone, '+521')) {
+                $conversation->phone = $phone;
+                $conversation->save();
+            }
+
+            return $conversation;
+        }
+
+        return CarWashWhatsAppConversation::query()->create([
+            'phone' => $phone,
+            'customer_name' => $customerName,
+            'status' => 'open',
+            'needs_human' => false,
+            'meta' => ['provider' => $provider ?? config('carwash.whatsapp_provider')],
+        ]);
     }
 }

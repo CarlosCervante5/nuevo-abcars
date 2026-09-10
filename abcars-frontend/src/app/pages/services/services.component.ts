@@ -15,7 +15,7 @@ import { CarWashService } from '@services/carwash.service';
 })
 export class ServicesComponent implements OnInit {
   carwashWhatsappUrl =
-    'https://wa.me/525646531805?text=' +
+    'https://wa.me/5215646531805?text=' +
     encodeURIComponent('Hola AB CarWash, quiero agendar un lavado.');
   carwashPhoneDisplay = '+52 564 653 1805';
   carwashPhoneTel = 'tel:+525646531805';
@@ -33,7 +33,11 @@ export class ServicesComponent implements OnInit {
         const d = res.data;
         if (d?.whatsapp_url) this.carwashWhatsappUrl = d.whatsapp_url;
         if (d?.phone_display) this.carwashPhoneDisplay = d.phone_display;
-        if (d?.phone_digits) this.carwashPhoneTel = `tel:+${d.phone_digits}`;
+        if (d?.phone_tel) {
+          this.carwashPhoneTel = d.phone_tel;
+        } else if (d?.phone_digits) {
+          this.carwashPhoneTel = `tel:+${d.phone_digits.replace(/^521(\d{10})$/, '52$1')}`;
+        }
       }
     });
   }

@@ -531,6 +531,7 @@ export class CarWashService {
         message: string;
         data: {
           phone_digits?: string | null;
+          phone_tel?: string | null;
           phone_display?: string | null;
           whatsapp_url?: string | null;
           prefill?: string;

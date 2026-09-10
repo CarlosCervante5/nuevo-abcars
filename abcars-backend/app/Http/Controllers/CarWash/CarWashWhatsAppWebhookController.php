@@ -36,7 +36,7 @@ class CarWashWhatsAppWebhookController extends Controller
             return response()->json(['ok' => true, 'skipped' => 'event', 'event' => $event]);
         }
 
-        $key = $data['key'] ?? [];
+        $key = is_array($data['key'] ?? null) ? $data['key'] : [];
         if (($key['fromMe'] ?? false) === true) {
             return response()->json(['ok' => true, 'skipped' => 'fromMe']);
         }
@@ -57,7 +57,11 @@ class CarWashWhatsAppWebhookController extends Controller
             return response()->json(['ok' => true, 'skipped' => 'no_text']);
         }
 
-        $phone = CarWashPhoneNormalizer::e164($remoteJid);
+        // Preferir remoteJidAlt / senderPn cuando WhatsApp usa addressingMode=lid
+        $phone = CarWashPhoneNormalizer::fromEvolutionKey($key, $data);
+        if ($phone === '') {
+            return response()->json(['ok' => true, 'skipped' => 'no_phone']);
+        }
         $messageId = $key['id'] ?? null;
 
         $inbound = [
@@ -128,10 +132,24 @@ class CarWashWhatsAppWebhookController extends Controller
 
             // Reusa persistencia creando/actualizando conversación
             $phone = CarWashPhoneNormalizer::e164($data['phone']);
-            $conversation = \App\Models\CarWash\CarWashWhatsAppConversation::query()->firstOrCreate(
-                ['phone' => $phone],
-                ['status' => 'open', 'needs_human' => false]
-            );
+            $alt = CarWashPhoneNormalizer::mexicoAlternate($phone);
+            $phones = array_values(array_filter([$phone, $alt]));
+            $conversation = \App\Models\CarWash\CarWashWhatsAppConversation::query()
+                ->whereIn('phone', $phones)
+                ->orderByRaw('CASE WHEN phone = ? THEN 0 ELSE 1 END', [$phone])
+                ->first();
+
+            if (! $conversation) {
+                $conversation = \App\Models\CarWash\CarWashWhatsAppConversation::query()->create([
+                    'phone' => $phone,
+                    'status' => 'open',
+                    'needs_human' => false,
+                ]);
+            } elseif ($conversation->phone !== $phone && str_starts_with($phone, '+521')) {
+                $conversation->phone = $phone;
+                $conversation->save();
+            }
+
             $inbound->sendAndStore($conversation, $data['body']);
 
             return ApiResponseHelper::apiSuccess(200, 'Mensaje enviado', [

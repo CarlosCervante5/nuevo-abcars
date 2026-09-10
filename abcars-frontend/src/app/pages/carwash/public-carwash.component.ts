@@ -28,7 +28,7 @@ interface WashPackage {
 })
 export class PublicCarwashComponent implements OnInit {
   /** Fallback si el API aún no responde (Settings → Teléfono público). */
-  private phoneDigits = '525646531805';
+  private phoneDigits = '5215646531805';
   private defaultPrefill = 'Hola AB CarWash, quiero agendar un lavado.';
 
   phoneDisplay = '+52 564 653 1805';
@@ -118,7 +118,8 @@ export class PublicCarwashComponent implements OnInit {
         const d = res.data;
         if (d?.phone_digits) {
           this.phoneDigits = d.phone_digits;
-          this.phoneTel = `tel:+${d.phone_digits}`;
+          this.phoneTel =
+            d.phone_tel || `tel:+${d.phone_digits.replace(/^521(\d{10})$/, '52$1')}`;
         }
         if (d?.phone_display) {
           this.phoneDisplay = d.phone_display;
