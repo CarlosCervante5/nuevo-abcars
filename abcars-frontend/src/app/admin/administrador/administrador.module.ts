@@ -55,8 +55,11 @@ import { CarWashLoyaltyComponent } from "./pages/carwash-loyalty/carwash-loyalty
         CommonModule,
         AngularMaterialModule,
         ReactiveFormsModule,
-        AdminModule,
+        // Routing must be registered BEFORE AdminModule: AdminModule imports
+        // AdminRoutingModule which ends with path '**' → /404. If that wildcard
+        // is registered first, every child route (carwash/board, users, …) 404s.
         AdministradorRoutingModule,
+        AdminModule,
         SkCubeComponent,
         MatFormFieldModule,
         MatInputModule,

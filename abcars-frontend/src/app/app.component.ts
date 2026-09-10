@@ -4,6 +4,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { SessionExpirationService } from './shared/services/session-expiration.service';
 import { AnalyticsService } from './shared/services/analytics.service';
+import { getAdminDashboardUrl } from './shared/utils/admin-dashboard-url';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -105,31 +106,23 @@ export class AppComponent implements DoCheck, OnInit {
     }
 
     public get_url_dashboard() {
-        
-        let role: any = localStorage.getItem('role');
-        
-        if(role != null){
-
-            if(role === 'client')
-                return `/auth/mi-cuenta`
-
-            if(role === 'appraiser_technician')
-                return `/admin/tecval`
-
-            if(role === 'spare_parts')
-                return `/admin/parts`
-
-            if(role === 'spare_parts_manager')
-                return `/admin/pmanager`
-
-            if(role === 'accountant')
-                return `/admin/contadora`
-
-            return `/admin/${role}`;
+        const role = localStorage.getItem('role');
+        if (role == null) {
+            return '/admin/not-autorized';
         }
 
-        return `/admin/not-autorized`;
+        // Legados no cubiertos por getAdminDashboardUrl
+        if (role === 'appraiser_technician') {
+            return '/admin/tecval';
+        }
+        if (role === 'spare_parts_manager') {
+            return '/admin/pmanager';
+        }
+        if (role === 'accountant') {
+            return '/admin/contadora';
+        }
 
+        return getAdminDashboardUrl(role);
     }
 
     deleteLS(){

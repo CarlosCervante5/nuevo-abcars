@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from 'src/app/auth/services/auth.service';
+import { getAdminDashboardUrl } from '../../utils/admin-dashboard-url';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -60,19 +61,8 @@ export class NavCarcareComponent {
 }
 
   public get_url_dashboard() {
-        
-    let role: any = localStorage.getItem('role');
-    
-    if(role != null){
-
-        if(role === 'client')
-            return `/auth/mi-cuenta`
-
-        return `/admin/${role}`;
-    }
-
-    return `/admin/not-autorized`;
-
+    const role = localStorage.getItem('role');
+    return role != null ? getAdminDashboardUrl(role) : '/admin/not-autorized';
   }
 
   public checkSessionStorageUser() {

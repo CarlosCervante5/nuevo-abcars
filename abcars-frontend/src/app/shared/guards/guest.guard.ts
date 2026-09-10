@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { getAdminDashboardUrl } from '../utils/admin-dashboard-url';
 
 @Injectable({
   providedIn: 'root'
@@ -19,10 +20,8 @@ export class GuestGuard implements CanActivate {
       // Si ya está autenticado, redirigir según el rol
       // Usar replaceUrl para evitar acumular entradas en el historial
       const role = localStorage.getItem('role');
-      if (role === 'client') {
-        this.router.navigate(['/auth/mi-cuenta'], { replaceUrl: true });
-      } else if (role) {
-        this.router.navigate([`/admin/${role}`], { replaceUrl: true });
+      if (role) {
+        this.router.navigateByUrl(getAdminDashboardUrl(role), { replaceUrl: true });
       } else {
         // Si hay token pero no hay rol, limpiar y permitir acceso
         localStorage.removeItem('user_token');
