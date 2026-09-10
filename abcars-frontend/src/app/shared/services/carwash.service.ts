@@ -27,6 +27,7 @@ export interface CarWashProduct {
   uuid: string;
   name: string;
   sku?: string | null;
+  category?: 'amenity' | 'food' | string | null;
   description?: string | null;
   price: number | string;
   stock: number;

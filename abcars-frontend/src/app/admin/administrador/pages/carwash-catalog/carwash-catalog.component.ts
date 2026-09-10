@@ -178,7 +178,12 @@ export class CarWashCatalogComponent implements OnInit {
   }
 
   productGroup(p: CarWashProduct): string {
+    const category = (p.category || '').toLowerCase();
+    if (category === 'food' || category === 'alimento' || category === 'alimentos') {
+      return 'Alimentos';
+    }
     const sku = (p.sku || '').toUpperCase();
+    if (sku.startsWith('AL-') || sku.startsWith('CF-')) return 'Alimentos';
     if (sku.startsWith('LQ-')) return 'Líquidos';
     if (sku.startsWith('CX-')) return 'Ceras';
     if (sku.startsWith('TR-')) return 'Trapos y textiles';
@@ -186,7 +191,7 @@ export class CarWashCatalogComponent implements OnInit {
   }
 
   get productGroups(): { label: string; items: CarWashProduct[] }[] {
-    const order = ['Líquidos', 'Ceras', 'Trapos y textiles', 'Amenidades'];
+    const order = ['Alimentos', 'Líquidos', 'Ceras', 'Trapos y textiles', 'Amenidades'];
     const map = new Map<string, CarWashProduct[]>();
     for (const p of this.products) {
       const g = this.productGroup(p);

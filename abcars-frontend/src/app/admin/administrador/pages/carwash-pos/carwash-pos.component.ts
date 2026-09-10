@@ -48,7 +48,7 @@ export class CarWashPosComponent implements OnInit {
   paymentMethod: 'cash' | 'card' | 'transfer' | 'mixed' | 'internal' = 'cash';
   notes = '';
   catalogQuery = '';
-  catalogTab: 'services' | 'products' = 'services';
+  catalogTab: 'services' | 'products' | 'food' = 'services';
 
   cart: CartLine[] = [];
   loading = false;
@@ -120,13 +120,47 @@ export class CarWashPosComponent implements OnInit {
   }
 
   get filteredProducts(): CarWashProduct[] {
+    return this.filterProductsByCategory('amenity');
+  }
+
+  get filteredFood(): CarWashProduct[] {
+    return this.filterProductsByCategory('food');
+  }
+
+  private filterProductsByCategory(category: 'amenity' | 'food'): CarWashProduct[] {
     const q = this.catalogQuery.trim().toLowerCase();
-    if (!q) return this.products;
-    return this.products.filter(
-      (p) =>
+    return this.products.filter((p) => {
+      if (!this.isProductCategory(p, category)) return false;
+      if (!q) return true;
+      return (
         (p.name || '').toLowerCase().includes(q) ||
         (p.sku || '').toLowerCase().includes(q)
-    );
+      );
+    });
+  }
+
+  private isProductCategory(p: CarWashProduct, category: 'amenity' | 'food'): boolean {
+    const raw = (p.category || '').toLowerCase();
+    if (raw === 'food' || raw === 'alimento' || raw === 'alimentos') {
+      return category === 'food';
+    }
+    if (raw === 'amenity' || raw === 'amenidad' || raw === 'amenidades') {
+      return category === 'amenity';
+    }
+    // Fallback por SKU (antes de migración / productos viejos)
+    const sku = (p.sku || '').toUpperCase();
+    const isFood = sku.startsWith('AL-') || sku.startsWith('CF-');
+    return category === 'food' ? isFood : !isFood;
+  }
+
+  productLabel(p: CarWashProduct): string {
+    return this.isProductCategory(p, 'food') ? 'Alimento' : 'Amenidad';
+  }
+
+  lineLabel(line: CartLine): string {
+    if (line.item_type === 'service') return 'Servicio';
+    const product = this.products.find((p) => p.uuid === line.uuid);
+    return product ? this.productLabel(product) : 'Producto';
   }
 
   get cartCount(): number {

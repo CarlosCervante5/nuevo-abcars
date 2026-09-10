@@ -186,12 +186,15 @@ class CarWashCatalogController extends Controller
 
     public function products(Request $request)
     {
-        $query = CarWashProduct::query()->orderBy('name');
+        $query = CarWashProduct::query()->orderBy('category')->orderBy('name');
         if (! $request->boolean('include_inactive')) {
             $query->where('is_active', true);
         }
+        if ($request->filled('category')) {
+            $query->where('category', $request->string('category'));
+        }
 
-        return ApiResponseHelper::apiSuccess(200, 'Productos amenidades', $query->get());
+        return ApiResponseHelper::apiSuccess(200, 'Productos CarWash', $query->get());
     }
 
     public function storeProduct(Request $request)
@@ -200,11 +203,14 @@ class CarWashCatalogController extends Controller
             $data = $request->validate([
                 'name' => 'required|string|max:255',
                 'sku' => 'nullable|string|max:64',
+                'category' => 'nullable|string|in:amenity,food',
                 'description' => 'nullable|string',
                 'price' => 'required|numeric|min:0',
                 'stock' => 'nullable|integer|min:0',
                 'is_active' => 'nullable|boolean',
             ]);
+
+            $data['category'] = $data['category'] ?? CarWashProduct::CATEGORY_AMENITY;
 
             $product = CarWashProduct::create($data);
 

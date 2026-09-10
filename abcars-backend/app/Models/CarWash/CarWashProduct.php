@@ -4,8 +4,12 @@ namespace App\Models\CarWash;
 
 class CarWashProduct extends CarWashModel
 {
+    public const CATEGORY_AMENITY = 'amenity';
+
+    public const CATEGORY_FOOD = 'food';
+
     protected $fillable = [
-        'name', 'sku', 'description', 'price', 'stock', 'is_active', 'image_path',
+        'name', 'sku', 'category', 'description', 'price', 'stock', 'is_active', 'image_path',
     ];
 
     protected $casts = [
