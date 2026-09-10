@@ -71,6 +71,8 @@ class CarWashWhatsAppWebhookController extends Controller
             'customer_name' => $data['pushName'] ?? null,
             'payload' => $request->all(),
             'provider' => 'evolution',
+            'evolution_lid' => CarWashPhoneNormalizer::lidFromEvolutionKey($key, $data),
+            'evolution_remote_jid' => $remoteJid !== '' ? $remoteJid : null,
         ];
 
         // Tras la respuesta HTTP (no depende de worker de queue)

@@ -21,7 +21,7 @@ class TwilioWhatsAppGateway implements WhatsAppGatewayInterface
             && filled($cfg['from'] ?? null);
     }
 
-    public function sendText(string $toPhone, string $body): array
+    public function sendText(string $toPhone, string $body, array $options = []): array
     {
         if (! $this->isConfigured()) {
             return ['ok' => false, 'error' => 'Twilio no configurado'];

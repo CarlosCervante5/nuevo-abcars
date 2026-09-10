@@ -24,14 +24,27 @@ OPENAI_API_KEY=<clave OpenAI>
 
 ## Activar el número
 
-1. Abre el Manager Evolution.
+1. Abre el Manager Evolution: https://evolution-api-production-fb0a5.up.railway.app/manager
 2. Entra a la instancia `abcars-carwash`.
-3. Escanea el QR con WhatsApp (Dispositivos vinculados).
+3. Escanea el QR con WhatsApp (Dispositivos vinculados) del número del bot.
 4. Confirma estado `open`:
    ```bash
    curl -H "apikey: $EVOLUTION_API_KEY" \
      https://evolution-api-production-fb0a5.up.railway.app/instance/connectionState/abcars-carwash
    ```
+
+> Si el estado es `connecting` (no `open`), los mensajes salen con **una sola palomita** y no se entregan. Hay que volver a escanear el QR.
+
+## Importante: versión Evolution
+
+El servidor actual es **Evolution API 2.3.7** (Baileys `7.0.0-rc.9`). Esa versión tiene un bug conocido: mensajes privados quedan en `PENDING` / una palomita, sobre todo con chats `@lid`.
+
+Recomendado: actualizar Evolution a una imagen/build con **Baileys ≥ 7.0.0-rc13** (rama develop / releases posteriores a ese bump).
+
+Mientras tanto el backend:
+- bloquea envíos si la instancia no está `open`
+- guarda el `@lid` del contacto y lo usa al responder
+- formatea números MX como `521…`
 
 ## DB + queue en sandbox
 

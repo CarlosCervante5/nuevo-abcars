@@ -139,4 +139,33 @@ class CarWashPhoneNormalizer
 
         return '';
     }
+
+    /**
+     * Extrae LID (@lid) si el mensaje viene en addressingMode=lid.
+     *
+     * @param  array<string, mixed>  $key
+     * @param  array<string, mixed>  $data
+     */
+    public static function lidFromEvolutionKey(array $key, array $data = []): ?string
+    {
+        $candidates = [
+            (string) ($key['remoteJid'] ?? ''),
+            (string) ($key['senderLid'] ?? $data['senderLid'] ?? ''),
+            (string) ($data['senderLid'] ?? ''),
+        ];
+
+        foreach ($candidates as $candidate) {
+            if ($candidate !== '' && str_contains($candidate, '@lid')) {
+                return $candidate;
+            }
+        }
+
+        $mode = strtolower((string) ($key['addressingMode'] ?? $data['addressingMode'] ?? ''));
+        $remote = (string) ($key['remoteJid'] ?? '');
+        if ($mode === 'lid' && $remote !== '' && ! str_contains($remote, '@')) {
+            return $remote.'@lid';
+        }
+
+        return null;
+    }
 }

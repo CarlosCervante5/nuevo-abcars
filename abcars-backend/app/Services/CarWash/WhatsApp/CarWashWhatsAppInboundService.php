@@ -42,6 +42,22 @@ class CarWashWhatsAppInboundService
             $inbound['provider'] ?? null
         );
 
+        // Guardar LID / JID para reenvíos (Evolution 2.3.7 entrega mejor por @lid)
+        $meta = is_array($conversation->meta) ? $conversation->meta : [];
+        $changedMeta = false;
+        if (! empty($inbound['evolution_lid'])) {
+            $meta['evolution_lid'] = $inbound['evolution_lid'];
+            $changedMeta = true;
+        }
+        if (! empty($inbound['evolution_remote_jid'])) {
+            $meta['evolution_remote_jid'] = $inbound['evolution_remote_jid'];
+            $changedMeta = true;
+        }
+        if ($changedMeta) {
+            $conversation->meta = $meta;
+            $conversation->save();
+        }
+
         if (! empty($inbound['customer_name']) && empty($conversation->customer_name)) {
             $conversation->customer_name = $inbound['customer_name'];
         }
@@ -147,7 +163,14 @@ class CarWashWhatsAppInboundService
         }
 
         $gateway = $this->gateways->default();
-        $result = $gateway->sendText($conversation->phone, $body);
+        $meta = is_array($conversation->meta) ? $conversation->meta : [];
+        $preferredJid = $meta['evolution_lid']
+            ?? $meta['evolution_remote_jid']
+            ?? null;
+
+        $result = $gateway->sendText($conversation->phone, $body, [
+            'preferred_jid' => is_string($preferredJid) ? $preferredJid : null,
+        ]);
 
         $this->storeOutboundMessage(
             $conversation,
@@ -164,6 +187,7 @@ class CarWashWhatsAppInboundService
             Log::warning('CarWash WhatsApp outbound failed', [
                 'phone' => $conversation->phone,
                 'error' => $result['error'] ?? null,
+                'connection_state' => $result['connection_state'] ?? null,
             ]);
         }
     }

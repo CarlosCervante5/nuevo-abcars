@@ -21,24 +21,91 @@ class EvolutionApiWhatsAppGateway implements WhatsAppGatewayInterface
             && filled($cfg['instance'] ?? null);
     }
 
-    public function sendText(string $toPhone, string $body): array
+    /**
+     * @param  array{preferred_jid?: string|null}  $options
+     * @return array{ok: bool, provider_message_id?: string|null, raw?: mixed, error?: string|null, delivery_status?: string|null, number_used?: string|null}
+     */
+    public function sendText(string $toPhone, string $body, array $options = []): array
     {
         if (! $this->isConfigured()) {
             return ['ok' => false, 'error' => 'Evolution API no configurada (EVOLUTION_API_URL, EVOLUTION_API_KEY, EVOLUTION_INSTANCE)'];
         }
 
+        $state = $this->connectionState();
+        if ($state !== null && $state !== 'open') {
+            Log::warning('Evolution sendText blocked: instance not open', ['state' => $state]);
+
+            return [
+                'ok' => false,
+                'error' => 'WhatsApp Evolution no está conectado (estado: '.$state.'). Escanea el QR en CarWash → Settings / Manager.',
+                'connection_state' => $state,
+            ];
+        }
+
         $cfg = config('carwash.evolution');
+        $candidates = [];
+
+        $preferred = trim((string) ($options['preferred_jid'] ?? ''));
+        if ($preferred !== '') {
+            $candidates[] = $this->normalizeSendTarget($preferred);
+        }
+
         $number = CarWashPhoneNormalizer::forEvolution($toPhone);
-        if ($number === '') {
+        if ($number !== '') {
+            // En Evolution 2.3.7 / Baileys rc.9, a veces entrega mejor el @lid que el PN.
+            // Probamos PN puro y también JID completo.
+            $candidates[] = $number;
+            $candidates[] = $number.'@s.whatsapp.net';
+
+            $resolved = $this->resolveWhatsAppNumber($number);
+            if (is_string($resolved) && $resolved !== '') {
+                array_unshift($candidates, $resolved);
+                if (! str_contains($resolved, '@')) {
+                    $candidates[] = $resolved.'@s.whatsapp.net';
+                }
+            }
+        }
+
+        $candidates = array_values(array_unique(array_filter($candidates)));
+        if ($candidates === []) {
             return ['ok' => false, 'error' => 'Teléfono destino inválido'];
         }
 
-        // Resuelve JID real en Evolution (evita PENDING / una sola palomita)
-        $resolved = $this->resolveWhatsAppNumber($number);
-        if (is_string($resolved) && $resolved !== '') {
-            $number = $resolved;
+        $lastError = null;
+        $lastRaw = null;
+        foreach ($candidates as $target) {
+            $result = $this->postSendText($target, $body);
+            if ($result['ok'] ?? false) {
+                $status = strtoupper((string) ($result['delivery_status'] ?? ''));
+                // Si queda PENDING, intenta el siguiente candidato (p. ej. LID)
+                if ($status === 'PENDING' && $target !== end($candidates)) {
+                    Log::warning('Evolution sendText PENDING, trying next target', [
+                        'target' => $target,
+                        'message_id' => $result['provider_message_id'] ?? null,
+                    ]);
+                    $lastRaw = $result;
+                    continue;
+                }
+
+                return $result;
+            }
+            $lastError = $result['error'] ?? 'send failed';
+            $lastRaw = $result;
         }
 
+        return [
+            'ok' => false,
+            'error' => is_string($lastError) ? $lastError : 'No se pudo entregar el mensaje',
+            'raw' => $lastRaw['raw'] ?? $lastRaw,
+        ];
+    }
+
+    /**
+     * @return array{ok: bool, provider_message_id?: string|null, raw?: mixed, error?: string|null, delivery_status?: string|null, number_used?: string|null}
+     */
+    private function postSendText(string $number, string $body): array
+    {
+        $cfg = config('carwash.evolution');
         $url = $cfg['base_url'].'/message/sendText/'.$cfg['instance'];
 
         try {
@@ -50,7 +117,6 @@ class EvolutionApiWhatsAppGateway implements WhatsAppGatewayInterface
                 ->post($url, [
                     'number' => $number,
                     'text' => $body,
-                    // Pequeño delay ayuda a que Baileys complete el handshake de entrega
                     'delay' => 1200,
                 ]);
 
@@ -94,8 +160,39 @@ class EvolutionApiWhatsAppGateway implements WhatsAppGatewayInterface
         }
     }
 
+    private function connectionState(): ?string
+    {
+        $cfg = config('carwash.evolution');
+        try {
+            $url = $cfg['base_url'].'/instance/connectionState/'.$cfg['instance'];
+            $response = Http::withHeaders(['apikey' => $cfg['api_key']])
+                ->timeout(10)
+                ->get($url);
+            if (! $response->successful()) {
+                return null;
+            }
+            $json = $response->json();
+
+            $state = data_get($json, 'instance.state') ?? data_get($json, 'state');
+
+            return is_string($state) ? strtolower($state) : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    private function normalizeSendTarget(string $raw): string
+    {
+        $raw = trim($raw);
+        if (str_contains($raw, '@lid') || str_contains($raw, '@s.whatsapp.net')) {
+            return $raw;
+        }
+
+        return CarWashPhoneNormalizer::forEvolution($raw);
+    }
+
     /**
-     * Pregunta a Evolution si el número existe y devuelve dígitos del JID canónico.
+     * Pregunta a Evolution si el número existe y devuelve dígitos/JID canónico.
      */
     private function resolveWhatsAppNumber(string $number): ?string
     {
@@ -118,7 +215,6 @@ class EvolutionApiWhatsAppGateway implements WhatsAppGatewayInterface
 
             $json = $response->json();
             $rows = is_array($json) ? $json : [];
-            // Algunas versiones envuelven en data
             if (isset($rows['data']) && is_array($rows['data'])) {
                 $rows = $rows['data'];
             }
@@ -129,14 +225,17 @@ class EvolutionApiWhatsAppGateway implements WhatsAppGatewayInterface
                 }
                 $exists = $row['exists'] ?? $row['isWhatsapp'] ?? $row['numberExists'] ?? null;
                 if ($exists === false) {
-                    Log::warning('Evolution: número no tiene WhatsApp', ['number' => $number, 'row' => $row]);
-
                     continue;
                 }
 
                 $jid = (string) ($row['jid'] ?? $row['number'] ?? '');
                 if ($jid === '') {
                     continue;
+                }
+
+                // Preferir JID tal cual si es @lid (mejor entrega en Baileys rc.9)
+                if (str_contains($jid, '@lid')) {
+                    return $jid;
                 }
 
                 $resolved = CarWashPhoneNormalizer::forEvolution($jid);
