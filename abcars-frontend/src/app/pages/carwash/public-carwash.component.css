@@ -25,28 +25,18 @@
   margin: 0 auto;
 }
 
-.cw-brand-hero {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #fff;
-  border-radius: 0.85rem;
-  padding: 0.9rem 1.4rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
-}
-
 .cw-brand-logo {
   display: block;
-  height: 3.8rem;
+  height: 3.4rem;
   width: auto;
   max-width: min(100%, 22rem);
+  margin: 0 auto 1.5rem;
   object-fit: contain;
 }
 
 @media (min-width: 768px) {
   .cw-brand-logo {
-    height: 4.8rem;
+    height: 4.4rem;
     max-width: 26rem;
   }
 }
