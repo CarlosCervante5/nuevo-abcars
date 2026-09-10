@@ -127,8 +127,8 @@ class CarWashWhatsAppSettingsController extends Controller
                 $digits = preg_replace('/\D+/', '', (string) env('CARWASH_PUBLIC_WHATSAPP_PHONE', '5215646531805')) ?? '';
             }
 
-            // México: wa.me necesita 521 + 10 dígitos (si no, el chat queda con 1 palomita)
-            $digits = \App\Services\CarWash\WhatsApp\CarWashPhoneNormalizer::forEvolution($digits);
+            // México: wa.me click-to-chat suele requerir 521 + 10 dígitos
+            $digits = \App\Services\CarWash\WhatsApp\CarWashPhoneNormalizer::forWhatsAppLink($digits);
 
             $prefill = 'Hola AB CarWash, quiero agendar un lavado.';
             $display = null;

@@ -35,16 +35,32 @@ OPENAI_API_KEY=<clave OpenAI>
 
 > Si el estado es `connecting` (no `open`), los mensajes salen con **una sola palomita** y no se entregan. Hay que volver a escanear el QR.
 
-## Importante: versión Evolution
+## Importante: versión Evolution (causa de la 1 palomita)
 
-El servidor actual es **Evolution API 2.3.7** (Baileys `7.0.0-rc.9`). Esa versión tiene un bug conocido: mensajes privados quedan en `PENDING` / una palomita, sobre todo con chats `@lid`.
+El servidor actual es **Evolution API 2.3.7** (Baileys `7.0.0-rc.9`). Esa versión deja los envíos en `PENDING` (una palomita) y el cliente **no recibe** la respuesta del bot, aunque el webhook sí llegue.
 
-Recomendado: actualizar Evolution a una imagen/build con **Baileys ≥ 7.0.0-rc13** (rama develop / releases posteriores a ese bump).
+### Fix recomendado (Railway del servicio Evolution)
 
-Mientras tanto el backend:
-- bloquea envíos si la instancia no está `open`
-- guarda el `@lid` del contacto y lo usa al responder
-- formatea números MX como `521…`
+Desplegar la imagen overlay del repo:
+
+- Carpeta: `infra/evolution-overlay/Dockerfile`
+- Base: `evoapicloud/evolution-api:v2.3.7` + `baileys@7.0.0-rc13`
+
+En Railway (proyecto Evolution):
+
+1. Settings → Build → Dockerfile path = `infra/evolution-overlay/Dockerfile` (o el root de ese overlay).
+2. Redesplegar.
+3. Abrir Manager → instancia `abcars-carwash` → escanear QR otra vez.
+4. Confirmar `connectionState` = `open`.
+5. Probar un mensaje: el status ya no debe quedarse en `PENDING`.
+
+Alternativa: imagen `evoapicloud/evolution-api:2.4.0-rc2` (probar en sandbox; puede requerir re-pareo).
+
+Mientras tanto el backend ABCars:
+- resuelve chats `@lid` → teléfono real (`remoteJidAlt`)
+- procesa el webhook en el mismo request (no solo `afterResponse`)
+- no reescribe a la fuerza números `52…` a `521…` (rompe JIDs reales)
+- guarda `@lid` para reenviar por ese JID
 
 ## DB + queue en sandbox
 

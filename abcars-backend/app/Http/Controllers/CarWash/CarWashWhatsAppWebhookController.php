@@ -58,8 +58,23 @@ class CarWashWhatsAppWebhookController extends Controller
         }
 
         // Preferir remoteJidAlt / senderPn cuando WhatsApp usa addressingMode=lid
+        $lid = CarWashPhoneNormalizer::lidFromEvolutionKey($key, $data);
         $phone = CarWashPhoneNormalizer::fromEvolutionKey($key, $data);
+
+        // Si el webhook solo trae @lid sin remoteJidAlt, resolver PN vía Evolution
+        if ($phone === '' && $lid) {
+            app(\App\Services\CarWash\CarWashSettingsService::class)->applyRuntime();
+            $phone = app(\App\Services\CarWash\WhatsApp\EvolutionApiWhatsAppGateway::class)
+                ->resolvePhoneFromLid($lid) ?? '';
+        }
+
         if ($phone === '') {
+            Log::warning('CarWash Evolution webhook sin teléfono usable', [
+                'remoteJid' => $remoteJid,
+                'lid' => $lid,
+                'has_alt' => filled($key['remoteJidAlt'] ?? null),
+            ]);
+
             return response()->json(['ok' => true, 'skipped' => 'no_phone']);
         }
         $messageId = $key['id'] ?? null;
@@ -71,14 +86,21 @@ class CarWashWhatsAppWebhookController extends Controller
             'customer_name' => $data['pushName'] ?? null,
             'payload' => $request->all(),
             'provider' => 'evolution',
-            'evolution_lid' => CarWashPhoneNormalizer::lidFromEvolutionKey($key, $data),
-            'evolution_remote_jid' => $remoteJid !== '' ? $remoteJid : null,
+            'evolution_lid' => $lid,
+            'evolution_remote_jid' => $lid ?: ($remoteJid !== '' ? $remoteJid : null),
         ];
 
-        // Tras la respuesta HTTP (no depende de worker de queue)
-        dispatch(function () use ($inbound) {
+        // Procesar en este request (más fiable que afterResponse en algunos hosts)
+        try {
             app(CarWashWhatsAppInboundService::class)->handle($inbound);
-        })->afterResponse();
+        } catch (\Throwable $e) {
+            Log::error('CarWash WhatsApp inbound handle failed', [
+                'message' => $e->getMessage(),
+                'phone' => $phone,
+            ]);
+
+            return response()->json(['ok' => false, 'error' => 'handle_failed'], 500);
+        }
 
         return response()->json(['ok' => true]);
     }

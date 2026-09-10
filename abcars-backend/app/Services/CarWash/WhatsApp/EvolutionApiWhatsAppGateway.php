@@ -249,4 +249,90 @@ class EvolutionApiWhatsAppGateway implements WhatsAppGatewayInterface
 
         return null;
     }
+
+    /**
+     * Resuelve el teléfono real (PN) a partir de un JID @lid consultando Evolution.
+     */
+    public function resolvePhoneFromLid(string $lidJid): ?string
+    {
+        if (! $this->isConfigured()) {
+            return null;
+        }
+
+        $lidJid = trim($lidJid);
+        if ($lidJid === '') {
+            return null;
+        }
+        if (! str_contains($lidJid, '@')) {
+            $lidJid .= '@lid';
+        }
+
+        $cfg = config('carwash.evolution');
+
+        try {
+            $url = $cfg['base_url'].'/chat/findMessages/'.$cfg['instance'];
+            $response = Http::withHeaders([
+                'apikey' => $cfg['api_key'],
+                'Content-Type' => 'application/json',
+            ])
+                ->timeout(15)
+                ->post($url, [
+                    'where' => ['key' => ['remoteJid' => $lidJid]],
+                    'page' => 1,
+                    'offset' => 5,
+                ]);
+
+            if ($response->successful()) {
+                $json = $response->json();
+                $msgs = data_get($json, 'messages.records')
+                    ?? data_get($json, 'messages')
+                    ?? (is_array($json) ? $json : []);
+                if (is_array($msgs)) {
+                    foreach ($msgs as $m) {
+                        if (! is_array($m)) {
+                            continue;
+                        }
+                        $key = is_array($m['key'] ?? null) ? $m['key'] : [];
+                        $alt = (string) ($key['remoteJidAlt'] ?? '');
+                        if ($alt !== '' && ! str_contains($alt, '@lid')) {
+                            $phone = CarWashPhoneNormalizer::e164($alt);
+                            if ($phone !== '' && ! CarWashPhoneNormalizer::looksLikeLidDigits($phone)) {
+                                return $phone;
+                            }
+                        }
+                    }
+                }
+            }
+
+            $chatsUrl = $cfg['base_url'].'/chat/findChats/'.$cfg['instance'];
+            $chatsRes = Http::withHeaders([
+                'apikey' => $cfg['api_key'],
+                'Content-Type' => 'application/json',
+            ])
+                ->timeout(20)
+                ->post($chatsUrl, []);
+
+            if ($chatsRes->successful()) {
+                $chats = $chatsRes->json();
+                if (is_array($chats)) {
+                    foreach ($chats as $chat) {
+                        if (! is_array($chat) || ($chat['remoteJid'] ?? '') !== $lidJid) {
+                            continue;
+                        }
+                        $alt = (string) data_get($chat, 'lastMessage.key.remoteJidAlt', '');
+                        if ($alt !== '' && ! str_contains($alt, '@lid')) {
+                            $phone = CarWashPhoneNormalizer::e164($alt);
+                            if ($phone !== '' && ! CarWashPhoneNormalizer::looksLikeLidDigits($phone)) {
+                                return $phone;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::info('Evolution resolvePhoneFromLid failed', ['lid' => $lidJid, 'message' => $e->getMessage()]);
+        }
+
+        return null;
+    }
 }
