@@ -100,7 +100,6 @@ class EvolutionApiWhatsAppGateway implements WhatsAppGatewayInterface
                 ->post($url, [
                     'number' => $number,
                     'text' => $body,
-                    'delay' => 1200,
                 ]);
 
             $json = $response->json();
@@ -145,11 +144,17 @@ class EvolutionApiWhatsAppGateway implements WhatsAppGatewayInterface
 
     private function connectionState(): ?string
     {
+        $cacheKey = 'carwash-evo:connection-state';
+        $cached = cache()->get($cacheKey);
+        if (is_string($cached) && $cached !== '') {
+            return $cached;
+        }
+
         $cfg = config('carwash.evolution');
         try {
             $url = $cfg['base_url'].'/instance/connectionState/'.$cfg['instance'];
             $response = Http::withHeaders(['apikey' => $cfg['api_key']])
-                ->timeout(10)
+                ->timeout(5)
                 ->get($url);
             if (! $response->successful()) {
                 return null;
@@ -157,8 +162,13 @@ class EvolutionApiWhatsAppGateway implements WhatsAppGatewayInterface
             $json = $response->json();
 
             $state = data_get($json, 'instance.state') ?? data_get($json, 'state');
+            $normalized = is_string($state) ? strtolower($state) : null;
+            if ($normalized !== null) {
+                // Cache corto: evita +200–500ms por cada reply
+                cache()->put($cacheKey, $normalized, now()->addSeconds(45));
+            }
 
-            return is_string($state) ? strtolower($state) : null;
+            return $normalized;
         } catch (\Throwable $e) {
             return null;
         }
@@ -258,11 +268,11 @@ class EvolutionApiWhatsAppGateway implements WhatsAppGatewayInterface
                 'apikey' => $cfg['api_key'],
                 'Content-Type' => 'application/json',
             ])
-                ->timeout(15)
+                ->timeout(8)
                 ->post($url, [
                     'where' => ['key' => ['remoteJid' => $lidJid]],
                     'page' => 1,
-                    'offset' => 5,
+                    'offset' => 3,
                 ]);
 
             if ($response->successful()) {
@@ -287,31 +297,8 @@ class EvolutionApiWhatsAppGateway implements WhatsAppGatewayInterface
                 }
             }
 
-            $chatsUrl = $cfg['base_url'].'/chat/findChats/'.$cfg['instance'];
-            $chatsRes = Http::withHeaders([
-                'apikey' => $cfg['api_key'],
-                'Content-Type' => 'application/json',
-            ])
-                ->timeout(20)
-                ->post($chatsUrl, []);
-
-            if ($chatsRes->successful()) {
-                $chats = $chatsRes->json();
-                if (is_array($chats)) {
-                    foreach ($chats as $chat) {
-                        if (! is_array($chat) || ($chat['remoteJid'] ?? '') !== $lidJid) {
-                            continue;
-                        }
-                        $alt = (string) data_get($chat, 'lastMessage.key.remoteJidAlt', '');
-                        if ($alt !== '' && ! str_contains($alt, '@lid')) {
-                            $phone = CarWashPhoneNormalizer::e164($alt);
-                            if ($phone !== '' && ! CarWashPhoneNormalizer::looksLikeLidDigits($phone)) {
-                                return $phone;
-                            }
-                        }
-                    }
-                }
-            }
+            // 2) Chat metadata omitido a propósito: findChats completo es muy lento.
+            // Si no hay remoteJidAlt en mensajes recientes, devolvemos null.
         } catch (\Throwable $e) {
             Log::info('Evolution resolvePhoneFromLid failed', ['lid' => $lidJid, 'message' => $e->getMessage()]);
         }

@@ -37,6 +37,12 @@ class CarWashWhatsAppAgentService
                 ?? 'El asistente IA no está configurado (falta OPENAI_API_KEY). Un asesor te puede ayudar pronto.';
         }
 
+        // Atajos sin LLM (cotización web / saludos) → respuesta en <1s
+        $fast = $this->fastPathReply($userMessage, $callerPhone);
+        if ($fast !== null) {
+            return $fast;
+        }
+
         $todayMx = now('America/Mexico_City')->format('Y-m-d');
         $tomorrowMx = now('America/Mexico_City')->addDay()->format('Y-m-d');
         $nowMx = now('America/Mexico_City')->format('H:i');
@@ -60,6 +66,8 @@ Eres el asistente de WhatsApp de ABCars CarWash. Atiendes citas de lavado de aut
 FECHA/HORA ACTUAL (America/Mexico_City): hoy={$todayMx} hora={$nowMx}; mañana={$tomorrowMx}.
 {$returningHint}
 
+VELOCIDAD: responde corto. Usa como máximo 1–2 tools por turno. No encadenes listar servicios + sedes + disponibilidad si no hace falta.
+
 Puedes: consultar servicios/sedes, revisar ocupación, agendar, consultar estatus y cancelar citas, consultar cuponera/sellos, o escalar a humano.
 Responde SIEMPRE en español, mensajes cortos de WhatsApp (1–4 líneas). Sin markdown pesado ni listas enormes.
 
@@ -67,26 +75,24 @@ ESTILO CONVERSACIONAL (muy importante):
 1. Pide INFORMACIÓN POR PARTES: una pregunta a la vez. No pidas nombre+servicio+sede+hora+placas en el mismo mensaje.
 2. Orden sugerido al agendar: (a) qué necesita el auto / tipo de lavado → (b) sede → (c) día/hora → (d) nombre → (e) placas → (f) resumen y confirmación → (g) crear cita.
 3. Si el cliente ya dio varios datos juntos, úsalos y pregunta solo lo que falte.
-4. SERVICIOS: no sueltes un catálogo numerado completo. Usa carwash_list_services y ofrece 2–3 opciones en tono de asesor, p. ej. “¿Buscas algo rápido de exterior, o también aspirado/interior? El más pedido es X (\$.\.\.). También tenemos Y…”. Si pide “ver todos”, entonces sí muestra el resto breve.
-5. HORARIOS: ofrece 2–4 slots concretos (no una lista interminable). Pregunta “¿te late alguno de estos?”.
-6. SEDES: si hay pocas, puedes nombrarlas en una frase; si hay varias, pregunta por zona o ofrece la principal primero.
+4. SERVICIOS: no sueltes un catálogo numerado completo. Usa carwash_list_services y ofrece 2–3 opciones en tono de asesor.
+5. HORARIOS: ofrece 2–4 slots concretos. Pregunta “¿te late alguno de estos?”.
+6. SEDES: si hay pocas, nómbralas en una frase.
 7. Tras reunir datos, haz UN resumen corto y pregunta “¿Confirmamos?”. Solo entonces llama carwash_create_appointment.
 
 REGLAS DE AGENDAR (críticas):
 1. Para crear una cita DEBES llamar carwash_create_appointment.
-2. NUNCA digas que la cita “quedó agendada” / “con éxito” si la tool no devolvió ok:true y un uuid.
-3. Si la tool responde ok:false o error, explica el problema y pide el dato faltante. No inventes confirmación.
-4. Si ok:true, confirma con: uuid, fecha/hora exacta (scheduled_local o scheduled_start_at), servicio, sede, placas y precio de la respuesta de la tool.
-5. Para scheduled_start_at usa SIEMPRE YYYY-MM-DD HH:MM con año actual. Si dice “hoy” usa {$todayMx}. Si dice “mañana” usa {$tomorrowMx}. Si da fecha concreta (p. ej. lunes 14 de septiembre 3 PM), respétala; no la cambies a hoy/mañana.
-6. Usa service_code / service_type_uuid EXACTOS de carwash_list_services (nunca inventes códigos como “lavado-completo”). Si falla el servicio, lista de nuevo y reintenta con el code correcto.
-7. En carwash_get_availability: lee available_slots. Si available_count > 0, SÍ hay cupo. booked_slots/slots vacíos = día libre.
-8. Si preguntan por sellos/cuponera: carwash_get_loyalty_stamps y muestra punch_card/message tal cual.
-9. Tras “¿Confirmamos?” y el cliente dice sí/claro/ok, DEBES llamar carwash_create_appointment en esa misma respuesta (no vuelvas a pedir confirmación).
+2. NUNCA digas que la cita quedó agendada si la tool no devolvió ok:true y un uuid.
+3. Si la tool responde ok:false, explica el error y pide el dato faltante.
+4. Si ok:true, confirma con uuid, fecha/hora, servicio, sede, placas y precio.
+5. Para scheduled_start_at usa YYYY-MM-DD HH:MM. “hoy”={$todayMx}, “mañana”={$tomorrowMx}.
+6. Usa service_code EXACTOS de carwash_list_services.
+7. En carwash_get_availability: available_slots con valores = sí hay cupo.
+8. Sellos/cuponera: carwash_get_loyalty_stamps.
+9. Tras “¿Confirmamos?” y el cliente dice sí, llama carwash_create_appointment en esa misma respuesta.
 
-El teléfono del cliente en este chat es: {$callerPhone}. Úsalo si no lo proporciona.
-Si piden autos seminuevos / inventario ABCars, indica amablemente que este canal es solo CarWash.
-Si el cliente escribe 0 / iniciar / reiniciar, el sistema ya reinicia el flujo; no hace falta tool.
-En mensajes de ayuda puedes recordar: “Escribe 0 o iniciar para reiniciar”.
+Teléfono del cliente: {$callerPhone}.
+Canal solo CarWash. “0” / iniciar reinicia el flujo.
 PROMPT;
 
         $messages = [['role' => 'system', 'content' => $system]];
@@ -96,7 +102,6 @@ PROMPT;
                 if ($content === '') {
                     continue;
                 }
-                // Evitar contaminar el contexto con fallos previos del bot
                 if (($h['role'] ?? '') === 'assistant' && $this->isFailurePlaceholder($content)) {
                     continue;
                 }
@@ -106,7 +111,8 @@ PROMPT;
         $messages[] = ['role' => 'user', 'content' => $userMessage];
 
         $model = trim((string) config('carwash.agent.model', 'gpt-4o-mini')) ?: 'gpt-4o-mini';
-        $maxIterations = 5;
+        $maxIterations = max(1, min(4, (int) config('carwash.agent.max_tool_rounds', 3)));
+        $openaiTimeout = max(10, min(45, (int) config('carwash.agent.openai_timeout', 25)));
 
         try {
             for ($i = 0; $i < $maxIterations; $i++) {
@@ -114,14 +120,14 @@ PROMPT;
                     'Authorization' => 'Bearer '.$apiKey,
                     'Content-Type' => 'application/json',
                 ])
-                    ->timeout(45)
+                    ->timeout($openaiTimeout)
                     ->post('https://api.openai.com/v1/chat/completions', [
                         'model' => $model,
                         'messages' => $messages,
                         'tools' => $this->tools->getToolsDefinitions(),
                         'tool_choice' => 'auto',
-                        'temperature' => 0.45,
-                        'max_tokens' => 550,
+                        'temperature' => 0.35,
+                        'max_tokens' => 280,
                     ]);
 
                 if (! $response->successful()) {
@@ -198,7 +204,7 @@ PROMPT;
      */
     public function historyFromConversation(CarWashWhatsAppConversation $conversation): array
     {
-        $limit = max(2, (int) config('carwash.agent.history_limit', 12));
+        $limit = max(2, (int) config('carwash.agent.history_limit', 6));
         $query = CarWashWhatsAppMessage::query()
             ->where('conversation_id', $conversation->id);
 
@@ -291,6 +297,66 @@ PROMPT;
         }
 
         return false;
+    }
+
+    /**
+     * Respuestas instantáneas sin OpenAI (cotización del sitio web, saludos).
+     */
+    private function fastPathReply(string $userMessage, string $callerPhone): ?string
+    {
+        $text = trim($userMessage);
+        if ($text === '') {
+            return null;
+        }
+
+        // Cotización enviada desde /carwash (Abrir WhatsApp con carrito)
+        if (preg_match('/quiero cotizar\s*\/\s*agendar estos servicios/iu', $text)
+            || preg_match('/Total estimado:\s*\$/u', $text)) {
+            $lines = preg_split("/\r\n|\n|\r/", $text) ?: [];
+            $items = [];
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if (preg_match('/^\d+\.\s+(.+?)\s*[—\-]\s*\$/u', $line, $m)) {
+                    $items[] = trim($m[1]);
+                }
+            }
+
+            $summary = count($items) > 0
+                ? implode(', ', array_slice($items, 0, 4))
+                : 'los servicios que elegiste';
+
+            if (preg_match('/Total estimado:\s*\$([\d,\.]+)/u', $text, $tm)) {
+                $total = $tm[1];
+                $intro = "¡Recibí tu cotización! ({$summary}). Total estimado: \${$total}.";
+            } else {
+                $intro = "¡Recibí tu cotización! ({$summary}).";
+            }
+
+            $locations = $this->tools->execute('carwash_list_locations', [], $callerPhone);
+            $names = [];
+            foreach (($locations['locations'] ?? []) as $loc) {
+                $n = is_array($loc) ? ($loc['name'] ?? '') : '';
+                if ($n !== '') {
+                    $names[] = $n;
+                }
+            }
+
+            if (count($names) === 1) {
+                return "{$intro}\nAtendemos en *{$names[0]}*. ¿Qué día y hora te acomodan?";
+            }
+            if (count($names) > 1) {
+                return $intro."\n¿En qué sede? ".implode(' / ', array_slice($names, 0, 3))."\n¿Y qué día/hora te queda bien?";
+            }
+
+            return "{$intro}\n¿En qué sede y qué día/hora te gustaría agendar?";
+        }
+
+        $lower = mb_strtolower($text);
+        if (preg_match('/^(hola|buenas|buen d[ií]a|hey|hi)\b/u', $lower) && mb_strlen($lower) < 40) {
+            return "¡Hola! Soy el asistente de ABCars CarWash 👋\n¿Quieres *agendar un lavado* o consultar tus *sellos*?";
+        }
+
+        return null;
     }
 
     /**
