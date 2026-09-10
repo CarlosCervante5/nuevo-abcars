@@ -178,7 +178,7 @@ class CarWashAssistantToolsService
             'ok' => true,
             'services' => $items,
             'top_suggestions' => $suggestions,
-            'assistant_instruction' => 'Ofrece top_suggestions en tono conversacional (2–3). Pregunta qué busca (rápido / completo / brillo). Al crear cita usa SIEMPRE el code exacto de services[].code (nunca inventes códigos). No pegues la lista completa salvo que el cliente pida ver todos.',
+            'assistant_instruction' => 'Ofrece top_suggestions en tono conversacional (2–3). Pregunta qué busca (rápido / completo / brillo). Al crear cita usa SIEMPRE el code exacto de services[].code (nunca inventes “lavado básico” ni códigos). En el resumen de confirmación usa el name oficial del catálogo. No pegues la lista completa salvo que el cliente pida ver todos.',
         ];
     }
 
@@ -480,6 +480,12 @@ class CarWashAssistantToolsService
                 if ($bySlug) {
                     return $bySlug;
                 }
+
+                // Alias comerciales (web / IA): "lavado básico", "paquete premium", etc.
+                $aliased = $this->resolveServiceAlias($slug);
+                if ($aliased) {
+                    return $aliased;
+                }
             }
 
             $byName = CarWashServiceType::query()
@@ -504,6 +510,82 @@ class CarWashAssistantToolsService
     }
 
     /**
+     * Mapea nombres inventados por la web/IA al código real del catálogo.
+     */
+    private function resolveServiceAlias(string $slug): ?CarWashServiceType
+    {
+        $slug = trim($slug, '-');
+        if ($slug === '') {
+            return null;
+        }
+
+        $map = [
+            // Paquete / nombre "básico"
+            'basico' => 'lavado-aspirado-secado',
+            'lavado-basico' => 'lavado-aspirado-secado',
+            'paquete-basico' => 'lavado-aspirado-secado',
+            'lavado-simple' => 'lavado-aspirado-secado',
+            'lavado-express' => 'lavado-aspirado-secado',
+            'lavado-rapido' => 'lavado-aspirado-secado',
+            'lavado-exterior' => 'lavado-aspirado-secado',
+            // Premium / con pulido
+            'premium' => 'lavado-aspirado-secado-pulido',
+            'lavado-premium' => 'lavado-aspirado-secado-pulido',
+            'paquete-premium' => 'lavado-aspirado-secado-pulido',
+            'lavado-con-pulido' => 'lavado-aspirado-secado-pulido',
+            // Completo / signature / encerado
+            'completo' => 'lavado-pulido-encerado',
+            'lavado-completo' => 'lavado-pulido-encerado',
+            'paquete-completo' => 'lavado-pulido-encerado',
+            'signature' => 'lavado-pulido-encerado',
+            'paquete-signature' => 'lavado-pulido-encerado',
+            'paquete-siganture' => 'lavado-pulido-encerado', // typo del mockup
+            'lavado-encerado' => 'lavado-pulido-encerado',
+            'pulido-encerado' => 'lavado-pulido-encerado',
+            // Elite / cerámica
+            'elite' => 'nanoceramico',
+            'paquete-elite' => 'nanoceramico',
+            'nanoceramica' => 'nanoceramico',
+            'proteccion-nanoceramica' => 'nanoceramico',
+            // Cotización web (nombres públicos)
+            'lavado-premium-de-carroceria' => 'lavado-aspirado-secado',
+            'descontaminacion-de-rines' => 'detallado-rines',
+            'lavado-aspirado-y-secado' => 'lavado-aspirado-secado',
+            'lavado-aspirado-secado-y-pulido' => 'lavado-aspirado-secado-pulido',
+            'pulido-y-encerado' => 'lavado-pulido-encerado',
+        ];
+
+        // Match exacto o si el slug contiene la clave (ej. "servicio-lavado-basico")
+        $code = $map[$slug] ?? null;
+        if ($code === null) {
+            foreach ($map as $alias => $target) {
+                if (str_contains($slug, $alias)) {
+                    $code = $target;
+                    break;
+                }
+            }
+        }
+
+        if ($code === null) {
+            return null;
+        }
+
+        $service = CarWashServiceType::query()
+            ->where('is_active', true)
+            ->where('code', $code)
+            ->first();
+
+        if ($service) {
+            Log::info('CarWash service alias matched', [
+                'slug' => $slug,
+                'matched_code' => $service->code,
+            ]);
+        }
+
+        return $service;
+    }
+
+    /**
      * Empareja nombres/códigos inventados por la IA (p. ej. lavado-completo)
      * con el catálogo real (lavado-pulido-encerado).
      */
@@ -512,6 +594,12 @@ class CarWashAssistantToolsService
         $needle = $this->normalizeServiceKey($raw);
         if ($needle === '' || mb_strlen($needle) < 4) {
             return null;
+        }
+
+        // Alias antes del score genérico
+        $aliased = $this->resolveServiceAlias($needle);
+        if ($aliased) {
+            return $aliased;
         }
 
         $services = CarWashServiceType::query()->where('is_active', true)->orderBy('sort_order')->get();

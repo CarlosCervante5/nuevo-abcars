@@ -86,7 +86,7 @@ REGLAS DE AGENDAR (críticas):
 3. Si la tool responde ok:false, explica el error y pide el dato faltante.
 4. Si ok:true, confirma con uuid, fecha/hora, servicio, sede, placas y precio.
 5. Para scheduled_start_at usa YYYY-MM-DD HH:MM. “hoy”={$todayMx}, “mañana”={$tomorrowMx}.
-6. Usa service_code EXACTOS de carwash_list_services.
+6. Usa service_code EXACTOS de carwash_list_services. NUNCA inventes nombres como "Lavado básico": en el resumen de confirmación escribe el *name* y guarda el *code* del catálogo. Al confirmar el cliente, llama carwash_create_appointment con ese mismo service_code.
 7. En carwash_get_availability: available_slots con valores = sí hay cupo.
 8. Sellos/cuponera: carwash_get_loyalty_stamps.
 9. Tras “¿Confirmamos?” y el cliente dice sí, llama carwash_create_appointment en esa misma respuesta.
