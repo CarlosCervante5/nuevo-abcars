@@ -1,105 +1,129 @@
 <div class="min-h-screen bg-gray-50">
   <app-home-nav></app-home-nav>
 
-  <div class="cw-hero text-white py-16 pt-32">
-    <div class="container mx-auto px-4">
-      <div class="max-w-4xl mx-auto text-center">
-        <div class="cw-brand-hero">
-          <img
-            src="assets/images/carwash/logo-abcarwash.png"
-            alt="AB CarWash"
-            class="cw-brand-logo"
-            width="320"
-            height="72"
-          />
-        </div>
-        <h1 class="svc-hero-title">AB CarWash</h1>
-        <p class="svc-hero-description">
-          Autolavado premium en Puebla. Agenda tu servicio y deja tu auto impecable.
-        </p>
-        <div class="flex flex-wrap justify-center gap-4">
-          <div class="flex items-center gap-2" *ngFor="let f of features">
-            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-            </svg>
-            <span class="hero-feature-badge">{{ f.label }}</span>
-          </div>
-        </div>
+  <!-- Hero -->
+  <section class="cw-hero">
+    <div class="cw-hero-inner">
+      <div class="cw-brand-hero">
+        <img
+          src="assets/images/carwash/logo-abcarwash.png"
+          alt="AB CarWash"
+          class="cw-brand-logo"
+          width="360"
+          height="80"
+        />
+      </div>
+      <h1 class="cw-hero-title">Servicios Premium de Estética Automotriz</h1>
+      <p class="cw-hero-lead">
+        Agenda hoy mismo tu cita, y disfruta tu auto como salido de agencia.
+      </p>
+    </div>
+  </section>
+
+  <!-- Paquetes -->
+  <section class="cw-section" id="paquetes">
+    <div class="cw-container">
+      <h2 class="cw-section-title cw-section-title--left">
+        Elige entre nuestros paquetes, el servicio adecuado para tu auto
+      </h2>
+
+      <div class="cw-packages">
+        <article class="cw-package" *ngFor="let pkg of packages" [class.cw-package--featured]="!!pkg.badge">
+          <span class="cw-package-badge" *ngIf="pkg.badge">{{ pkg.badge }}</span>
+          <h3>{{ pkg.name }}</h3>
+          <ul>
+            <li *ngFor="let f of pkg.features">{{ f }}</li>
+          </ul>
+          <p class="cw-package-meta">
+            Precio desde: <strong>${{ pkg.priceFrom | number: '1.0-0' }}</strong>
+          </p>
+          <p class="cw-package-meta">
+            Tiempo estimado: <strong>{{ pkg.duration }}</strong>
+          </p>
+          <a
+            class="cw-btn cw-btn--primary cw-btn--block"
+            [href]="whatsappForPackage(pkg)"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Agendar Cita
+          </a>
+        </article>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="container mx-auto px-4 py-16">
-    <div class="max-w-6xl mx-auto">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-2 space-y-8">
-          <div class="bg-white rounded-3xl p-8 shadow-sm" id="paquetes">
-            <h2 class="section-title">Lista de servicios</h2>
-            <p class="section-lead">Tarifas en MXN · precio público con IVA.</p>
-
-            <div class="overflow-x-auto">
-              <table class="svc-table">
-                <thead>
-                  <tr>
-                    <th>Servicio</th>
-                    <th>Precio con IVA</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let s of services">
-                    <td>{{ s.name }}</td>
-                    <td class="svc-price">${{ s.priceWithVat | number: '1.0-0' }}</td>
-                    <td class="svc-actions">
-                      <a
-                        class="svc-btn svc-btn--primary"
-                        [href]="whatsappFor(s)"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Agendar
-                      </a>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-3xl p-8 shadow-sm">
-            <h2 class="section-title">¿Listo para dejar tu auto impecable?</h2>
-            <p class="section-lead">
-              Agenda por WhatsApp al
-              <a class="svc-link" [href]="phoneTel">{{ phoneDisplay }}</a>
-              y te confirmamos horario en minutos.
-            </p>
-            <div class="flex flex-wrap gap-3 mt-6">
-              <button type="button" class="svc-btn svc-btn--primary" (click)="scrollToPackages()">
-                Ver paquetes
-              </button>
-              <a class="svc-btn svc-btn--wa" [href]="whatsappUrl" target="_blank" rel="noopener noreferrer">
-                Agenda via WhatsApp
-              </a>
-            </div>
+  <!-- Menú + WhatsApp -->
+  <section class="cw-section cw-section--tight">
+    <div class="cw-container">
+      <div class="cw-split">
+        <div class="cw-menu-card">
+          <h2 class="cw-section-title cw-section-title--left">
+            O selecciona de nuestro menú de servicios:
+          </h2>
+          <div class="cw-table-wrap">
+            <table class="cw-menu-table">
+              <thead>
+                <tr>
+                  <th>Servicio</th>
+                  <th>Precio desde</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let s of services">
+                  <td>{{ s.name }}</td>
+                  <td class="cw-price">${{ s.priceWithVat | number: '1.0-0' }}</td>
+                  <td>
+                    <a
+                      class="cw-btn cw-btn--primary cw-btn--sm"
+                      [href]="whatsappFor(s)"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Seleccionar
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <aside class="space-y-6">
-          <div class="bg-white rounded-3xl p-8 shadow-sm sticky top-28">
-            <h2 class="section-title">Agenda ahora</h2>
-            <p class="section-lead">Escríbenos y te damos disponibilidad el mismo día.</p>
-            <a class="svc-btn svc-btn--wa svc-btn--block" [href]="whatsappUrl" target="_blank" rel="noopener noreferrer">
-              Abrir WhatsApp
-            </a>
-            <p class="svc-aside-meta">
-              Teléfono
-              <a class="svc-link" [href]="phoneTel">{{ phoneDisplay }}</a>
-            </p>
-          </div>
+        <aside class="cw-wa-card">
+          <h3>¿Listo para dejar tu auto impecable?</h3>
+          <p>Escríbenos y te confirmamos disponibilidad en minutos</p>
+          <a class="cw-btn cw-btn--wa cw-btn--block" [href]="whatsappUrl" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
+              />
+            </svg>
+            Abrir WhatsApp
+          </a>
+          <p class="cw-wa-phone">
+            O llama al
+            <a [href]="phoneTel">{{ phoneDisplay }}</a>
+          </p>
         </aside>
       </div>
     </div>
-  </div>
+  </section>
+
+  <!-- CTA cambio de auto -->
+  <section class="cw-cta-banner">
+    <div class="cw-container cw-cta-inner">
+      <h2>¿Quieres cambiar de auto?</h2>
+      <p>
+        Nuestro equipo de expertos está listo para ayudarte a encontrar la solución perfecta para tus necesidades automotrices.
+      </p>
+      <div class="cw-cta-actions">
+        <a routerLink="/inventario" class="cw-btn cw-btn--white">Ver Vehículos Disponibles</a>
+        <a routerLink="/financiamiento" class="cw-btn cw-btn--orange">Solicitar Cotización</a>
+      </div>
+    </div>
+  </section>
 
   <app-modern-footer></app-modern-footer>
 </div>
