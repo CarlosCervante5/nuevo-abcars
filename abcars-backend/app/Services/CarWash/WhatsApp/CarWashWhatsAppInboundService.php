@@ -40,9 +40,8 @@ class CarWashWhatsAppInboundService
 
         // Serializa por conversación: evita loops por webhooks/reintentos en paralelo
         $lockKey = 'carwash-wa:conv:'.sha1($phone);
-        $lock = Cache::lock($lockKey, 90);
-
-        if (! $lock->get()) {
+        // Cache::add es portable (file/redis); lock atómico no siempre está disponible
+        if (! Cache::add($lockKey, 1, 90)) {
             Log::info('CarWash WhatsApp inbound skipped (lock busy)', [
                 'phone' => $phone,
                 'provider_message_id' => $providerMessageId,
@@ -54,7 +53,7 @@ class CarWashWhatsAppInboundService
         try {
             $this->handleLocked($inbound, $phone, $body, $providerMessageId);
         } finally {
-            optional($lock)->release();
+            Cache::forget($lockKey);
         }
     }
 
