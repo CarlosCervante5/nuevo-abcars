@@ -70,7 +70,7 @@ import { getAdminDashboardUrl } from '../../utils/admin-dashboard-url';
                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
                 (click)="$event.stopPropagation()">
                 <a 
-                  [routerLink]="[dashboardUrl]" 
+                  [routerLink]="dashboardUrl" 
                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                   (click)="closeAccountDropdown(); scrollToTop()">
                   Dashboard
@@ -220,7 +220,7 @@ import { getAdminDashboardUrl } from '../../utils/admin-dashboard-url';
               <!-- Mobile Dropdown Options -->
               <div *ngIf="mobileAccountDropdownOpen" class="mobile-sidebar-dropdown">
                 <a 
-                  [routerLink]="[dashboardUrl]" 
+                  [routerLink]="dashboardUrl" 
                   class="mobile-sidebar-dropdown-item"
                   (click)="closeMobileMenu(); closeMobileAccountDropdown(); scrollToTop()">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
