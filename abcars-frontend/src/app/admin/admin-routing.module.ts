@@ -88,7 +88,7 @@ const routes: Routes = [
     canActivate: [SparePartsGuard],
     canLoad: [SparePartsGuard]
   },
-  { path: '**', redirectTo: '404' }
+  { path: '**', redirectTo: '/404' }
 ];
 
 @NgModule({

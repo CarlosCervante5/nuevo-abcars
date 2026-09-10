@@ -7,6 +7,7 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { ReferralService } from '../../services/referral.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { getAdminDashboardUrl } from '../../utils/admin-dashboard-url';
 
 @Component({
   selector: 'app-dark-nav',
@@ -406,15 +407,7 @@ export class DarkNavComponent implements OnInit, OnDestroy {
   }
 
   getDashboardUrl(role: string | null): string {
-    if (!role) {
-      return '/auth/mi-cuenta';
-    }
-
-    if (role === 'client') {
-      return '/auth/mi-cuenta';
-    }
-
-    return `/admin/${role}`;
+    return getAdminDashboardUrl(role);
   }
 
   logout(): void {

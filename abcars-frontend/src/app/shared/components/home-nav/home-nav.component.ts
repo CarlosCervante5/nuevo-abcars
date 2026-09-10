@@ -6,6 +6,7 @@ import { AuthStateService } from '../../services/auth-state.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { getAdminDashboardUrl } from '../../utils/admin-dashboard-url';
 
 @Component({
   selector: 'app-home-nav',
@@ -408,15 +409,7 @@ export class HomeNavComponent implements OnInit, OnDestroy {
   }
 
   getDashboardUrl(role: string | null): string {
-    if (!role) {
-      return '/auth/mi-cuenta';
-    }
-
-    if (role === 'client') {
-      return '/auth/mi-cuenta';
-    }
-
-    return `/admin/${role}`;
+    return getAdminDashboardUrl(role);
   }
 
   logout(): void {
