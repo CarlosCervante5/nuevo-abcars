@@ -4,6 +4,8 @@ namespace App\Services\CarWash\WhatsApp;
 
 use App\Models\CarWash\CarWashWhatsAppConversation;
 use App\Models\CarWash\CarWashWhatsAppMessage;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -36,13 +38,89 @@ class CarWashWhatsAppInboundService
             }
         }
 
+        // Serializa por conversación: evita loops por webhooks/reintentos en paralelo
+        $lockKey = 'carwash-wa:conv:'.sha1($phone);
+        $lock = Cache::lock($lockKey, 90);
+
+        if (! $lock->get()) {
+            Log::info('CarWash WhatsApp inbound skipped (lock busy)', [
+                'phone' => $phone,
+                'provider_message_id' => $providerMessageId,
+            ]);
+
+            return;
+        }
+
+        try {
+            $this->handleLocked($inbound, $phone, $body, $providerMessageId);
+        } finally {
+            optional($lock)->release();
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $inbound
+     */
+    private function handleLocked(array $inbound, string $phone, string $body, ?string $providerMessageId): void
+    {
+        // Re-check dentro del lock
+        if ($providerMessageId) {
+            $exists = CarWashWhatsAppMessage::query()->where('twilio_sid', $providerMessageId)->exists();
+            if ($exists) {
+                return;
+            }
+        }
+
+        // Mismo texto entrante reciente → no volver a responder (reintentos Evolution)
+        $recentDuplicate = CarWashWhatsAppMessage::query()
+            ->where('direction', 'inbound')
+            ->where('body', $body)
+            ->where('created_at', '>=', now()->subMinutes(2))
+            ->whereHas('conversation', function ($q) use ($phone) {
+                $alt = CarWashPhoneNormalizer::mexicoAlternate($phone);
+                $phones = array_values(array_filter([$phone, $alt]));
+                $q->whereIn('phone', $phones);
+            })
+            ->exists();
+
+        if ($recentDuplicate && ! $providerMessageId) {
+            return;
+        }
+
+        if ($recentDuplicate && $providerMessageId) {
+            // Ya respondimos a este mismo texto hace poco: solo registrar id si es nuevo
+            try {
+                $conversation = $this->findOrCreateConversation(
+                    $phone,
+                    $inbound['customer_name'] ?? null,
+                    $inbound['provider'] ?? null
+                );
+                CarWashWhatsAppMessage::create([
+                    'conversation_id' => $conversation->id,
+                    'direction' => 'inbound',
+                    'twilio_sid' => $providerMessageId,
+                    'body' => $body,
+                    'status' => 'received_duplicate',
+                    'payload' => $inbound['payload'] ?? null,
+                ]);
+            } catch (QueryException $e) {
+                // unique twilio_sid
+            }
+
+            Log::info('CarWash WhatsApp inbound duplicate body skipped', [
+                'phone' => $phone,
+                'provider_message_id' => $providerMessageId,
+            ]);
+
+            return;
+        }
+
         $conversation = $this->findOrCreateConversation(
             $phone,
             $inbound['customer_name'] ?? null,
             $inbound['provider'] ?? null
         );
 
-        // Guardar LID / JID para reenvíos (Evolution 2.3.7 entrega mejor por @lid)
         $meta = is_array($conversation->meta) ? $conversation->meta : [];
         $changedMeta = false;
         if (! empty($inbound['evolution_lid'])) {
@@ -62,24 +140,33 @@ class CarWashWhatsAppInboundService
             $conversation->customer_name = $inbound['customer_name'];
         }
 
-        DB::transaction(function () use ($conversation, $body, $providerMessageId, $inbound) {
-            CarWashWhatsAppMessage::create([
-                'conversation_id' => $conversation->id,
-                'direction' => 'inbound',
-                'twilio_sid' => $providerMessageId,
-                'body' => $body,
-                'status' => 'received',
-                'payload' => $inbound['payload'] ?? null,
+        try {
+            DB::transaction(function () use ($conversation, $body, $providerMessageId, $inbound) {
+                CarWashWhatsAppMessage::create([
+                    'conversation_id' => $conversation->id,
+                    'direction' => 'inbound',
+                    'twilio_sid' => $providerMessageId,
+                    'body' => $body,
+                    'status' => 'received',
+                    'payload' => $inbound['payload'] ?? null,
+                ]);
+
+                $conversation->last_message_at = now();
+                $conversation->status = 'open';
+                $conversation->save();
+            });
+        } catch (QueryException $e) {
+            // Carrera: otro worker ya insertó el mismo twilio_sid
+            Log::info('CarWash WhatsApp inbound race ignored', [
+                'provider_message_id' => $providerMessageId,
+                'error' => $e->getMessage(),
             ]);
 
-            $conversation->last_message_at = now();
-            $conversation->status = 'open';
-            $conversation->save();
-        });
+            return;
+        }
 
         $conversation = $conversation->fresh();
 
-        // Reinicio de flujo: "0" / iniciar / reiniciar (si el usuario se trabó)
         if ($this->isResetCommand($body)) {
             $this->resetConversationContext($conversation);
             $this->sendAndStore($conversation->fresh(), $this->welcomeAfterResetMessage());
@@ -98,7 +185,6 @@ class CarWashWhatsAppInboundService
         }
 
         $history = $this->agent->historyFromConversation($conversation->fresh());
-        // Quitar el último inbound recién guardado del history que el agent también recibe como userMessage
         if (! empty($history) && end($history)['role'] === 'user') {
             array_pop($history);
         }
@@ -111,7 +197,6 @@ class CarWashWhatsAppInboundService
     {
         $normalized = mb_strtolower(trim($body));
         $normalized = preg_replace('/\s+/u', ' ', $normalized) ?? $normalized;
-        // Quitar signos comunes de WhatsApp
         $normalized = trim($normalized, " \t\n\r\0\x0B.!¡?¿*\"'");
 
         if ($normalized === '0') {
@@ -162,6 +247,22 @@ class CarWashWhatsAppInboundService
             return;
         }
 
+        // No reenviar el mismo texto outbound en ventana corta (anti-loop)
+        $dupOut = CarWashWhatsAppMessage::query()
+            ->where('conversation_id', $conversation->id)
+            ->where('direction', 'outbound')
+            ->where('body', $body)
+            ->where('created_at', '>=', now()->subMinutes(3))
+            ->exists();
+
+        if ($dupOut) {
+            Log::info('CarWash WhatsApp outbound duplicate suppressed', [
+                'conversation_uuid' => $conversation->uuid,
+            ]);
+
+            return;
+        }
+
         $gateway = $this->gateways->default();
         $meta = is_array($conversation->meta) ? $conversation->meta : [];
         $preferredJid = $meta['evolution_lid']
@@ -193,9 +294,6 @@ class CarWashWhatsAppInboundService
     }
 
     /**
-     * Persiste un outbound ya enviado (p. ej. notificación de estatus) sin reenviar.
-     * Busca/crea la conversación por teléfono normalizado para que aparezca en el inbox admin.
-     *
      * @param  array<string, mixed>|null  $payload
      */
     public function storeOutboundAlreadySent(
@@ -263,9 +361,6 @@ class CarWashWhatsAppInboundService
         return $message;
     }
 
-    /**
-     * Busca conversación por +521… o variante +52… (evita duplicados MX).
-     */
     private function findOrCreateConversation(
         string $phone,
         ?string $customerName = null,
@@ -280,7 +375,6 @@ class CarWashWhatsAppInboundService
             ->first();
 
         if ($conversation) {
-            // Preferir formato WhatsApp MX (+521…) al reenviar
             if ($conversation->phone !== $phone && str_starts_with($phone, '+521')) {
                 $conversation->phone = $phone;
                 $conversation->save();

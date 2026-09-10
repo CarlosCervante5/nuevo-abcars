@@ -52,18 +52,7 @@ class EvolutionApiWhatsAppGateway implements WhatsAppGatewayInterface
 
         $number = CarWashPhoneNormalizer::forEvolution($toPhone);
         if ($number !== '') {
-            // En Evolution 2.3.7 / Baileys rc.9, a veces entrega mejor el @lid que el PN.
-            // Probamos PN puro y también JID completo.
             $candidates[] = $number;
-            $candidates[] = $number.'@s.whatsapp.net';
-
-            $resolved = $this->resolveWhatsAppNumber($number);
-            if (is_string($resolved) && $resolved !== '') {
-                array_unshift($candidates, $resolved);
-                if (! str_contains($resolved, '@')) {
-                    $candidates[] = $resolved.'@s.whatsapp.net';
-                }
-            }
         }
 
         $candidates = array_values(array_unique(array_filter($candidates)));
@@ -71,33 +60,27 @@ class EvolutionApiWhatsAppGateway implements WhatsAppGatewayInterface
             return ['ok' => false, 'error' => 'Teléfono destino inválido'];
         }
 
-        $lastError = null;
-        $lastRaw = null;
-        foreach ($candidates as $target) {
-            $result = $this->postSendText($target, $body);
-            if ($result['ok'] ?? false) {
-                $status = strtoupper((string) ($result['delivery_status'] ?? ''));
-                // Si queda PENDING, intenta el siguiente candidato (p. ej. LID)
-                if ($status === 'PENDING' && $target !== end($candidates)) {
-                    Log::warning('Evolution sendText PENDING, trying next target', [
-                        'target' => $target,
-                        'message_id' => $result['provider_message_id'] ?? null,
-                    ]);
-                    $lastRaw = $result;
-                    continue;
-                }
-
-                return $result;
-            }
-            $lastError = $result['error'] ?? 'send failed';
-            $lastRaw = $result;
+        // UN solo intento de envío. Reintentar tras PENDING duplicaba el mismo texto
+        // (loop de 3–4 mensajes idénticos con una palomita).
+        $target = $candidates[0];
+        $result = $this->postSendText($target, $body);
+        if ($result['ok'] ?? false) {
+            return $result;
         }
 
-        return [
-            'ok' => false,
-            'error' => is_string($lastError) ? $lastError : 'No se pudo entregar el mensaje',
-            'raw' => $lastRaw['raw'] ?? $lastRaw,
-        ];
+        // Solo si falló de verdad (no PENDING), probar el siguiente candidato una vez
+        if (count($candidates) > 1) {
+            $fallback = $candidates[1];
+            Log::info('Evolution sendText retry with fallback target', [
+                'from' => $target,
+                'to' => $fallback,
+                'error' => $result['error'] ?? null,
+            ]);
+
+            return $this->postSendText($fallback, $body);
+        }
+
+        return $result;
     }
 
     /**

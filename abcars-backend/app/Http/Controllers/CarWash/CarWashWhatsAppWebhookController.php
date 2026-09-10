@@ -90,17 +90,19 @@ class CarWashWhatsAppWebhookController extends Controller
             'evolution_remote_jid' => $lid ?: ($remoteJid !== '' ? $remoteJid : null),
         ];
 
-        // Procesar en este request (más fiable que afterResponse en algunos hosts)
-        try {
-            app(CarWashWhatsAppInboundService::class)->handle($inbound);
-        } catch (\Throwable $e) {
-            Log::error('CarWash WhatsApp inbound handle failed', [
-                'message' => $e->getMessage(),
-                'phone' => $phone,
-            ]);
-
-            return response()->json(['ok' => false, 'error' => 'handle_failed'], 500);
-        }
+        // ACK rápido + procesar después (evita retries de Evolution por timeout)
+        // que sumados al multi-send generaban loops de mensajes idénticos.
+        $inboundCopy = $inbound;
+        dispatch(function () use ($inboundCopy) {
+            try {
+                app(CarWashWhatsAppInboundService::class)->handle($inboundCopy);
+            } catch (\Throwable $e) {
+                Log::error('CarWash WhatsApp inbound handle failed', [
+                    'message' => $e->getMessage(),
+                    'phone' => $inboundCopy['phone'] ?? null,
+                ]);
+            }
+        })->afterResponse();
 
         return response()->json(['ok' => true]);
     }
