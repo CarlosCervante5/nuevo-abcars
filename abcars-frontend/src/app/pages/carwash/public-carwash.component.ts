@@ -29,10 +29,13 @@ interface WashPackage {
 export class PublicCarwashComponent implements OnInit {
   /** Fallback si el API aún no responde (Settings → Teléfono público). */
   private phoneDigits = '525646531805';
+  private defaultPrefill = 'Hola AB CarWash, quiero agendar un lavado.';
 
-  whatsappUrl = this.buildWhatsAppUrl('Hola AB CarWash, quiero agendar un lavado.');
   phoneDisplay = '+52 564 653 1805';
   phoneTel = 'tel:+525646531805';
+
+  /** Índices de servicios agregados al carrito (permite varios). */
+  cart = new Set<number>();
 
   readonly packages: WashPackage[] = [
     {
@@ -116,12 +119,12 @@ export class PublicCarwashComponent implements OnInit {
         if (d?.phone_digits) {
           this.phoneDigits = d.phone_digits;
           this.phoneTel = `tel:+${d.phone_digits}`;
-          this.whatsappUrl =
-            d.whatsapp_url ||
-            this.buildWhatsAppUrl(d.prefill || 'Hola AB CarWash, quiero agendar un lavado.');
         }
         if (d?.phone_display) {
           this.phoneDisplay = d.phone_display;
+        }
+        if (d?.prefill) {
+          this.defaultPrefill = d.prefill;
         }
       },
       error: () => {
@@ -130,14 +133,75 @@ export class PublicCarwashComponent implements OnInit {
     });
   }
 
-  whatsappFor(service: WashServiceRow): string {
-    return this.buildWhatsAppUrl(`Hola AB CarWash, me interesa: ${service.name}`);
+  get cartIndices(): number[] {
+    return [...this.cart].sort((a, b) => a - b);
+  }
+
+  get cartItems(): WashServiceRow[] {
+    return this.cartIndices.map((i) => this.services[i]).filter(Boolean);
+  }
+
+  get cartCount(): number {
+    return this.cart.size;
+  }
+
+  get cartTotal(): number {
+    return this.cartItems.reduce((sum, s) => sum + s.priceWithVat, 0);
+  }
+
+  get whatsappUrl(): string {
+    return this.buildWhatsAppUrl(this.buildCartMessage());
+  }
+
+  isSelected(index: number): boolean {
+    return this.cart.has(index);
+  }
+
+  toggleService(index: number): void {
+    if (this.cart.has(index)) {
+      this.cart.delete(index);
+    } else {
+      this.cart.add(index);
+    }
+    // Nueva referencia para que Angular detecte el cambio del Set
+    this.cart = new Set(this.cart);
+  }
+
+  removeFromCart(index: number): void {
+    this.cart.delete(index);
+    this.cart = new Set(this.cart);
+  }
+
+  clearCart(): void {
+    this.cart = new Set();
   }
 
   whatsappForPackage(pkg: WashPackage): string {
     return this.buildWhatsAppUrl(
       `Hola AB CarWash, quiero agendar el ${pkg.name} (desde $${pkg.priceFrom.toLocaleString('es-MX')}).`
     );
+  }
+
+  private buildCartMessage(): string {
+    const items = this.cartItems;
+    if (!items.length) {
+      return this.defaultPrefill;
+    }
+
+    const lines = items.map(
+      (s, i) => `${i + 1}. ${s.name} — $${s.priceWithVat.toLocaleString('es-MX')}`
+    );
+    const total = this.cartTotal.toLocaleString('es-MX');
+
+    return [
+      'Hola AB CarWash, quiero cotizar / agendar estos servicios:',
+      '',
+      ...lines,
+      '',
+      `Total estimado: $${total} (precios desde, con IVA)`,
+      '',
+      '¿Me confirman disponibilidad?'
+    ].join('\n');
   }
 
   private buildWhatsAppUrl(text: string): string {

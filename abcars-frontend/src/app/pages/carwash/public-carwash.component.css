@@ -256,6 +256,10 @@
   background: #f8fafc;
 }
 
+.cw-row--selected {
+  background: #eff6ff !important;
+}
+
 .cw-price {
   font-weight: 750;
   white-space: nowrap;
@@ -273,7 +277,8 @@
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+  font-family: inherit;
 }
 
 .cw-btn:hover {
@@ -296,6 +301,12 @@
   color: #fff;
 }
 
+.cw-btn--selected {
+  background: #dbeafe;
+  color: var(--cw-navy-deep);
+  border: 1px solid #93c5fd;
+}
+
 .cw-btn--wa {
   background: var(--cw-wa);
   color: #fff;
@@ -314,6 +325,106 @@
 .cw-btn--orange {
   background: var(--cw-gold);
   color: #1f2937;
+}
+
+.cw-cart {
+  margin: 0 0 1rem;
+  border: 1px solid var(--cw-line);
+  border-radius: 0.75rem;
+  background: #f8fafc;
+  padding: 0.75rem;
+}
+
+.cw-cart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 750;
+  color: var(--cw-ink);
+}
+
+.cw-cart-clear {
+  border: 0;
+  background: transparent;
+  color: var(--cw-blue);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+
+.cw-cart-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.cw-cart-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.55rem;
+  padding: 0.5rem 0.55rem;
+}
+
+.cw-cart-item {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.cw-cart-name {
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: var(--cw-ink);
+}
+
+.cw-cart-price {
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: var(--cw-muted);
+}
+
+.cw-cart-remove {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #4b5563;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.cw-cart-remove:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.cw-cart-total {
+  margin: 0.7rem 0 0 !important;
+  font-size: 0.88rem !important;
+  color: var(--cw-ink) !important;
+}
+
+.cw-cart-total strong {
+  font-weight: 800;
 }
 
 .cw-cta-banner {
