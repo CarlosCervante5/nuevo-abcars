@@ -86,27 +86,23 @@ export class PublicCarwashComponent implements OnInit {
     }
   ];
 
-  /** Menú individual de servicios (precios MXN con IVA). */
+  /** Menú individual de servicios (precios MXN con IVA / desde). */
   readonly services: WashServiceRow[] = [
     { name: 'Lavado premium de carrocería', priceWithVat: 250 },
     { name: 'Descontaminación de rines', priceWithVat: 250 },
-    { name: 'Lavado, aspirado y secado', priceWithVat: 250 },
-    { name: 'Lavado, aspirado, secado y pulido', priceWithVat: 400 },
-    { name: 'Pulido y encerado', priceWithVat: 2000 },
+    { name: 'Detallado de pintura en rines (retoque)', priceWithVat: 650 },
+    { name: 'Pulido y encerado de carrocería', priceWithVat: 2000 },
     { name: 'Lavado de vestiduras', priceWithVat: 850 },
-    { name: 'Lavado de vestiduras y alfombra intenso', priceWithVat: 1800 },
-    { name: 'Descontaminación de lluvia ácida parabrisas', priceWithVat: 600 },
-    { name: 'Descontaminación de lluvia ácida carrocería', priceWithVat: 3000 },
+    { name: 'Lavado de vestiduras y alfombras', priceWithVat: 1800 },
+    { name: 'Lavado a detalle e hidratación de plásticos', priceWithVat: 700 },
+    { name: 'Descontaminación de parabrisas', priceWithVat: 600 },
+    { name: 'Lavado exterior de motor', priceWithVat: 600 },
     { name: 'Protección nanocerámica', priceWithVat: 4000 },
     { name: 'Películas de protección solar', priceWithVat: 3700 },
-    { name: 'Filos de PPF', priceWithVat: 350 },
-    { name: 'Películas y filos de PPF', priceWithVat: 3900 },
+    { name: 'Filos PPF (Paint Protection Film)', priceWithVat: 350 },
     { name: 'PPF Pieza', priceWithVat: 3500 },
     { name: 'PPF Completo', priceWithVat: 65000 },
-    { name: 'Detallado de rines (retoques)', priceWithVat: 600 },
-    { name: 'Detallado completo de ruedas', priceWithVat: 750 },
-    { name: 'Venta de nitrógeno (inflado llantas)', priceWithVat: 600 },
-    { name: 'Rehidratación de plásticos', priceWithVat: 700 },
+    { name: 'Inflado de llantas con nitrógeno', priceWithVat: 600 },
     { name: 'Pintura de fascia sin reparación (express)', priceWithVat: 1800 }
   ];
 

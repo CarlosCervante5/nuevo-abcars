@@ -520,39 +520,51 @@ class CarWashAssistantToolsService
         }
 
         $map = [
-            // Paquete / nombre "básico"
-            'basico' => 'lavado-aspirado-secado',
-            'lavado-basico' => 'lavado-aspirado-secado',
-            'paquete-basico' => 'lavado-aspirado-secado',
-            'lavado-simple' => 'lavado-aspirado-secado',
-            'lavado-express' => 'lavado-aspirado-secado',
-            'lavado-rapido' => 'lavado-aspirado-secado',
-            'lavado-exterior' => 'lavado-aspirado-secado',
-            // Premium / con pulido
-            'premium' => 'lavado-aspirado-secado-pulido',
-            'lavado-premium' => 'lavado-aspirado-secado-pulido',
-            'paquete-premium' => 'lavado-aspirado-secado-pulido',
-            'lavado-con-pulido' => 'lavado-aspirado-secado-pulido',
+            // Paquete / nombre "básico" → lavado premium
+            'basico' => 'lavado-premium-carroceria',
+            'lavado-basico' => 'lavado-premium-carroceria',
+            'paquete-basico' => 'lavado-premium-carroceria',
+            'lavado-simple' => 'lavado-premium-carroceria',
+            'lavado-express' => 'lavado-premium-carroceria',
+            'lavado-rapido' => 'lavado-premium-carroceria',
+            'lavado-aspirado-secado' => 'lavado-premium-carroceria',
+            'lavado-aspirado-y-secado' => 'lavado-premium-carroceria',
+            'lavado-premium-de-carroceria' => 'lavado-premium-carroceria',
+            'lavado-premium-carroceria' => 'lavado-premium-carroceria',
+            // Premium / con pulido → pulido y encerado
+            'premium' => 'lavado-pulido-encerado',
+            'lavado-premium' => 'lavado-premium-carroceria',
+            'paquete-premium' => 'lavado-pulido-encerado',
+            'lavado-con-pulido' => 'lavado-pulido-encerado',
+            'lavado-aspirado-secado-pulido' => 'lavado-pulido-encerado',
+            'lavado-aspirado-secado-y-pulido' => 'lavado-pulido-encerado',
             // Completo / signature / encerado
             'completo' => 'lavado-pulido-encerado',
             'lavado-completo' => 'lavado-pulido-encerado',
             'paquete-completo' => 'lavado-pulido-encerado',
             'signature' => 'lavado-pulido-encerado',
             'paquete-signature' => 'lavado-pulido-encerado',
-            'paquete-siganture' => 'lavado-pulido-encerado', // typo del mockup
+            'paquete-siganture' => 'lavado-pulido-encerado',
             'lavado-encerado' => 'lavado-pulido-encerado',
             'pulido-encerado' => 'lavado-pulido-encerado',
+            'pulido-y-encerado' => 'lavado-pulido-encerado',
+            'pulido-y-encerado-de-carroceria' => 'lavado-pulido-encerado',
             // Elite / cerámica
             'elite' => 'nanoceramico',
             'paquete-elite' => 'nanoceramico',
             'nanoceramica' => 'nanoceramico',
             'proteccion-nanoceramica' => 'nanoceramico',
-            // Cotización web (nombres públicos)
-            'lavado-premium-de-carroceria' => 'lavado-aspirado-secado',
-            'descontaminacion-de-rines' => 'detallado-rines',
-            'lavado-aspirado-y-secado' => 'lavado-aspirado-secado',
-            'lavado-aspirado-secado-y-pulido' => 'lavado-aspirado-secado-pulido',
-            'pulido-y-encerado' => 'lavado-pulido-encerado',
+            // Cotización web / nombres públicos
+            'descontaminacion-de-rines' => 'descontaminacion-rines',
+            'descontaminacion-rines' => 'descontaminacion-rines',
+            'detallado-de-pintura-en-rines' => 'detallado-rines',
+            'detallado-de-rines' => 'detallado-rines',
+            'lavado-exterior-de-motor' => 'lavado-exterior-motor',
+            'inflado-de-llantas' => 'nitrogeno-llantas',
+            'inflado-de-llanas' => 'nitrogeno-llantas',
+            'nitrogeno' => 'nitrogeno-llantas',
+            'pintura-de-fasia' => 'pintura-fascia-express',
+            'pintura-de-fascia' => 'pintura-fascia-express',
         ];
 
         // Match exacto o si el slug contiene la clave (ej. "servicio-lavado-basico")
