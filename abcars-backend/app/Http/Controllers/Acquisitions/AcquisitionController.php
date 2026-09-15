@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Acquisitions;
 
 use App\Helpers\ApiResponseHelper;
+use App\Helpers\ValuationAccessHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Acquisitions\AttatchAcquisitionBatchRequest;
 use App\Http\Requests\Acquisitions\AttatchAcquisitionRequest;
@@ -103,6 +104,10 @@ class AcquisitionController extends Controller
     public function attatch(AttatchAcquisitionRequest $request)
     {
         try {
+
+            if (ValuationAccessHelper::isGlobalReadOnlyViewer(auth()->user())) {
+                return ValuationAccessHelper::mutationDeniedResponse();
+            }
             
             $data = $request->validated();
 
@@ -138,6 +143,10 @@ class AcquisitionController extends Controller
     public function uploadPDF( UploadDocumentationRequest $request){
 
         try{
+
+            if (ValuationAccessHelper::isGlobalReadOnlyViewer(auth()->user())) {
+                return ValuationAccessHelper::mutationDeniedResponse();
+            }
 
             $base_folder = env('AWS_DOCUMENTATION_FOLDER_BASE', 'default_folder');
             $aws_url = env('AWS_CLOUDFRONT_URL');

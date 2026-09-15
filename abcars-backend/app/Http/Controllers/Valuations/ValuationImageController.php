@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Valuations;
 
 use App\Helpers\ApiResponseHelper;
+use App\Helpers\ValuationAccessHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Files\UploadValuationImageRequest;
 use App\Http\Requests\Valuations\SearchValuationImagesRequest;
@@ -35,6 +36,11 @@ class ValuationImageController extends Controller
     public function store(UploadValuationImageRequest $request)
     {
         try {
+
+            if (ValuationAccessHelper::isGlobalReadOnlyViewer(auth()->user())) {
+                return ValuationAccessHelper::mutationDeniedResponse();
+            }
+
             $valuation_uuid = $request->input('valuation_uuid');
             $name = $request->input('name');
             $group_name = $request->input('group_name');

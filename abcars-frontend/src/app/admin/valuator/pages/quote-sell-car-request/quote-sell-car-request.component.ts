@@ -6,6 +6,7 @@ import { UserTechnicians, Overview } from '@interfaces/admin.interfaces';
 import { SparePartsService } from '@services/spare-parts.service';
 import { UpdateQuoteValuationService } from '@services/update-quote-valuation.service';
 import Swal from 'sweetalert2';
+import { isValuationReadOnlyViewer, valuationAppointmentsListLink } from '@helpers/valuation-view.helper';
 
 @Component({
     selector: 'app-quote-sell-car-request',
@@ -36,8 +37,14 @@ export class QuoteSellCarRequestComponent implements OnInit {
 
     private role = localStorage.getItem('role') || '';
 
+    readonly valuationViewOnly = isValuationReadOnlyViewer();
+
     get baseUrl(): string {
         return this.role === 'seller' ? '/admin/seller' : '/admin/valuator';
+    }
+
+    get appointmentListLink(): string[] {
+        return valuationAppointmentsListLink();
     }
 
     constructor(
@@ -182,6 +189,9 @@ export class QuoteSellCarRequestComponent implements OnInit {
                     this.quotationForm.controls['spare_parts'].setValue(Number(sumCost).toFixed(2));
                     this.quotationForm.controls['hyp'].setValue(Number(sumRepairs).toFixed(2));
                     this.onCotizacion();
+                    if (this.valuationViewOnly) {
+                        this.quotationForm.disable({ emitEvent: false });
+                    }
                     if (resp.data.status === 'valuated') {
                         this.quotationForm.patchValue({
                             take: resp.data.book_trade_in_offer,
@@ -240,7 +250,10 @@ export class QuoteSellCarRequestComponent implements OnInit {
     }
 
     public onSubmit() {
-        
+        if (this.valuationViewOnly) {
+            return;
+        }
+
         const valuation_uuid = this._activatedRoute.snapshot.params.uuid_valuation;
         const seller_uuid = this.quotationForm.controls['seller'].value;
         const book_trade_in_offer = this.quotationForm.controls['take'].value;
@@ -264,7 +277,7 @@ export class QuoteSellCarRequestComponent implements OnInit {
             body_work_painting_cost, estimated_total, trade_in_final, final_offer, status, comments, take_type)
                 .subscribe({
                     next: () => {
-                        this._router.navigate([this.baseUrl, 'appointment']);
+                        this._router.navigate(this.appointmentListLink);
                         Swal.fire({
                             icon: 'success',
                             title: 'Alta registro',

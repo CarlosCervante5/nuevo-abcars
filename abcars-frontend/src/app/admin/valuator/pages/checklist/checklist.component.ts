@@ -26,6 +26,7 @@ import { MatSelectChange } from '@angular/material/select';
 // import { extendChartView } from 'echarts';
 import { SparePartsFormComponent } from '../../components/spare-parts-form/spare-parts-form.component';
 import { BodyworkPaintValuatorFormComponent } from '../../components/bodywork-paint-valuator-form/bodywork-paint-valuator-form.component';
+import { isValuationReadOnlyViewer, valuationAppointmentsListLink } from '@helpers/valuation-view.helper';
 
 @Component({
     selector: 'app-checklist',
@@ -75,8 +76,14 @@ export class ChecklistComponent implements OnInit {
 
     private role = localStorage.getItem('role') || '';
 
+    readonly valuationViewOnly = isValuationReadOnlyViewer();
+
     get baseUrl(): string {
         return this.role === 'seller' ? '/admin/seller' : '/admin/valuator';
+    }
+
+    get appointmentListLink(): string[] {
+        return valuationAppointmentsListLink();
     }
 
     constructor(
@@ -247,6 +254,9 @@ export class ChecklistComponent implements OnInit {
     }
 
     public onCustomerInformation() {
+        if (this.valuationViewOnly) {
+            return;
+        }
         this.spinner = true;
 
         const brand = this.customerInformationForm.controls['brand'].value;
@@ -296,6 +306,9 @@ export class ChecklistComponent implements OnInit {
     }
 
     public openExternalPicture() {
+        if (this.valuationViewOnly) {
+            return;
+        }
         const bottomSheetRef = this._bottomSheet.open(ExternalRevisionPictureComponent, {
             data: { uuid_valuation: this._activatedRoute.snapshot.params.uuid_valuation}
         });
@@ -333,6 +346,9 @@ export class ChecklistComponent implements OnInit {
     }
 
     public openInternalPicture() {
+        if (this.valuationViewOnly) {
+            return;
+        }
         const bottomSheetRef = this._bottomSheet.open(InternalRevisionPictureComponent, {
             data: { uuid_valuation: this._activatedRoute.snapshot.params.uuid_valuation}
         });
@@ -370,6 +386,9 @@ export class ChecklistComponent implements OnInit {
     }
 
     public openBodyworkValuatorForm() {
+        if (this.valuationViewOnly) {
+            return;
+        }
         this._bottomSheet.open(BodyworkPaintValuatorFormComponent, {
             data: { uuid_valuation: this._activatedRoute.snapshot.params.uuid_valuation}
         });
@@ -398,6 +417,9 @@ export class ChecklistComponent implements OnInit {
     }
 
     public attachCheck(valuation_uuid: string, check_uuid:string, selected_value: string){
+        if (this.valuationViewOnly) {
+            return;
+        }
         this._checklistService.updateValuation(valuation_uuid, check_uuid, selected_value)
         .subscribe({
             next: (response : GralResponse) =>{
@@ -676,6 +698,7 @@ export class ChecklistComponent implements OnInit {
                         this.customerInformationForm.controls['engine_type'].disable();
                         this.customerInformationForm.controls['appraiserTechnician'].disable();
                     }
+                    this.applyAdminReadOnlyMode();
                 },
             error: (error) => {
                 console.error('Error al cargar la valuación:', error);
@@ -746,6 +769,20 @@ export class ChecklistComponent implements OnInit {
         this.externalReviewForm.markAllAsTouched();
         this.internalReviewForm.markAllAsTouched();
         this.vehicleCertificationForm.markAllAsTouched();
+        this.applyAdminReadOnlyMode();
+    }
+
+    private applyAdminReadOnlyMode(): void {
+        if (!this.valuationViewOnly) {
+            return;
+        }
+        this.btn_save = false;
+        this.btn_follow = false;
+        this.customerInformationForm.disable({ emitEvent: false });
+        this.mechanicElectricForm.disable({ emitEvent: false });
+        this.externalReviewForm.disable({ emitEvent: false });
+        this.internalReviewForm.disable({ emitEvent: false });
+        this.vehicleCertificationForm.disable({ emitEvent: false });
     }
 
     private parseDate(dateString: string): Date | null {
@@ -816,6 +853,9 @@ export class ChecklistComponent implements OnInit {
 
     //función para abrir el model de refacciones
     public openSparePartsForm(){
+        if (this.valuationViewOnly) {
+            return;
+        }
         const bottomSheetRef = this._bottomSheet.open(SparePartsFormComponent, {
             data: {
                 uuid_valuation: this.valuation_uuid

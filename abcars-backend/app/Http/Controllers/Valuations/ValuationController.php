@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Valuations;
 
 use App\Exports\ValuationReportExport;
 use App\Helpers\ApiResponseHelper;
+use App\Helpers\ValuationAccessHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Repairs\UpdateRepairRequest;
 use App\Http\Requests\SpareParts\UpdateSparePartRequest;
@@ -87,6 +88,10 @@ class ValuationController extends Controller
     {
         try {
 
+            if (ValuationAccessHelper::isGlobalReadOnlyViewer(auth()->user())) {
+                return ValuationAccessHelper::mutationDeniedResponse();
+            }
+
             $data = $request->validated();
 
             $valuation = VehicleValuation::findByUuid($data['valuation_uuid']);
@@ -165,7 +170,11 @@ class ValuationController extends Controller
                             ->whereHas('appointment', fn ($q) => $q->where('referrer_user_id', $user->id))
                         : VehicleValuation::with($valuationWith)->whereRaw('0 = 1')
                 )
-                : $user->valuations()->with($valuationWith);
+                : (
+                    ValuationAccessHelper::isGlobalReadOnlyViewer($user)
+                        ? VehicleValuation::with($valuationWith)
+                        : $user->valuations()->with($valuationWith)
+                );
 
             $valuations = $baseQuery
             ->where(function ($query) use ($data) {
@@ -370,6 +379,10 @@ class ValuationController extends Controller
     {
         try {
 
+            if (ValuationAccessHelper::isGlobalReadOnlyViewer(auth()->user())) {
+                return ValuationAccessHelper::mutationDeniedResponse();
+            }
+
             $data = $request->validated();
 
             // Obtener la parte mediante repair_uuid
@@ -504,6 +517,10 @@ class ValuationController extends Controller
     public function attatch(AttatchCheckpointRequest $request)
     {
         try {
+
+            if (ValuationAccessHelper::isGlobalReadOnlyViewer(auth()->user())) {
+                return ValuationAccessHelper::mutationDeniedResponse();
+            }
             
             $data = $request->validated();
 
@@ -544,6 +561,10 @@ class ValuationController extends Controller
     public function updateVehicle( StoreValuationVehicleRequest $request)
     {
         try {
+
+            if (ValuationAccessHelper::isGlobalReadOnlyViewer(auth()->user())) {
+                return ValuationAccessHelper::mutationDeniedResponse();
+            }
 
             $data = $request->validated();
 

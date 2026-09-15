@@ -10,6 +10,7 @@ import { ChecklistItem, GetAcquisitionsChecklist } from '@interfaces/getAcquisit
 import { GralResponse } from '@interfaces/getChecklist.interface';
 
 import Swal from 'sweetalert2';
+import { isValuationReadOnlyViewer } from '@helpers/valuation-view.helper';
 
 @Component({
     selector: 'app-documentation-vehicle',
@@ -18,6 +19,8 @@ import Swal from 'sweetalert2';
     standalone: false
 })
 export class DocumentationVehicleComponent implements OnInit {
+
+  readonly valuationViewOnly = isValuationReadOnlyViewer();
 
   public url: string = '';
 
@@ -74,6 +77,9 @@ export class DocumentationVehicleComponent implements OnInit {
   }
 
   public uploadDocuments(file: any) {
+    if (this.valuationViewOnly) {
+      return;
+    }
     this.spinner = true;
     const picture = file.target.files[0];
     this._acquisitionsChecklistService.uploadPdf(this.data.valuation_uuid, picture)
@@ -184,9 +190,18 @@ export class DocumentationVehicleComponent implements OnInit {
 
     this.spinner = false;
 
+    if (this.valuationViewOnly) {
+      this.takeInformationForm.disable({ emitEvent: false });
+      this.documentationCarForm.disable({ emitEvent: false });
+      this.documentsPlateProceduresForm.disable({ emitEvent: false });
+      this.btn_load = false;
+    }
   }
 
   public onSelectChange(event: Event, uuid_check: string) {
+    if (this.valuationViewOnly) {
+      return;
+    }
     const target = event.target as HTMLSelectElement;
     const valorSeleccionado = target.value;
     this.attachCheck(this.data.valuation_uuid, uuid_check, valorSeleccionado);
@@ -227,6 +242,9 @@ export class DocumentationVehicleComponent implements OnInit {
   }
 
   public attachCheck(valuation_uuid: string, checkpoint_uuid: string, selected_value: number | string | null) {
+    if (this.valuationViewOnly) {
+      return;
+    }
     this._acquisitionsChecklistService.updateAcquisitions(valuation_uuid, checkpoint_uuid, selected_value)
       .subscribe({
         next: (resp: GralResponse) => {

@@ -166,7 +166,7 @@
                             Regresar
                         </button>
 
-                        <button type="button" class="documentation-vehicle-btn documentation-vehicle-btn-primary mt-3 mx-2 px-3" (click)="uploadDocumentInput.click()" [disabled]="spinner">
+                        <button *ngIf="!valuationViewOnly" type="button" class="documentation-vehicle-btn documentation-vehicle-btn-primary mt-3 mx-2 px-3" (click)="uploadDocumentInput.click()" [disabled]="spinner">
                             <span *ngIf="!spinner">Cargar expediente</span>
                             <span *ngIf="spinner" class="documentation-vehicle-spinner"></span>
                         </button>

@@ -3,14 +3,17 @@
 <div class="container mx-auto px-4 pt-24">
     <div class="w-full mt-5">
         <div class="w-full">
-            <a [routerLink]="[baseUrl, 'appointment']" class="valuator-back-link">
+            <a [routerLink]="appointmentListLink" class="valuator-back-link">
                 <i class="fi fi-rr-arrow-left"></i> Regresar a Citas de valuación
             </a>
+            <p *ngIf="valuationViewOnly" class="mt-2 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
+                Modo consulta: puedes revisar el checklist; los cambios solo los realizan valuadores y técnicos.
+            </p>
             <h4 class="checklist-page-title">Checklist de Valuación</h4>
             <nav class="checklist-breadcrumb" aria-label="breadcrumb">
                 <ol class="checklist-breadcrumb-list">
                     <li class="checklist-breadcrumb-item" [routerLink]="[baseUrl]">Overview</li>
-                    <li class="checklist-breadcrumb-item" [routerLink]="[baseUrl, 'appointment']">Citas de valuación</li>
+                    <li class="checklist-breadcrumb-item" [routerLink]="appointmentListLink">Citas de valuación</li>
                     <li class="checklist-breadcrumb-item checklist-breadcrumb-item-active" aria-current="page">Checklist de valuación</li>
                 </ol>
             </nav>
@@ -503,7 +506,7 @@
                         <button mat-button type="button" matStepperNext class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3">
                             Siguiente
                         </button>
-                        <button mat-button type="button" (click)="openSparePartsForm()" class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3">
+                        <button *ngIf="!valuationViewOnly" mat-button type="button" (click)="openSparePartsForm()" class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3">
                             Agregar Refacciones
                         </button>
                     </div>
@@ -565,10 +568,10 @@
                         <button mat-button type="button" matStepperNext class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3">
                             Siguiente
                         </button>
-                        <button mat-button type="button" class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3" (click)="openExternalPicture()">
+                        <button *ngIf="!valuationViewOnly" mat-button type="button" class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3" (click)="openExternalPicture()">
                             Foto Exterior
                         </button>
-                        <button mat-button type="button" class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3" (click)="openBodyworkValuatorForm()">
+                        <button *ngIf="!valuationViewOnly" mat-button type="button" class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3" (click)="openBodyworkValuatorForm()">
                             Verifica HyP
                         </button>
                     </div>
@@ -613,7 +616,7 @@
                         <button mat-button type="button" matStepperNext class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3">
                             Siguiente
                         </button>
-                        <button mat-button type="button" class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3" (click)="openInternalPicture()">
+                        <button *ngIf="!valuationViewOnly" mat-button type="button" class="checklist-btn checklist-btn-primary mt-3 mx-2 px-3" (click)="openInternalPicture()">
                             Foto Interior
                         </button>
                     </div>

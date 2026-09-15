@@ -17,6 +17,7 @@ import {reload} from '../../../../shared/helpers/session.helper';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Overview } from '@interfaces/admin.interfaces';
+import { isValuationReadOnlyViewer } from '@helpers/valuation-view.helper';
 
 const THUMBUP_ICON =
   `
@@ -54,6 +55,10 @@ export class AppointmentsComponent implements OnInit {
 
   get baseUrl(): string {
     return this.role === 'seller' ? '/admin/seller' : '/admin/valuator';
+  }
+
+  get valuationViewOnly(): boolean {
+    return isValuationReadOnlyViewer();
   }
 
   constructor(

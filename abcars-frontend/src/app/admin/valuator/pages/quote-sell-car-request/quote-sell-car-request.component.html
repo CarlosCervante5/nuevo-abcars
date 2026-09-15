@@ -3,15 +3,18 @@
 <div class="container mx-auto px-4 pt-24">
     <div class="w-full mt-24">
         <div class="text-center">
-            <a [routerLink]="[baseUrl, 'appointment']" class="valuator-back-link valuator-back-link-center">
+            <a [routerLink]="appointmentListLink" class="valuator-back-link valuator-back-link-center">
                 <i class="fi fi-rr-arrow-left"></i> Regresar a Citas de Valuación
             </a>
+            <p *ngIf="valuationViewOnly" class="mt-2 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 max-w-2xl mx-auto">
+                Modo consulta: la cotización es solo lectura.
+            </p>
             <h1 class="quote-sell-page-title">Cotización de la solicitud Vender tu Auto</h1>
             <h2 class="quote-sell-page-subtitle">Realiza la cotización del Auto Solicitado.</h2>
             <nav class="quote-sell-breadcrumb" aria-label="breadcrumb">
                 <ol class="quote-sell-breadcrumb-list">
                     <li class="quote-sell-breadcrumb-item" [routerLink]="[baseUrl]">Overview</li>
-                    <li class="quote-sell-breadcrumb-item" [routerLink]="[baseUrl, 'appointment']">Citas de Valuación</li>
+                    <li class="quote-sell-breadcrumb-item" [routerLink]="appointmentListLink">Citas de Valuación</li>
                     <li class="quote-sell-breadcrumb-item quote-sell-breadcrumb-item-active" aria-current="page">Cotización</li>
                 </ol>
             </nav>
@@ -355,7 +358,7 @@
                     </div>
                 </div>
 
-                <div class="mt-3">
+                <div class="mt-3" *ngIf="!valuationViewOnly">
                     <button type="submit" class="quote-sell-btn quote-sell-btn-primary" [disabled]="quotationForm.invalid">
                         <span>Enviar</span>
                     </button>

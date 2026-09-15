@@ -13,6 +13,9 @@
                 <a *ngIf="!embedInShell" [routerLink]="[baseUrl]" class="valuator-back-link">
                     <i class="fi fi-rr-arrow-left"></i> Regresar a Overview
                 </a>
+                <p *ngIf="valuationViewOnly && embedInShell" class="mt-2 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
+                    Vista global de valuaciones (solo lectura). Puedes revisar checklist, cotización y descargar; no se guardan cambios.
+                </p>
                 <h4 class="appointments-page-title">Solicitudes Citas de valuación</h4>
                 <nav class="appointments-breadcrumb" aria-label="breadcrumb">
                     <ol class="appointments-breadcrumb-list">
@@ -24,7 +27,7 @@
                         </li>
                         <li class="appointments-breadcrumb-item appointments-breadcrumb-item-active" aria-current="page">Citas de valuación</li>
                     </ol>
-                    <div class="flex justify-end p-3">
+                    <div class="flex justify-end p-3" *ngIf="!valuationViewOnly">
                         <a mat-button (click)="newAppointment()" class="appointments-add-btn"><i class="fa-solid fa-plus"></i> Agregar Cita de Valuación</a>
                     </div>
                 </nav>
@@ -189,13 +192,13 @@
                                </button>
                               <mat-menu #menu="matMenu">
                                 <a mat-menu-item [routerLink]="[baseUrl, 'checklist', row.uuid]">
-                                  Comenzar
+                                  {{ valuationViewOnly ? 'Ver checklist' : 'Comenzar' }}
                                 </a>
                                 <a mat-menu-item (click)="openDownloadValuation(row.uuid)" *ngIf="row.status === 'valuated' || row.status === 'complete_file' ">
                                   Descargar Valuación
                                 </a>
                                 <a mat-menu-item [routerLink]="[baseUrl, 'quote-request', row.uuid]" *ngIf="row.status === 'checklist_ready' && row.status_parts === 'parts_done' || row.status === 'valuated' ">
-                                  Valuar
+                                  {{ valuationViewOnly ? 'Ver valuación' : 'Valuar' }}
                                 </a>
                                 <a mat-menu-item (click)="openBottomSheetDocumentation(row.uuid, row.acquisition_pdf)" *ngIf="row.status === 'checklist_ready' && row.status_parts === 'parts_done' || row.status === 'valuated' || row.status === 'complete_file' ">
                                   <i class="fi fi-rr-folder"></i>
