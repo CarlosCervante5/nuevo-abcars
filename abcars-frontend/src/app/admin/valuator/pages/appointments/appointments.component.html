@@ -46,7 +46,7 @@
             >
         </div>
 
-             <mat-accordion class="custom-panel">
+             <mat-accordion class="custom-panel" *ngIf="!valuationViewOnly">
               <mat-expansion-panel>
 
                 <mat-expansion-panel-header>
@@ -93,9 +93,9 @@
 
 
         <!-- Table -->
-        <div class="flex justify-center appointments-table-container mt-5">
-            <div class="mat-elevation-z8 w-full adm-mat-table-wrap">
-                <table mat-table [dataSource]="dataSource" class="w-full">
+        <div class="appointments-table-container mt-5" [class.appointments-table-container--admin]="valuationViewOnly && embedInShell">
+            <div class="mat-elevation-z8 w-full adm-mat-table-wrap appointments-table-scroll">
+                <table mat-table [dataSource]="dataSource" class="w-full appointments-valuations-table">
                         
                          <ng-container matColumnDef="id">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header>#</th>

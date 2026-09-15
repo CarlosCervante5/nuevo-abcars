@@ -114,13 +114,49 @@
 /* Table Container */
 .appointments-table-container {
     margin-top: 1.25rem !important;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
 }
 
-.appointments-table-container .mat-elevation-z8 {
+.appointments-table-container--admin {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.appointments-table-container .mat-elevation-z8,
+.appointments-table-scroll {
     border: 1px solid #e5e7eb;
     border-radius: 0.75rem;
-    overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    max-width: 100%;
+    min-width: 0;
+}
+
+.appointments-table-scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+}
+
+.appointments-valuations-table .mat-mdc-cell,
+.appointments-valuations-table .mat-cell,
+.appointments-valuations-table .mat-mdc-header-cell,
+.appointments-valuations-table th.mat-header-cell {
+    white-space: nowrap;
+}
+
+.appointments-table-container--admin .appointments-valuations-table .mat-column-vin {
+    max-width: 11rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.appointments-table-container--admin .appointments-valuations-table .mat-column-name,
+.appointments-table-container--admin .appointments-valuations-table .mat-column-lastName {
+    max-width: 8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Status Badges */

@@ -39,7 +39,16 @@ export class AppointmentsComponent implements OnInit {
   public page: number = 1;
 
   dataSource!: MatTableDataSource<VehicleValuations>;
-  displayedColumns: string[] = ['id', 'name', 'lastName', 'brand', 'model', 'vin', 'year', 'status', 'statusParts', 'statusRepairs', 'actions'];
+
+  /** Valuador: incluye Refacciones/HyP; admin global: tabla más compacta. */
+  get displayedColumns(): string[] {
+    const cols = ['id', 'name', 'lastName', 'brand', 'model', 'vin', 'year', 'status'];
+    if (!this.valuationViewOnly) {
+      cols.push('statusParts', 'statusRepairs');
+    }
+    cols.push('actions');
+    return cols;
+  }
 
   public palabra_busqueda: string = '';
   public currentYear: number = new Date().getFullYear();
