@@ -91,7 +91,7 @@ export class DashboardComponent {
             ]
     };
 
-    private static readStoredUser(): { nickname?: string; name?: string; surname?: string; email?: string } {
+    private static readStoredUser(): { uuid?: string; nickname?: string; name?: string; surname?: string; email?: string } {
         try {
             const raw = localStorage.getItem('user');
             return raw ? JSON.parse(raw) : {};
