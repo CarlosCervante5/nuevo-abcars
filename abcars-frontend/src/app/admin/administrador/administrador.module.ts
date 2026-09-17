@@ -1,6 +1,6 @@
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { AdminModule } from "../admin.module";
+import { AdminSharedModule } from '../admin-shared.module';
 import { AngularMaterialModule } from "src/app/angular-material/angular-material.module";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { AdminShellComponent } from "./components/admin-shell/admin-shell.component";
@@ -55,11 +55,9 @@ import { CarWashLoyaltyComponent } from "./pages/carwash-loyalty/carwash-loyalty
         CommonModule,
         AngularMaterialModule,
         ReactiveFormsModule,
-        // Routing must be registered BEFORE AdminModule: AdminModule imports
-        // AdminRoutingModule which ends with path '**' → /404. If that wildcard
-        // is registered first, every child route (carwash/board, users, …) 404s.
+        // Routing must be registered BEFORE AdminSharedModule (sin AdminRoutingModule).
         AdministradorRoutingModule,
-        AdminModule,
+        AdminSharedModule,
         SkCubeComponent,
         MatFormFieldModule,
         MatInputModule,

@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { SparePartsRoutingModule } from './spare-parts-routing.module';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
-import { AdminModule } from '../admin.module';
+import { AdminSharedModule } from '../admin-shared.module';
 import { SparePartsAdministrationComponent } from './pages/spare-parts-administration/spare-parts-administration.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AngularMaterialModule } from 'src/app/angular-material/angular-material.module';
@@ -20,7 +20,7 @@ import { SparePartsEditComponent } from './components/spare-parts-edit/spare-par
     SparePartsViewComponent
   ],
   imports: [
-    AdminModule,
+    AdminSharedModule,
     AngularMaterialModule,
     CommonModule,
     NewNavComponent,

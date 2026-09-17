@@ -3,7 +3,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { BlogManagerRoutingModule } from './blog-manager-routing.module';
 import { PostsComponent } from './pages/posts/posts.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { AdminModule } from '../admin.module';
+import { AdminSharedModule } from '../admin-shared.module';
 import { AngularMaterialModule } from '../../angular-material/angular-material.module';
 import { LoadImagesComponent } from './components/load-images/load-images.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -40,7 +40,7 @@ import { PostPreviewComponent } from './components/post-preview/post-preview.com
     AngularMaterialModule,
     FormsModule,
     BlogManagerRoutingModule,
-    AdminModule,
+    AdminSharedModule,
     DragDropModule,
     ReactiveFormsModule,
     SkCubeComponent,

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AngularMaterialModule } from 'src/app/angular-material/angular-material.module';
-import { AdminModule } from '../admin.module';
+import { AdminSharedModule } from '../admin-shared.module';
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
 import { AppointmentManagerComponent } from './pages/appointment-manager/appointment-manager.component';
 
@@ -16,7 +16,7 @@ import { AppointmentManagerComponent } from './pages/appointment-manager/appoint
   imports: [
     CommonModule,
     RouterModule,
-    AdminModule,
+    AdminSharedModule,
     AngularMaterialModule,
     FormsModule,
     NewNavComponent

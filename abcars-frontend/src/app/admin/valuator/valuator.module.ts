@@ -3,7 +3,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { ValuatorRoutingModule } from './valuator-routing.module';
 import { ValuatorAppointmentsPageModule } from './valuator-appointments-page.module';
-import { AdminModule } from '../admin.module';
+import { AdminSharedModule } from '../admin-shared.module';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { AngularMaterialModule } from 'src/app/angular-material/angular-material.module';
 import { ChecklistComponent } from './pages/checklist/checklist.component';
@@ -32,13 +32,13 @@ import { CommonModule } from '@angular/common';
     SparePartsFormComponent
   ],
   imports: [
-    ValuatorAppointmentsPageModule,
-    AdminModule,
-    AngularMaterialModule,
     ValuatorRoutingModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    AngularMaterialModule,
+    AdminSharedModule,
+    ValuatorAppointmentsPageModule,
     NewNavComponent,
     SkCubeComponent
   ]

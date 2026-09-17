@@ -1,34 +1,11 @@
 import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 
 import { AdminRoutingModule } from './admin-routing.module';
-import { OverviewComponent } from './components/overview/overview.component';
-import { AssistantFloatingComponent } from './components/assistant-floating/assistant-floating.component';
-import { AngularMaterialModule } from '../angular-material/angular-material.module';
-import { ReactiveFormsModule } from '@angular/forms';
-import { SkCubeComponent } from '@components/sk-cube/sk-cube.component';
-import { CommonModule } from '@angular/common';
-import { ValuationStatisticsOverviewComponent } from './components/valuation-statistics-overview/valuation-statistics-overview.component';
+import { AdminSharedModule } from './admin-shared.module';
 
+/** Carga raíz bajo /admin: rutas + reexport de UI compartida. */
 @NgModule({
-  declarations: [
-    OverviewComponent,
-    AssistantFloatingComponent,
-    ValuationStatisticsOverviewComponent
-  ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    RouterModule,
-    AdminRoutingModule,
-    AngularMaterialModule,
-    SkCubeComponent
-  ],
-  exports: [
-    OverviewComponent,
-    AssistantFloatingComponent,
-    ReactiveFormsModule
-  ]
+  imports: [AdminSharedModule, AdminRoutingModule],
+  exports: [AdminSharedModule]
 })
-export class AdminModule { }
+export class AdminModule {}

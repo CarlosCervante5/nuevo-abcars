@@ -3,7 +3,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { TechnicianRoutingModule } from './technician-routing.module';
 import { AppointmentsComponent } from './pages/appointments/appointments.component';
-import { AdminModule } from '../admin.module';
+import { AdminSharedModule } from '../admin-shared.module';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { AngularMaterialModule } from 'src/app/angular-material/angular-material.module';
 import { AppointmentFormComponent } from './components/appointment-form/appointment-form.component';
@@ -33,9 +33,9 @@ import { CommonModule } from '@angular/common';
     DocumentationVehicleComponent
   ],
   imports: [
-    AdminModule,
-    AngularMaterialModule,
     TechnicianRoutingModule,
+    AdminSharedModule,
+    AngularMaterialModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

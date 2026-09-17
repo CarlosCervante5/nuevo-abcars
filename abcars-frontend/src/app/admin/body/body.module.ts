@@ -4,7 +4,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
 import { BodyRoutingModule } from './body-routing.module';
-import { AdminModule } from '../admin.module';
+import { AdminSharedModule } from '../admin-shared.module';
 import { AngularMaterialModule } from 'src/app/angular-material/angular-material.module';
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
 import { BodyDashboardComponent } from './pages/dashboard/body-dashboard.component';
@@ -14,7 +14,7 @@ import { BodyHypOrderDialogComponent } from './components/body-hyp-order-dialog/
 @NgModule({
   declarations: [BodyDashboardComponent, BodyHypOrdersListComponent, BodyHypOrderDialogComponent],
   imports: [
-    AdminModule,
+    AdminSharedModule,
     AngularMaterialModule,
     BodyRoutingModule,
     CommonModule,

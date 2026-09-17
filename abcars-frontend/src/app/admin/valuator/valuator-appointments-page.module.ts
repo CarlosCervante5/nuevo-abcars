@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AngularMaterialModule } from 'src/app/angular-material/angular-material.module';
-import { AdminModule } from '../admin.module';
+import { AdminSharedModule } from '../admin-shared.module';
 import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.component';
 import { SkCubeComponent } from '@components/sk-cube/sk-cube.component';
 import { AppointmentsComponent } from './pages/appointments/appointments.component';
@@ -20,7 +20,7 @@ import { DocumentationVehicleComponent } from './components/documentation-vehicl
     RouterModule,
     FormsModule,
     ReactiveFormsModule,
-    AdminModule,
+    AdminSharedModule,
     AngularMaterialModule,
     NewNavComponent,
     SkCubeComponent

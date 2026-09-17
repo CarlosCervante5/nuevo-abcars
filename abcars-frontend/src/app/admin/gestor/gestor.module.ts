@@ -5,7 +5,7 @@ import { GestorRoutingModule } from './gestor-routing.module';
 import { DeliveryPhotosPageModule } from './delivery-photos-page.module';
 import { PromotionsPageModule } from './promotions-page.module';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { AdminModule } from '../admin.module';
+import { AdminSharedModule } from '../admin-shared.module';
 import { ScheduleEventsComponent } from './pages/schedule-events/schedule-events.component';
 import { AngularMaterialModule } from 'src/app/angular-material/angular-material.module';
 import { UpdateImagesPromoComponent } from './components/update-images-promo/update-images-promo.component';
@@ -42,7 +42,7 @@ import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.co
     AngularMaterialModule,
     CommonModule,
     GestorRoutingModule,
-    AdminModule,
+    AdminSharedModule,
     DragDropModule,
     FormsModule,
     ReactiveFormsModule,

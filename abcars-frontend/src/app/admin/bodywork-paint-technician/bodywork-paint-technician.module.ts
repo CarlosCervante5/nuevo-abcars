@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { BodyworkPaintTechnicianRoutingModule } from './bodywork-paint-technician-routing.module';
-import { AdminModule } from '../admin.module';
+import { AdminSharedModule } from '../admin-shared.module';
 import { AngularMaterialModule } from 'src/app/angular-material/angular-material.module';
 
 import { BodyworkPaintTechnicianComponent } from './pages/bodywork-paint/bodywork-paint-technician.component';
@@ -21,7 +21,7 @@ import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.co
     HypEvidenceProcessorComponent,
   ],
   imports: [
-    AdminModule,
+    AdminSharedModule,
     AngularMaterialModule,
     BodyworkPaintTechnicianRoutingModule,
     CommonModule,

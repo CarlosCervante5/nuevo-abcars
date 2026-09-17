@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 
 import { MarketingRoutingModule } from './marketing-routing.module';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { AdminModule } from '../admin.module';
+import { AdminSharedModule } from '../admin-shared.module';
 import { AngularMaterialModule } from '../../angular-material/angular-material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SkCubeComponent } from '@components/sk-cube/sk-cube.component'
@@ -18,7 +18,7 @@ import { MainBannerPageModule } from './main-banner-page.module';
     AngularMaterialModule,
     FormsModule,
     MarketingRoutingModule,
-    AdminModule,
+    AdminSharedModule,
     ReactiveFormsModule,
     SkCubeComponent,
     NewNavComponent,

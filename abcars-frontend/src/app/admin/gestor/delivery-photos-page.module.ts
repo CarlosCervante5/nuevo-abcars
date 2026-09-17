@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AngularMaterialModule } from 'src/app/angular-material/angular-material.module';
-import { AdminModule } from '../admin.module';
+import { AdminSharedModule } from '../admin-shared.module';
 import { DeliveryPhotosComponent } from './pages/delivery-photos/delivery-photos.component';
 
 /**
@@ -11,7 +11,7 @@ import { DeliveryPhotosComponent } from './pages/delivery-photos/delivery-photos
  */
 @NgModule({
   declarations: [DeliveryPhotosComponent],
-  imports: [CommonModule, RouterModule, FormsModule, AdminModule, AngularMaterialModule],
+  imports: [CommonModule, RouterModule, FormsModule, AdminSharedModule, AngularMaterialModule],
   exports: [DeliveryPhotosComponent]
 })
 export class DeliveryPhotosPageModule {}

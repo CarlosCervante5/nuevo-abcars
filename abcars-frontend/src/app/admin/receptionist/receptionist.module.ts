@@ -5,7 +5,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ReceptionistRoutingModule } from './receptionist-routing.module';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ReceptionFormComponent } from './pages/reception-form/reception-form.component';
-import { AdminModule } from '../admin.module';
+import { AdminSharedModule } from '../admin-shared.module';
 import { AngularMaterialModule } from '../../angular-material/angular-material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SkCubeComponent } from '@components/sk-cube/sk-cube.component'
@@ -21,7 +21,7 @@ import { NewNavComponent } from 'src/app/shared/versiones-nav/new-nav/new-nav.co
     AngularMaterialModule,
     FormsModule,
     ReceptionistRoutingModule,
-    AdminModule,
+    AdminSharedModule,
     DragDropModule,
     ReactiveFormsModule,
     SkCubeComponent,
