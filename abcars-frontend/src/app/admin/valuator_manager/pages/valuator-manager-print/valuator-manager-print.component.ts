@@ -1,13 +1,17 @@
 import { Component, ElementRef, ViewChild, type OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
-import { environment } from '@environments/environment';
-import { GetUsersByRol, UserTechnicians, Overview } from '@interfaces/admin.interfaces';
-
-import { ValuatorManagerPrintService } from '@services/valuator-manager-print.service';
+import { Overview, UserTechnicians, GetUsersByRol } from '@interfaces/admin.interfaces';
+import {
+  ValuatorManagerPrintService,
+  ValuationReportFilters,
+  ValuationReportRow
+} from '@services/valuator-manager-print.service';
+import { AppointmentService } from '@services/appointment.service';
+import { isValuationReadOnlyViewer } from '@helpers/valuation-view.helper';
 
 @Component({
   selector: 'app-valuator-manager-print',
-  // imports: [],
   templateUrl: './valuator-manager-print.component.html',
   styleUrl: './valuator-manager-print.component.css',
   standalone: false
@@ -16,19 +20,25 @@ export class ValuatorManagerPrintComponent implements OnInit {
   @ViewChild('dateValuation') dateValuation!: ElementRef<HTMLInputElement>;
   @ViewChild('dateEndValuation') dateEndValuation!: ElementRef<HTMLInputElement>;
 
-  public url: string = environment.baseUrl;
-  public inputDateValuation!: string;
-  public inputDateEndValuation: string | null = null;
+  public inputDateValuation = '';
+  public inputDateEndValuation = '';
+  public keyword = '';
   public valuators: UserTechnicians[] = [];
   public iduservaluator: string | null = '';
 
-  // References Overview para el encabezado
+  public loading = false;
+  public exporting = false;
+  public error: string | null = null;
+  public rows: ValuationReportRow[] = [];
+  public previewLoaded = false;
+
   public itemOverview: Overview;
 
   constructor(
-    private _valuatorManagerPrintService: ValuatorManagerPrintService
-  ){
-    // Inicializar itemOverview
+    private _valuatorManagerPrintService: ValuatorManagerPrintService,
+    private _appointmentService: AppointmentService,
+    private _router: Router
+  ) {
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       this.itemOverview = {
@@ -47,8 +57,7 @@ export class ValuatorManagerPrintComponent implements OnInit {
           }
         ]
       };
-    } catch (error) {
-      // Fallback si hay error al parsear
+    } catch {
       this.itemOverview = {
         user: {
           name: 'Usuario',
@@ -70,50 +79,102 @@ export class ValuatorManagerPrintComponent implements OnInit {
 
   ngOnInit(): void {
     this.getValuators();
-   }
+  }
 
-  public getValuators(){
-    this._valuatorManagerPrintService.getValuators()
-    .subscribe({
-      next: ( valuators: GetUsersByRol ) => {
+  public getValuators(): void {
+    this._valuatorManagerPrintService.getValuators().subscribe({
+      next: (valuators: GetUsersByRol) => {
         this.valuators = valuators.data.users;
-        console.log(this.valuators);
+      },
+      error: () => {
+        this.error = 'No se pudieron cargar los valuadores';
       }
     });
   }
 
-  public onChange(valuatorId: string | null){
-    console.log(valuatorId);
+  public onChange(valuatorId: string | null): void {
     this.iduservaluator = valuatorId ? valuatorId : null;
   }
 
-  public getDateValuation(event: Event){
+  public getDateValuation(event: Event): void {
     const target = event.target as HTMLInputElement;
-    const dateValue = target.value;
-    this.inputDateValuation = dateValue;
+    this.inputDateValuation = target.value || '';
   }
 
-  public getDateEndValuation(event: Event){
+  public getDateEndValuation(event: Event): void {
     const target = event.target as HTMLInputElement;
-    const dateValue = target.value;
-    this.inputDateEndValuation = dateValue;
+    this.inputDateEndValuation = target.value || '';
   }
 
-  public generateDownloadUrl(): string {
-    let baseUrl = `${this.url}/api/valuations/report`;
-    let params = [];
+  private currentFilters(): ValuationReportFilters {
+    return {
+      valuator_uuid: this.iduservaluator || null,
+      begin_date: this.inputDateValuation || null,
+      end_date: this.inputDateEndValuation || null,
+      keyword: this.keyword.trim() || null
+    };
+  }
 
-    if (this.iduservaluator) {
-        params.push(`valuator_uuid=${this.iduservaluator}`);
-    }
-    if (this.inputDateValuation) {
-        params.push(`begin_date=${this.inputDateValuation}`);
-    }
-    if (this.inputDateEndValuation) {
-      params.push(`end_date=${this.inputDateEndValuation}`)
+  public loadPreview(): void {
+    this.loading = true;
+    this.error = null;
+    this._valuatorManagerPrintService.previewReport(this.currentFilters()).subscribe({
+      next: (res) => {
+        this.rows = res.data?.rows || [];
+        this.previewLoaded = true;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = err?.error?.message || 'No se pudo cargar el reporte';
+      }
+    });
+  }
+
+  public exportExcel(): void {
+    this.exporting = true;
+    this.error = null;
+    this._valuatorManagerPrintService.downloadReportExcel(this.currentFilters()).subscribe({
+      next: (blob) => {
+        this.exporting = false;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'valuations_report.xlsx';
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        this.exporting = false;
+        this.error = err?.error?.message || 'No se pudo exportar a Excel';
+      }
+    });
+  }
+
+  public openValuation(row: ValuationReportRow): void {
+    const role = localStorage.getItem('role') || '';
+    const canOpenChecklist =
+      isValuationReadOnlyViewer() ||
+      ['valuator', 'seller', 'appraiser_technician'].includes(role);
+
+    if (canOpenChecklist) {
+      this._router.navigate(['/admin/valuator/checklist', row.uuid]);
+      return;
     }
 
-    return params.length ? `${baseUrl}?${params.join('&')}` : baseUrl;
-}
+    this._appointmentService.openDownloadValuation(row.uuid).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      },
+      error: () => {
+        this.error = 'No se pudo abrir la valuación';
+      }
+    });
+  }
 
+  public money(value: number | string | null | undefined): string {
+    const n = Number(value || 0);
+    return n.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+  }
 }

@@ -624,11 +624,11 @@ Route::prefix('appointment')->middleware('bandwidth_usage')->group(function () {
 
 Route::prefix('valuations')->middleware('bandwidth_usage')->group(function () {
 
-    Route::get('/report',[ValuationController::class, 'report']);
     Route::post('/count',[ValuationController::class, 'count']);
 
 
     Route::middleware(['auth:sanctum', 'deny_role:body'])->group(function () {
+        Route::get('/report',[ValuationController::class, 'report']);
         Route::get('/search', [ValuationController::class, 'search']);
         Route::get('/search_bodyworks', [ValuationController::class, 'searchBodyworks']);
         Route::get('/search_repairs', [ValuationController::class, 'searchRepairs']);

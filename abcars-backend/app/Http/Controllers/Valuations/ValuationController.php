@@ -6,6 +6,7 @@ use App\Exports\ValuationReportExport;
 use App\Helpers\ApiResponseHelper;
 use App\Helpers\ValuationAccessHelper;
 use App\Http\Controllers\Controller;
+use App\Services\ValuationReportService;
 use App\Http\Requests\Repairs\UpdateRepairRequest;
 use App\Http\Requests\SpareParts\UpdateSparePartRequest;
 use App\Http\Requests\Valuations\AttatchCheckpointRequest;
@@ -710,23 +711,42 @@ class ValuationController extends Controller
     }
 
     /**
-     * Reporte de valuaciones por fecha de inicio, fin, y uuid del valuador.
-     * 
+     * Reporte de valuaciones por fecha, valuador y/o VIN/cliente.
+     * format=json → vista previa; por defecto Excel con encabezados.
+     *
      * @param  \App\Http\Requests\Valuations\ReportValuationRequest  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse
      */
-    public function report( ReportValuationRequest $request)
+    public function report(ReportValuationRequest $request, ValuationReportService $reportService)
     {
         try {
-            
-            $valuator_uuid = $request->input('valuator_uuid');
-            $begin_date = $request->input('begin_date');
-            $end_date = $request->input('end_date');
+            $filters = [
+                'valuator_uuid' => $request->input('valuator_uuid'),
+                'begin_date' => $request->input('begin_date'),
+                'end_date' => $request->input('end_date'),
+                'keyword' => $request->input('keyword'),
+            ];
 
-            // return Excel::download(new ValuationReportExport($valuator_uuid, $begin_date, $end_date), 'valuations_report.csv');
+            $format = strtolower((string) $request->input('format', 'xlsx'));
+            if (in_array($format, ['json', 'preview'], true)) {
+                $rows = $reportService->rows($filters);
 
-            return Excel::download(new ValuationReportExport($valuator_uuid, $begin_date, $end_date), 'valuations_report.xlsx');
-        
+                return ApiResponseHelper::apiSuccess(200, 'Reporte de valuaciones', [
+                    'count' => $rows->count(),
+                    'columns' => $reportService->headings(),
+                    'rows' => $rows->values(),
+                ]);
+            }
+
+            return Excel::download(
+                new ValuationReportExport(
+                    $filters['valuator_uuid'],
+                    $filters['begin_date'],
+                    $filters['end_date'],
+                    $filters['keyword'],
+                ),
+                'valuations_report.xlsx'
+            );
         } catch (\Exception $e) {
             return ApiResponseHelper::apiError('Error al obtener el reporte', $e->getMessage(), 500, 'GET_REPORT_ERROR');
         }

@@ -1,11 +1,11 @@
 <app-overview [overview]="itemOverview" [url_index]="'/admin/valuation_manager'" [hideModules]="true"></app-overview>
 <div class="container mx-auto px-4 pt-24">
     <div class="w-full mb-6">
-        <h4 class="valuator-print-title">Impresión de Valuación</h4>
+        <h4 class="valuator-print-title">Reporte de valuaciones</h4>
         <nav class="valuator-print-breadcrumb" aria-label="breadcrumb">
             <ol class="valuator-print-breadcrumb-list">
                 <li class="valuator-print-breadcrumb-item" [routerLink]="['/admin/valuation_manager']">Overview</li>
-                <li class="valuator-print-breadcrumb-item valuator-print-breadcrumb-item-active" aria-current="page">Imprimir valuación</li>
+                <li class="valuator-print-breadcrumb-item valuator-print-breadcrumb-item-active" aria-current="page">Reporte</li>
             </ol>
         </nav>
     </div>
@@ -15,12 +15,11 @@
             <div class="valuator-print-content">
                 <div class="valuator-print-drop-container">
                     <div class="valuator-print-instructions">
-                        <p class="valuator-print-instruction-text">Puedes imprimir por fecha, por nombre de valuador o por ambos campos,</p>
-                        <p class="valuator-print-instruction-text">si pulsas descargar sin info en los campos, se imprimirán todas las valuaciones.</p>
+                        <p class="valuator-print-instruction-text">Filtra por fechas, valuador y/o VIN (también nombre o teléfono del cliente).</p>
+                        <p class="valuator-print-instruction-text">Primero consulta en pantalla; usa el vínculo del VIN o cliente para abrir la valuación. Luego exporta a Excel con todas las columnas.</p>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                        <!-- Fecha de inicio -->
                         <div class="valuator-print-form-field">
                             <label class="valuator-print-label">Fecha de inicio</label>
                             <input 
@@ -31,7 +30,6 @@
                             >
                         </div>
 
-                        <!-- Fecha fin -->
                         <div class="valuator-print-form-field">
                             <label class="valuator-print-label">Fecha fin</label>
                             <input 
@@ -42,7 +40,18 @@
                             >
                         </div>
 
-                        <!-- Nombre del valuador -->
+                        <div class="valuator-print-form-field md:col-span-2">
+                            <label class="valuator-print-label">Buscar por VIN / cliente</label>
+                            <input
+                                type="text"
+                                [(ngModel)]="keyword"
+                                name="keyword"
+                                placeholder="Ej. VIN, nombre o teléfono"
+                                class="valuator-print-input"
+                                (keyup.enter)="loadPreview()"
+                            >
+                        </div>
+
                         <div class="valuator-print-form-field md:col-span-2">
                             <label class="valuator-print-label">Nombre del valuador</label>
                             <select 
@@ -50,7 +59,7 @@
                                 (change)="onChange(inputname.value)"
                                 class="valuator-print-input"
                             >
-                                <option value="">Seleccione el valuador</option>
+                                <option value="">Todos los valuadores</option>
                                 <option *ngFor="let valuator of valuators" [value]="valuator.uuid">
                                     {{ valuator.user_profile.name }} {{ valuator.user_profile.last_name }}
                                 </option>
@@ -58,17 +67,115 @@
                         </div>
                     </div>
 
-                    <!-- Botón Descargar -->
-                    <div class="w-full mt-6 text-center">
-                        <a 
-                            [href]="generateDownloadUrl()"
+                    <div class="valuator-print-actions">
+                        <button
+                            type="button"
                             class="valuator-print-btn valuator-print-btn-primary"
-                            target="_blank"
+                            (click)="loadPreview()"
+                            [disabled]="loading || exporting"
                         >
-                            DESCARGAR
-                        </a>
+                            {{ loading ? 'Cargando…' : 'Consultar en pantalla' }}
+                        </button>
+                        <button
+                            type="button"
+                            class="valuator-print-btn valuator-print-btn-secondary"
+                            (click)="exportExcel()"
+                            [disabled]="loading || exporting"
+                        >
+                            {{ exporting ? 'Exportando…' : 'Exportar Excel' }}
+                        </button>
                     </div>
+
+                    <p class="valuator-print-error" *ngIf="error">{{ error }}</p>
                 </div>
+            </div>
+        </div>
+
+        <div class="valuator-print-results" *ngIf="previewLoaded">
+            <div class="valuator-print-results-head">
+                <h5>{{ rows.length }} valuación(es) encontrada(s)</h5>
+            </div>
+
+            <p class="valuator-print-empty" *ngIf="!rows.length">No hay resultados con esos filtros.</p>
+
+            <div class="valuator-print-table-wrap" *ngIf="rows.length">
+                <table class="valuator-print-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>VIN</th>
+                            <th>Estatus</th>
+                            <th>Unidad</th>
+                            <th>Cliente</th>
+                            <th>Valuador</th>
+                            <th>Mecánico</th>
+                            <th>Ref. Libro</th>
+                            <th>Intelimotor</th>
+                            <th>Partes (O/G/U)</th>
+                            <th>Reacond.</th>
+                            <th>Toma / Oferta</th>
+                            <th>Comentarios</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let row of rows">
+                            <td>{{ row.fecha_valuacion }}</td>
+                            <td>
+                                <button type="button" class="valuator-print-link" (click)="openValuation(row)">
+                                    {{ row.vin }}
+                                </button>
+                            </td>
+                            <td>{{ row.estatus }}</td>
+                            <td>
+                                <div class="valuator-print-stack">
+                                    <strong>{{ row.marca }} {{ row.modelo }}</strong>
+                                    <small>{{ row.version }} · {{ row.anio }} · {{ row.color }}</small>
+                                    <small>{{ row.kilometraje }} km</small>
+                                </div>
+                            </td>
+                            <td>
+                                <button type="button" class="valuator-print-link" (click)="openValuation(row)">
+                                    {{ row.nombre_cliente }}
+                                </button>
+                            </td>
+                            <td>{{ row.nombre_valuador }}</td>
+                            <td>{{ row.nombre_mecanico }}</td>
+                            <td>
+                                <div class="valuator-print-stack">
+                                    <small>Toma {{ money(row.ref_libro_toma) }}</small>
+                                    <small>Venta {{ money(row.ref_libro_venta) }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="valuator-print-stack">
+                                    <small>Baja {{ money(row.ref_intelimotor_baja) }}</small>
+                                    <small>Alta {{ money(row.ref_intelimotor_alta) }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="valuator-print-stack">
+                                    <small>O {{ money(row.partes_originales) }}</small>
+                                    <small>G {{ money(row.partes_genericas) }}</small>
+                                    <small>U {{ money(row.partes_usadas) }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="valuator-print-stack">
+                                    <small>MO {{ money(row.reacond_mano_obra) }}</small>
+                                    <small>HyP {{ money(row.reacond_hyp) }}</small>
+                                    <strong>{{ money(row.reacond_total) }}</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="valuator-print-stack">
+                                    <small>Toma {{ money(row.valor_toma) }}</small>
+                                    <strong>{{ money(row.oferta_final) }}</strong>
+                                </div>
+                            </td>
+                            <td class="valuator-print-comments">{{ row.comentarios || '—' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

@@ -16,11 +16,14 @@ class ReportValuationRequest extends FormRequest
         return [
             'valuator_uuid' => [
                 'sometimes',
+                'nullable',
                 'string',
                 'uuid',
             ],
-            'begin_date' => 'sometimes|max:255|string',
-            'end_date' => 'sometimes|max:255|string',
+            'begin_date' => 'sometimes|nullable|max:255|string',
+            'end_date' => 'sometimes|nullable|max:255|string',
+            'keyword' => 'sometimes|nullable|string|max:255',
+            'format' => 'sometimes|nullable|string|in:json,xlsx,excel',
         ];
     }
 }

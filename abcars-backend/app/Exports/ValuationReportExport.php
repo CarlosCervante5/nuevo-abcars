@@ -2,71 +2,48 @@
 
 namespace App\Exports;
 
-use App\Models\User;
-use App\Models\Valuations\VehicleValuation;
+use App\Services\ValuationReportService;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class ValuationReportExport implements FromCollection
+class ValuationReportExport implements FromCollection, WithHeadings, ShouldAutoSize
 {
-    protected $begin_date;
-    protected $end_date;
-    protected $valuator_uuid;
+    protected ?string $begin_date;
 
-    public function __construct($valuator_uuid = null , $begin_date = null, $end_date = null)
-    {
+    protected ?string $end_date;
+
+    protected ?string $valuator_uuid;
+
+    protected ?string $keyword;
+
+    public function __construct(
+        $valuator_uuid = null,
+        $begin_date = null,
+        $end_date = null,
+        $keyword = null,
+    ) {
         $this->valuator_uuid = $valuator_uuid;
         $this->begin_date = $begin_date;
         $this->end_date = $end_date;
+        $this->keyword = $keyword;
     }
 
-    /**
-    * @return \Illuminate\Support\Collection
-    */
-    public function collection()
+    public function collection(): Collection
     {
-        
-        // Construir la consulta base
-        $query = VehicleValuation::query();
+        $service = app(ValuationReportService::class);
 
-        // Filtrar por valuador si se proporciona el UUID
-        if ($this->valuator_uuid) {
-            
-            $valuator = User::findByUuid($this->valuator_uuid);
-
-            if ($valuator) {
-                $query->whereHas('valuator', function ($q) use ($valuator) {
-                    $q->where('users.id', $valuator->id);
-                });
-            }
-        }
-
-        // Aplicar filtros de fechas
-        if ($this->begin_date && $this->end_date) {
-            $query->whereBetween('created_at', [$this->begin_date, $this->end_date]);
-        } elseif ($this->begin_date) {
-            $query->where('created_at', '>=', $this->begin_date);
-        }
-
-
-        $results = $query->with(['vehicle','valuator.userProfile'])->get();
-
-        // Formatear los resultados en un array simple
-        return $results->map(function ($valuation) {
-            return [
-                'ID' => $valuation->id,
-                'Estatus' => $valuation->status,
-                'VIN' => $valuation->vehicle->vin ?? 'N/A',
-                'Nombre(s)' => $valuation->valuator[0]->userProfile->name ?? 'N/A',
-                'Apellido(s)' => $valuation->valuator[0]->userProfile->last_name ?? 'N/A',
-            ];
-        });
-
-        return $query->get();
-
+        return $service->rows([
+            'valuator_uuid' => $this->valuator_uuid,
+            'begin_date' => $this->begin_date,
+            'end_date' => $this->end_date,
+            'keyword' => $this->keyword,
+        ])->map(fn (array $row) => $service->excelValues($row));
     }
 
     public function headings(): array
     {
-        return ['ID', 'Estatus', 'VIN', 'Nombre(s)', 'Apellido(s)'];
+        return app(ValuationReportService::class)->headings();
     }
 }
