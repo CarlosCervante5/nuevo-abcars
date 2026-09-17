@@ -205,10 +205,8 @@ class ValuationController extends Controller
                                 ->orWhere('year', 'LIKE', $keyword)
                                 ->orWhere('vin', 'LIKE', $keyword);
                         })->orWhereHas('vehicle', function ($q) use ($keyword) {
-                            $q->where('vin', 'LIKE', $keyword)
-                                ->orWhere('model_name', 'LIKE', $keyword)
-                                ->orWhere('brand_name', 'LIKE', $keyword)
-                                ->orWhere('year', 'LIKE', $keyword);
+                            // Vehículo de inventario (vehicles): solo VIN; no tiene brand_name/model_name.
+                            $q->where('vin', 'LIKE', $keyword);
                         });
                     });
                 }
