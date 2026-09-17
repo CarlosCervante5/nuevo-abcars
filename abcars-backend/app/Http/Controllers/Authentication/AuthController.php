@@ -150,9 +150,12 @@ class AuthController extends Controller
             
             $user = auth()->user();
 
+            if (! $user) {
+                return ApiResponseHelper::authError('Token inválido', null, 401, 'UNAUTHENTICATED');
+            }
+
             $stored_role = $request->input('stored_role');
             $expected_role = $request->input('expected_role');
-
 
             if ($stored_role !== $expected_role) {
                 return ApiResponseHelper::authError('Roles proporcionados no coinciden', null, 401, 'UNMATCHED_ROLES_PROVIDED');
@@ -161,8 +164,8 @@ class AuthController extends Controller
             if (! $user->hasRole($stored_role)) {
                 return ApiResponseHelper::authError('Rol no autorizado', null, 403, 'UNAUTHORIZED_ROLE');
             }
-            
-            return ApiResponseHelper::apiSuccess(200, 'Token y rol válidos', [$userRole, $expected_role]);
+
+            return ApiResponseHelper::apiSuccess(200, 'Token y rol válidos', [$stored_role, $expected_role]);
             
         } catch (\Exception $e) {
             return ApiResponseHelper::authError('Error al validar el token o rol', $e->getMessage(), 500, 'VALIDATION_ERROR');
