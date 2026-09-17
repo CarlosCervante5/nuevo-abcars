@@ -176,22 +176,40 @@ class ValuationController extends Controller
                         : $user->valuations()->with($valuationWith)
                 );
 
+            if (
+                ! empty($data['valuator_uuid'])
+                && ValuationAccessHelper::isGlobalReadOnlyViewer($user)
+            ) {
+                $valuator = User::findByUuid($data['valuator_uuid']);
+                if ($valuator) {
+                    $baseQuery = $baseQuery->whereHas('valuator', function ($q) use ($valuator) {
+                        $q->where('users.id', $valuator->id);
+                    });
+                }
+            }
+
             $valuations = $baseQuery
             ->where(function ($query) use ($data) {
                 if (!empty($data['keyword'])) {
                     $keyword = '%' . $data['keyword'] . '%';
 
-                    // Agrupamos las condiciones relacionadas al customer y al vehicle
-                    $query->whereHas('appointment.customer', function ($query) use ($keyword) {
-                        $query->where('name', 'LIKE', $keyword)
-                            ->orWhere('last_name', 'LIKE', $keyword)
-                            ->orWhere('phone_1', 'LIKE', $keyword)
-                            ->orWhere('email_1', 'LIKE', $keyword);
-                    })->orWhereHas('appointment.vehicle', function ($query) use ($keyword) {
-                        $query->where('model_name', 'LIKE', $keyword)
-                            ->orWhere('brand_name', 'LIKE', $keyword)
-                            ->orWhere('year', 'LIKE', $keyword)
-                            ->orWhere('vin', 'LIKE', $keyword);
+                    $query->where(function ($q) use ($keyword) {
+                        $q->whereHas('appointment.customer', function ($q) use ($keyword) {
+                            $q->where('name', 'LIKE', $keyword)
+                                ->orWhere('last_name', 'LIKE', $keyword)
+                                ->orWhere('phone_1', 'LIKE', $keyword)
+                                ->orWhere('email_1', 'LIKE', $keyword);
+                        })->orWhereHas('appointment.vehicle', function ($q) use ($keyword) {
+                            $q->where('model_name', 'LIKE', $keyword)
+                                ->orWhere('brand_name', 'LIKE', $keyword)
+                                ->orWhere('year', 'LIKE', $keyword)
+                                ->orWhere('vin', 'LIKE', $keyword);
+                        })->orWhereHas('vehicle', function ($q) use ($keyword) {
+                            $q->where('vin', 'LIKE', $keyword)
+                                ->orWhere('model_name', 'LIKE', $keyword)
+                                ->orWhere('brand_name', 'LIKE', $keyword)
+                                ->orWhere('year', 'LIKE', $keyword);
+                        });
                     });
                 }
             })

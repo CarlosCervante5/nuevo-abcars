@@ -11,7 +11,7 @@ import { DocumentationVehicleComponent } from '../../components/documentation-ve
 
 // Servicios
 import { AppointmentService } from '@services/appointment.service';
-import { ValuationAppointments, VehicleValuations } from '@interfaces/getAppointments.interface';
+import { ValuationAppointments, User, VehicleValuations } from '@interfaces/getAppointments.interface';
 import { ActivatedRoute, Router } from '@angular/router';
 import {reload} from '../../../../shared/helpers/session.helper';
 import { MatIconRegistry } from '@angular/material/icon';
@@ -51,6 +51,9 @@ export class AppointmentsComponent implements OnInit {
   }
 
   public palabra_busqueda: string = '';
+  /** Filtro admin: vacío = todos los valuadores. */
+  public selectedValuatorUuid: string = '';
+  public valuators: User[] = [];
   public currentYear: number = new Date().getFullYear();
   private timer: any;
   public openMenus: { [key: string]: boolean } = {};
@@ -131,8 +134,39 @@ export class AppointmentsComponent implements OnInit {
     if (this.itemOverview?.pages?.[0]) {
       this.itemOverview.pages[0].permalink = permalink;
     }
+    if (this.valuationViewOnly && this.embedInShell) {
+      this.loadValuatorsForFilter();
+    }
     this.getAppointments(this.page);
     this.scrollTop();
+  }
+
+  private loadValuatorsForFilter(): void {
+    this._appointmentService.getValuators().subscribe({
+      next: (response) => {
+        this.valuators = [...(response.data?.users ?? [])].sort((a, b) =>
+          this.valuatorLabel(a).localeCompare(this.valuatorLabel(b), 'es')
+        );
+      },
+      error: (error) => reload(error, this._router),
+    });
+  }
+
+  valuatorLabel(valuator: User): string {
+    const p = valuator.user_profile;
+    const full = [p?.name, p?.last_name].filter(Boolean).join(' ').trim();
+    if (full) {
+      return full;
+    }
+    return (valuator.nickname || valuator.email || valuator.uuid || 'Usuario').trim();
+  }
+
+  public onValuatorFilterChange(): void {
+    this.page = 1;
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+    this.getAppointments(this.page, this.palabra_busqueda.trim(), this.selectedValuatorUuid);
   }
 
   scrollTop() {
@@ -143,8 +177,11 @@ export class AppointmentsComponent implements OnInit {
     this._bottomSheet.open(AppointmentFormComponent);  
   }
 
-  public getAppointments(page: number, keyword: string = ''): void {
-    this._appointmentService.getAppointments(page, keyword)
+  public getAppointments(page: number, keyword: string = '', valuatorUuid: string = ''): void {
+    this.page = page;
+    const valuatorFilter =
+      this.valuationViewOnly && this.embedInShell ? valuatorUuid || this.selectedValuatorUuid : '';
+    this._appointmentService.getAppointments(page, keyword, valuatorFilter)
       .subscribe({
         next: ( response: ValuationAppointments) => {
           console.log(response.data.data);
@@ -175,7 +212,11 @@ export class AppointmentsComponent implements OnInit {
     //       this.dataSource = new MatTableDataSource(response.data.data);
     //     }
     //   });
-    this.getAppointments(this.page, busqueda);
+    this.page = 1;
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+    this.getAppointments(this.page, busqueda, this.selectedValuatorUuid);
   }
 
   public searchKeyboard(){
@@ -188,7 +229,8 @@ export class AppointmentsComponent implements OnInit {
   }
 
   public paginationChange(event: PageEvent) {
-    this.getAppointments(event.pageIndex + 1);
+    const keyword = this.palabra_busqueda.length > 0 ? this.palabra_busqueda : '';
+    this.getAppointments(event.pageIndex + 1, keyword, this.selectedValuatorUuid);
     this.scrollTop();
   }
 

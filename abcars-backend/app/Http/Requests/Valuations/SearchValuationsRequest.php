@@ -15,6 +15,7 @@ class SearchValuationsRequest extends FormRequest
     {
         return [
             'keyword' => 'sometimes|string|nullable',
+            'valuator_uuid' => 'sometimes|nullable|string|max:255',
         ];
     }
 

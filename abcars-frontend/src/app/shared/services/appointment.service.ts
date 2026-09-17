@@ -32,7 +32,11 @@ export class AppointmentService {
     return this._http.post<GralResponse>(`${this.baseUrl}/api/appointment`, form.value, {headers: headers});
   }
 
-  public getAppointments( page: number, keyword: string = ''): Observable<ValuationAppointments>{
+  public getAppointments(
+    page: number,
+    keyword: string = '',
+    valuatorUuid: string = ''
+  ): Observable<ValuationAppointments> {
     let user_token = localStorage.getItem('user_token');    
     let headers = new HttpHeaders().set('Authorization', `Bearer ${user_token}`);
 
@@ -44,6 +48,10 @@ export class AppointmentService {
 
     if (keyword.length > 0) {
       params = params.set('keyword', keyword);
+    }
+
+    if (valuatorUuid.length > 0) {
+      params = params.set('valuator_uuid', valuatorUuid);
     }
 
     return this._http.get<ValuationAppointments>(`${ this.baseUrl }/api/valuations/search`, {headers, params}); 

@@ -14,7 +14,7 @@
                     <i class="fi fi-rr-arrow-left"></i> Regresar a Overview
                 </a>
                 <p *ngIf="valuationViewOnly && embedInShell" class="mt-2 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
-                    Vista global de valuaciones (solo lectura). Puedes revisar checklist, cotización y descargar; no se guardan cambios.
+                    Vista global de valuaciones (solo lectura). Puedes consultar el listado y descargar el PDF de valuación cuando esté disponible; no puedes editar expedientes ni checklist.
                 </p>
                 <h4 class="appointments-page-title">Solicitudes Citas de valuación</h4>
                 <nav class="appointments-breadcrumb" aria-label="breadcrumb">
@@ -34,16 +34,36 @@
             </div>
         </div>
 
-        <!-- Search Input -->
-        <div class="appointments-search-wrap">
-            <i class="fi fi-rr-search appointments-search-icon"></i>
-            <input 
-                type="text"
-                [(ngModel)]="palabra_busqueda" 
-                (keyup)="searchKeyboard()" 
-                placeholder="Buscar por nombre, apellidos, marca, modelo, vin, año"
-                class="appointments-search-input"
+        <!-- Búsqueda y filtro valuador (admin) -->
+        <div
+          class="appointments-filters-row"
+          [class.appointments-filters-row--admin]="valuationViewOnly && embedInShell"
+        >
+            <div class="appointments-search-wrap">
+                <i class="fi fi-rr-search appointments-search-icon"></i>
+                <input 
+                    type="text"
+                    [(ngModel)]="palabra_busqueda" 
+                    (keyup)="searchKeyboard()" 
+                    placeholder="Buscar por nombre, apellidos, marca, modelo, VIN o año"
+                    class="appointments-search-input"
+                >
+            </div>
+            <div
+              *ngIf="valuationViewOnly && embedInShell"
+              class="appointments-valuator-filter-wrap"
             >
+                <label class="appointments-valuator-filter-label" for="admin-valuator-filter">Valuador</label>
+                <select
+                  id="admin-valuator-filter"
+                  class="appointments-valuator-filter-select"
+                  [(ngModel)]="selectedValuatorUuid"
+                  (change)="onValuatorFilterChange()"
+                >
+                    <option value="">Todos</option>
+                    <option *ngFor="let v of valuators" [value]="v.uuid">{{ valuatorLabel(v) }}</option>
+                </select>
+            </div>
         </div>
 
              <mat-accordion class="custom-panel" *ngIf="!valuationViewOnly">

@@ -75,9 +75,66 @@
     color: var(--abcars-primary, #f59e0b) !important;
 }
 
+/* Búsqueda y filtros */
+.appointments-filters-row {
+    margin-bottom: 1.25rem;
+}
+
+.appointments-filters-row--admin {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+    .appointments-filters-row--admin {
+        flex-direction: row;
+        align-items: flex-end;
+        gap: 1rem;
+    }
+
+    .appointments-filters-row--admin .appointments-search-wrap {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .appointments-valuator-filter-wrap {
+        flex: 0 0 auto;
+        min-width: 14rem;
+    }
+}
+
+.appointments-valuator-filter-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 0.35rem;
+}
+
+.appointments-valuator-filter-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    background: #fff;
+    color: #111827;
+}
+
+.appointments-valuator-filter-select:focus {
+    outline: none;
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
 /* Search Bar */
 .appointments-search-wrap {
     position: relative;
+    margin-bottom: 0;
+}
+
+.appointments-filters-row:not(.appointments-filters-row--admin) .appointments-search-wrap {
     margin-bottom: 1.25rem;
 }
 
