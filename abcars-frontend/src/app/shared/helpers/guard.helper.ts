@@ -89,7 +89,7 @@ export function validateRoleGuard(
     router.navigate(['/auth/iniciar-sesion'], { replaceUrl: true });
     return of(false);
   }
-  
+
   // Si hay token y el rol coincide, validar con el backend (usar el rol almacenado)
   return accountService.validateRole(storedRole!)
     .pipe(
@@ -102,8 +102,13 @@ export function validateRoleGuard(
           localStorage.removeItem('permissions');
           localStorage.removeItem('profile');
           if (!(window as any).__isRedirecting401) {
-            router.navigate(['/auth/iniciar-sesion'], { replaceUrl: true });
+            (window as any).__isRedirecting401 = true;
+            router.navigate(['/auth/iniciar-sesion'], { replaceUrl: true }).finally(() => {
+              (window as any).__isRedirecting401 = false;
+            });
           }
+        } else {
+          console.error('validateRoleGuard:', error);
         }
         return of(false);
       })

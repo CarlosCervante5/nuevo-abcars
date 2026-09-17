@@ -16,7 +16,7 @@ import { SellerReferralStatsService, ReferralStatsResponse } from '@services/sel
 })
 export class DashboardComponent {
 
-    private user = JSON.parse(localStorage.getItem('user')!);
+    private user = DashboardComponent.readStoredUser();
 
     public referralStats: { total_referrals: number; month_referrals: number; converted_referrals: number } | null = null;
     public statsLoading: boolean = false;
@@ -52,10 +52,10 @@ export class DashboardComponent {
 
     public itemOverview: Overview = {
         user: {
-            name: this.user.name,
-            surname: this.user.surname,
+            name: this.user.nickname || this.user.name || 'Usuario',
+            surname: this.user.surname || '',
             role: this.role === 'seller' ? 'Seller Dashboard' : 'Valuator',
-            email: this.user.email,
+            email: this.user.email || '',
             picturepath: ''
         },
         pages: this.role === 'seller'
@@ -90,4 +90,13 @@ export class DashboardComponent {
                 }
             ]
     };
+
+    private static readStoredUser(): { nickname?: string; name?: string; surname?: string; email?: string } {
+        try {
+            const raw = localStorage.getItem('user');
+            return raw ? JSON.parse(raw) : {};
+        } catch {
+            return {};
+        }
+    }
 }

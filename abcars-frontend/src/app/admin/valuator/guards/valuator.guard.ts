@@ -15,11 +15,9 @@ export class ValuatorGuard  {
   ) {    
   }
 
-  canActivate(): Observable<boolean> | Promise<boolean> | boolean {
-    return validateRoleGuard(['valuator', 'seller', 'administrator', 'super_admin', 'appraiser_technician'], this._accountService, this._router);
-  }
+  private readonly allowedRoles = ['valuator', 'seller', 'administrator', 'super_admin', 'appraiser_technician'];
 
-  canLoad(): Observable<boolean> | Promise<boolean> | boolean {
-    return validateRoleGuard(['valuator', 'seller', 'administrator', 'super_admin', 'appraiser_technician'], this._accountService, this._router);
+  canActivate(): Observable<boolean> | Promise<boolean> | boolean {
+    return validateRoleGuard(this.allowedRoles, this._accountService, this._router);
   }
 }

@@ -13,7 +13,8 @@ const routes: Routes = [
   { path: 'inventory', component: InventoryViewComponent},
   { path: 'inventory/:uuid', component: VehicleDetailViewComponent},
   { path: 'checklist/:uuid_valuation', component: ChecklistComponent},
-  { path: 'quote-request/:uuid_valuation', component: QuoteSellCarRequestComponent}
+  { path: 'quote-request/:uuid_valuation', component: QuoteSellCarRequestComponent},
+  { path: '**', redirectTo: '', pathMatch: 'full' },
 ];
 
 @NgModule({
