@@ -144,9 +144,52 @@ class User extends Authenticatable
     }
 
 
+    /**
+     * Rol principal cuando el usuario tiene varios roles Spatie (login, guards, perfil).
+     */
+    public function resolveLoginRole(): ?string
+    {
+        $names = $this->getRoleNames();
+        if ($names->isEmpty()) {
+            return null;
+        }
+
+        $priority = [
+            'super_admin',
+            'administrator',
+            'valuator',
+            'technician',
+            'seller',
+            'valuation_manager',
+            'appointment_manager',
+            'bodywork_paint_technician',
+            'body',
+            'spare_parts',
+            'marketing',
+            'blog_manager',
+            'gestor',
+            'receptionist',
+            'manager',
+            'carwash_admin',
+            'carwash_supervisor',
+            'carwash_cashier',
+            'carwash_washer',
+            'carwash_agent',
+            'client',
+        ];
+
+        foreach ($priority as $role) {
+            if ($names->contains($role)) {
+                return $role;
+            }
+        }
+
+        return $names->first();
+    }
+
     public function getRoleProfile()
     {
-        $role = $this->getRoleNames()->first();
+        $role = $this->resolveLoginRole();
 
         $profile = match ($role) {
             'client' => $this->customerProfile()->first(),

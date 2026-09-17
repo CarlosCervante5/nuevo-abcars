@@ -95,16 +95,12 @@ export function validateRoleGuard(
     .pipe(
       map(() => true),
       catchError((error) => {
-        // Si hay error 401, el interceptor ya manejará la redirección
-        // Solo necesitamos retornar false y limpiar el estado
-        if (error.status === 401) {
-          // Limpiar el estado de autenticación
+        if (error.status === 401 || error.status === 403) {
           localStorage.removeItem('user_token');
           localStorage.removeItem('user');
           localStorage.removeItem('role');
           localStorage.removeItem('permissions');
           localStorage.removeItem('profile');
-          // El interceptor ya redirigirá, pero por si acaso:
           if (!(window as any).__isRedirecting401) {
             router.navigate(['/auth/iniciar-sesion'], { replaceUrl: true });
           }

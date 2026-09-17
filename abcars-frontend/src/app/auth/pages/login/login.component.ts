@@ -137,6 +137,8 @@ export class LoginComponent implements OnInit {
                     this._router.navigateByUrl('/admin/seller');
                 } else if (loginResponse.data.role === 'super_admin') {
                     this._router.navigateByUrl('/admin/administrator');
+                } else if (loginResponse.data.role === 'appraiser_technician') {
+                    this._router.navigateByUrl('/admin/valuator');
                 } else if (loginResponse.data.role === 'manager') {
                     // Rol backend Spatie "manager" (inventario vehículos); no hay ruta /admin/manager — mismo panel que marketing.
                     this._router.navigateByUrl('/admin/marketing');

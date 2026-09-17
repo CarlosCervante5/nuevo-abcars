@@ -154,13 +154,11 @@ class AuthController extends Controller
             $expected_role = $request->input('expected_role');
 
 
-            if($stored_role !== $expected_role) {
+            if ($stored_role !== $expected_role) {
                 return ApiResponseHelper::authError('Roles proporcionados no coinciden', null, 401, 'UNMATCHED_ROLES_PROVIDED');
             }
-            
-            $userRole = $user->getRoleNames()->first();
-            
-            if ($userRole !== $stored_role) {
+
+            if (! $user->hasRole($stored_role)) {
                 return ApiResponseHelper::authError('Rol no autorizado', null, 403, 'UNAUTHORIZED_ROLE');
             }
             

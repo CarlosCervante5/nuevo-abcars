@@ -28,6 +28,11 @@ export function getAdminDashboardUrl(role: string | null | undefined): string {
     return '/admin/administrator';
   }
 
+  // Roles legados del frontend (sin ruta /admin/{role})
+  if (role === 'appraiser_technician') {
+    return '/admin/valuator';
+  }
+
   // Rol Spatie "manager" (inventario); no hay /admin/manager
   if (role === 'manager') {
     return '/admin/marketing';

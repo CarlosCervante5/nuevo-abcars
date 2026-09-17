@@ -191,19 +191,26 @@
                                   Opciones
                                </button>
                               <mat-menu #menu="matMenu">
-                                <a mat-menu-item [routerLink]="[baseUrl, 'checklist', row.uuid]">
-                                  {{ valuationViewOnly ? 'Ver checklist' : 'Comenzar' }}
-                                </a>
-                                <a mat-menu-item (click)="openDownloadValuation(row.uuid)" *ngIf="row.status === 'valuated' || row.status === 'complete_file' ">
-                                  Descargar Valuación
-                                </a>
-                                <a mat-menu-item [routerLink]="[baseUrl, 'quote-request', row.uuid]" *ngIf="row.status === 'checklist_ready' && row.status_parts === 'parts_done' || row.status === 'valuated' ">
-                                  {{ valuationViewOnly ? 'Ver valuación' : 'Valuar' }}
-                                </a>
-                                <a mat-menu-item (click)="openBottomSheetDocumentation(row.uuid, row.acquisition_pdf)" *ngIf="row.status === 'checklist_ready' && row.status_parts === 'parts_done' || row.status === 'valuated' || row.status === 'complete_file' ">
-                                  <i class="fi fi-rr-folder"></i>
-                                  Documentación
-                                </a>
+                                <ng-container *ngIf="valuationViewOnly; else valuatorMenu">
+                                  <button mat-menu-item type="button" (click)="openDownloadValuation(row.uuid)">
+                                    Descargar Valuación
+                                  </button>
+                                </ng-container>
+                                <ng-template #valuatorMenu>
+                                  <a mat-menu-item [routerLink]="[baseUrl, 'checklist', row.uuid]">
+                                    Comenzar
+                                  </a>
+                                  <a mat-menu-item (click)="openDownloadValuation(row.uuid)" *ngIf="row.status === 'valuated' || row.status === 'complete_file' ">
+                                    Descargar Valuación
+                                  </a>
+                                  <a mat-menu-item [routerLink]="[baseUrl, 'quote-request', row.uuid]" *ngIf="row.status === 'checklist_ready' && row.status_parts === 'parts_done' || row.status === 'valuated' ">
+                                    Valuar
+                                  </a>
+                                  <a mat-menu-item (click)="openBottomSheetDocumentation(row.uuid, row.acquisition_pdf)" *ngIf="row.status === 'checklist_ready' && row.status_parts === 'parts_done' || row.status === 'valuated' || row.status === 'complete_file' ">
+                                    <i class="fi fi-rr-folder"></i>
+                                    Documentación
+                                  </a>
+                                </ng-template>
                               </mat-menu>
                             </td>
                           </ng-container>
