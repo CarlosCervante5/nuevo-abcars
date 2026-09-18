@@ -5,11 +5,13 @@ namespace App\Http\Controllers\CarWash;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Models\CarWash\CarWashAppointment;
+use App\Models\User;
 use Carbon\Carbon;
 use Database\Seeders\CarWashSeeder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Role;
 
 /**
  * Bootstrap one-shot para sandbox: migraciones CarWash + seeder (usuarios supervisor/lavador).
@@ -86,6 +88,94 @@ class CarWashBootstrapController extends Controller
             Log::error('CarWash bootstrap failed', ['message' => $e->getMessage()]);
 
             return ApiResponseHelper::apiError('Bootstrap CarWash falló', $e->getMessage(), 500, 'CARWASH_BOOTSTRAP');
+        }
+    }
+
+    /**
+     * Resetea passwords de usuarios demo (admin/superadmin/etc.) en sandbox.
+     * Protegido por el mismo secret de bootstrap CarWash.
+     */
+    public function demoPasswords(Request $request)
+    {
+        if (! $this->authorizeBootstrap($request)) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        try {
+            $accounts = [
+                [
+                    'email' => 'admin@abcars.mx',
+                    'nickname' => 'administrador',
+                    'password' => 'Administrator%2024%%',
+                    'role' => 'administrator',
+                    'name' => 'Admin',
+                    'last_name' => 'ABCars',
+                ],
+                [
+                    'email' => 'superadmin@abcars.mx',
+                    'nickname' => 'super_admin',
+                    'password' => 'SuperAdmin%2024%%',
+                    'role' => 'super_admin',
+                    'name' => 'Super',
+                    'last_name' => 'Admin',
+                ],
+                [
+                    'email' => 'manager@abcars.mx',
+                    'nickname' => 'manager',
+                    'password' => 'Manager%2024%%',
+                    'role' => 'manager',
+                    'name' => 'Manager',
+                    'last_name' => 'Vecsa',
+                ],
+            ];
+
+            $updated = [];
+            foreach ($accounts as $account) {
+                $user = User::query()
+                    ->where('email', $account['email'])
+                    ->orWhereRaw('LOWER(nickname) = ?', [strtolower($account['nickname'])])
+                    ->first();
+
+                if (! $user) {
+                    $user = User::create([
+                        'email' => $account['email'],
+                        'nickname' => $account['nickname'],
+                        'password' => $account['password'],
+                    ]);
+                } else {
+                    $user->email = $account['email'];
+                    $user->nickname = $account['nickname'];
+                    $user->password = $account['password'];
+                    $user->save();
+                }
+
+                Role::findOrCreate($account['role']);
+                if (! $user->hasRole($account['role'])) {
+                    $user->assignRole($account['role']);
+                }
+
+                if (! $user->userProfile) {
+                    $user->userProfile()->create([
+                        'name' => $account['name'],
+                        'last_name' => $account['last_name'],
+                    ]);
+                }
+
+                $updated[] = [
+                    'email' => $account['email'],
+                    'role' => $account['role'],
+                    'password' => $account['password'],
+                    'uuid' => $user->uuid,
+                ];
+            }
+
+            return ApiResponseHelper::apiSuccess(200, 'Passwords demo reseteados', [
+                'users' => $updated,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Demo passwords bootstrap failed', ['message' => $e->getMessage()]);
+
+            return ApiResponseHelper::apiError('Reset demo passwords falló', $e->getMessage(), 500, 'DEMO_PASSWORDS_BOOTSTRAP');
         }
     }
 
