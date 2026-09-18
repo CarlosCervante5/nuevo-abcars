@@ -16,6 +16,8 @@ import { AppointmentManagerComponent } from '../appointment-manager/pages/appoin
 import { AppointmentManagerGuard } from '../appointment-manager/guards/appointment_manager.guard';
 import { AppointmentsComponent } from '../valuator/pages/appointments/appointments.component';
 import { ValuatorGuard } from '../valuator/guards/valuator.guard';
+import { ValuatorManagerPrintComponent } from '../valuator_manager/pages/valuator-manager-print/valuator-manager-print.component';
+import { ValuationManagerGuard } from '../valuator_manager/guards/valuation-manager.guard';
 import { DeliveryPhotosComponent } from '../gestor/pages/delivery-photos/delivery-photos.component';
 import { GestorGuard } from '../gestor/guards/gestor.guard';
 import { PromotionsComponent } from '../gestor/pages/promotions/promotions.component';
@@ -55,6 +57,12 @@ const routes: Routes = [
         path: 'valuation-appointments',
         component: AppointmentsComponent,
         canActivate: [ValuatorGuard],
+        data: { embedInShell: true }
+      },
+      {
+        path: 'valuation-report',
+        component: ValuatorManagerPrintComponent,
+        canActivate: [ValuationManagerGuard],
         data: { embedInShell: true }
       },
       {

@@ -27,8 +27,18 @@
                         </li>
                         <li class="appointments-breadcrumb-item appointments-breadcrumb-item-active" aria-current="page">Citas de valuación</li>
                     </ol>
-                    <div class="flex justify-end p-3" *ngIf="!valuationViewOnly">
-                        <a mat-button (click)="newAppointment()" class="appointments-add-btn"><i class="fa-solid fa-plus"></i> Agregar Cita de Valuación</a>
+                    <div class="flex justify-end gap-2 p-3 flex-wrap">
+                        <a
+                          *ngIf="valuationViewOnly && embedInShell"
+                          mat-button
+                          [routerLink]="['/admin/administrator/valuation-report']"
+                          class="appointments-add-btn appointments-report-btn"
+                        >
+                          <i class="fi fi-rr-file-excel"></i> Descargar reporte
+                        </a>
+                        <a *ngIf="!valuationViewOnly" mat-button (click)="newAppointment()" class="appointments-add-btn">
+                          <i class="fa-solid fa-plus"></i> Agregar Cita de Valuación
+                        </a>
                     </div>
                 </nav>
             </div>

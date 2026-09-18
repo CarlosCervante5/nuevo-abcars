@@ -1,10 +1,20 @@
-<app-overview [overview]="itemOverview" [url_index]="'/admin/valuation_manager'" [hideModules]="true"></app-overview>
-<div class="container mx-auto px-4 pt-24">
+<app-overview
+  *ngIf="!embedInShell"
+  [overview]="itemOverview"
+  [url_index]="'/admin/valuation_manager'"
+  [hideModules]="true"
+></app-overview>
+<div [ngClass]="embedInShell ? 'container mx-auto px-4 lg:px-8 pt-2 pb-8' : 'container mx-auto px-4 pt-24'">
     <div class="w-full mb-6">
         <h4 class="valuator-print-title">Reporte de valuaciones</h4>
         <nav class="valuator-print-breadcrumb" aria-label="breadcrumb">
             <ol class="valuator-print-breadcrumb-list">
-                <li class="valuator-print-breadcrumb-item" [routerLink]="['/admin/valuation_manager']">Overview</li>
+                <li
+                  class="valuator-print-breadcrumb-item"
+                  [routerLink]="embedInShell ? ['/admin/administrator'] : ['/admin/valuation_manager']"
+                >
+                  {{ embedInShell ? 'Panel' : 'Overview' }}
+                </li>
                 <li class="valuator-print-breadcrumb-item valuator-print-breadcrumb-item-active" aria-current="page">Reporte</li>
             </ol>
         </nav>

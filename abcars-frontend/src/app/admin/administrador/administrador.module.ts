@@ -23,6 +23,7 @@ import { AdminHomeDashboardComponent } from "./pages/admin-home-dashboard/admin-
 import { VehicleInventoryModule } from "../marketing/vehicle-inventory.module";
 import { AppointmentAssignmentsModule } from "../appointment-manager/appointment-assignments.module";
 import { ValuatorAppointmentsPageModule } from "../valuator/valuator-appointments-page.module";
+import { ValuatorManagerPrintPageModule } from "../valuator_manager/valuator-manager-print-page.module";
 import { DeliveryPhotosPageModule } from "../gestor/delivery-photos-page.module";
 import { PromotionsPageModule } from "../gestor/promotions-page.module";
 import { AdminMainBannerComponent } from "./pages/admin-main-banner/admin-main-banner.component";
@@ -68,6 +69,7 @@ import { CarWashLoyaltyComponent } from "./pages/carwash-loyalty/carwash-loyalty
         VehicleInventoryModule,
         AppointmentAssignmentsModule,
         ValuatorAppointmentsPageModule,
+        ValuatorManagerPrintPageModule,
         DeliveryPhotosPageModule,
         PromotionsPageModule,
         AdminMainBannerComponent,

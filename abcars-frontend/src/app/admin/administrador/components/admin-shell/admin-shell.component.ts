@@ -29,6 +29,7 @@ export class AdminShellComponent implements OnInit, OnDestroy {
     'home-banner': 'Banner del inicio',
     'assing-valuations': 'Solicitudes',
     'valuation-appointments': 'Valuaciones',
+    'valuation-report': 'Reporte valuaciones',
     'delivery-photos': 'Fotos de entregas',
     promotions: 'Promociones',
     'inventory-promotions': 'Promociones Inventario',

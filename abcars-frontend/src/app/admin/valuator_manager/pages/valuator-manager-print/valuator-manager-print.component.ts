@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild, type OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { Overview, UserTechnicians, GetUsersByRol } from '@interfaces/admin.interfaces';
 import {
@@ -20,6 +20,9 @@ export class ValuatorManagerPrintComponent implements OnInit {
   @ViewChild('dateValuation') dateValuation!: ElementRef<HTMLInputElement>;
   @ViewChild('dateEndValuation') dateEndValuation!: ElementRef<HTMLInputElement>;
 
+  /** Dentro de AdminShell (/admin/administrator/valuation-report). */
+  embedInShell = false;
+
   public inputDateValuation = '';
   public inputDateEndValuation = '';
   public keyword = '';
@@ -37,7 +40,8 @@ export class ValuatorManagerPrintComponent implements OnInit {
   constructor(
     private _valuatorManagerPrintService: ValuatorManagerPrintService,
     private _appointmentService: AppointmentService,
-    private _router: Router
+    private _router: Router,
+    private _route: ActivatedRoute
   ) {
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -78,6 +82,12 @@ export class ValuatorManagerPrintComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.embedInShell = this._route.snapshot.data['embedInShell'] === true;
+    if (this.itemOverview?.pages?.[0]) {
+      this.itemOverview.pages[0].permalink = this.embedInShell
+        ? '/admin/administrator/valuation-report'
+        : '/admin/valuation_manager/print-valuation';
+    }
     this.getValuators();
   }
 
