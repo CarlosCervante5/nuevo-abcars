@@ -1,76 +1,48 @@
-/* Programa de Venta Asistida — tokens del mockup */
+/* Servicio de Consignación — tipografía y tamaños como financiamiento/seguros */
 .valuation-page {
-  --val-teal: #006d60;
-  --val-teal-deep: #004d40;
+  --val-teal: #0d9488;
   --val-gold: #ffb703;
-  --val-magenta: #e056fd;
   --val-ink: #111827;
   --val-muted: #4b5563;
   --val-border: #d1d5db;
-  --val-font: 'Poppins', 'Raleway', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  min-height: 100vh;
-  background: #f3f4f6;
+  --val-font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-family: var(--val-font);
-}
-
-.valuation-hero {
-  background: linear-gradient(180deg, var(--val-teal-deep) 0%, var(--val-teal) 100%);
-  color: #fff;
-  padding: 7.5rem 1rem 4.5rem;
-  text-align: center;
-}
-
-.valuation-hero-inner {
-  max-width: 48rem;
-  margin: 0 auto;
 }
 
 .valuation-hero-title {
   font-family: var(--val-font) !important;
-  font-size: clamp(1.75rem, 4vw, 2.75rem) !important;
+  font-size: 2rem !important; /* 32px móvil */
   font-weight: 700 !important;
   line-height: 1.2 !important;
   letter-spacing: -0.02em !important;
   color: #ffffff !important;
-  margin: 0 0 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+@media (min-width: 1024px) {
+  .valuation-hero-title {
+    font-size: 3rem !important; /* 48px desktop */
+  }
 }
 
 .valuation-hero-description {
   font-family: var(--val-font) !important;
-  font-size: clamp(1rem, 2vw, 1.2rem) !important;
+  font-size: 1.25rem !important; /* 20px */
   font-weight: 400 !important;
   line-height: 1.6 !important;
-  color: rgba(255, 255, 255, 0.92) !important;
-  margin: 0 auto !important;
-  max-width: 40rem;
-}
-
-.valuation-body {
-  margin-top: -2.5rem;
-  padding: 0 1rem 4rem;
-}
-
-.valuation-container {
-  max-width: 72rem;
-  margin: 0 auto;
-}
-
-.valuation-value-card {
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  padding: 1.75rem 1.5rem 2rem;
-  margin-bottom: 2rem;
+  color: #99f6e4 !important;
+  margin-bottom: 2rem !important;
 }
 
 .valuation-value-title {
   font-family: var(--val-font) !important;
-  font-size: clamp(1.15rem, 2.5vw, 1.5rem) !important;
+  font-size: 1.5rem !important; /* 24px */
   font-weight: 700 !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.01em !important;
   color: var(--val-ink) !important;
   text-align: center;
-  margin: 0 0 1.75rem !important;
-  line-height: 1.35 !important;
+  margin: 0 0 1.5rem !important;
 }
 
 .valuation-value-grid {
@@ -96,17 +68,18 @@
 
 .valuation-value-item .value-copy {
   margin: 0;
-  font-size: 0.9rem;
-  font-weight: 400;
-  line-height: 1.4;
-  color: var(--val-ink);
+  font-family: var(--val-font) !important;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  color: var(--val-muted) !important;
   max-width: 18.5rem;
 }
 
 .valuation-value-item .value-lead {
-  font-weight: 700;
+  font-weight: 600 !important;
+  color: var(--val-ink) !important;
   display: block;
-  white-space: nowrap;
 }
 
 .valuation-value-item .value-copy--inline .value-lead {
@@ -148,7 +121,7 @@
 .valuation-main-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
+  gap: 2rem;
   align-items: start;
 }
 
@@ -159,13 +132,13 @@
   order: 3;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 2rem;
 }
 
 @media (min-width: 1024px) {
   .valuation-main-grid {
-    grid-template-columns: minmax(0, 1.55fr) minmax(18rem, 0.9fr);
-    gap: 1.75rem;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 2rem;
   }
 
   .valuation-block-vehicle {
@@ -190,18 +163,10 @@
   }
 }
 
-.valuation-panel,
-.valuation-contact-card {
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  padding: 1.5rem 1.35rem;
-}
-
 .valuation-fields-2 {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 @media (min-width: 640px) {
@@ -210,21 +175,13 @@
   }
 }
 
-.valuation-magenta-box {
-  background: #fff;
-  border: none;
-  border-radius: 0.85rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  padding: 1.35rem 1.25rem;
-}
-
 .magenta-box-title {
   font-family: var(--val-font) !important;
-  font-size: 1.1rem !important;
-  font-weight: 700 !important;
+  font-size: 1.125rem !important; /* 18px subtítulo */
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
   color: var(--val-ink) !important;
-  margin: 0 0 1.15rem !important;
-  line-height: 1.35 !important;
+  margin: 0 0 1rem !important;
 }
 
 .valuation-services-grid {
@@ -243,48 +200,54 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--val-ink);
+  font-family: var(--val-font) !important;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  color: var(--val-ink) !important;
 }
 
 .valuation-modalities {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
 
 @media (min-width: 640px) {
   .valuation-modalities {
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    gap: 2rem;
   }
 }
 
 .modality-title {
-  font-size: 0.95rem !important;
-  font-weight: 700 !important;
+  font-family: var(--val-font) !important;
+  font-size: 1.125rem !important; /* 18px */
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
   color: var(--val-ink) !important;
-  margin: 0 0 0.4rem !important;
+  margin: 0 0 0.5rem !important;
 }
 
 .modality-subtitle {
   margin: 0 0 0.75rem;
-  font-size: 0.78rem;
-  font-weight: 400;
-  line-height: 1.35;
-  color: var(--val-muted);
-  white-space: nowrap;
+  font-family: var(--val-font) !important;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  color: var(--val-muted) !important;
 }
 
 .modality-list {
   margin: 0 !important;
-  padding-left: 1.35rem !important;
+  padding-left: 1.25rem !important;
   list-style-type: disc !important;
   list-style-position: outside !important;
-  color: var(--val-muted);
-  font-size: 0.9rem;
-  line-height: 1.55;
+  font-family: var(--val-font) !important;
+  color: var(--val-muted) !important;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
 }
 
 .modality-list li {
@@ -301,18 +264,19 @@
 
 .section-title {
   font-family: var(--val-font) !important;
-  font-size: 1.35rem !important;
+  font-size: 1.5rem !important; /* 24px */
   font-weight: 700 !important;
   line-height: 1.3 !important;
+  letter-spacing: -0.01em !important;
   color: var(--val-ink) !important;
-  margin: 0 0 0.75rem !important;
+  margin: 0 0 1.5rem !important;
 }
 
 .subsection-title {
   font-family: var(--val-font) !important;
-  font-size: 1rem !important;
+  font-size: 1.125rem !important; /* 18px */
   font-weight: 600 !important;
-  line-height: 1.4 !important;
+  line-height: 1.5 !important;
   color: var(--val-ink) !important;
   margin: 0 0 1rem !important;
 }
@@ -321,11 +285,11 @@
 .form-request-label {
   display: block !important;
   font-family: var(--val-font) !important;
-  font-size: 0.875rem !important;
-  font-weight: 600 !important;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 500 !important;
   line-height: 1.5 !important;
   color: #374151 !important;
-  margin-bottom: 0.4rem !important;
+  margin-bottom: 0.5rem !important;
 }
 
 .form-input,
@@ -333,10 +297,10 @@
 .form-input-error,
 .form-request-input-error {
   width: 100% !important;
-  padding: 0.7rem 0.9rem !important;
-  border-radius: 0.45rem !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: 0.5rem !important;
   font-family: var(--val-font) !important;
-  font-size: 1rem !important;
+  font-size: 1rem !important; /* 16px */
   font-weight: 400 !important;
   line-height: 1.5 !important;
   color: var(--val-ink) !important;
@@ -379,9 +343,9 @@
 
 .form-request-title {
   font-family: var(--val-font) !important;
-  font-size: 1.2rem !important;
+  font-size: 1.25rem !important; /* 20px — como financing */
   font-weight: 700 !important;
-  line-height: 1.35 !important;
+  line-height: 1.4 !important;
   color: var(--val-ink) !important;
   margin: 0 0 1rem !important;
 }
@@ -389,21 +353,21 @@
 .form-submit-btn {
   width: 100% !important;
   margin-top: 0.35rem !important;
-  padding: 0.85rem 1.25rem !important;
-  border-radius: 0.55rem !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 0.75rem !important;
   font-family: var(--val-font) !important;
   font-size: 1rem !important;
   font-weight: 700 !important;
-  line-height: 1.4 !important;
+  line-height: 1.5 !important;
   color: #ffffff !important;
-  background-color: var(--val-teal) !important;
+  background-color: #14b8a6 !important;
   border: none !important;
   cursor: pointer !important;
-  transition: background-color 0.25s ease !important;
+  transition: background-color 0.3s ease !important;
 }
 
 .form-submit-btn:hover:not(:disabled) {
-  background-color: var(--val-teal-deep) !important;
+  background-color: #0d9488 !important;
 }
 
 .form-submit-btn:disabled {

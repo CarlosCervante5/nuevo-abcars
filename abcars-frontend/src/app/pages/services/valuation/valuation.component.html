@@ -1,18 +1,20 @@
-<div class="valuation-page">
+<div class="min-h-screen bg-gray-50 valuation-page">
   <app-home-nav></app-home-nav>
 
-  <header class="valuation-hero">
-    <div class="valuation-hero-inner">
-      <h1 class="valuation-hero-title">Programa de Venta Asistida</h1>
-      <p class="valuation-hero-description">
-        Nuestro servicio de consignación es una solución integral diseñada para que vendas tu auto de forma segura y rentable.
-      </p>
+  <div class="bg-gradient-to-r from-teal-600 to-teal-800 text-white py-16 pt-32">
+    <div class="container mx-auto px-4">
+      <div class="max-w-4xl mx-auto text-center">
+        <h1 class="valuation-hero-title">Servicio de Consignación</h1>
+        <p class="valuation-hero-description">
+          Es nuestra solución integral diseñada para que vendas tu auto de forma segura y rentable.
+        </p>
+      </div>
     </div>
-  </header>
+  </div>
 
-  <div class="valuation-body">
-    <div class="valuation-container">
-      <section class="valuation-value-card" aria-labelledby="valuation-value-heading">
+  <div class="container mx-auto px-4 py-16">
+    <div class="max-w-6xl mx-auto space-y-8">
+      <section class="bg-white rounded-3xl p-8 shadow-sm" aria-labelledby="valuation-value-heading">
         <h2 id="valuation-value-heading" class="valuation-value-title">
           Le devolvemos el verdadero valor de reventa a tu seminuevo
         </h2>
@@ -60,7 +62,7 @@
       </section>
 
       <form class="valuation-main-grid" [formGroup]="valuationForm" (ngSubmit)="submitValuation($event)">
-        <section class="valuation-panel valuation-block-vehicle" aria-labelledby="valuation-vehicle-heading">
+        <section class="bg-white rounded-3xl p-8 shadow-sm valuation-block-vehicle" aria-labelledby="valuation-vehicle-heading">
           <h2 id="valuation-vehicle-heading" class="section-title">Solicitar Valuación</h2>
           <h3 class="subsection-title">Información del Vehículo</h3>
           <div class="valuation-fields-2">
@@ -131,7 +133,7 @@
         </section>
 
         <aside class="valuation-block-contact">
-          <section class="valuation-contact-card" aria-labelledby="valuation-contact-heading">
+          <section class="bg-white rounded-3xl p-8 shadow-sm" aria-labelledby="valuation-contact-heading">
             <h2 id="valuation-contact-heading" class="form-request-title">Información de Contacto</h2>
 
             <div class="valuation-contact-fields">
@@ -252,7 +254,7 @@
         </aside>
 
         <div class="valuation-block-info">
-          <section class="valuation-magenta-box" aria-labelledby="valuation-services-heading">
+          <section class="bg-white rounded-3xl p-8 shadow-sm" aria-labelledby="valuation-services-heading">
             <h2 id="valuation-services-heading" class="magenta-box-title">
               Pon tu auto a la venta sin dejarlo en la agencia.
             </h2>
@@ -280,7 +282,7 @@
             </div>
           </section>
 
-          <section class="valuation-magenta-box" aria-labelledby="valuation-modalities-heading">
+          <section class="bg-white rounded-3xl p-8 shadow-sm" aria-labelledby="valuation-modalities-heading">
             <h2 id="valuation-modalities-heading" class="magenta-box-title">Modalidades de consignación</h2>
             <div class="valuation-modalities">
               <div>
