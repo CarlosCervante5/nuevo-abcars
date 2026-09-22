@@ -1,9 +1,7 @@
-/* Servicio de Consignación — alineado con otras páginas de servicios */
+/* Servicio de Consignación — tipografía y tamaños como financiamiento/seguros */
 .valuation-page {
   --val-teal: #0d9488;
-  --val-teal-deep: #0f766e;
   --val-gold: #ffb703;
-  --val-magenta: #e056fd;
   --val-ink: #111827;
   --val-muted: #4b5563;
   --val-border: #d1d5db;
@@ -13,7 +11,7 @@
 
 .valuation-hero-title {
   font-family: var(--val-font) !important;
-  font-size: 2rem !important;
+  font-size: 2rem !important; /* 32px móvil */
   font-weight: 700 !important;
   line-height: 1.2 !important;
   letter-spacing: -0.02em !important;
@@ -23,45 +21,28 @@
 
 @media (min-width: 1024px) {
   .valuation-hero-title {
-    font-size: 3rem !important;
+    font-size: 3rem !important; /* 48px desktop */
   }
 }
 
 .valuation-hero-description {
   font-family: var(--val-font) !important;
-  font-size: 1.25rem !important;
+  font-size: 1.25rem !important; /* 20px */
   font-weight: 400 !important;
   line-height: 1.6 !important;
   color: #99f6e4 !important;
   margin-bottom: 2rem !important;
 }
 
-.valuation-body {
-  margin-top: -2.5rem;
-  padding: 0 1rem 4rem;
-}
-
-.valuation-container {
-  max-width: 72rem;
-  margin: 0 auto;
-}
-
-.valuation-value-card {
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  padding: 1.75rem 1.5rem 2rem;
-  margin-bottom: 2rem;
-}
-
 .valuation-value-title {
   font-family: var(--val-font) !important;
-  font-size: clamp(1.15rem, 2.5vw, 1.5rem) !important;
+  font-size: 1.5rem !important; /* 24px */
   font-weight: 700 !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.01em !important;
   color: var(--val-ink) !important;
   text-align: center;
-  margin: 0 0 1.75rem !important;
-  line-height: 1.35 !important;
+  margin: 0 0 1.5rem !important;
 }
 
 .valuation-value-grid {
@@ -87,17 +68,18 @@
 
 .valuation-value-item .value-copy {
   margin: 0;
-  font-size: 0.9rem;
-  font-weight: 400;
-  line-height: 1.4;
-  color: var(--val-ink);
+  font-family: var(--val-font) !important;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  color: var(--val-muted) !important;
   max-width: 18.5rem;
 }
 
 .valuation-value-item .value-lead {
-  font-weight: 700;
+  font-weight: 600 !important;
+  color: var(--val-ink) !important;
   display: block;
-  white-space: nowrap;
 }
 
 .valuation-value-item .value-copy--inline .value-lead {
@@ -139,7 +121,7 @@
 .valuation-main-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
+  gap: 2rem;
   align-items: start;
 }
 
@@ -150,13 +132,13 @@
   order: 3;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 2rem;
 }
 
 @media (min-width: 1024px) {
   .valuation-main-grid {
-    grid-template-columns: minmax(0, 1.55fr) minmax(18rem, 0.9fr);
-    gap: 1.75rem;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 2rem;
   }
 
   .valuation-block-vehicle {
@@ -181,18 +163,10 @@
   }
 }
 
-.valuation-panel,
-.valuation-contact-card {
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  padding: 1.5rem 1.35rem;
-}
-
 .valuation-fields-2 {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 @media (min-width: 640px) {
@@ -201,21 +175,13 @@
   }
 }
 
-.valuation-magenta-box {
-  background: #fff;
-  border: none;
-  border-radius: 0.85rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  padding: 1.35rem 1.25rem;
-}
-
 .magenta-box-title {
   font-family: var(--val-font) !important;
-  font-size: 1.1rem !important;
-  font-weight: 700 !important;
+  font-size: 1.125rem !important; /* 18px subtítulo */
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
   color: var(--val-ink) !important;
-  margin: 0 0 1.15rem !important;
-  line-height: 1.35 !important;
+  margin: 0 0 1rem !important;
 }
 
 .valuation-services-grid {
@@ -234,48 +200,54 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--val-ink);
+  font-family: var(--val-font) !important;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  color: var(--val-ink) !important;
 }
 
 .valuation-modalities {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
 
 @media (min-width: 640px) {
   .valuation-modalities {
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    gap: 2rem;
   }
 }
 
 .modality-title {
-  font-size: 0.95rem !important;
-  font-weight: 700 !important;
+  font-family: var(--val-font) !important;
+  font-size: 1.125rem !important; /* 18px */
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
   color: var(--val-ink) !important;
-  margin: 0 0 0.4rem !important;
+  margin: 0 0 0.5rem !important;
 }
 
 .modality-subtitle {
   margin: 0 0 0.75rem;
-  font-size: 0.78rem;
-  font-weight: 400;
-  line-height: 1.35;
-  color: var(--val-muted);
-  white-space: nowrap;
+  font-family: var(--val-font) !important;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  color: var(--val-muted) !important;
 }
 
 .modality-list {
   margin: 0 !important;
-  padding-left: 1.35rem !important;
+  padding-left: 1.25rem !important;
   list-style-type: disc !important;
   list-style-position: outside !important;
-  color: var(--val-muted);
-  font-size: 0.9rem;
-  line-height: 1.55;
+  font-family: var(--val-font) !important;
+  color: var(--val-muted) !important;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
 }
 
 .modality-list li {
@@ -292,7 +264,7 @@
 
 .section-title {
   font-family: var(--val-font) !important;
-  font-size: 1.5rem !important;
+  font-size: 1.5rem !important; /* 24px */
   font-weight: 700 !important;
   line-height: 1.3 !important;
   letter-spacing: -0.01em !important;
@@ -302,9 +274,9 @@
 
 .subsection-title {
   font-family: var(--val-font) !important;
-  font-size: 1rem !important;
+  font-size: 1.125rem !important; /* 18px */
   font-weight: 600 !important;
-  line-height: 1.4 !important;
+  line-height: 1.5 !important;
   color: var(--val-ink) !important;
   margin: 0 0 1rem !important;
 }
@@ -313,7 +285,7 @@
 .form-request-label {
   display: block !important;
   font-family: var(--val-font) !important;
-  font-size: 0.875rem !important;
+  font-size: 0.875rem !important; /* 14px */
   font-weight: 500 !important;
   line-height: 1.5 !important;
   color: #374151 !important;
@@ -328,7 +300,7 @@
   padding: 0.75rem 1rem !important;
   border-radius: 0.5rem !important;
   font-family: var(--val-font) !important;
-  font-size: 1rem !important;
+  font-size: 1rem !important; /* 16px */
   font-weight: 400 !important;
   line-height: 1.5 !important;
   color: var(--val-ink) !important;
@@ -371,9 +343,9 @@
 
 .form-request-title {
   font-family: var(--val-font) !important;
-  font-size: 1.2rem !important;
+  font-size: 1.25rem !important; /* 20px — como financing */
   font-weight: 700 !important;
-  line-height: 1.35 !important;
+  line-height: 1.4 !important;
   color: var(--val-ink) !important;
   margin: 0 0 1rem !important;
 }
