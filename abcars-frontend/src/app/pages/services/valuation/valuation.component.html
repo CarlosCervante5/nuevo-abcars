@@ -63,7 +63,7 @@
 
       <form class="valuation-main-grid" [formGroup]="valuationForm" (ngSubmit)="submitValuation($event)">
         <section class="bg-white rounded-3xl p-8 shadow-sm valuation-block-vehicle" aria-labelledby="valuation-vehicle-heading">
-          <h2 id="valuation-vehicle-heading" class="section-title">Solicitar Valuación</h2>
+          <h2 id="valuation-vehicle-heading" class="section-title">Solicitar Cita</h2>
           <h3 class="subsection-title">Información del Vehículo</h3>
           <div class="valuation-fields-2">
             <div>
@@ -246,7 +246,7 @@
               </div>
 
               <button type="submit" [disabled]="isSubmitting" class="form-submit-btn">
-                <span *ngIf="!isSubmitting">Solicitar Valuación Gratuita</span>
+                <span *ngIf="!isSubmitting">Enviar Solicitud</span>
                 <span *ngIf="isSubmitting">Enviando...</span>
               </button>
             </div>
