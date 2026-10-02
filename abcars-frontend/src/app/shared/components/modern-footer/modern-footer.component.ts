@@ -69,7 +69,7 @@ import { sortDealershipsForPublic, branchPublicTitle } from '../../utils/public-
               <li><a [routerLink]="['/seguros']" class="text-gray-300 hover:text-white transition-colors text-sm">Seguros automotrices</a></li>
               <li><a [routerLink]="['/servicio-tecnico']" class="text-gray-300 hover:text-white transition-colors text-sm">Servicio técnico</a></li>
               <!-- <li><a [routerLink]="['/refacciones']" class="text-gray-300 hover:text-white transition-colors text-sm">Refacciones originales</a></li> -->
-              <li><a [routerLink]="['/valuacion']" [queryParams]="valuationReferralParams" class="text-gray-300 hover:text-white transition-colors text-sm">Valuación gratuita</a></li>
+              <li><a [routerLink]="['/valuacion']" [queryParams]="valuationReferralParams" class="text-gray-300 hover:text-white transition-colors text-sm">Consignación</a></li>
             </ul>
           </div>
 
