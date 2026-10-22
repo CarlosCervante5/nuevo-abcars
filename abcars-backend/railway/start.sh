@@ -9,6 +9,8 @@
 #
 set -e
 
+cd /app
+
 ROLE="${ABCARS_PROCESS_ROLE:-web}"
 
 case "$ROLE" in
@@ -21,7 +23,9 @@ case "$ROLE" in
     exec php artisan queue:work --sleep=3 --tries=3 --max-time=3600 --no-interaction
     ;;
   web|*)
-    echo "[start] ABCARS_PROCESS_ROLE=${ROLE} → serve"
-    exec php artisan serve --host=0.0.0.0 --port "${PORT:?PORT is required}"
+    echo "[start] ABCARS_PROCESS_ROLE=${ROLE} → serve ($(php -r 'echo PHP_VERSION;'))"
+    # --no-reload conserva las variables de Railway. Sin ese flag, `artisan serve`
+    # las borra del proceso HTTP si existe un .env y la API no llega a responder.
+    exec php artisan serve --no-reload --host=0.0.0.0 --port "${PORT:?PORT is required}"
     ;;
 esac

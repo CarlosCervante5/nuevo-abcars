@@ -7,8 +7,8 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 # Un solo comando; Railway solo permite 1 elemento en el array
-preDeployCommand = ["chmod +x ./railway/init-app.sh && sh ./railway/init-app.sh"]
+preDeployCommand = ["sh /app/railway/init-app.sh"]
 # Arranque por rol (ABCARS_PROCESS_ROLE en Variables de cada servicio):
 #   web (default) → serve | scheduler → schedule:run | queue → queue:work
 # Ver railway/start.sh y railway/RAILWAY.md
-startCommand = "chmod +x ./railway/start.sh && sh ./railway/start.sh"
+startCommand = "sh /app/railway/start.sh"

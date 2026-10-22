@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+cd /app
+echo "[init] PHP $(php -r 'echo PHP_VERSION;')"
+
 # Cache config, routes and views for production
 php artisan config:cache
 php artisan route:cache
