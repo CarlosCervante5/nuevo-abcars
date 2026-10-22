@@ -2,7 +2,8 @@
 # https://docs.railway.app/deploy/config-as-code
 
 [build]
-builder = "nixpacks"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 # Un solo comando; Railway solo permite 1 elemento en el array

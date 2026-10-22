@@ -1,6 +1,6 @@
 # Build del backend Laravel desde monorepo (nuevo-abcars/abcars-backend)
 # Railway construye desde la raíz del repo; este Dockerfile copia solo el backend.
-FROM php:8.2-cli
+FROM php:8.5-cli
 
 RUN apt-get update && apt-get install -y \
     libpng-dev \
