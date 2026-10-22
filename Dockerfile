@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd pdo_mysql mbstring xml zip bcmath \
+    && docker-php-ext-install gd pdo_mysql mbstring zip bcmath \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -24,6 +24,7 @@ WORKDIR /app
 # Copiar solo el backend desde la raíz del monorepo
 COPY abcars-backend/composer.json abcars-backend/composer.lock ./
 # Incluir require-dev (Faker) para que los seeders que usan Factory puedan ejecutarse en el contenedor
+ENV COMPOSER_MEMORY_LIMIT=-1
 RUN composer install --optimize-autoloader --no-scripts --no-interaction
 
 COPY abcars-backend/ .
